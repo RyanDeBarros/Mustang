@@ -1,0 +1,6 @@
+// Hint files help the Visual Studio IDE interpret Visual C++ identifiers
+// such as names of functions and macros.
+// For more information see https://go.microsoft.com/fwlink/?linkid=865984
+#define glCreateProgram GLEW_GET_FUN(__glewCreateProgram)
+#define TRY(x) ASSERT(glNoError(#x)) x ASSERT(glNoError(#x))
+#define TRY(x)
