@@ -68,25 +68,25 @@ namespace Logger {
 
 	void LogErrorFatal(const char* message, const char* source)
 	{
-		std::cerr << "[Error] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		std::cerr << "[Fatal] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
 		ASSERT(false);
 	}
 
 	void LogErrorFatal(const unsigned char* message, const char* source)
 	{
-		std::cerr << "[Error] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		std::cerr << "[Fatal] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
 		ASSERT(false);
 	}
 
 	void LogErrorFatal(const std::string& message, const char* source)
 	{
-		std::cerr << "[Error] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		std::cerr << "[Fatal] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
 		ASSERT(false);
 	}
 
 	void LogErrorFatal(const unsigned int message, const char* source)
 	{
-		std::cerr << "[Error] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		std::cerr << "[Fatal] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
 		ASSERT(false);
 	}
 

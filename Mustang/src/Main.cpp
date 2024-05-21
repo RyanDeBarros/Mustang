@@ -5,6 +5,7 @@
 #include "Logger.h"
 #include "Utility.h"
 #include "Shader.h"
+#include "VertexArray.h"
 
 void run(GLFWwindow*);
 
@@ -12,6 +13,9 @@ int main()
 {
 	if (!glfwInit())
 		return -1;
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	GLFWwindow* window = glfwCreateWindow(1440, 1080, "Mustang Engine", nullptr, nullptr);
 	if (!window)
 	{
@@ -44,35 +48,17 @@ void run(GLFWwindow* window)
 	double deltaTime = 0;
 	double prevTime = time;
 
-	GLfloat data[] = {
-		-0.5f, -0.5f,
-		 0.5f, -0.5f,
-		 0.5f,  0.5f,
-		-0.5f,  0.5f
+	GLfloat vertices[] = {
+		-0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
+		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
+		-0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f
 	};
-	unsigned int vb;
-	TRY(
-		glGenBuffers(1, &vb);
-		glBindBuffer(GL_ARRAY_BUFFER, vb);
-		glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), data, GL_STATIC_DRAW);
-	)
-	TRY(
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	)
-
-	GLuint indexes[] = {
+	GLuint indices[] = {
 		0, 1, 2,
 		2, 3, 0
 	};
-	unsigned int ib;
-	TRY(
-		glGenBuffers(1, &ib);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(GLuint), indexes, GL_STATIC_DRAW);
-	)
-
+	VertexArray va(vertices, 4, 0b11, 0b1101, indices, 6);
 	Shader shader("res/shaders/test.vert", "res/shaders/test.frag");
 
 	for (;;)
@@ -84,9 +70,12 @@ void run(GLFWwindow* window)
 
 		// Render here
 		shader.Bind();
+		va.Bind();
 		TRY(
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 		)
+		va.Unbind();
+		shader.Unbind();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
