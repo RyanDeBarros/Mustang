@@ -6,6 +6,7 @@
 #include "Utility.h"
 #include "Shader.h"
 #include "VertexArray.h"
+#include <ShaderFactory.h>
 
 void run(GLFWwindow*);
 
@@ -48,6 +49,8 @@ void run(GLFWwindow* window)
 	double deltaTime = 0;
 	double prevTime = time;
 
+
+
 	GLfloat vertices[] = {
 		-0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
 		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
@@ -59,7 +62,8 @@ void run(GLFWwindow* window)
 		2, 3, 0
 	};
 	VertexArray va(vertices, 4, 0b11, 0b1101, indices, 6);
-	Shader shader("res/shaders/test.vert", "res/shaders/test.frag");
+
+	unsigned int shader = ShaderFactory::GetHandle("res/shaders/test.vert", "res/shaders/test.frag");
 
 	for (;;)
 	{
@@ -69,17 +73,19 @@ void run(GLFWwindow* window)
 		prevTime = time;
 
 		// Render here
-		shader.Bind();
+		ShaderFactory::Bind(shader);
 		va.Bind();
 		TRY(
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 		)
 		va.Unbind();
-		shader.Unbind();
+		ShaderFactory::Unbind(shader);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		if (glfwWindowShouldClose(window))
 			break;
 	}
+
+	ShaderFactory::Terminate();
 }

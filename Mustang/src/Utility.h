@@ -2,7 +2,7 @@
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #ifdef _DEBUG
-#define TRY(x) ASSERT(glNoError(#x)) x; ASSERT(glNoError(#x))
+#define TRY(x) ASSERT(glNoError(#x, __FILE__, __LINE__)) x; ASSERT(glNoError(#x, __FILE__, __LINE__))
 #else
 #define TRY(x) x;
 #endif
@@ -11,12 +11,12 @@
 
 #include "Logger.h"
 
-static bool glNoError(const char* function_name)
+static bool glNoError(const char* function_name, const char* file, int line)
 {
 	bool no_err = true;
 	while (GLenum error = glGetError())
 	{
-		Logger::LogError(error, function_name);
+		Logger::LogError(error, function_name, file, std::to_string(line).c_str());
 		no_err = false;
 	}
 	return no_err;

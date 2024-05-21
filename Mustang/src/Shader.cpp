@@ -3,6 +3,7 @@
 #include <string>
 
 #include "Utility.h"
+#include <iostream>
 
 static GLuint compile_shader(GLenum type, const char* shader, const char*filepath)
 {

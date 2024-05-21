@@ -26,67 +26,103 @@ namespace Logger {
 		std::cout << message << std::endl;
 	}
 
-	void LogWarning(const char* message, const char* source)
+	void LogWarning(const char* message, const char* source, const char* file, const char* line)
 	{
-		std::cout << "[Warning] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		if (source[0] != '\0')
+			std::cout << "[Warning] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
+		else
+			std::cout << "[Warning] " << message << std::endl;
 	}
 
-	void LogWarning(const unsigned char* message, const char* source)
+	void LogWarning(const unsigned char* message, const char* source, const char* file, const char* line)
 	{
-		std::cout << "[Warning] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		if (source[0] != '\0')
+			std::cout << "[Warning] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
+		else
+			std::cout << "[Warning] " << message << std::endl;
 	}
 
-	void LogWarning(const std::string& message, const char* source)
+	void LogWarning(const std::string& message, const char* source, const char* file, const char* line)
 	{
-		std::cout << "[Warning] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		if (source[0] != '\0')
+			std::cout << "[Warning] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
+		else
+			std::cout << "[Warning] " << message << std::endl;
 	}
 
-	void LogWarning(const unsigned int message, const char* source)
+	void LogWarning(const unsigned int message, const char* source, const char* file, const char* line)
 	{
-		std::cout << "[Warning] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		if (source[0] != '\0')
+			std::cout << "[Warning] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
+		else
+			std::cout << "[Warning] " << message << std::endl;
 	}
 
-	void LogError(const char* message, const char* source)
+	void LogError(const char* message, const char* source, const char* file, const char* line)
 	{
-		std::cerr << "[Error] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		if (source[0] != '\0')
+			std::cout << "[Error] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
+		else
+			std::cout << "[Error] " << message << std::endl;
 	}
 
-	void LogError(const unsigned char* message, const char* source)
+	void LogError(const unsigned char* message, const char* source, const char* file, const char* line)
 	{
-		std::cerr << "[Error] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		if (source[0] != '\0')
+			std::cout << "[Error] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
+		else
+			std::cout << "[Error] " << message << std::endl;
 	}
 	
-	void LogError(const std::string& message, const char* source)
+	void LogError(const std::string& message, const char* source, const char* file, const char* line)
 	{
-		std::cerr << "[Error] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		if (source[0] != '\0')
+			std::cout << "[Error] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
+		else
+			std::cout << "[Error] " << message << std::endl;
 	}
 
-	void LogError(const unsigned int message, const char* source)
+	void LogError(const unsigned int message, const char* source, const char* file, const char* line)
 	{
-		std::cerr << "[Error] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		if (source[0] != '\0')
+			std::cout << "[Error] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
+		else
+			std::cout << "[Error] " << message << std::endl;
 	}
 
-	void LogErrorFatal(const char* message, const char* source)
+	void LogErrorFatal(const char* message, const char* source, const char* file, const char* line)
 	{
-		std::cerr << "[Fatal] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		if (source[0] != '\0')
+			std::cout << "[Fatal] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
+		else
+			std::cout << "[Fatal] " << message << std::endl;
 		ASSERT(false);
 	}
 
-	void LogErrorFatal(const unsigned char* message, const char* source)
+	void LogErrorFatal(const unsigned char* message, const char* source, const char* file, const char* line)
 	{
-		std::cerr << "[Fatal] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		if (source[0] != '\0')
+			std::cout << "[Fatal] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
+		else
+			std::cout << "[Fatal] " << message << std::endl;
 		ASSERT(false);
 	}
 
-	void LogErrorFatal(const std::string& message, const char* source)
+	void LogErrorFatal(const std::string& message, const char* source, const char* file, const char* line)
 	{
-		std::cerr << "[Fatal] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		if (source[0] != '\0')
+			std::cout << "[Fatal] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
+		else
+			std::cout << "[Fatal] " << message << std::endl;
 		ASSERT(false);
 	}
 
-	void LogErrorFatal(const unsigned int message, const char* source)
+	void LogErrorFatal(const unsigned int message, const char* source, const char* file, const char* line)
 	{
-		std::cerr << "[Fatal] " << message << "\tSource (" << source << " " << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+		if (source[0] != '\0')
+			std::cout << "[Fatal] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
+		else
+			std::cout << "[Fatal] " << message << std::endl;
 		ASSERT(false);
 	}
 
