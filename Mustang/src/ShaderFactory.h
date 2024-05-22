@@ -1,6 +1,6 @@
 #pragma once
 
-typedef unsigned int ShaderHandle;
+#include "Typedefs.h"
 
 class ShaderFactory
 {

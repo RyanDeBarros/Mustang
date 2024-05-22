@@ -8,6 +8,8 @@
     <ClCompile Include="src\VertexArray.cpp" />
     <ClCompile Include="src\ShaderFactory.cpp" />
     <ClCompile Include="src\AssetLoader.cpp" />
+    <ClCompile Include="src\render\Renderer.cpp" />
+    <ClCompile Include="src\render\CanvasLayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h" />
@@ -16,5 +18,8 @@
     <ClInclude Include="src\VertexArray.h" />
     <ClInclude Include="src\ShaderFactory.h" />
     <ClInclude Include="src\AssetLoader.h" />
+    <ClInclude Include="src\render\Renderer.h" />
+    <ClInclude Include="src\render\CanvasLayer.h" />
+    <ClInclude Include="src\Typedefs.h" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ShaderFactory.h"
+#include "Typedefs.h"
 
 enum class LOAD_STATUS
 {

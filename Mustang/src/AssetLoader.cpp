@@ -1,6 +1,7 @@
 #include "AssetLoader.h"
 
 #include "Utility.h"
+#include "ShaderFactory.h"
 
 #include <fstream>
 #include <string>

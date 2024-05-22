@@ -2,12 +2,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "Typedefs.h"
 #include "Logger.h"
 #include "Utility.h"
 #include "Shader.h"
 #include "VertexArray.h"
 #include "ShaderFactory.h"
 #include "AssetLoader.h"
+#include "render/Renderer.h"
 
 void run(GLFWwindow*);
 
@@ -40,6 +42,12 @@ int main()
 void run(GLFWwindow* window)
 {
 	TRY(Logger::LogInfo(glGetString(GL_VERSION)));
+	Renderer::Init();
+
+	Renderer::AddCanvasLayer(0);
+	Renderer::AddCanvasLayer(-1);
+	Renderer::AddCanvasLayer(3);
+	Renderer::AddCanvasLayer(2);
 
 	TRY(
 		glEnable(GL_BLEND);
@@ -77,6 +85,8 @@ void run(GLFWwindow* window)
 		prevTime = time;
 
 		// Render here
+		Renderer::OnDraw();
+
 		ShaderFactory::Bind(shader);
 		va.Bind();
 		TRY(
@@ -92,4 +102,5 @@ void run(GLFWwindow* window)
 	}
 
 	ShaderFactory::Terminate();
+	Renderer::Terminate();
 }

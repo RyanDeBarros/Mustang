@@ -4,6 +4,7 @@
 
 namespace Logger {
 	
+	void Wait();
 	void LogInfo(const char* message);
 	void LogInfo(const unsigned char* message);
 	void LogInfo(const std::string& message);

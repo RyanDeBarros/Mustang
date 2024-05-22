@@ -6,6 +6,11 @@
 
 namespace Logger {
 
+	void Wait()
+	{
+		std::cin.get();
+	}
+
 	void LogInfo(const char* message)
 	{
 		std::cout << message << std::endl;
