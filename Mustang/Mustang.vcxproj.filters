@@ -6,15 +6,15 @@
     <ClCompile Include="src\Utility.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\VertexArray.cpp" />
-    <ClCompile Include="src\Renderable.cpp" />
     <ClCompile Include="src\ShaderFactory.cpp" />
+    <ClCompile Include="src\AssetLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Utility.h" />
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\VertexArray.h" />
-    <ClInclude Include="src\Renderable.h" />
     <ClInclude Include="src\ShaderFactory.h" />
+    <ClInclude Include="src\AssetLoader.h" />
   </ItemGroup>
 </Project>

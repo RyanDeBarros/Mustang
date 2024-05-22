@@ -1,0 +1,7 @@
+[HEADER]
+AssetType=SHADER
+
+[SHADER]
+vertex=res/shaders/test.vert
+fragment=res/shaders/test.frag
+#

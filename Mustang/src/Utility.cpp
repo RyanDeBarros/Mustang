@@ -4,7 +4,7 @@
 
 namespace Utility {
 
-	const char* ReadFile(const char* filepath)
+	char* ReadFile(const char* filepath)
 	{
 		FILE* file;
 		fopen_s(&file, filepath, "rb");

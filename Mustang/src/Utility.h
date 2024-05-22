@@ -24,6 +24,6 @@ static bool glNoError(const char* function_name, const char* file, int line)
 
 namespace Utility {
 
-	const char* ReadFile(const char* filepath);
+	char* ReadFile(const char* filepath);
 
 }

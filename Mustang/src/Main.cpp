@@ -6,7 +6,8 @@
 #include "Utility.h"
 #include "Shader.h"
 #include "VertexArray.h"
-#include <ShaderFactory.h>
+#include "ShaderFactory.h"
+#include "AssetLoader.h"
 
 void run(GLFWwindow*);
 
@@ -63,7 +64,10 @@ void run(GLFWwindow* window)
 	};
 	VertexArray va(vertices, 4, 0b11, 0b1101, indices, 6);
 
-	unsigned int shader = ShaderFactory::GetHandle("res/shaders/test.vert", "res/shaders/test.frag");
+	ShaderHandle shader;
+	auto status = loadShader("res/assets/shader.mass", shader);
+	if (status != LOAD_STATUS::OK)
+		ASSERT(false);
 
 	for (;;)
 	{
