@@ -2,9 +2,9 @@
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #ifdef _DEBUG
-#define TRY(x) ASSERT(glNoError(#x, __FILE__, __LINE__)) x; ASSERT(glNoError(#x, __FILE__, __LINE__))
+#	define TRY(x) ASSERT(glNoError(#x, __FILE__, __LINE__)) x; ASSERT(glNoError(#x, __FILE__, __LINE__))
 #else
-#define TRY(x) x;
+#	define TRY(x) x;
 #endif
 
 #include "GL/glew.h"

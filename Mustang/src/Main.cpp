@@ -42,6 +42,7 @@ int main()
 void run(GLFWwindow* window)
 {
 	TRY(Logger::LogInfo(glGetString(GL_VERSION)));
+	ShaderFactory::Init();
 	Renderer::Init();
 
 	Renderer::AddCanvasLayer(0);
@@ -93,7 +94,7 @@ void run(GLFWwindow* window)
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 		)
 		va.Unbind();
-		ShaderFactory::Unbind(shader);
+		ShaderFactory::Unbind();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

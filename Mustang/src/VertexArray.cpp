@@ -2,7 +2,7 @@
 
 #include "Utility.h"
 
-static void inline setup_vertices(GLfloat vertices[], size_t& num_vertices, unsigned short& layout_mask, unsigned int& layout)
+static void inline setup_vertices(GLfloat vertices[], VertexCounter& num_vertices, unsigned short& layout_mask, unsigned int& layout)
 {
 	unsigned short stride = 0;
 	unsigned char num_attribs = 0;
@@ -26,12 +26,12 @@ static void inline setup_vertices(GLfloat vertices[], size_t& num_vertices, unsi
 	TRY(glBufferData(GL_ARRAY_BUFFER, num_vertices * stride * sizeof(GLfloat), vertices, GL_STATIC_DRAW));
 }
 
-static void inline setup_indices(GLuint indices[], size_t num_indices)
+static void inline setup_indices(GLuint indices[], VertexCounter num_indices)
 {
 	TRY(glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_indices * sizeof(GLuint), indices, GL_STATIC_DRAW));
 }
 
-VertexArray::VertexArray(GLfloat vertices[], size_t num_vertices, unsigned short layout_mask, unsigned int layout, GLuint indices[], size_t num_indices)
+VertexArray::VertexArray(GLfloat vertices[], VertexCounter num_vertices, VertexLayoutMask layout_mask, VertexLayout layout, GLuint indices[], VertexCounter num_indices)
 	: m_VA(0), m_VB(0), m_IB(0)
 {
 	TRY(glGenVertexArrays(1, &m_VA));

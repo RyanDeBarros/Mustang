@@ -38,6 +38,18 @@ void Renderer::AddCanvasLayer(const ZIndex z)
 	else null_map();
 }
 
+void Renderer::AddCanvasLayer(const CanvasLayerData data)
+{
+	if (layers)
+	{
+		if (layers->find(data.z) == layers->end())
+			layers->emplace(data.z, data);
+		else
+			Logger::LogErrorFatal(std::string("Tried to add new canvas layer to renderer zindex (") + std::to_string(data.z) + "), but a canvas layer under that zindex already exists!");
+	}
+	else null_map();
+}
+
 void Renderer::RemoveCanvasLayer(const ZIndex z)
 {
 	if (layers)

@@ -1,9 +1,8 @@
 #include "ShaderFactory.h"
+
+#include "Utility.h"
 #include "Shader.h"
 #include "Logger.h"
-
-#include <unordered_map>
-
 
 struct ShaderElement
 {
@@ -43,40 +42,65 @@ struct ShaderElement
 	}
 };
 
-static ShaderHandle handle_cap = 1;
-std::unordered_map<ShaderHandle, ShaderElement> factory;
+static void null_factory()
+{
+	Logger::LogErrorFatal("ShaderFactory is not initialized. Call ShaderFactory::Init() before application loop.");
+}
+
+void ShaderFactory::Init()
+{
+	handle_cap = 1;
+	factory = new std::unordered_map<ShaderHandle, ShaderElement>();
+}
 
 ShaderHandle ShaderFactory::GetHandle(const char* vertex_shader, const char* fragment_shader)
 {
-	for (const auto& [handle, element] : factory)
+	if (!factory)
+	{
+		null_factory();
+		return 0;
+	}
+	for (const auto& [handle, element] : *factory)
 	{
 		if (strcmp(vertex_shader, element.vertexFilepath) == 0 && strcmp(fragment_shader, element.fragmentFilepath) == 0)
 			return handle;
 	}
 	ShaderHandle handle = handle_cap++;
-	factory.emplace(handle, ShaderElement(vertex_shader, fragment_shader));
+	factory->emplace(handle, ShaderElement(vertex_shader, fragment_shader));
 	return handle;
 }
 
 void ShaderFactory::Bind(ShaderHandle handle)
 {
-	auto iter = factory.find(handle);
-	if (iter != factory.end())
+	if (!factory)
+	{
+		null_factory();
+		return;
+	}
+	auto iter = factory->find(handle);
+	if (iter != factory->end())
 		iter->second.shader->Bind();
 	else
 		Logger::LogWarning("Failed to bind shader. Handle (" + std::to_string(handle) + ") does not exist in ShaderFactory.");
 }
 
-void ShaderFactory::Unbind(ShaderHandle handle)
+void ShaderFactory::Unbind()
 {
-	auto iter = factory.find(handle);
-	if (iter != factory.end())
-		iter->second.shader->Unbind();
-	else
-		Logger::LogWarning("Failed to unbind shader. Handle (" + std::to_string(handle) + ") does not exist in ShaderFactory.");
+	if (!factory)
+	{
+		null_factory();
+		return;
+	}
+	TRY(glUseProgram(0));
 }
 
 void ShaderFactory::Terminate()
 {
-	factory.clear();
+	if (!factory)
+	{
+		null_factory();
+		return;
+	}
+	factory->clear();
+	delete factory;
 }
