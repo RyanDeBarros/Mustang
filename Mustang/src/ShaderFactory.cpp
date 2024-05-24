@@ -50,6 +50,23 @@ static void null_factory()
 ShaderHandle ShaderFactory::handle_cap;
 std::unordered_map<ShaderHandle, struct ShaderElement>* ShaderFactory::factory;
 
+Shader* ShaderFactory::Get(ShaderHandle handle)
+{
+	if (!factory)
+	{
+		null_factory();
+		return nullptr;
+	}
+	auto iter = factory->find(handle);
+	if (iter != factory->end())
+		return iter->second.shader;
+	else
+	{
+		Logger::LogWarning("Shader handle (" + std::to_string(handle) + ") does not exist in ShaderFactory.");
+		return nullptr;
+	}
+}
+
 void ShaderFactory::Init()
 {
 	handle_cap = 1;
@@ -75,16 +92,11 @@ ShaderHandle ShaderFactory::GetHandle(const char* vertex_shader, const char* fra
 
 void ShaderFactory::Bind(ShaderHandle handle)
 {
-	if (!factory)
-	{
-		null_factory();
-		return;
-	}
-	auto iter = factory->find(handle);
-	if (iter != factory->end())
-		iter->second.shader->Bind();
+	Shader* shader = Get(handle);
+	if (shader)
+		shader->Bind();
 	else
-		Logger::LogWarning("Failed to bind shader. Handle (" + std::to_string(handle) + ") does not exist in ShaderFactory.");
+		Logger::LogWarning("Failed to bind shader at handle (" + std::to_string(handle) + ".");
 }
 
 void ShaderFactory::Unbind()
@@ -106,4 +118,31 @@ void ShaderFactory::Terminate()
 	}
 	factory->clear();
 	delete factory;
+}
+
+void bad_uniform(ShaderHandle handle)
+{
+	Logger::LogWarning("Failed to set uniform for shader at handle (" + std::to_string(handle) + ").");
+}
+
+void ShaderFactory::SetUniform1f(ShaderHandle handle, const char* uniform_name, GLfloat v0)
+{
+	Shader* shader = Get(handle);
+	if (shader)
+	{
+		TRY(glUniform1f(shader->GetUniformLocation(uniform_name), v0));
+	}
+	else
+		bad_uniform(handle);
+}
+
+void ShaderFactory::SetUniform1iv(ShaderHandle handle, const char* uniform_name, GLsizei count, const GLint* value)
+{
+	Shader* shader = Get(handle);
+	if (shader)
+	{
+		TRY(glUniform1iv(shader->GetUniformLocation(uniform_name), count, value));
+	}
+	else
+		bad_uniform(handle);
 }

@@ -172,10 +172,12 @@
     <ClCompile Include="src\render\Renderer.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderFactory.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\Utility.cpp" />
     <ClCompile Include="src\VertexArray.cpp" />
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
+    <ClCompile Include="vendor\stb_image\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AssetLoader.h" />
@@ -189,6 +191,7 @@
     <ClInclude Include="src\EngineSettings.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\ShaderFactory.h" />
+    <ClInclude Include="src\Texture.h" />
     <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\Typedefs.h" />
     <ClInclude Include="src\Utility.h" />
@@ -481,6 +484,7 @@
     <ClInclude Include="vendor\glm\vec3.hpp" />
     <ClInclude Include="vendor\glm\vec4.hpp" />
     <ClInclude Include="vendor\glm\vector_relational.hpp" />
+    <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="vendor\glm\detail\func_common.inl" />

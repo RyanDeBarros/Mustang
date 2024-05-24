@@ -7,10 +7,13 @@
 #include "Logger.h"
 #include "Utility.h"
 #include "Shader.h"
+#include "Texture.h"
 #include "VertexArray.h"
 #include "ShaderFactory.h"
 #include "AssetLoader.h"
 #include "render/Renderer.h"
+
+#include <iostream>
 
 void run(GLFWwindow*);
 
@@ -59,23 +62,31 @@ void run(GLFWwindow* window)
 	double prevTime = time;
 
 
-
+	// posXY, texCoordRS, texSlot, RGBA
+	GLfloat texSlot = 0.0f;
 	GLfloat vertices[] = {
-		-0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
-		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
-		 0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f
+		-0.5f, -0.5f, 0.0f, 0.0f, texSlot, 1.0f, 0.0f, 0.0f, 1.0f,
+		 0.5f, -0.5f, 1.0f, 0.0f, texSlot, 0.0f, 1.0f, 0.0f, 1.0f,
+		 0.5f,  0.5f, 1.0f, 1.0f, texSlot, 0.0f, 0.0f, 1.0f, 1.0f,
+		-0.5f,  0.5f, 0.0f, 1.0f, texSlot, 1.0f, 1.0f, 1.0f, 1.0f
 	};
 	GLuint indices[] = {
 		0, 1, 2,
 		2, 3, 0
 	};
-	VertexArray va(vertices, 4, 0b11, 0b1101, indices, 6);
+	VertexArray va(vertices, 4, 0b1111, 0b11000101, indices, 6);
+
+	TextureSlot* samplers = new TextureSlot[EngineSettings::max_texture_slots];
+	for (TextureSlot i = 0; i < EngineSettings::max_texture_slots; i++)
+		samplers[i] = i;
 
 	ShaderHandle shader;
 	auto status = loadShader("res/assets/shader.mass", shader);
 	if (status != LOAD_STATUS::OK)
 		ASSERT(false);
+
+	Texture texture0("res/textures/snowman.png");
+	Texture texture1("res/textures/tux.png");
 
 	for (;;)
 	{
@@ -88,11 +99,14 @@ void run(GLFWwindow* window)
 		Renderer::OnDraw();
 
 		ShaderFactory::Bind(shader);
+		ShaderFactory::SetUniform1iv(shader, "u_TextureSlots", EngineSettings::max_texture_slots, samplers);
+		texture0.Bind(0);
+		texture1.Bind(1);
 		va.Bind();
-		TRY(
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-		)
+		TRY(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 		va.Unbind();
+		texture1.Unbind(1);
+		texture0.Unbind(0);
 		ShaderFactory::Unbind();
 
 		glfwSwapBuffers(window);
@@ -100,6 +114,8 @@ void run(GLFWwindow* window)
 		if (glfwWindowShouldClose(window))
 			break;
 	}
+
+	delete[] samplers;
 
 	ShaderFactory::Terminate();
 	Renderer::Terminate();

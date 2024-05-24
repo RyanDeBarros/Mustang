@@ -3,5 +3,5 @@ AssetType=SHADER
 
 [SHADER]
 vertex=res/shaders/test.vert
-fragment=res/shaders/test.frag
+fragment=res/shaders/test2TS.frag
 #

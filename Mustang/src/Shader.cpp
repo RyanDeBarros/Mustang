@@ -2,6 +2,7 @@
 
 #include <string>
 #include <iostream>
+#include <GL/glew.h>
 
 #include "Utility.h"
 
@@ -64,12 +65,23 @@ Shader::~Shader()
 	TRY(glDeleteProgram(m_RID));
 }
 
-void Shader::Bind()
+void Shader::Bind() const
 {
 	TRY(glUseProgram(m_RID));
 }
 
-void Shader::Unbind()
+void Shader::Unbind() const
 {
 	TRY(glUseProgram(0));
+}
+
+GLint Shader::GetUniformLocation(const char* uniform_name) const
+{
+	if (m_UniformLocationCache.find(uniform_name) != m_UniformLocationCache.end())
+		return m_UniformLocationCache[uniform_name];
+	TRY(GLint location = glGetUniformLocation(m_RID, uniform_name));
+	if (location == -1)
+		Logger::LogWarning(std::string("No uniform exists under the name: ") + uniform_name);
+	m_UniformLocationCache[uniform_name] = location;
+	return location;
 }
