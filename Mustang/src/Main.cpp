@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Typedefs.h"
+#include "EngineSettings.h"
 #include "Logger.h"
 #include "Utility.h"
 #include "Shader.h"
@@ -20,7 +21,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	GLFWwindow* window = glfwCreateWindow(1440, 1080, "Mustang Engine", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow((int)EngineSettings::window_width, (int)EngineSettings::window_height, "Mustang Engine", nullptr, nullptr);
 	if (!window)
 	{
 		glfwTerminate();
@@ -41,6 +42,7 @@ int main()
 
 void run(GLFWwindow* window)
 {
+	Logger::LogInfo("Welcome to Mustang Engine! GL_VERSION:");
 	TRY(Logger::LogInfo(glGetString(GL_VERSION)));
 	ShaderFactory::Init();
 	Renderer::Init();

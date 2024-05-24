@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <stdexcept>
 
-static enum READ_STATUS
+enum READ_STATUS
 {
 	OK,
 	EMPTY,
@@ -35,11 +35,11 @@ static bool readHeader(std::string::iterator& iter, const std::string::iterator&
 	consumeWhitespace(iter);
 	if (iter == terminator || *iter != '[')
 		return false;
-	auto start = ++iter;
+	std::string::iterator start = ++iter;
 	while (*iter != ']' && iter != terminator) iter++;
 	if (iter == terminator)
 		return false;
-	auto end = iter++;
+	std::string::iterator end = iter++;
 	header = std::string(start, end);
 	return true;
 }
@@ -49,11 +49,11 @@ static READ_STATUS readKeyValue(std::string::iterator& iter, const std::string::
 	consumeWhitespace(iter);
 	if (iter == terminator)
 		return EMPTY;
-	auto start = iter;
+	std::string::iterator start = iter;
 	while (*iter != '=' && iter != terminator) iter++;
 	if (iter == terminator)
 		return INCOMPLETE_KEY;
-	auto end = iter;
+	std::string::iterator end = iter;
 	key = std::string(start, end);
 	start = ++iter;
 	while (*iter != '\n' && *iter != '\r' && iter != terminator) iter++;

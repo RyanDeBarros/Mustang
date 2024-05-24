@@ -29,9 +29,10 @@ struct Renderable
 	VertexCounter m_VertexCount;
 	GLuint* m_IndexBufferData;
 	VertexCounter m_IndexCount;
+	// TODO m_TextureHandle
 };
 
 namespace Render
 {
-	Renderable Empty = {BatchModel(), nullptr, 0, nullptr, 0};
+	extern Renderable Empty;
 }

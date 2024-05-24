@@ -162,11 +162,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\AssetLoader.cpp" />
+    <ClCompile Include="src\EngineSettings.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\render\ActorConstruct.cpp" />
+    <ClCompile Include="src\render\ActorComposite.cpp" />
     <ClCompile Include="src\render\ActorPrimitive.cpp" />
     <ClCompile Include="src\render\CanvasLayer.cpp" />
+    <ClCompile Include="src\render\Renderable.cpp" />
     <ClCompile Include="src\render\Renderer.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderFactory.cpp" />
@@ -178,10 +180,10 @@
   <ItemGroup>
     <ClInclude Include="src\AssetLoader.h" />
     <ClInclude Include="src\Logger.h" />
-    <ClInclude Include="src\render\ActorConstruct.h" />
+    <ClInclude Include="src\render\ActorComposite.h" />
     <ClInclude Include="src\render\ActorPrimitive.h" />
+    <ClInclude Include="src\render\ActorRenderIterator.h" />
     <ClInclude Include="src\render\CanvasLayer.h" />
-    <ClInclude Include="src\render\QuadRender.h" />
     <ClInclude Include="src\render\Renderable.h" />
     <ClInclude Include="src\render\Renderer.h" />
     <ClInclude Include="src\EngineSettings.h" />

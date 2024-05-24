@@ -7,7 +7,7 @@ CanvasLayer::CanvasLayer(ZIndex z)
 {
 	m_CameraTransform = Transform2D();
 	m_View = Transform::ToMatrix(Transform::Inverse(m_CameraTransform));
-	m_BatchList = new std::forward_list<ActorPrimitive2D>();
+	m_Batcher = new std::map<ZIndex, std::list<std::variant<ActorPrimitive2D*, ActorComposite2D*>>>();
 }
 
 CanvasLayer::CanvasLayer(CanvasLayerData data)
@@ -15,36 +15,46 @@ CanvasLayer::CanvasLayer(CanvasLayerData data)
 {
 	m_CameraTransform = Transform2D();
 	m_View = Transform::ToMatrix(Transform::Inverse(m_CameraTransform));
-	m_BatchList = new std::forward_list<ActorPrimitive2D>();
+	m_Batcher = new std::map<ZIndex, std::list<std::variant<ActorPrimitive2D*, ActorComposite2D*>>>();
 }
 
 CanvasLayer::~CanvasLayer()
 {
-	if (m_BatchList)
+	if (m_Batcher)
 	{
-		m_BatchList->clear();
-		delete m_BatchList;
+		m_Batcher->clear();
+		delete m_Batcher;
 	}
 }
 
-CanvasHandle CanvasLayer::OnAttach(ActorPrimitive2D* primitive)
+void CanvasLayer::OnAttach(const ActorPrimitive2D* const primitive)
 {
-	// TODO Add primitives in correct order, following 1: ZIndex, 2: order set by m_Data.relativeOrderByInsert. Use indexing pointers that point to edges of ZIndex sections for faster insertion.
+	// TODO
 }
 
-CanvasHandle CanvasLayer::OnAttach(ActorConstruct2D* construct)
+void CanvasLayer::OnAttach(const ActorComposite2D* const composite)
 {
-	// TODO Add primitives in correct order, following 1: ZIndex, 2: order set by m_Data.relativeOrderByInsert. Use indexing pointers that point to edges of ZIndex sections for faster insertion.
+	// TODO
 }
 
-void CanvasLayer::OnSetZIndex(const CanvasHandle& handle, ZIndex new_val)
+void CanvasLayer::OnSetZIndex(const ActorPrimitive2D* const primitive, const ZIndex new_val)
 {
-	// TODO Reorder the primitive OR construct at the handle. Update indexing pointers as necessary.
+	// TODO
 }
 
-void CanvasLayer::OnDetach(const CanvasHandle& handle)
+void CanvasLayer::OnSetZIndex(const ActorComposite2D* const composite, const ZIndex new_val)
 {
-	// TODO Remove primitive OR construct at the handle. Update indexing pointers as necessary.
+	// TODO
+}
+
+void CanvasLayer::OnDetach(const ActorPrimitive2D* const primitive)
+{
+	// TODO
+}
+
+void CanvasLayer::OnDetach(const ActorComposite2D* const composite)
+{
+	// TODO
 }
 
 void CanvasLayer::OnDraw()

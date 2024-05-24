@@ -1,9 +1,13 @@
 #pragma once
 
 typedef unsigned int VertexCounter;
-typedef unsigned char ActorPrimitiveCounter;
+
+#ifdef WIN32
+typedef signed int ActorPrimitiveCounter;
+#else
+typedef signed long long ActorPrimitiveCounter;
+#endif
 typedef unsigned short VertexLayoutMask;
 typedef unsigned int VertexLayout;
 typedef signed short ZIndex;
-typedef unsigned int CanvasHandle;
 typedef unsigned int ShaderHandle;

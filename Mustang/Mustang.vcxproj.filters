@@ -13,7 +13,9 @@
     <ClCompile Include="src\render\ActorPrimitive.cpp" />
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
-    <ClCompile Include="src\render\ActorConstruct.cpp" />
+    <ClCompile Include="src\render\ActorComposite.cpp" />
+    <ClCompile Include="src\render\Renderable.cpp" />
+    <ClCompile Include="src\EngineSettings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h" />
@@ -317,8 +319,8 @@
     <ClInclude Include="src\render\Renderable.h" />
     <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\EngineSettings.h" />
-    <ClInclude Include="src\render\ActorConstruct.h" />
-    <ClInclude Include="src\render\QuadRender.h" />
+    <ClInclude Include="src\render\ActorComposite.h" />
+    <ClInclude Include="src\render\ActorRenderIterator.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="vendor\glm\detail\func_common.inl" />

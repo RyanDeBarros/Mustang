@@ -1,9 +1,9 @@
 #include "Shader.h"
 
 #include <string>
+#include <iostream>
 
 #include "Utility.h"
-#include <iostream>
 
 static GLuint compile_shader(GLenum type, const char* shader, const char*filepath)
 {

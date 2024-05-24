@@ -47,6 +47,9 @@ static void null_factory()
 	Logger::LogErrorFatal("ShaderFactory is not initialized. Call ShaderFactory::Init() before application loop.");
 }
 
+ShaderHandle ShaderFactory::handle_cap;
+std::unordered_map<ShaderHandle, struct ShaderElement>* ShaderFactory::factory;
+
 void ShaderFactory::Init()
 {
 	handle_cap = 1;
