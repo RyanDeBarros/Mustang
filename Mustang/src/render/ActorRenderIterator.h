@@ -8,7 +8,6 @@ class ActorRenderIterator
 	ActorPrimitive2D** tail;
 	ActorPrimitive2D** head;
 	ActorPrimitive2D** current;
-
 public:
 	ActorRenderIterator(ActorPrimitive2D* primitive)
 		: tail(&primitive), head(&primitive), current(tail)

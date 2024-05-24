@@ -16,12 +16,12 @@
 
 struct CanvasLayerData
 {
-	ZIndex z;
+	CanvasIndex ci;
 	bool enableGLBlend;
 	GLenum sourceBlend, destBlend;
 	float pLeft, pRight, pBottom, pTop;
-	CanvasLayerData(ZIndex z)
-		: z(z), enableGLBlend(true), sourceBlend(GL_SRC_ALPHA), destBlend(GL_ONE_MINUS_SRC_ALPHA), pLeft(0), pRight(EngineSettings::window_width), pBottom(0), pTop(EngineSettings::window_height)
+	CanvasLayerData(CanvasIndex ci)
+		: ci(ci), enableGLBlend(true), sourceBlend(GL_SRC_ALPHA), destBlend(GL_ONE_MINUS_SRC_ALPHA), pLeft(0), pRight(EngineSettings::window_width), pBottom(0), pTop(EngineSettings::window_height)
 	{}
 };
 
@@ -31,20 +31,20 @@ class CanvasLayer
 	glm::mat3 m_Proj;
 	Transform2D m_CameraTransform;
 	glm::mat3 m_View;
-	std::map<ZIndex, std::list<std::variant<ActorPrimitive2D*, ActorComposite2D*>>>* m_Batcher;
+	std::map<ZIndex, std::list<std::variant<ActorPrimitive2D*, ActorComposite2D*>>*>* m_Batcher;
 public:
-	CanvasLayer(ZIndex z = 0);
+	CanvasLayer(CanvasIndex z = 0);
 	CanvasLayer(CanvasLayerData data);
 	~CanvasLayer();
 
-	void OnAttach(const ActorPrimitive2D* const primitive);
-	void OnAttach(const ActorComposite2D* const composite);
-	void OnSetZIndex(const ActorPrimitive2D* const primitive, const ZIndex new_val);
-	void OnSetZIndex(const ActorComposite2D* const composite, const ZIndex new_val);
-	void OnDetach(const ActorPrimitive2D* const primitive);
-	void OnDetach(const ActorComposite2D* const composite);
+	void OnAttach(ActorPrimitive2D* const primitive);
+	void OnAttach(ActorComposite2D* const composite);
+	bool OnSetZIndex(ActorPrimitive2D* const primitive, const ZIndex new_val);
+	bool OnSetZIndex(ActorComposite2D* const composite, const ZIndex new_val);
+	bool OnDetach(ActorPrimitive2D* const primitive);
+	bool OnDetach(ActorComposite2D* const composite);
 	void OnDraw();
 	
-	ZIndex getZIndex() const { return m_Data.z; }
+	CanvasIndex getZIndex() const { return m_Data.ci; }
 	CanvasLayerData& getDataRef() { return m_Data; }
 };

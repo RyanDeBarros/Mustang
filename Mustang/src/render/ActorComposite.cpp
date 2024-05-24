@@ -8,7 +8,7 @@ constexpr ActorPrimitiveCounter DYNAMIC_INCR_AMOUNT = 5;
 constexpr ActorPrimitiveCounter VOLATILE_INCR_FACTOR = 2;
 
 ActorComposite2D::ActorComposite2D(CompositeMode mode, ActorPrimitiveCounter initial_size, ZIndex z)
-	: m_Mode(mode), m_ConstructZ(z)
+	: m_Mode(mode), m_CompositeZ(z)
 {
 	tail = new ActorPrimitive2D*[initial_size];
 	head = tail;

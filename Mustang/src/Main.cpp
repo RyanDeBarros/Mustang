@@ -48,9 +48,6 @@ void run(GLFWwindow* window)
 	Renderer::Init();
 
 	Renderer::AddCanvasLayer(0);
-	Renderer::AddCanvasLayer(-1);
-	Renderer::AddCanvasLayer(3);
-	Renderer::AddCanvasLayer(2);
 
 	TRY(
 		glEnable(GL_BLEND);

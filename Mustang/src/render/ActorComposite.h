@@ -13,11 +13,12 @@ enum class CompositeMode
 class ActorComposite2D
 {
 	friend class ActorRenderIterator;
+	friend class CanvasLayer;
 	CompositeMode m_Mode;
 	ActorPrimitive2D** tail;
 	ActorPrimitive2D** head;
 	ActorPrimitive2D** cap;
-	ZIndex m_ConstructZ;
+	ZIndex m_CompositeZ;
 public:
 	ActorComposite2D(CompositeMode mode, ActorPrimitiveCounter initial_size = 1, ZIndex z = 0);
 	~ActorComposite2D();
@@ -29,6 +30,8 @@ public:
 	ActorPrimitive2D* Replace(ActorPrimitive2D* primitive, ActorPrimitiveCounter index);
 	ActorPrimitive2D* Remove(ActorPrimitiveCounter index);
 	bool Erase(ActorPrimitive2D* primitive);
+
+	inline ZIndex GetZIndex() const { return m_CompositeZ; }
 private:
 	void _assert_valid_index(ActorPrimitiveCounter index);
 	void _try_increase_alloc();

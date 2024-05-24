@@ -29,7 +29,7 @@ struct Renderable
 	VertexCounter m_VertexCount;
 	GLuint* m_IndexBufferData;
 	VertexCounter m_IndexCount;
-	// TODO m_TextureHandle
+	// TODO m_TextureHandle. Implement TextureFactory
 };
 
 namespace Render

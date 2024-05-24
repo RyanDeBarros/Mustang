@@ -4,7 +4,7 @@
 
 #include "Logger.h"
 
-std::map<ZIndex, CanvasLayer>* layers = nullptr;
+std::map<CanvasIndex, CanvasLayer>* layers = nullptr;
 
 static void null_map()
 {
@@ -13,7 +13,7 @@ static void null_map()
 
 void Renderer::Init()
 {
-	layers = new std::map<ZIndex, CanvasLayer>();
+	layers = new std::map<CanvasIndex, CanvasLayer>();
 }
 
 void Renderer::OnDraw()
@@ -26,14 +26,14 @@ void Renderer::OnDraw()
 	else null_map();
 }
 
-void Renderer::AddCanvasLayer(const ZIndex z)
+void Renderer::AddCanvasLayer(const CanvasIndex ci)
 {
 	if (layers)
 	{
-		if (layers->find(z) == layers->end())
-			layers->emplace(z, z);
+		if (layers->find(ci) == layers->end())
+			layers->emplace(ci, ci);
 		else
-			Logger::LogErrorFatal(std::string("Tried to add new canvas layer to renderer zindex (") + std::to_string(z) + "), but a canvas layer under that zindex already exists!");
+			Logger::LogErrorFatal(std::string("Tried to add new canvas layer to renderer canvas index (") + std::to_string(ci) + "), but a canvas layer under that canvas index already exists!");
 	}
 	else null_map();
 }
@@ -42,35 +42,35 @@ void Renderer::AddCanvasLayer(const CanvasLayerData data)
 {
 	if (layers)
 	{
-		if (layers->find(data.z) == layers->end())
-			layers->emplace(data.z, data);
+		if (layers->find(data.ci) == layers->end())
+			layers->emplace(data.ci, data);
 		else
-			Logger::LogErrorFatal(std::string("Tried to add new canvas layer to renderer zindex (") + std::to_string(data.z) + "), but a canvas layer under that zindex already exists!");
+			Logger::LogErrorFatal(std::string("Tried to add new canvas layer to renderer canvas index (") + std::to_string(data.ci) + "), but a canvas layer under that canvas index already exists!");
 	}
 	else null_map();
 }
 
-void Renderer::RemoveCanvasLayer(const ZIndex z)
+void Renderer::RemoveCanvasLayer(const CanvasIndex ci)
 {
 	if (layers)
 	{
-		if (layers->find(z) != layers->end())
-			layers->erase(z);
+		if (layers->find(ci) != layers->end())
+			layers->erase(ci);
 		else
-			Logger::LogErrorFatal(std::string("Tried to remove a canvas layer at renderer zindex (") + std::to_string(z) + "), but no canvas layer under that zindex exists!");
+			Logger::LogErrorFatal(std::string("Tried to remove a canvas layer at renderer canvas index (") + std::to_string(ci) + "), but no canvas layer under that canvas index exists!");
 	}
 	else null_map();
 }
 
-CanvasLayer* Renderer::GetCanvasLayer(const ZIndex z)
+CanvasLayer* Renderer::GetCanvasLayer(const CanvasIndex ci)
 {
 	if (layers)
 	{
-		auto layer = layers->find(z);
+		auto layer = layers->find(ci);
 		if (layer != layers->end())
 			return &layer->second;
 		else
-			Logger::LogErrorFatal(std::string("Tried to get a canvas layer at renderer zindex (") + std::to_string(z) + "), but no canvas layer under that zindex exists!");
+			Logger::LogErrorFatal(std::string("Tried to get a canvas layer at renderer canvas index (") + std::to_string(ci) + "), but no canvas layer under that canvas index exists!");
 	}
 	else null_map();
 	return nullptr;
