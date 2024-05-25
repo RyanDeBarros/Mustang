@@ -9,6 +9,8 @@ namespace Logger {
 	void LogInfo(const unsigned char* message);
 	void LogInfo(const std::string& message);
 	void LogInfo(const unsigned int message);
+	void LogInfo(const int message);
+	void LogInfo(const double message);
 	void LogWarning(const char* message, const char* source="", const char* file="", const char* line="");
 	void LogWarning(const unsigned char* message, const char* source="", const char* file="", const char* line="");
 	void LogWarning(const std::string& message, const char* source="", const char* file="", const char* line="");

@@ -3,9 +3,17 @@
 typedef unsigned int VertexCounter;
 typedef unsigned short VertexLayoutMask;
 typedef unsigned int VertexLayout;
+
+typedef unsigned int ShaderHandle;
+typedef unsigned int TextureHandle;
+
 typedef signed short ZIndex;
 typedef signed char CanvasIndex;
-typedef unsigned int ShaderHandle;
+
+#include <variant>
+class ActorPrimitive2D;
+class ActorComposite2D;
+typedef std::variant<ActorPrimitive2D*, ActorComposite2D*> ActorRenderBase2D;
 
 #include "GL/glew.h"
 typedef GLuint RID;

@@ -31,7 +31,7 @@ class CanvasLayer
 	glm::mat3 m_Proj;
 	Transform2D m_CameraTransform;
 	glm::mat3 m_View;
-	std::map<ZIndex, std::list<std::variant<ActorPrimitive2D*, ActorComposite2D*>>*>* m_Batcher;
+	std::map<ZIndex, std::list<ActorRenderBase2D>*>* m_Batcher;
 public:
 	CanvasLayer(CanvasIndex z = 0);
 	CanvasLayer(CanvasLayerData data);

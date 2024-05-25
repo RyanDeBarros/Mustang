@@ -7,7 +7,7 @@ CanvasLayer::CanvasLayer(CanvasIndex z)
 {
 	m_CameraTransform = Transform2D();
 	m_View = Transform::ToMatrix(Transform::Inverse(m_CameraTransform));
-	m_Batcher = new std::map<ZIndex, std::list<std::variant<ActorPrimitive2D*, ActorComposite2D*>>*>();
+	m_Batcher = new std::map<ZIndex, std::list<ActorRenderBase2D>*>();
 }
 
 CanvasLayer::CanvasLayer(CanvasLayerData data)
@@ -15,7 +15,7 @@ CanvasLayer::CanvasLayer(CanvasLayerData data)
 {
 	m_CameraTransform = Transform2D();
 	m_View = Transform::ToMatrix(Transform::Inverse(m_CameraTransform));
-	m_Batcher = new std::map<ZIndex, std::list<std::variant<ActorPrimitive2D*, ActorComposite2D*>>*>();
+	m_Batcher = new std::map<ZIndex, std::list<ActorRenderBase2D>*>();
 }
 
 CanvasLayer::~CanvasLayer()
@@ -37,7 +37,7 @@ void CanvasLayer::OnAttach(ActorPrimitive2D* const primitive)
 	auto entry = m_Batcher->find(primitive->GetZIndex());
 	if (entry == m_Batcher->end())
 	{
-		m_Batcher->emplace(primitive->GetZIndex(), new std::list<std::variant<ActorPrimitive2D*, ActorComposite2D*>>());
+		m_Batcher->emplace(primitive->GetZIndex(), new std::list<ActorRenderBase2D>());
 		entry = m_Batcher->find(primitive->GetZIndex());
 	}
 	entry->second->push_back(primitive);
@@ -48,7 +48,7 @@ void CanvasLayer::OnAttach(ActorComposite2D* const composite)
 	auto entry = m_Batcher->find(composite->GetZIndex());
 	if (entry == m_Batcher->end())
 	{
-		m_Batcher->emplace(composite->GetZIndex(), new std::list<std::variant<ActorPrimitive2D*, ActorComposite2D*>>());
+		m_Batcher->emplace(composite->GetZIndex(), new std::list<ActorRenderBase2D>());
 		entry = m_Batcher->find(composite->GetZIndex());
 	}
 	entry->second->push_back(composite);

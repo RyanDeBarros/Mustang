@@ -18,4 +18,6 @@ public:
 	void Unbind() const;
 
 	GLint GetUniformLocation(const char* uniform_name) const;
+	
+	inline bool IsValid() const { return m_RID > 0; }
 };

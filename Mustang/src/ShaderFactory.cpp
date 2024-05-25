@@ -1,8 +1,7 @@
 #include "ShaderFactory.h"
 
-#include "Utility.h"
-#include "Shader.h"
 #include "Logger.h"
+#include "Utility.h"
 
 struct ShaderElement
 {
@@ -73,6 +72,17 @@ void ShaderFactory::Init()
 	factory = new std::unordered_map<ShaderHandle, ShaderElement>();
 }
 
+void ShaderFactory::Terminate()
+{
+	if (!factory)
+	{
+		null_factory();
+		return;
+	}
+	factory->clear();
+	delete factory;
+}
+
 ShaderHandle ShaderFactory::GetHandle(const char* vertex_shader, const char* fragment_shader)
 {
 	if (!factory)
@@ -85,9 +95,15 @@ ShaderHandle ShaderFactory::GetHandle(const char* vertex_shader, const char* fra
 		if (strcmp(vertex_shader, element.vertexFilepath) == 0 && strcmp(fragment_shader, element.fragmentFilepath) == 0)
 			return handle;
 	}
-	ShaderHandle handle = handle_cap++;
-	factory->emplace(handle, ShaderElement(vertex_shader, fragment_shader));
-	return handle;
+	ShaderElement element(vertex_shader, fragment_shader);
+	if (element.shader->IsValid())
+	{
+		ShaderHandle handle = handle_cap++;
+		factory->emplace(handle, ShaderElement(std::move(element)));
+		return handle;
+	}
+	else
+		return 0;
 }
 
 void ShaderFactory::Bind(ShaderHandle handle)
@@ -96,7 +112,7 @@ void ShaderFactory::Bind(ShaderHandle handle)
 	if (shader)
 		shader->Bind();
 	else
-		Logger::LogWarning("Failed to bind shader at handle (" + std::to_string(handle) + ".");
+		Logger::LogWarning("Failed to bind shader at handle (" + std::to_string(handle) + ").");
 }
 
 void ShaderFactory::Unbind()
@@ -107,17 +123,6 @@ void ShaderFactory::Unbind()
 		return;
 	}
 	TRY(glUseProgram(0));
-}
-
-void ShaderFactory::Terminate()
-{
-	if (!factory)
-	{
-		null_factory();
-		return;
-	}
-	factory->clear();
-	delete factory;
 }
 
 void bad_uniform(ShaderHandle handle)

@@ -23,7 +23,7 @@ static void inline setup_vertices(GLfloat vertices[], VertexCounter& num_vertice
 		offset += attrib * sizeof(GLfloat);
 		num_attribs++;
 	}
-	TRY(glBufferData(GL_ARRAY_BUFFER, num_vertices * stride * sizeof(GLfloat), vertices, GL_STATIC_DRAW));
+	TRY(glBufferData(GL_ARRAY_BUFFER, num_vertices * stride * sizeof(GLfloat), vertices, GL_DYNAMIC_DRAW));
 }
 
 static void inline setup_indices(GLuint indices[], VertexCounter num_indices)

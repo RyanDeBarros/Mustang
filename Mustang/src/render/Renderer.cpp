@@ -3,8 +3,11 @@
 #include <map>
 
 #include "Logger.h"
+#include "ShaderFactory.h"
+#include "TextureFactory.h"
 
-std::map<CanvasIndex, CanvasLayer>* layers = nullptr;
+std::map<CanvasIndex, CanvasLayer>* Renderer::layers = nullptr;
+TextureSlot* Renderer::samplers;
 
 static void null_map()
 {
@@ -14,6 +17,12 @@ static void null_map()
 void Renderer::Init()
 {
 	layers = new std::map<CanvasIndex, CanvasLayer>();
+	ShaderFactory::Init();
+	TextureFactory::Init();
+
+	samplers = new TextureSlot[EngineSettings::max_texture_slots];
+	for (TextureSlot i = 0; i < EngineSettings::max_texture_slots; i++)
+		samplers[i] = i;
 }
 
 void Renderer::OnDraw()
@@ -84,4 +93,8 @@ void Renderer::Terminate()
 		delete layers;
 	}
 	else null_map();
+	if (samplers)
+		delete[] samplers;
+	TextureFactory::Terminate();
+	ShaderFactory::Terminate();
 }

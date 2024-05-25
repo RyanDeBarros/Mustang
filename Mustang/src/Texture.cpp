@@ -41,12 +41,10 @@ void Texture::Bind(TextureSlot slot) const
 {
 	TRY(glActiveTexture(GL_TEXTURE0 + slot));
 	TRY(glBindTexture(GL_TEXTURE_2D, m_RID));
-	//TRY(glBindTextureUnit(slot, m_RID));
 }
 
 void Texture::Unbind(TextureSlot slot) const
 {
 	TRY(glActiveTexture(GL_TEXTURE0 + slot));
 	TRY(glBindTexture(GL_TEXTURE_2D, 0));
-	//TRY(glBindTextureUnit(slot, 0));
 }

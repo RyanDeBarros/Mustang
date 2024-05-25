@@ -18,6 +18,7 @@
     <ClCompile Include="src\EngineSettings.cpp" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
+    <ClCompile Include="src\TextureFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h" />
@@ -325,6 +326,7 @@
     <ClInclude Include="src\render\ActorRenderIterator.h" />
     <ClInclude Include="src\Texture.h" />
     <ClInclude Include="vendor\stb_image\stb_image.h" />
+    <ClInclude Include="src\TextureFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="vendor\glm\detail\func_common.inl" />

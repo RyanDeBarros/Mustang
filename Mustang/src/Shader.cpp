@@ -39,22 +39,31 @@ Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
 	{
 		TRY(m_RID = glCreateProgram());
 		GLuint vs = compile_shader(GL_VERTEX_SHADER, vertex_shader, vertex_filepath);
-		GLuint fs = compile_shader(GL_FRAGMENT_SHADER, fragment_shader, fragment_filepath);
-		if (vs != 0 && fs != 0)
+		if (vs == 0)
 		{
-			TRY(
-				glAttachShader(m_RID, vs);
-				glAttachShader(m_RID, fs);
-				glLinkProgram(m_RID);
-				glValidateProgram(m_RID);
-			)
-			TRY(
-				glDeleteShader(vs);
-				glDeleteShader(fs);
-			)
+			TRY(glDeleteProgram(m_RID));
+			m_RID = 0;
 		}
 		else
-			m_RID = 0;
+		{
+			GLuint fs = compile_shader(GL_FRAGMENT_SHADER, fragment_shader, fragment_filepath);
+			if (fs == 0)
+			{
+				TRY(glDeleteProgram(m_RID));
+				TRY(glDeleteShader(vs));
+				m_RID = 0;
+			}
+			else
+			{
+				TRY(glAttachShader(m_RID, vs));
+				TRY(glAttachShader(m_RID, fs));
+				TRY(glLinkProgram(m_RID));
+				TRY(glValidateProgram(m_RID));
+
+				TRY(glDeleteShader(vs));
+				TRY(glDeleteShader(fs));
+			}
+		}
 	}
 	delete[] vertex_shader;
 	delete[] fragment_shader;

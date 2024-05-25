@@ -134,5 +134,14 @@ LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
 	}
 	
 	handle = ShaderFactory::GetHandle(vertex_shader, fragment_shader);
-	return LOAD_STATUS::OK;
+	if (handle > 0)
+		return LOAD_STATUS::OK;
+	else
+		return LOAD_STATUS::ASSET_LOAD_ERR;
+}
+
+LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle)
+{
+	// TODO
+	return LOAD_STATUS::ASSET_LOAD_ERR;
 }

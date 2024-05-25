@@ -35,6 +35,11 @@ struct TextureSettings
 	MagFilter mag_filter = MagFilter::Linear;
 	TextureWrap wrap_s = TextureWrap::ClampToEdge;
 	TextureWrap wrap_t = TextureWrap::ClampToEdge;
+
+	bool operator==(const TextureSettings& other) const
+	{
+		return min_filter == other.min_filter && mag_filter == other.mag_filter && wrap_s == other.wrap_s && wrap_t == other.wrap_t;
+	}
 };
 
 class Texture
@@ -51,4 +56,6 @@ public:
 
 	inline int GetWidth() const { return m_Width; }
 	inline int GetHeight() const { return m_Height; }
+
+	inline bool IsValid() const { return m_RID > 0; }
 };

@@ -31,6 +31,16 @@ namespace Logger {
 		std::cout << message << std::endl;
 	}
 
+	void LogInfo(const int message)
+	{
+		std::cout << message << std::endl;
+	}
+
+	void LogInfo(const double message)
+	{
+		std::cout << message << std::endl;
+	}
+
 	void LogWarning(const char* message, const char* source, const char* file, const char* line)
 	{
 		if (source[0] != '\0')
