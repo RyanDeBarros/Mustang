@@ -1,13 +1,14 @@
 #include "AssetLoader.h"
 
-#include "Utility.h"
-#include "ShaderFactory.h"
-
 #include <fstream>
 #include <string>
 #include <sstream>
 #include <unordered_map>
 #include <stdexcept>
+
+#include "Utility.h"
+#include "ShaderFactory.h"
+#include "TextureFactory.h"
 
 enum READ_STATUS
 {
@@ -50,7 +51,7 @@ static READ_STATUS readKeyValue(std::string::iterator& iter, const std::string::
 	if (iter == terminator)
 		return EMPTY;
 	std::string::iterator start = iter;
-	while (*iter != '=' && iter != terminator) iter++;
+	while (iter != terminator && *iter != '=') iter++;
 	if (iter == terminator)
 		return INCOMPLETE_KEY;
 	std::string::iterator end = iter;
@@ -67,7 +68,7 @@ static std::unordered_map<std::string, std::string> readAllKeyValues(std::string
 	consumeWhitespace(iter);
 	std::unordered_map<std::string, std::string> kvs;
 	std::string key, value;
-	while (*iter != '#' && iter != terminator) {
+	while (iter != terminator && *iter != '#') {
 		READ_STATUS status = readKeyValue(iter, terminator, key, value);
 		if (status == OK)
 			kvs[key] = value;
@@ -84,20 +85,22 @@ static std::unordered_map<std::string, std::string> readAllKeyValues(std::string
 	return kvs;
 }
 
-LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
+void readFileIntoString(const char* filepath, std::string& file)
 {
-	if (!validExtension(filepath))
-		return LOAD_STATUS::READ_ERR;
-
 	std::ifstream stream(filepath);
 	std::stringstream ss;
 	ss << stream.rdbuf();
 	// TODO use ss directly?
-	std::string file = ss.str();
-	
-	const char* vertex_shader;
-	const char* fragment_shader;
+	file = ss.str();
+}
 
+LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
+{
+	if (!validExtension(filepath))
+		return LOAD_STATUS::READ_ERR;
+	
+	std::string file;
+	readFileIntoString(filepath, file);
 	auto iter = file.begin();
 	std::string header, key, value;
 
@@ -105,32 +108,26 @@ LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
 		return LOAD_STATUS::SYNTAX_ERR;
 	if (readKeyValue(iter, file.end(), key, value) != OK)
 		return LOAD_STATUS::SYNTAX_ERR;
-	if (value != std::string_view("SHADER"))
+	if (value != "SHADER" || key != "AssetType")
 		return LOAD_STATUS::MISMATCH_ERR;
 
+	const char* vertex_shader;
+	const char* fragment_shader;
 	if (!readHeader(iter, file.end(), header) || header != "SHADER")
 		return LOAD_STATUS::SYNTAX_ERR;
 	READ_STATUS status;
 	const auto kvs = readAllKeyValues(iter, file.end(), status);
 	if (status == SYNTAX_ERROR)
 		return LOAD_STATUS::SYNTAX_ERR;
+	
 	try
 	{
-		std::string ref = kvs.at("ref");
-		// TODO load referenced shader
-		return LOAD_STATUS::SYNTAX_ERR;
+		vertex_shader = kvs.at("vertex").c_str();
+		fragment_shader = kvs.at("fragment").c_str();
 	}
 	catch (std::out_of_range)
 	{
-		try
-		{
-			vertex_shader = kvs.at("vertex").c_str();
-			fragment_shader = kvs.at("fragment").c_str();
-		}
-		catch (std::out_of_range)
-		{
-			return LOAD_STATUS::SYNTAX_ERR;
-		}
+		return LOAD_STATUS::SYNTAX_ERR;
 	}
 	
 	handle = ShaderFactory::GetHandle(vertex_shader, fragment_shader);
@@ -142,6 +139,53 @@ LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
 
 LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle)
 {
-	// TODO
-	return LOAD_STATUS::ASSET_LOAD_ERR;
+	if (!validExtension(filepath))
+		return LOAD_STATUS::READ_ERR;
+
+	std::string file;
+	readFileIntoString(filepath, file);
+	auto iter = file.begin();
+	std::string header, key, value;
+
+	if (!readHeader(iter, file.end(), header) || header != "HEADER")
+		return LOAD_STATUS::SYNTAX_ERR;
+	if (readKeyValue(iter, file.end(), key, value) != OK)
+		return LOAD_STATUS::SYNTAX_ERR;
+	if (value != "TEXTURE" || key != "AssetType")
+		return LOAD_STATUS::MISMATCH_ERR;
+
+	const char* filename;
+	TextureSettings settings;
+	GLint lod_level(0);
+	if (!readHeader(iter, file.end(), header) || header != "TEXTURE")
+		return LOAD_STATUS::SYNTAX_ERR;
+	READ_STATUS status;
+	const auto kvs = readAllKeyValues(iter, file.end(), status);
+	if (status == SYNTAX_ERROR)
+		return LOAD_STATUS::SYNTAX_ERR;
+
+	try
+	{
+		filename = kvs.at("path").c_str();
+		if (kvs.find("lod") != kvs.end())
+			lod_level = std::stoi(kvs.at("lod"));
+		if (kvs.find("settings.min_filter") != kvs.end())
+			settings.min_filter = static_cast<MinFilter>(std::stoi(kvs.at("settings.min_filter")));
+		if (kvs.find("settings.mag_filter") != kvs.end())
+			settings.mag_filter = static_cast<MagFilter>(std::stoi(kvs.at("settings.mag_filter")));
+		if (kvs.find("settings.wrap_s") != kvs.end())
+			settings.wrap_s = static_cast<TextureWrap>(std::stoi(kvs.at("settings.wrap_s")));
+		if (kvs.find("settings.wrap_t") != kvs.end())
+			settings.wrap_t = static_cast<TextureWrap>(std::stoi(kvs.at("settings.wrap_t")));
+	}
+	catch (std::out_of_range)
+	{
+		return LOAD_STATUS::SYNTAX_ERR;
+	}
+	
+	handle = TextureFactory::GetHandle(filename, settings, lod_level);
+	if (handle > 0)
+		return LOAD_STATUS::OK;
+	else
+		return LOAD_STATUS::ASSET_LOAD_ERR;
 }

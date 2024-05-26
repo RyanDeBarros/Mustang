@@ -24,12 +24,12 @@ struct BatchModel
 
 struct Renderable
 {
-	BatchModel m_Model;
-	GLfloat* m_VertexBufferData;
-	VertexCounter m_VertexCount;
-	GLuint* m_IndexBufferData;
-	VertexCounter m_IndexCount;
-	// TODO m_TextureHandle. Implement TextureFactory
+	BatchModel model;
+	GLfloat* vertexBufferData;
+	VertexCounter vertexCount;
+	GLuint* indexBufferData;
+	VertexCounter indexCount;
+	TextureHandle textureHandle;
 };
 
 namespace Render

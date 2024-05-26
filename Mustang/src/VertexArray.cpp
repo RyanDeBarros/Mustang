@@ -38,14 +38,20 @@ VertexArray::VertexArray(GLfloat vertices[], VertexCounter num_vertices, VertexL
 	TRY(glGenBuffers(1, &m_VB));
 	TRY(glGenBuffers(1, &m_IB));
 	Bind();
+	TRY(glBindBuffer(GL_ARRAY_BUFFER, m_VB));
+	TRY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IB));
 	setup_vertices(vertices, num_vertices, layout_mask, layout);
 	setup_indices(indices, num_indices);
 	Unbind();
+	TRY(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	TRY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
 VertexArray::~VertexArray()
 {
 	Unbind();
+	TRY(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	TRY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	TRY(glDeleteBuffers(1, &m_IB));
 	TRY(glDeleteBuffers(1, &m_VB));
 	TRY(glDeleteVertexArrays(1, &m_VA));
@@ -54,13 +60,9 @@ VertexArray::~VertexArray()
 void VertexArray::Bind()
 {
 	TRY(glBindVertexArray(m_VA));
-	TRY(glBindBuffer(GL_ARRAY_BUFFER, m_VB));
-	TRY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IB));
 }
 
 void VertexArray::Unbind()
 {
 	TRY(glBindVertexArray(0));
-	TRY(glBindBuffer(GL_ARRAY_BUFFER, 0));
-	TRY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }

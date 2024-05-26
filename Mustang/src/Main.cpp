@@ -51,11 +51,6 @@ void run(GLFWwindow* window)
 
 	Renderer::AddCanvasLayer(0);
 
-	TRY(
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	)
-
 	double time = glfwGetTime();
 	double deltaTime = 0;
 	double prevTime = time;
@@ -70,25 +65,26 @@ void run(GLFWwindow* window)
 		 0.5f,  0.5f, 1.0f, 1.0f, texSlot, 0.0f, 0.0f, 1.0f, 1.0f,
 		-0.5f,  0.5f, 0.0f, 1.0f, texSlot, 1.0f, 1.0f, 1.0f, 1.0f
 	};
-	GLfloat* texModif[] = {
-		vertices + 4, vertices + 4 + 9, vertices + 4 + 9*2, vertices + 4 + 9*3
-	};
 	GLuint indices[] = {
 		0, 1, 2,
 		2, 3, 0
 	};
 	VertexArray va(vertices, 4, 0b1111, 0b11000101, indices, 6);
 
+	// Load shaders
 	ShaderHandle shader;
 	if (loadShader("res/assets/shader.mass", shader) != LOAD_STATUS::OK)
 		ASSERT(false);
 
-	TextureHandle texH0 = TextureFactory::GetHandle("res/textures/snowman.png");
-	TextureHandle texH1 = TextureFactory::GetHandle("res/textures/tux.png");
+	// Load textures
+	TextureHandle texH0, texH1;
+	if (loadTexture("res/assets/snowman.mass", texH0) != LOAD_STATUS::OK)
+		ASSERT(false);
+	if (loadTexture("res/assets/tux.mass", texH1) != LOAD_STATUS::OK)
+		ASSERT(false);
 
 	for (;;)
 	{
-		TRY(glClear(GL_COLOR_BUFFER_BIT));
 		time = glfwGetTime();
 		deltaTime = time - prevTime;
 		prevTime = time;
@@ -109,6 +105,7 @@ void run(GLFWwindow* window)
 		ShaderFactory::Unbind();
 
 		glfwSwapBuffers(window);
+		TRY(glClear(GL_COLOR_BUFFER_BIT));
 		glfwPollEvents();
 		if (glfwWindowShouldClose(window))
 			break;
