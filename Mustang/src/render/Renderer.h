@@ -1,12 +1,16 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "Typedefs.h"
 #include "CanvasLayer.h"
 
 class Renderer
 {
+	friend class CanvasLayer;
 	static std::map<CanvasIndex, CanvasLayer>* layers;
 	static TextureSlot* samplers;
+	static std::unordered_map<BatchModel, VAO> rvaos;
 public:
 	static void Init();
 	static void OnDraw();

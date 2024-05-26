@@ -17,6 +17,7 @@ typedef std::variant<ActorPrimitive2D*, ActorComposite2D*> ActorRenderBase2D;
 
 #include "GL/glew.h"
 typedef GLuint RID;
+typedef GLuint VAO;
 typedef GLint TextureSlot;
 
 #ifdef WIN32

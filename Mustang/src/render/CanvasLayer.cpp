@@ -1,6 +1,7 @@
 #include "render/CanvasLayer.h"
 
 #include "Utility.h"
+#include "ActorRenderIterator.h"
 
 CanvasLayer::CanvasLayer(CanvasIndex z)
 	: m_Data(CanvasLayerData(z)), m_Proj(glm::ortho<float>(m_Data.pLeft, m_Data.pRight, m_Data.pBottom, m_Data.pTop))
@@ -101,5 +102,31 @@ void CanvasLayer::OnDraw()
 	{
 		TRY(glDisable(GL_BLEND));
 	}
-	// TODO Iterate over m_BatchList, batching subsequences that have the same BatchModel and executing glDrawElements for every batch section. Proper ordering can be assumed. 
+	ActorRenderIterator iter;
+	BatchModel currentModel;
+	for (const auto& list : *m_Batcher)
+	{
+		for (const auto element : *list.second)
+		{
+			iter = std::visit([](auto&& arg) { return ActorRenderIterator(arg); }, element);
+			while (*iter)
+			{
+				const auto& transform = (*iter)->m_Transform;
+				const auto& render = (*iter)->m_Render;
+				if (render.model == currentModel)
+				{
+					// TODO copy render/transform over to this canvas layer's pooled vertex buffer and index buffer. If limit is reached, flush and reset the pools.
+				}
+				else
+				{
+					// TODO 1. FLUSH: i) bind pools and glBufferSubData on those pools. ii) unbind pools and bind Renderer::rvaos[currentModel]. iii) glDrawElements and unbind vao.
+					//		2. RESET: i) reset pools and set currentModel = render.model. ii) if rvaos has currentModel, continue. else: create vao by:
+					//									A) create new vertex array and set it to rvaos[currentModel].
+					//									B) parse currentModel layout, bind new vao and generate new buffers for pools (use alloc for pools, but don't send actual data?).
+					//									C) call glVertexAttribPointer on layouts to confirm VAO. at end, unbind vao for security.
+					//		3. copy render.transform over to this canvas layer's pooled vertex buffer and index buffer. If limit is reached, flush and reset the pools.
+				}
+			}
+		}
+	}
 }

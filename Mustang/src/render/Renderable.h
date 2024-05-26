@@ -35,4 +35,5 @@ struct Renderable
 namespace Render
 {
 	extern Renderable Empty;
+	extern BatchModel NullModel;
 }

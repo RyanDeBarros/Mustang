@@ -9,6 +9,9 @@ class ActorRenderIterator
 	ActorPrimitive2D** head;
 	ActorPrimitive2D** current;
 public:
+	ActorRenderIterator()
+		: tail(nullptr), head(nullptr), current(nullptr)
+	{}
 	ActorRenderIterator(ActorPrimitive2D* primitive)
 		: tail(&primitive), head(&primitive), current(tail)
 	{}

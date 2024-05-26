@@ -2,5 +2,5 @@
 
 namespace Render
 {
-	Renderable Empty = { BatchModel(), nullptr, 0, nullptr, 0 };
+	Renderable Empty = { BatchModel(), nullptr, 0, nullptr, 0, 0 };
 }
