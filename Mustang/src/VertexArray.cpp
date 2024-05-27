@@ -57,12 +57,12 @@ VertexArray::~VertexArray()
 	TRY(glDeleteVertexArrays(1, &m_VA));
 }
 
-void VertexArray::Bind()
+void VertexArray::Bind() const
 {
 	TRY(glBindVertexArray(m_VA));
 }
 
-void VertexArray::Unbind()
+void VertexArray::Unbind() const
 {
 	TRY(glBindVertexArray(0));
 }

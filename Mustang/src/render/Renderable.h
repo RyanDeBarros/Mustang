@@ -7,19 +7,18 @@
 struct BatchModel
 {
 	ShaderHandle shader;
-	// TODO MaterialHandle material;
 	VertexLayout layout;
 	VertexLayoutMask layoutMask;
 
-	BatchModel()
-		: shader(0), layout(0), layoutMask(0)
-	{}
+	BatchModel(ShaderHandle shader = 0, VertexLayout layout = 0, VertexLayoutMask layoutMask = 0);
+	bool operator==(const BatchModel&) const;
+	PointerOffset layoutSize() const;
+};
 
-	bool operator==(const BatchModel& m)
-	{
-		// TODO material check
-		return shader == m.shader && layout == m.layout && layoutMask == m.layoutMask;
-	}
+template<>
+struct std::hash<BatchModel>
+{
+	size_t operator()(const BatchModel& model) const;
 };
 
 struct Renderable
@@ -27,6 +26,7 @@ struct Renderable
 	BatchModel model;
 	GLfloat* vertexBufferData;
 	VertexCounter vertexCount;
+	VertexSize vertexBufferSize;
 	GLuint* indexBufferData;
 	VertexCounter indexCount;
 	TextureHandle textureHandle;
@@ -35,5 +35,4 @@ struct Renderable
 namespace Render
 {
 	extern Renderable Empty;
-	extern BatchModel NullModel;
 }

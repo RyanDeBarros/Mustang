@@ -10,11 +10,10 @@ class Renderer
 	friend class CanvasLayer;
 	static std::map<CanvasIndex, CanvasLayer>* layers;
 	static TextureSlot* samplers;
-	static std::unordered_map<BatchModel, VAO> rvaos;
+	static std::unordered_map<BatchModel, VAO>* rvaos;
 public:
 	static void Init();
 	static void OnDraw();
-	static void AddCanvasLayer(const CanvasIndex);
 	static void AddCanvasLayer(const CanvasLayerData);
 	static void RemoveCanvasLayer(const CanvasIndex);
 	static CanvasLayer* GetCanvasLayer(const CanvasIndex);

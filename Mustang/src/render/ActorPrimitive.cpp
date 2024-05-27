@@ -9,3 +9,12 @@ ActorPrimitive2D::ActorPrimitive2D(Renderable render, Transform2D transform, ZIn
 	: m_Render(render), m_Transform(transform), m_Z(z), m_Visible(visible)
 {
 }
+
+ActorPrimitive2D::~ActorPrimitive2D()
+{
+}
+
+void ActorPrimitive2D::OnDraw()
+{
+	// TODO insert transform into vertexBufferData
+}

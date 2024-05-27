@@ -11,6 +11,6 @@ public:
 	VertexArray(GLfloat vertices[], VertexCounter num_vertices, VertexLayoutMask layout_mask, VertexLayout layout, GLuint indices[], VertexCounter num_indices);
 	~VertexArray();
 
-	void Bind();
-	void Unbind();
+	void Bind() const;
+	void Unbind() const;
 };

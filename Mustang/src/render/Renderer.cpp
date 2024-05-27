@@ -8,6 +8,7 @@
 
 std::map<CanvasIndex, CanvasLayer>* Renderer::layers = nullptr;
 TextureSlot* Renderer::samplers;
+std::unordered_map<BatchModel, VAO>* Renderer::rvaos;
 
 static void null_map()
 {
@@ -23,6 +24,8 @@ void Renderer::Init()
 	samplers = new TextureSlot[EngineSettings::max_texture_slots];
 	for (TextureSlot i = 0; i < EngineSettings::max_texture_slots; i++)
 		samplers[i] = i;
+
+	rvaos = new std::unordered_map<BatchModel, VAO>();
 }
 
 void Renderer::OnDraw()
@@ -31,18 +34,6 @@ void Renderer::OnDraw()
 	{
 		for (auto& [z, layer] : *layers)
 			layer.OnDraw();
-	}
-	else null_map();
-}
-
-void Renderer::AddCanvasLayer(const CanvasIndex ci)
-{
-	if (layers)
-	{
-		if (layers->find(ci) == layers->end())
-			layers->emplace(ci, ci);
-		else
-			Logger::LogErrorFatal(std::string("Tried to add new canvas layer to renderer canvas index (") + std::to_string(ci) + "), but a canvas layer under that canvas index already exists!");
 	}
 	else null_map();
 }
@@ -97,4 +88,7 @@ void Renderer::Terminate()
 		delete[] samplers;
 	TextureFactory::Terminate();
 	ShaderFactory::Terminate();
+
+	if (rvaos)
+		delete rvaos;
 }

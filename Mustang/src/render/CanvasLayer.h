@@ -13,6 +13,7 @@
 #include "Transform.h"
 #include "ActorPrimitive.h"
 #include "ActorComposite.h"
+#include "Renderable.h"
 
 struct CanvasLayerData
 {
@@ -20,8 +21,10 @@ struct CanvasLayerData
 	bool enableGLBlend;
 	GLenum sourceBlend, destBlend;
 	float pLeft, pRight, pBottom, pTop;
-	CanvasLayerData(CanvasIndex ci)
-		: ci(ci), enableGLBlend(true), sourceBlend(GL_SRC_ALPHA), destBlend(GL_ONE_MINUS_SRC_ALPHA), pLeft(0), pRight(EngineSettings::window_width), pBottom(0), pTop(EngineSettings::window_height)
+	VertexSize maxVertexPoolSize, maxIndexPoolSize;
+	CanvasLayerData(CanvasIndex ci, VertexSize max_vertex_pool_size, VertexSize max_index_pool_size)
+		: ci(ci), enableGLBlend(true), sourceBlend(GL_SRC_ALPHA), destBlend(GL_ONE_MINUS_SRC_ALPHA), pLeft(0), pRight(EngineSettings::window_width), pBottom(0), pTop(EngineSettings::window_height),
+		maxVertexPoolSize(max_vertex_pool_size), maxIndexPoolSize(max_index_pool_size)
 	{}
 };
 
@@ -32,8 +35,12 @@ class CanvasLayer
 	Transform2D m_CameraTransform;
 	glm::mat3 m_View;
 	std::map<ZIndex, std::list<ActorRenderBase2D>*>* m_Batcher;
+	GLfloat* m_VertexPool;
+	GLfloat* vertexPos;
+	GLuint* m_IndexPool;
+	GLuint* indexPos;
+	BatchModel currentModel;
 public:
-	CanvasLayer(CanvasIndex z = 0);
 	CanvasLayer(CanvasLayerData data);
 	~CanvasLayer();
 
@@ -44,7 +51,11 @@ public:
 	bool OnDetach(ActorPrimitive2D* const primitive);
 	bool OnDetach(ActorComposite2D* const composite);
 	void OnDraw();
-	
+
 	CanvasIndex getZIndex() const { return m_Data.ci; }
 	CanvasLayerData& getDataRef() { return m_Data; }
+private:
+	inline void SetBlending() const;
+	inline void PoolOver(const Renderable& render);
+	inline void FlushAndReset();
 };

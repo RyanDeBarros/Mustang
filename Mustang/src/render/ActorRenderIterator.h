@@ -41,7 +41,7 @@ public:
 
 	ActorPrimitive2D* operator*()
 	{
-		if (head - tail < 0)
+		if (head - tail < 0 || !current)
 			return nullptr;
 		return *current;
 	}

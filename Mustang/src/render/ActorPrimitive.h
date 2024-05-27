@@ -15,6 +15,9 @@ class ActorPrimitive2D
 public:
 	ActorPrimitive2D();
 	ActorPrimitive2D(Renderable render, Transform2D transform, ZIndex z = 0, bool visible = true);
+	~ActorPrimitive2D();
+
+	void OnDraw();
 
 	inline ZIndex GetZIndex() const { return m_Z; }
 };

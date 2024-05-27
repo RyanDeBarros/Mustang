@@ -12,6 +12,7 @@
 #include "TextureFactory.h"
 #include "AssetLoader.h"
 #include "render/Renderer.h"
+#include "render/ActorPrimitive.h"
 
 #include <iostream>
 
@@ -49,7 +50,7 @@ void run(GLFWwindow* window)
 	TRY(Logger::LogInfo(glGetString(GL_VERSION)));
 	Renderer::Init();
 
-	Renderer::AddCanvasLayer(0);
+	Renderer::AddCanvasLayer(CanvasLayerData(0, 2048, 1024));
 
 	double time = glfwGetTime();
 	double deltaTime = 0;
@@ -83,6 +84,13 @@ void run(GLFWwindow* window)
 	if (loadTexture("res/assets/tux.mass", texH1) != LOAD_STATUS::OK)
 		ASSERT(false);
 
+	// Create actors
+	BatchModel model{ shader, 0b11000101, 0b1111 };
+	Renderable render{ model, vertices, 4, sizeof(vertices), indices, 6, texH0 };
+	Transform2D transform;
+	ActorPrimitive2D* actor = new ActorPrimitive2D(render, transform);
+	Renderer::GetCanvasLayer(0)->OnAttach(actor);
+
 	for (;;)
 	{
 		time = glfwGetTime();
@@ -97,9 +105,9 @@ void run(GLFWwindow* window)
 		ShaderFactory::SetUniform1iv(shader, "u_TextureSlots", EngineSettings::max_texture_slots, Renderer::GetSamplers());
 		TextureFactory::Bind(texH0, 0);
 		TextureFactory::Bind(texH1, 1);
-		va.Bind();
-		TRY(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
-		va.Unbind();
+		//va.Bind();
+		//TRY(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+		//va.Unbind();
 		TextureFactory::Unbind(0);
 		TextureFactory::Unbind(1);
 		ShaderFactory::Unbind();
@@ -110,6 +118,8 @@ void run(GLFWwindow* window)
 		if (glfwWindowShouldClose(window))
 			break;
 	}
+
+	delete actor;
 
 	Renderer::Terminate();
 }

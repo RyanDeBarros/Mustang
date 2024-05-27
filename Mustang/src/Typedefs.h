@@ -1,6 +1,7 @@
 #pragma once
 
 typedef unsigned int VertexCounter;
+typedef unsigned int VertexSize;
 typedef unsigned short VertexLayoutMask;
 typedef unsigned int VertexLayout;
 
@@ -21,7 +22,9 @@ typedef GLuint VAO;
 typedef GLint TextureSlot;
 
 #ifdef WIN32
-	typedef signed int ActorPrimitiveCounter;
+typedef signed int ActorPrimitiveCounter;
+typedef signed int PointerOffset;
 #else
-	typedef signed long long ActorPrimitiveCounter;
+typedef signed long long ActorPrimitiveCounter;
+typedef signed long long PointerOffset;
 #endif
