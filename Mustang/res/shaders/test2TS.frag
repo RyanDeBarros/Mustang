@@ -6,12 +6,12 @@ in vec4 t_Color;
 in float t_TexSlot;
 in vec2 t_TexCoord;
 
-uniform sampler2D u_TextureSlots[2];
+layout(binding=0) uniform sampler2D TEXTURE_SLOTS[2];
 
 void main() {
 	if (t_TexSlot < 0) {
 		o_Color = t_Color;
 	} else {
-		o_Color = texture(u_TextureSlots[int(t_TexSlot)], t_TexCoord);
+		o_Color = texture(TEXTURE_SLOTS[int(t_TexSlot)], t_TexCoord);
 	}
 }

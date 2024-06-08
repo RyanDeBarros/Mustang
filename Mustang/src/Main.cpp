@@ -84,12 +84,13 @@ void run(GLFWwindow* window)
 
 	// Create actors
 	BatchModel model{ shader, 0b11010100, 0b1111 };
-	Renderable render{ model, vertices, 4, indices, 6, texH0 };
+	Renderable render{ model, vertices, 4, indices, 6, 0 };
 	Transform2D transform;
 	ActorPrimitive2D* actor = new ActorPrimitive2D(render, transform);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor);
 
-	actor->SetTextureHandle(0);
+	//actor->SetTextureHandle(texH0);
+	//actor->SetTextureHandle(texH1);
 
 	for (;;)
 	{

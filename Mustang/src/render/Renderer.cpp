@@ -8,7 +8,6 @@
 #include "TextureFactory.h"
 
 std::map<CanvasIndex, CanvasLayer>* Renderer::layers = nullptr;
-TextureSlot* Renderer::samplers;
 std::unordered_map<BatchModel, VAO>* Renderer::rvaos;
 
 static void null_map()
@@ -21,10 +20,6 @@ void Renderer::Init()
 	layers = new std::map<CanvasIndex, CanvasLayer>();
 	ShaderFactory::Init();
 	TextureFactory::Init();
-
-	samplers = new TextureSlot[RenderSettings::max_texture_slots];
-	for (TextureSlot i = 0; i < RenderSettings::max_texture_slots; i++)
-		samplers[i] = i;
 
 	rvaos = new std::unordered_map<BatchModel, VAO>();
 }
@@ -85,8 +80,6 @@ void Renderer::Terminate()
 		delete layers;
 	}
 	else null_map();
-	if (samplers)
-		delete[] samplers;
 	TextureFactory::Terminate();
 	ShaderFactory::Terminate();
 

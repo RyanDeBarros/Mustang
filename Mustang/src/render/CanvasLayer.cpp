@@ -4,6 +4,7 @@
 #include "ActorRenderIterator.h"
 #include "Renderer.h"
 #include "ShaderFactory.h"
+#include "TextureFactory.h"
 
 CanvasLayer::CanvasLayer(CanvasLayerData data)
 	: m_Data(data), m_Proj(glm::ortho<float>(m_Data.pLeft, m_Data.pRight, m_Data.pBottom, m_Data.pTop))
@@ -187,7 +188,10 @@ inline TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 		FlushAndReset();
 	}
 	m_TextureSlotBatch.push_back(render.textureHandle);
-	return m_TextureSlotBatch.size() - 1;
+	TextureSlot slot = m_TextureSlotBatch.size() - 1;
+	TextureFactory::Bind(render.textureHandle, slot);
+	// Note: due to the abstraction of glDrawElements and glBufferSubData behind CanvasLayer, there is currently no need to actually call TextureFactory::Unbind on anything.
+	return slot;
 }
 
 inline void CanvasLayer::FlushAndReset()
@@ -199,6 +203,7 @@ inline void CanvasLayer::FlushAndReset()
 	TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
 	TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
 	ShaderFactory::Bind(currentModel.shader);
+	// TODO set shader uniforms here
 	TRY(glDrawElements(GL_TRIANGLES, indexPos - m_IndexPool, GL_UNSIGNED_INT, nullptr));
 	ShaderFactory::Unbind();
 	UnbindBuffers();

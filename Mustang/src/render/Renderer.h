@@ -9,7 +9,6 @@ class Renderer
 {
 	friend class CanvasLayer;
 	static std::map<CanvasIndex, CanvasLayer>* layers;
-	static TextureSlot* samplers;
 	static std::unordered_map<BatchModel, VAO>* rvaos;
 public:
 	static void Init();
@@ -18,6 +17,4 @@ public:
 	static void RemoveCanvasLayer(const CanvasIndex);
 	static CanvasLayer* GetCanvasLayer(const CanvasIndex);
 	static void Terminate();
-
-	static inline const TextureSlot* GetSamplers() { return samplers; }
 };
