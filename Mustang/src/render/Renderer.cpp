@@ -2,6 +2,7 @@
 
 #include <map>
 
+#include "Utility.h"
 #include "Logger.h"
 #include "ShaderFactory.h"
 #include "TextureFactory.h"
@@ -89,6 +90,10 @@ void Renderer::Terminate()
 	TextureFactory::Terminate();
 	ShaderFactory::Terminate();
 
+	for (const auto& [model, vao] : *rvaos)
+	{
+		TRY(glDeleteVertexArrays(1, &vao));
+	}
 	if (rvaos)
 		delete rvaos;
 }

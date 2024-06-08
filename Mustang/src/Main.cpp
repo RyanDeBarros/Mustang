@@ -58,19 +58,19 @@ void run(GLFWwindow* window)
 	double totalTime = 0;
 
 
-	// posXY, texCoordRS, texSlot, RGBA
-	GLfloat texSlot = 0.0f;
+	// texSlot, posXY, texCoordRS, RGBA
+	//GLfloat texSlot = -1.0f;
 	GLfloat vertices[] = {
-		-0.5f, -0.5f, 0.0f, 0.0f, texSlot, 1.0f, 0.0f, 0.0f, 1.0f,
-		 0.5f, -0.5f, 1.0f, 0.0f, texSlot, 0.0f, 1.0f, 0.0f, 1.0f,
-		 0.5f,  0.5f, 1.0f, 1.0f, texSlot, 0.0f, 0.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f, 0.0f, 1.0f, texSlot, 1.0f, 1.0f, 1.0f, 1.0f
+		-1.0f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-1.0f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+		-1.0f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
 	};
 	GLuint indices[] = {
 		0, 1, 2,
 		2, 3, 0
 	};
-	VertexArray va(vertices, 4, 0b1111, 0b11000101, indices, 6);
+	//VertexArray va(vertices, 4, 0b1111, 0b11010100, indices, 6);
 
 	// Load shaders
 	ShaderHandle shader;
@@ -85,11 +85,13 @@ void run(GLFWwindow* window)
 		ASSERT(false);
 
 	// Create actors
-	BatchModel model{ shader, 0b11000101, 0b1111 };
-	Renderable render{ model, vertices, 4, sizeof(vertices), indices, 6, texH0 };
+	BatchModel model{ shader, 0b11010100, 0b1111 };
+	Renderable render{ model, vertices, 4, indices, 6, texH0 };
 	Transform2D transform;
 	ActorPrimitive2D* actor = new ActorPrimitive2D(render, transform);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor);
+
+	actor->SetTextureHandle(0);
 
 	for (;;)
 	{
@@ -101,16 +103,16 @@ void run(GLFWwindow* window)
 		// Render here
 		Renderer::OnDraw();
 
-		ShaderFactory::Bind(shader);
-		ShaderFactory::SetUniform1iv(shader, "u_TextureSlots", EngineSettings::max_texture_slots, Renderer::GetSamplers());
-		TextureFactory::Bind(texH0, 0);
-		TextureFactory::Bind(texH1, 1);
+		//ShaderFactory::Bind(shader);
+		//ShaderFactory::SetUniform1iv(shader, "u_TextureSlots", EngineSettings::max_texture_slots, Renderer::GetSamplers());
+		//TextureFactory::Bind(texH0, 0);
+		//TextureFactory::Bind(texH1, 1);
 		//va.Bind();
 		//TRY(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 		//va.Unbind();
-		TextureFactory::Unbind(0);
-		TextureFactory::Unbind(1);
-		ShaderFactory::Unbind();
+		//TextureFactory::Unbind(0);
+		//TextureFactory::Unbind(1);
+		//ShaderFactory::Unbind();
 
 		glfwSwapBuffers(window);
 		TRY(glClear(GL_COLOR_BUFFER_BIT));

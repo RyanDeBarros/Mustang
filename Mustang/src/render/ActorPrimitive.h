@@ -6,6 +6,7 @@
 
 class ActorPrimitive2D
 {
+protected:
 	friend class CanvasLayer;
 	ZIndex m_Z;
 	// TODO make Renderable a pointer?
@@ -17,7 +18,8 @@ public:
 	ActorPrimitive2D(Renderable render, Transform2D transform, ZIndex z = 0, bool visible = true);
 	~ActorPrimitive2D();
 
-	void OnDraw();
+	void OnDraw(signed char texture_slot);
 
 	inline ZIndex GetZIndex() const { return m_Z; }
+	inline void SetTextureHandle(TextureHandle handle) { m_Render.textureHandle = handle; }
 };

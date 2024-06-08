@@ -1,8 +1,8 @@
 #version 440 core
 
-layout(location=0) in vec2 i_Position;
-layout(location=1) in vec2 i_TexCoord;
-layout(location=2) in float i_TexSlot;
+layout(location=0) in float i_TexSlot;
+layout(location=1) in vec2 i_Position;
+layout(location=2) in vec2 i_TexCoord;
 layout(location=3) in vec4 i_Color;
 
 out vec4 t_Color;

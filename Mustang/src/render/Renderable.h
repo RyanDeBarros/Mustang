@@ -12,7 +12,6 @@ struct BatchModel
 
 	BatchModel(ShaderHandle shader = 0, VertexLayout layout = 0, VertexLayoutMask layoutMask = 0);
 	bool operator==(const BatchModel&) const;
-	PointerOffset layoutSize() const;
 };
 
 template<>
@@ -26,7 +25,6 @@ struct Renderable
 	BatchModel model;
 	GLfloat* vertexBufferData;
 	VertexCounter vertexCount;
-	VertexSize vertexBufferSize;
 	GLuint* indexBufferData;
 	VertexCounter indexCount;
 	TextureHandle textureHandle;
@@ -35,4 +33,9 @@ struct Renderable
 namespace Render
 {
 	extern Renderable Empty;
+	extern BatchModel NullModel;
+	extern inline PointerOffset VertexBufferLayoutCount(Renderable);
+	extern inline PointerOffset VertexBufferLayoutCount(VertexCounter, VertexLayout, VertexLayoutMask);
+	// TODO use typedef?
+	extern inline unsigned short StrideCountOf(VertexLayout, VertexLayoutMask);
 }

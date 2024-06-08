@@ -10,11 +10,6 @@ bool BatchModel::operator==(const BatchModel& m) const
 	return shader == m.shader && layout == m.layout && layoutMask == m.layoutMask;
 }
 
-PointerOffset BatchModel::layoutSize() const
-{
-	// TODO calculate layout size
-	return 36;
-}
 
 size_t std::hash<BatchModel>::operator()(const BatchModel& model) const
 {
@@ -26,5 +21,29 @@ size_t std::hash<BatchModel>::operator()(const BatchModel& model) const
 
 namespace Render
 {
-	Renderable Empty = { BatchModel(), nullptr, 0, 0, nullptr, 0, 0 };
+	Renderable Empty = { BatchModel(), nullptr, 0, nullptr, 0, 0 };
+	BatchModel NullModel = { 0, 0, 0 };
+
+	PointerOffset VertexBufferLayoutCount(Renderable render)
+	{
+		return render.vertexCount * StrideCountOf(render.model.layout, render.model.layoutMask);
+	}
+
+	PointerOffset VertexBufferLayoutCount(VertexCounter num_vertices, VertexLayout layout, VertexLayoutMask mask)
+	{
+		return num_vertices * StrideCountOf(layout, mask);
+	}
+
+	unsigned short StrideCountOf(VertexLayout layout, VertexLayoutMask mask)
+	{
+		unsigned short stride = 0;
+		unsigned char num_attribs = 0;
+		while (mask >> num_attribs != 0)
+		{
+			auto shift = 2 * num_attribs;
+			stride += ((layout & (0b11 << shift)) >> shift) + 1;
+			num_attribs++;
+		}
+		return stride;
+	}
 }

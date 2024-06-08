@@ -4,6 +4,7 @@
 #include <map>
 #include <list>
 #include <variant>
+#include <vector>
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -39,7 +40,9 @@ class CanvasLayer
 	GLfloat* vertexPos;
 	GLuint* m_IndexPool;
 	GLuint* indexPos;
+	GLuint m_VB, m_IB;
 	BatchModel currentModel;
+	std::vector<TextureHandle> m_TextureSlotBatch;
 public:
 	CanvasLayer(CanvasLayerData data);
 	~CanvasLayer();
@@ -57,5 +60,9 @@ public:
 private:
 	inline void SetBlending() const;
 	inline void PoolOver(const Renderable& render);
+	inline void BindTextureSlot(ActorPrimitive2D*, const Renderable&);
 	inline void FlushAndReset();
+	inline void RegisterModel() const;
+	inline void BindBuffers() const;
+	inline void UnbindBuffers() const;
 };
