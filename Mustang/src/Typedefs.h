@@ -14,7 +14,7 @@ typedef signed char CanvasIndex;
 #include <variant>
 class ActorPrimitive2D;
 class ActorComposite2D;
-typedef std::variant<ActorPrimitive2D*, ActorComposite2D*> ActorRenderBase2D;
+typedef std::variant<ActorPrimitive2D* const, ActorComposite2D* const> ActorRenderBase2D;
 
 #include "GL/glew.h"
 typedef GLuint RID;

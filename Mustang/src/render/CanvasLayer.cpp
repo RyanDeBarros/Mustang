@@ -117,12 +117,13 @@ void CanvasLayer::OnDraw()
 			iter = std::visit([](auto&& arg) { return ActorRenderIterator(arg); }, element);
 			while (*iter)
 			{
-				if (!(*iter)->m_Visible)
+				ActorPrimitive2D* const primitive = *iter;
+				if (!primitive->m_Visible)
 				{
 					++iter;
 					continue;
 				}
-				const auto& render = (*iter)->m_Render;
+				const auto& render = primitive->m_Render;
 				if (render.model != currentModel)
 				{
 					FlushAndReset();
@@ -137,7 +138,7 @@ void CanvasLayer::OnDraw()
 				{
 					FlushAndReset();
 				}
-				(*iter)->OnDraw(GetTextureSlot(render));
+				primitive->OnDraw(GetTextureSlot(render));
 				PoolOver(render);
 				++iter;
 			}

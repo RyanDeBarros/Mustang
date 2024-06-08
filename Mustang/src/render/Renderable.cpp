@@ -24,17 +24,17 @@ namespace Render
 	Renderable Empty = { BatchModel(), nullptr, 0, nullptr, 0, 0 };
 	BatchModel NullModel = { 0, 0, 0 };
 
-	PointerOffset VertexBufferLayoutCount(Renderable render)
+	PointerOffset VertexBufferLayoutCount(const Renderable& render)
 	{
 		return render.vertexCount * StrideCountOf(render.model.layout, render.model.layoutMask);
 	}
 
-	PointerOffset VertexBufferLayoutCount(VertexCounter num_vertices, VertexLayout layout, VertexLayoutMask mask)
+	PointerOffset VertexBufferLayoutCount(const VertexCounter& num_vertices, const VertexLayout& layout, const VertexLayoutMask& mask)
 	{
 		return num_vertices * StrideCountOf(layout, mask);
 	}
 
-	unsigned short StrideCountOf(VertexLayout layout, VertexLayoutMask mask)
+	unsigned short StrideCountOf(const VertexLayout& layout, const VertexLayoutMask& mask)
 	{
 		unsigned short stride = 0;
 		unsigned char num_attribs = 0;

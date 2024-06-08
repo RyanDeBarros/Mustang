@@ -34,8 +34,8 @@ namespace Render
 {
 	extern Renderable Empty;
 	extern BatchModel NullModel;
-	extern inline PointerOffset VertexBufferLayoutCount(Renderable);
-	extern inline PointerOffset VertexBufferLayoutCount(VertexCounter, VertexLayout, VertexLayoutMask);
+	extern inline PointerOffset VertexBufferLayoutCount(const Renderable&);
+	extern inline PointerOffset VertexBufferLayoutCount(const VertexCounter&, const VertexLayout&, const VertexLayoutMask&);
 	// TODO use typedef?
-	extern inline unsigned short StrideCountOf(VertexLayout, VertexLayoutMask);
+	extern inline unsigned short StrideCountOf(const VertexLayout&, const VertexLayoutMask&);
 }
