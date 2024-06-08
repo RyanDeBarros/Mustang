@@ -9,7 +9,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-#include "EngineSettings.h"
+#include "RenderSettings.h"
 #include "Typedefs.h"
 #include "Transform.h"
 #include "ActorPrimitive.h"
@@ -24,7 +24,7 @@ struct CanvasLayerData
 	float pLeft, pRight, pBottom, pTop;
 	VertexSize maxVertexPoolSize, maxIndexPoolSize;
 	CanvasLayerData(CanvasIndex ci, VertexSize max_vertex_pool_size, VertexSize max_index_pool_size)
-		: ci(ci), enableGLBlend(true), sourceBlend(GL_SRC_ALPHA), destBlend(GL_ONE_MINUS_SRC_ALPHA), pLeft(0), pRight(EngineSettings::window_width), pBottom(0), pTop(EngineSettings::window_height),
+		: ci(ci), enableGLBlend(true), sourceBlend(GL_SRC_ALPHA), destBlend(GL_ONE_MINUS_SRC_ALPHA), pLeft(0), pRight(RenderSettings::window_width), pBottom(0), pTop(RenderSettings::window_height),
 		maxVertexPoolSize(max_vertex_pool_size), maxIndexPoolSize(max_index_pool_size)
 	{}
 };

@@ -162,7 +162,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\AssetLoader.cpp" />
-    <ClCompile Include="src\EngineSettings.cpp" />
+    <ClCompile Include="src\RenderSettings.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\render\ActorComposite.cpp" />
@@ -189,7 +189,7 @@
     <ClInclude Include="src\render\CanvasLayer.h" />
     <ClInclude Include="src\render\Renderable.h" />
     <ClInclude Include="src\render\Renderer.h" />
-    <ClInclude Include="src\EngineSettings.h" />
+    <ClInclude Include="src\RenderSettings.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\ShaderFactory.h" />
     <ClInclude Include="src\Texture.h" />

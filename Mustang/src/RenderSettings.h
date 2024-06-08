@@ -2,7 +2,7 @@
 
 #include "Typedefs.h"
 
-namespace EngineSettings
+namespace RenderSettings
 {
 	extern float window_width, window_height;
 	extern TextureSlot max_texture_slots;

@@ -15,7 +15,7 @@
     <ClCompile Include="vendor\glm\glm.cppm" />
     <ClCompile Include="src\render\ActorComposite.cpp" />
     <ClCompile Include="src\render\Renderable.cpp" />
-    <ClCompile Include="src\EngineSettings.cpp" />
+    <ClCompile Include="src\RenderSettings.cpp" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
     <ClCompile Include="src\TextureFactory.cpp" />
@@ -321,7 +321,7 @@
     <ClInclude Include="vendor\glm\vector_relational.hpp" />
     <ClInclude Include="src\render\Renderable.h" />
     <ClInclude Include="src\Transform.h" />
-    <ClInclude Include="src\EngineSettings.h" />
+    <ClInclude Include="src\RenderSettings.h" />
     <ClInclude Include="src\render\ActorComposite.h" />
     <ClInclude Include="src\render\ActorRenderIterator.h" />
     <ClInclude Include="src\Texture.h" />

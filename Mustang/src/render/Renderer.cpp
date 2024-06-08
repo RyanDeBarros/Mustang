@@ -22,8 +22,8 @@ void Renderer::Init()
 	ShaderFactory::Init();
 	TextureFactory::Init();
 
-	samplers = new TextureSlot[EngineSettings::max_texture_slots];
-	for (TextureSlot i = 0; i < EngineSettings::max_texture_slots; i++)
+	samplers = new TextureSlot[RenderSettings::max_texture_slots];
+	for (TextureSlot i = 0; i < RenderSettings::max_texture_slots; i++)
 		samplers[i] = i;
 
 	rvaos = new std::unordered_map<BatchModel, VAO>();

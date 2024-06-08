@@ -184,7 +184,7 @@ inline void CanvasLayer::BindTextureSlot(ActorPrimitive2D* primitive, const Rend
 				return;
 			}
 		}
-		if (m_TextureSlotBatch.size() >= EngineSettings::max_texture_slots)
+		if (m_TextureSlotBatch.size() >= RenderSettings::max_texture_slots)
 		{
 			FlushAndReset();
 		}
