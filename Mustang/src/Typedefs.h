@@ -1,9 +1,10 @@
 #pragma once
 
-typedef unsigned int VertexCounter;
+typedef unsigned int BufferCounter;
 typedef unsigned int VertexSize;
 typedef unsigned short VertexLayoutMask;
 typedef unsigned int VertexLayout;
+typedef unsigned short Stride;
 
 typedef unsigned int ShaderHandle;
 typedef unsigned int TextureHandle;

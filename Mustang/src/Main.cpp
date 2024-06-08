@@ -89,7 +89,7 @@ void run(GLFWwindow* window)
 	ActorPrimitive2D* actor = new ActorPrimitive2D(render, transform);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor);
 
-	//actor->SetTextureHandle(0);
+	actor->SetTextureHandle(0);
 
 	for (;;)
 	{

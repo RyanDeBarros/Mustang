@@ -198,10 +198,10 @@ inline void CanvasLayer::FlushAndReset()
 	BindBuffers();
 	TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
 	TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
-	UnbindBuffers();
 	ShaderFactory::Bind(currentModel.shader);
-	TRY(glDrawElements(GL_TRIANGLES, indexPos - m_IndexPool, GL_UNSIGNED_INT, &m_IndexPool));
+	TRY(glDrawElements(GL_TRIANGLES, indexPos - m_IndexPool, GL_UNSIGNED_INT, nullptr));
 	ShaderFactory::Unbind();
+	UnbindBuffers();
 	TRY(glBindVertexArray(0));
 	vertexPos = m_VertexPool;
 	indexPos = m_IndexPool;
@@ -214,20 +214,7 @@ inline void CanvasLayer::RegisterModel() const
 	GLuint vao;
 	TRY(glGenVertexArrays(1, &vao));
 	TRY(glBindVertexArray(vao));
-
-	// TODO Extract into separate function from Render namespace, just like with StrideCountOf?
-	unsigned short offset = 0;
-	unsigned char num_attribs = 0;
-	while (currentModel.layoutMask >> num_attribs != 0)
-	{
-		TRY(glEnableVertexAttribArray(num_attribs));
-		auto shift = 2 * num_attribs;
-		unsigned char attrib = ((currentModel.layout & (3 << shift)) >> shift) + 1;
-		TRY(glVertexAttribPointer(num_attribs, attrib, GL_FLOAT, GL_FALSE, Render::StrideCountOf(currentModel.layout, currentModel.layoutMask) * sizeof(GLfloat), (const GLvoid*)offset));
-		offset += attrib * sizeof(GLfloat);
-		num_attribs++;
-	}
-
+	Render::_AttribLayout(currentModel.layout, currentModel.layoutMask);
 	TRY(glBindVertexArray(0));
 	UnbindBuffers();
 	(*Renderer::rvaos)[currentModel] = vao;

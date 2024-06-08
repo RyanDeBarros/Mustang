@@ -14,5 +14,4 @@ void main() {
 	t_Color = i_Color;
 	t_TexCoord = i_TexCoord;
 	t_TexSlot = i_TexSlot;
-	t_Color = vec4(1.0);
 }

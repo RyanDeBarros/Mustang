@@ -1,5 +1,7 @@
 #include "render/Renderable.h"
 
+#include "Utility.h"
+
 BatchModel::BatchModel(ShaderHandle shader, VertexLayout layout, VertexLayoutMask layoutMask)
 	: shader(shader), layout(layout), layoutMask(layoutMask)
 {
@@ -29,7 +31,7 @@ namespace Render
 		return render.vertexCount * StrideCountOf(render.model.layout, render.model.layoutMask);
 	}
 
-	PointerOffset VertexBufferLayoutCount(const VertexCounter& num_vertices, const VertexLayout& layout, const VertexLayoutMask& mask)
+	PointerOffset VertexBufferLayoutCount(const BufferCounter& num_vertices, const VertexLayout& layout, const VertexLayoutMask& mask)
 	{
 		return num_vertices * StrideCountOf(layout, mask);
 	}
@@ -45,5 +47,20 @@ namespace Render
 			num_attribs++;
 		}
 		return stride;
+	}
+
+	void _AttribLayout(const VertexLayout& layout, const VertexLayoutMask& mask)
+	{
+		unsigned short offset = 0;
+		unsigned char num_attribs = 0;
+		while (mask >> num_attribs != 0)
+		{
+			TRY(glEnableVertexAttribArray(num_attribs));
+			auto shift = 2 * num_attribs;
+			unsigned char attrib = ((layout & (3 << shift)) >> shift) + 1;
+			TRY(glVertexAttribPointer(num_attribs, attrib, GL_FLOAT, GL_FALSE, Render::StrideCountOf(layout, mask) * sizeof(GLfloat), (const GLvoid*)offset));
+			offset += attrib * sizeof(GLfloat);
+			num_attribs++;
+		}
 	}
 }

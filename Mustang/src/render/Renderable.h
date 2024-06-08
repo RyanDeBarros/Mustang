@@ -24,9 +24,9 @@ struct Renderable
 {
 	BatchModel model;
 	GLfloat* vertexBufferData;
-	VertexCounter vertexCount;
+	BufferCounter vertexCount;
 	GLuint* indexBufferData;
-	VertexCounter indexCount;
+	BufferCounter indexCount;
 	TextureHandle textureHandle;
 };
 
@@ -35,7 +35,7 @@ namespace Render
 	extern Renderable Empty;
 	extern BatchModel NullModel;
 	extern inline PointerOffset VertexBufferLayoutCount(const Renderable&);
-	extern inline PointerOffset VertexBufferLayoutCount(const VertexCounter&, const VertexLayout&, const VertexLayoutMask&);
-	// TODO use typedef?
-	extern inline unsigned short StrideCountOf(const VertexLayout&, const VertexLayoutMask&);
+	extern inline PointerOffset VertexBufferLayoutCount(const BufferCounter&, const VertexLayout&, const VertexLayoutMask&);
+	extern inline Stride StrideCountOf(const VertexLayout&, const VertexLayoutMask&);
+	extern inline void _AttribLayout(const VertexLayout&, const VertexLayoutMask&);
 }

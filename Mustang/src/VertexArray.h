@@ -8,7 +8,7 @@ class VertexArray
 {
 	GLuint m_VA, m_VB, m_IB;
 public:
-	VertexArray(GLfloat vertices[], VertexCounter num_vertices, VertexLayoutMask layout_mask, VertexLayout layout, GLuint indices[], VertexCounter num_indices);
+	VertexArray(GLfloat vertices[], BufferCounter num_vertices, VertexLayoutMask layout_mask, VertexLayout layout, GLuint indices[], BufferCounter num_indices);
 	~VertexArray();
 
 	void Bind() const;
