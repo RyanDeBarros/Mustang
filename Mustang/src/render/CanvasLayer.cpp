@@ -137,7 +137,7 @@ void CanvasLayer::OnDraw()
 				{
 					FlushAndReset();
 				}
-				BindTextureSlot(*iter, render);
+				(*iter)->OnDraw(GetTextureSlot(render));
 				PoolOver(render);
 				++iter;
 			}
@@ -167,31 +167,26 @@ inline void CanvasLayer::PoolOver(const Renderable& render)
 	indexPos += render.indexCount;
 }
 
-inline void CanvasLayer::BindTextureSlot(ActorPrimitive2D* primitive, const Renderable& render)
+inline TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 {
 	if (render.textureHandle == 0)
 	{
 		// no texture
-		primitive->OnDraw(-1);
+		return -1;
 	}
-	else
+	for (auto it = m_TextureSlotBatch.begin(); it != m_TextureSlotBatch.end(); it++)
 	{
-		for (auto it = m_TextureSlotBatch.begin(); it != m_TextureSlotBatch.end(); it++)
+		if (*it == render.textureHandle)
 		{
-			if (*it == render.textureHandle)
-			{
-				primitive->OnDraw(it - m_TextureSlotBatch.begin());
-				return;
-			}
+			return it - m_TextureSlotBatch.begin();
 		}
-		if (m_TextureSlotBatch.size() >= RenderSettings::max_texture_slots)
-		{
-			FlushAndReset();
-		}
-		m_TextureSlotBatch.push_back(render.textureHandle);
-		primitive->OnDraw(m_TextureSlotBatch.size() - 1);
 	}
-
+	if (m_TextureSlotBatch.size() >= RenderSettings::max_texture_slots)
+	{
+		FlushAndReset();
+	}
+	m_TextureSlotBatch.push_back(render.textureHandle);
+	return m_TextureSlotBatch.size() - 1;
 }
 
 inline void CanvasLayer::FlushAndReset()
@@ -219,7 +214,7 @@ inline void CanvasLayer::RegisterModel() const
 	TRY(glGenVertexArrays(1, &vao));
 	TRY(glBindVertexArray(vao));
 
-	// TODO Should work? Extract into separate function from Render?
+	// TODO Extract into separate function from Render namespace, just like with StrideCountOf?
 	unsigned short offset = 0;
 	unsigned char num_attribs = 0;
 	while (currentModel.layoutMask >> num_attribs != 0)

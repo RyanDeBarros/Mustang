@@ -18,7 +18,7 @@ ActorPrimitive2D::~ActorPrimitive2D()
 
 void ActorPrimitive2D::OnDraw(signed char texture_slot)
 {
-	for (size_t i = 0; i < Render::VertexBufferLayoutCount(m_Render); i += Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask))
+	for (VertexCounter i = 0; i < Render::VertexBufferLayoutCount(m_Render); i += Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask))
 	{
 		*(m_Render.vertexBufferData + i) = texture_slot;
 	}

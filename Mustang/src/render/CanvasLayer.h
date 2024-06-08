@@ -60,7 +60,7 @@ public:
 private:
 	inline void SetBlending() const;
 	inline void PoolOver(const Renderable& render);
-	inline void BindTextureSlot(ActorPrimitive2D*, const Renderable&);
+	inline TextureSlot GetTextureSlot(const Renderable&);
 	inline void FlushAndReset();
 	inline void RegisterModel() const;
 	inline void BindBuffers() const;
