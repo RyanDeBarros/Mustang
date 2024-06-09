@@ -5,6 +5,7 @@
 #include "Utility.h"
 #include "ShaderFactory.h"
 #include "TextureFactory.h"
+#include "render/Renderable.h"
 
 static bool validExtension(const char* filepath)
 {
@@ -122,4 +123,75 @@ LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle)
 		return LOAD_STATUS::OK;
 	else
 		return LOAD_STATUS::ASSET_LOAD_ERR;
+}
+
+LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
+{
+	if (!validExtension(filepath))
+		return LOAD_STATUS::READ_ERR;
+	auto res = toml::parseFile(filepath);
+	if (!res.table)
+	{
+		Logger::LogError("Cannot parse asset file: " + res.errmsg);
+		return LOAD_STATUS::READ_ERR;
+	}
+
+	auto [ok0, header] = res.table->getString("header");
+	if (!ok0)
+		return LOAD_STATUS::SYNTAX_ERR;
+	else if (header != "renderable")
+		return LOAD_STATUS::MISMATCH_ERR;
+
+	auto _renderable = res.table->getTable("renderable");
+	if (!_renderable)
+		return LOAD_STATUS::SYNTAX_ERR;
+
+	TextureHandle texture_handle = 0;
+	auto [ok2, texture] = _renderable->getString("texture");
+	if (ok2)
+	{
+		if (loadTexture(texture.c_str(), texture_handle) != LOAD_STATUS::OK)
+			return LOAD_STATUS::REFERENCE_ERROR;
+	}
+	renderable.textureHandle = texture_handle;
+
+	auto model = _renderable->getTable("model");
+	if (!model)
+		return LOAD_STATUS::SYNTAX_ERR;
+	auto [ok3, layout] = model->getInt("layout");
+	if (!ok3)
+		return LOAD_STATUS::SYNTAX_ERR;
+	auto [ok4, mask] = model->getInt("mask");
+	if (!ok4)
+		return LOAD_STATUS::SYNTAX_ERR;
+	renderable.model.layout = layout;
+	renderable.model.layoutMask = mask;
+	
+	ShaderHandle shader_handle = 0;
+	auto [ok5, shader] = model->getString("shader");
+	if (ok5)
+	{
+		if (loadShader(shader.c_str(), shader_handle) != LOAD_STATUS::OK)
+			return LOAD_STATUS::REFERENCE_ERROR;
+	}
+	renderable.model.shader = shader_handle;
+
+	auto vertex_array = _renderable->getArray("vertices");
+	if (!vertex_array)
+		return LOAD_STATUS::SYNTAX_ERR;
+	auto [ok1, num_vertices] = _renderable->getInt("num_vertices");
+	if (!ok1)
+		return LOAD_STATUS::SYNTAX_ERR;
+	renderable.vertexCount = num_vertices;
+	if (!renderable.AttachVertexBuffer(*vertex_array, Render::VertexBufferLayoutCount(renderable)))
+		return LOAD_STATUS::ASSET_LOAD_ERR;
+
+	auto index_array = _renderable->getArray("indices");
+	if (!index_array)
+		return LOAD_STATUS::SYNTAX_ERR;
+	renderable.indexCount = index_array->size();
+	if (!renderable.AttachIndexBuffer(*index_array, renderable.indexCount))
+		return LOAD_STATUS::ASSET_LOAD_ERR;
+
+	return LOAD_STATUS::OK;
 }

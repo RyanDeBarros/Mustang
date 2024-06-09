@@ -23,20 +23,19 @@ size_t std::hash<BatchModel>::operator()(const BatchModel& model) const
 
 namespace Render
 {
-	Renderable Empty = { BatchModel(), nullptr, 0, nullptr, 0, 0 };
 	BatchModel NullModel = { 0, 0, 0 };
 
-	PointerOffset VertexBufferLayoutCount(const Renderable& render)
+	BufferCounter VertexBufferLayoutCount(const Renderable& render)
 	{
 		return render.vertexCount * StrideCountOf(render.model.layout, render.model.layoutMask);
 	}
 
-	PointerOffset VertexBufferLayoutCount(const BufferCounter& num_vertices, const VertexLayout& layout, const VertexLayoutMask& mask)
+	BufferCounter VertexBufferLayoutCount(const BufferCounter& num_vertices, const VertexLayout& layout, const VertexLayoutMask& mask)
 	{
 		return num_vertices * StrideCountOf(layout, mask);
 	}
 
-	unsigned short StrideCountOf(const VertexLayout& layout, const VertexLayoutMask& mask)
+	Stride StrideCountOf(const VertexLayout& layout, const VertexLayoutMask& mask)
 	{
 		unsigned short stride = 0;
 		unsigned char num_attribs = 0;
@@ -63,4 +62,75 @@ namespace Render
 			num_attribs++;
 		}
 	}
+}
+
+Renderable::Renderable(BatchModel model, TextureHandle texture_handle)
+	: model(model), textureHandle(texture_handle), vertexBufferData(nullptr), vertexCount(0), indexBufferData(nullptr), indexCount(0)
+{
+}
+
+Renderable::Renderable(Renderable&& other) noexcept
+	: model(other.model), textureHandle(other.textureHandle), vertexBufferData(other.vertexBufferData), vertexCount(other.vertexCount), indexBufferData(other.indexBufferData), indexCount(other.indexCount)
+{
+	other.vertexBufferData = nullptr;
+	other.indexBufferData = nullptr;
+}
+
+Renderable::Renderable(const Renderable& other) noexcept
+	: model(other.model), textureHandle(other.textureHandle), vertexBufferData(nullptr), vertexCount(other.vertexCount), indexBufferData(nullptr), indexCount(other.indexCount)
+{
+	if (other.vertexBufferData && other.indexBufferData)
+	{
+		auto buffer_size = Render::VertexBufferLayoutCount(other);
+		vertexBufferData = new GLfloat[buffer_size];
+		indexBufferData = new GLuint[indexCount];
+		memcpy_s(vertexBufferData, buffer_size * sizeof(GLfloat), other.vertexBufferData, buffer_size * sizeof(GLfloat));
+		memcpy_s(indexBufferData, indexCount * sizeof(GLuint), other.indexBufferData, indexCount * sizeof(GLuint));
+	}
+}
+
+Renderable::~Renderable()
+{
+	if (vertexBufferData)
+		delete[] vertexBufferData;
+	if (indexBufferData)
+		delete[] indexBufferData;
+}
+
+bool Renderable::AttachVertexBuffer(toml::Array vertex_array, size_t size)
+{
+	if (vertexBufferData)
+		delete[] vertexBufferData;
+	vertexBufferData = new GLfloat[size];
+	for (size_t i = 0; i < size; i++)
+	{
+		auto [ok, _double] = vertex_array.getDouble(i);
+		if (!ok)
+		{
+			if (vertexBufferData)
+				delete[] vertexBufferData;
+			return false;
+		}
+		vertexBufferData[i] = (GLfloat)_double;
+	}
+	return true;
+}
+
+bool Renderable::AttachIndexBuffer(toml::Array index_array, size_t size)
+{
+	if (indexBufferData)
+		delete[] indexBufferData;
+	indexBufferData = new GLuint[size];
+	for (size_t i = 0; i < size; i++)
+	{
+		auto [ok, _int] = index_array.getInt(i);
+		if (!ok)
+		{
+			if (indexBufferData)
+				delete[] indexBufferData;
+			return false;
+		}
+		indexBufferData[i] = (GLuint)_int;
+	}
+	return true;
 }

@@ -57,19 +57,6 @@ void run(GLFWwindow* window)
 	double prevTime = time;
 	double totalTime = 0;
 
-
-	// texSlot, posXY, texCoordRS, RGBA
-	GLfloat vertices[] = {
-		-1.0f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		-1.0f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-		-1.0f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-		-1.0f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
-	};
-	GLuint indices[] = {
-		0, 1, 2,
-		2, 3, 0
-	};
-
 	// Load shaders
 	ShaderHandle shader;
 	if (loadShader("res/assets/shader.toml", shader) != LOAD_STATUS::OK)
@@ -84,16 +71,20 @@ void run(GLFWwindow* window)
 	if (loadTexture("res/assets/flag.toml", texFlag) != LOAD_STATUS::OK)
 		ASSERT(false);
 
+	Renderable renderable;
+	if (loadRenderable("res/assets/renderable.toml", renderable) != LOAD_STATUS::OK)
+		ASSERT(false);
+
 	// Create actors
-	BatchModel model{ shader, 0b11010100, 0b1111 };
-	Renderable render{ model, vertices, 4, indices, 6, 0 };
 	Transform2D transform;
-	ActorPrimitive2D* actor = new ActorPrimitive2D(render, transform);
+	ActorPrimitive2D* actor = new ActorPrimitive2D(renderable, transform);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor);
 
-	actor->SetTextureHandle(texSnowman);
-	actor->SetTextureHandle(texTux);
-	actor->SetTextureHandle(texFlag);
+	//actor->SetShaderHandle(shader);
+	//actor->SetTextureHandle(texSnowman);
+	//actor->SetTextureHandle(texTux);
+	//actor->SetTextureHandle(texFlag);
+	//actor->SetTextureHandle(0);
 
 	for (;;)
 	{

@@ -11,6 +11,10 @@ class ShaderFactory
 	static ShaderHandle handle_cap;
 	static std::unordered_map<ShaderHandle, struct ShaderElement>* factory;
 	static Shader* Get(ShaderHandle);
+
+	ShaderFactory() = delete;
+	~ShaderFactory() = delete;
+
 public:
 	static void Init();
 	static void Terminate();

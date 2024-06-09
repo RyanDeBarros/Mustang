@@ -10,6 +10,10 @@ class TextureFactory
 	static TextureHandle handle_cap;
 	static std::unordered_map<TextureHandle, struct TextureElement>* factory;
 	static Texture* Get(TextureHandle);
+
+	TextureFactory() = delete;
+	~TextureFactory() = delete;
+
 public:
 	static void Init();
 	static void Terminate();
