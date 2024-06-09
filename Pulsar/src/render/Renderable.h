@@ -42,7 +42,6 @@ struct Renderable
 	Renderable(const Renderable& other) noexcept;
 	~Renderable();
 
-
 private:
 	GLfloat* vertexBufferData;
 	BufferCounter vertexCount;

@@ -6,6 +6,7 @@
 #include "Logger.h"
 #include "factory/ShaderFactory.h"
 #include "factory/TextureFactory.h"
+#include "factory/QuadRender.h"
 
 std::map<CanvasIndex, CanvasLayer>* Renderer::layers = nullptr;
 std::unordered_map<BatchModel, VAO>* Renderer::rvaos;
@@ -20,6 +21,7 @@ void Renderer::Init()
 	layers = new std::map<CanvasIndex, CanvasLayer>();
 	ShaderFactory::Init();
 	TextureFactory::Init();
+	QuadRender::DefineQuadRenderable();
 
 	rvaos = new std::unordered_map<BatchModel, VAO>();
 }

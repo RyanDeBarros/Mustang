@@ -6,7 +6,7 @@ in vec4 t_Color;
 in float t_TexSlot;
 in vec2 t_TexCoord;
 
-layout(binding=0) uniform sampler2D TEXTURE_SLOTS[2];
+layout(binding=0) uniform sampler2D TEXTURE_SLOTS[32];
 
 void main() {
 	if (t_TexSlot < 0) {

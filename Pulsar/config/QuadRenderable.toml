@@ -3,10 +3,8 @@ header = "renderable"
 [renderable.model]
 layout = 0b11010100
 mask = 0b1111
-shader = "config/StandardShader32.toml"
 
 [renderable]
-texture = "res/assets/flag.toml"
 # texture slot | vertex position | texture coordinate | RGBA color
 vertices = [
 	-1.0, -0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,

@@ -1,5 +1,0 @@
-header = "shader"
-
-[shader]
-vertex = "res/shaders/test.vert"
-fragment = "res/shaders/test2TS.frag"

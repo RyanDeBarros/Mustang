@@ -9,6 +9,7 @@
 #include "AssetLoader.h"
 #include "render/Renderer.h"
 #include "render/ActorPrimitive.h"
+#include "factory/QuadRender.h"
 
 void run(GLFWwindow*);
 
@@ -52,28 +53,34 @@ void run(GLFWwindow* window)
 	double prevTime = time;
 	double totalTime = 0;
 
+	// Load shaders
+	ShaderHandle shaderStandard32;
+	if (loadShader(_RendererSettings::standard_shader32_assetfile, shaderStandard32) != LOAD_STATUS::OK)
+		ASSERT(false);
+
 	// Load textures
-	TextureHandle texSnowman, texTux, texFlag;
-	if (loadTexture("res/assets/snowman.toml", texSnowman) != LOAD_STATUS::OK)
+	TextureHandle textureSnowman, textureTux, textureFlag;
+	if (loadTexture("res/assets/snowman.toml", textureSnowman) != LOAD_STATUS::OK)
 		ASSERT(false);
-	if (loadTexture("res/assets/tux.toml", texTux) != LOAD_STATUS::OK)
+	if (loadTexture("res/assets/tux.toml", textureTux) != LOAD_STATUS::OK)
 		ASSERT(false);
-	if (loadTexture("res/assets/flag.toml", texFlag) != LOAD_STATUS::OK)
+	if (loadTexture("res/assets/flag.toml", textureFlag) != LOAD_STATUS::OK)
 		ASSERT(false);
 
 	// Load renderables
-	Renderable renderable;
-	if (loadRenderable("res/assets/renderable.toml", renderable) != LOAD_STATUS::OK)
-		ASSERT(false);
+	//Renderable renderable;
+	//if (loadRenderable("res/assets/renderable.toml", renderable) != LOAD_STATUS::OK)
+		//ASSERT(false);
 
 	// Create actors
-	Transform2D transform;
-	ActorPrimitive2D* actor = new ActorPrimitive2D(renderable, transform);
+	//ActorPrimitive2D* actor = new ActorPrimitive2D(renderable);
+	QuadRender* actor = new QuadRender();
 	Renderer::GetCanvasLayer(0)->OnAttach(actor);
 
-	//actor->SetTextureHandle(texSnowman);
-	//actor->SetTextureHandle(texTux);
-	//actor->SetTextureHandle(texFlag);
+	actor->SetShaderHandle(shaderStandard32);
+	//actor->SetTextureHandle(textureSnowman);
+	//actor->SetTextureHandle(textureTux);
+	actor->SetTextureHandle(textureFlag);
 	//actor->SetTextureHandle(0);
 
 	for (;;)

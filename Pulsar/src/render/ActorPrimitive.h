@@ -14,7 +14,8 @@ protected:
 	bool m_Visible;
 public:
 	ActorPrimitive2D();
-	ActorPrimitive2D(Renderable render, Transform2D transform, ZIndex z = 0, bool visible = true);
+	ActorPrimitive2D(const Renderable& render);
+	ActorPrimitive2D(const Renderable& render, const Transform2D& transform, const ZIndex& z = 0, const bool& visible = true);
 	
 	void OnDraw(signed char texture_slot);
 
