@@ -205,9 +205,9 @@ bool _LoadRendererSettings()
 		auto [ok0, max_texture_slots] = rendering->getInt("max_texture_slots");
 		if (ok0)
 			_RendererSettings::max_texture_slots = max_texture_slots;
-		auto [ok1, quad_renderable] = rendering->getString("quad_renderable");
+		auto [ok1, rect_renderable] = rendering->getString("rect_renderable");
 		if (ok1)
-			_RendererSettings::quad_renderable_filepath = quad_renderable;
+			_RendererSettings::rect_renderable_filepath = rect_renderable;
 	}
 
 	return true;

@@ -163,7 +163,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\AssetLoader.cpp" />
-    <ClCompile Include="src\factory\QuadRender.cpp" />
+    <ClCompile Include="src\factory\RectRender.cpp" />
     <ClCompile Include="src\RendererSettings.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -184,7 +184,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AssetLoader.h" />
-    <ClInclude Include="src\factory\QuadRender.h" />
+    <ClInclude Include="src\factory\RectRender.h" />
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\render\ActorComposite.h" />
     <ClInclude Include="src\render\ActorPrimitive.h" />

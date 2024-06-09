@@ -3,7 +3,7 @@
 namespace _RendererSettings
 {
 	const char* settings_filepath = "config/Renderer.toml";
-	std::string quad_renderable_filepath = "config/QuadRenderable.toml";
+	std::string rect_renderable_filepath = "config/RectRenderable.toml";
 	float window_width = 1440, window_height = 1080;
 	TextureSlot max_texture_slots = 2;
 

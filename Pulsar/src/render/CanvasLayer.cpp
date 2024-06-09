@@ -135,7 +135,7 @@ void CanvasLayer::OnDraw()
 					}
 				}
 				else if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(render)
-						|| m_Data.maxIndexPoolSize - (indexPos - m_IndexPool) < render.indexCount * sizeof(GLuint))
+						|| m_Data.maxIndexPoolSize - (indexPos - m_IndexPool) < render.indexCount)
 				{
 					FlushAndReset();
 				}
@@ -167,7 +167,7 @@ inline void CanvasLayer::PoolOver(const Renderable& render)
 		memcpy_s(indexPos, m_Data.maxIndexPoolSize - (indexPos - m_IndexPool), render.indexBufferData, render.indexCount * sizeof(GLuint));
 	if (render.vertexCount)
 		for (PointerOffset ic = 0; ic < render.indexCount; ic++)
-			*(indexPos + ic) += (vertexPos - m_VertexPool) / Render::VertexBufferLayoutCount(render);
+			*(indexPos + ic) += (GLuint)(vertexPos - m_VertexPool) / Render::VertexBufferLayoutCount(render);
 	vertexPos += Render::VertexBufferLayoutCount(render);
 	indexPos += render.indexCount;
 }
@@ -183,7 +183,7 @@ inline TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 	{
 		if (*it == render.textureHandle)
 		{
-			return it - m_TextureSlotBatch.begin();
+			return (TextureSlot)(it - m_TextureSlotBatch.begin());
 		}
 	}
 	if (m_TextureSlotBatch.size() >= _RendererSettings::max_texture_slots)
@@ -191,7 +191,7 @@ inline TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 		FlushAndReset();
 	}
 	m_TextureSlotBatch.push_back(render.textureHandle);
-	TextureSlot slot = m_TextureSlotBatch.size() - 1;
+	TextureSlot slot = (TextureSlot)(m_TextureSlotBatch.size() - 1);
 	TextureFactory::Bind(render.textureHandle, slot);
 	// Note: due to the abstraction of glDrawElements and glBufferSubData behind CanvasLayer, there is currently no need to actually call TextureFactory::Unbind on anything.
 	return slot;
@@ -207,7 +207,7 @@ inline void CanvasLayer::FlushAndReset()
 	TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
 	ShaderFactory::Bind(currentModel.shader);
 	// TODO set shader uniforms here
-	TRY(glDrawElements(GL_TRIANGLES, indexPos - m_IndexPool, GL_UNSIGNED_INT, nullptr));
+	TRY(glDrawElements(GL_TRIANGLES, (GLsizei)(indexPos - m_IndexPool), GL_UNSIGNED_INT, nullptr));
 	ShaderFactory::Unbind();
 	UnbindBuffers();
 	TRY(glBindVertexArray(0));

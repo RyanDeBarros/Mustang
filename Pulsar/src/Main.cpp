@@ -9,7 +9,7 @@
 #include "AssetLoader.h"
 #include "render/Renderer.h"
 #include "render/ActorPrimitive.h"
-#include "factory/QuadRender.h"
+#include "factory/RectRender.h"
 
 void run(GLFWwindow*);
 
@@ -74,7 +74,7 @@ void run(GLFWwindow* window)
 
 	// Create actors
 	//ActorPrimitive2D* actor = new ActorPrimitive2D(renderable);
-	QuadRender* actor = new QuadRender();
+	RectRender* actor = new RectRender();
 	Renderer::GetCanvasLayer(0)->OnAttach(actor);
 
 	actor->SetShaderHandle(shaderStandard32);
