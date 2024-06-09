@@ -11,7 +11,8 @@ protected:
 	ZIndex m_Z;
 	Renderable m_Render;
 	Transform2D m_Transform;
-	bool m_Visible;
+	// m_Status = 0b... | transformRS updated | transformP updated | visible
+	unsigned char m_Status;
 public:
 	ActorPrimitive2D();
 	ActorPrimitive2D(const Renderable& render);
@@ -21,9 +22,10 @@ public:
 
 	inline ZIndex GetZIndex() const { return m_Z; }
 	// TODO mostly just for testing. these properties will be set with subclasses that have access to the protected data members.
-	inline void SetShaderHandle(ShaderHandle handle) { m_Render.model.shader = handle; }
-	inline void SetTextureHandle(TextureHandle handle) { m_Render.textureHandle = handle; }
-	inline void SetPosition(float x, float y) { m_Transform.position.x = x; m_Transform.position.y = y; }
-	inline void SetRotation(float r) { m_Transform.rotation = r; }
-	inline void SetScale(float x, float y) { m_Transform.scale.x = x; m_Transform.scale.y = y; }
+	inline void SetVisible(const bool& visible) { m_Status = (visible ? m_Status |= 1 : m_Status &= ~1); }
+	inline void SetShaderHandle(const ShaderHandle& handle) { m_Render.model.shader = handle; }
+	inline void SetTextureHandle(const TextureHandle& handle) { m_Render.textureHandle = handle; }
+	inline void SetPosition(const float& x, const float& y) { m_Transform.position.x = x; m_Transform.position.y = y; m_Status |= 0b10; }
+	inline void SetRotation(const float& r) { m_Transform.rotation = r; m_Status |= 0b100; }
+	inline void SetScale(const float& x, const float& y) { m_Transform.scale.x = x; m_Transform.scale.y = y; m_Status |= 0b100; }
 };

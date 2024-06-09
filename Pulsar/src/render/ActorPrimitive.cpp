@@ -3,17 +3,17 @@
 #include "Logger.h"
 
 ActorPrimitive2D::ActorPrimitive2D()
-	: m_Z(0), m_Visible(true)
+	: m_Z(0), m_Status(1)
 {
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render)
-	: m_Render(render), m_Transform(), m_Z(0), m_Visible(true)
+	: m_Render(render), m_Transform(), m_Z(0), m_Status(1)
 {
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, const ZIndex& z, const bool& visible)
-	: m_Render(render), m_Transform(transform), m_Z(z), m_Visible(visible)
+	: m_Render(render), m_Transform(transform), m_Z(z), m_Status(visible ? 1 : 0)
 {
 }
 
@@ -28,20 +28,27 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 			*(m_Render.vertexBufferData + i * stride) = texture_slot;
 	}
-	// TODO insert transform into vertexBufferData. Keep bitset of visibility, transformPUpdated, transformRSUpdated, etc. Only do the following if the transform was updated since the last frame
 	glm::mat3x2 condensed_matrix = Transform::ToCondensedMatrix(m_Transform);
 	// update TransformP
-	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+	if ((m_Status & 0b10) == 0b10)
 	{
-		*(m_Render.vertexBufferData + i * stride + 1) = condensed_matrix[0][0];
-		*(m_Render.vertexBufferData + i * stride + 2) = condensed_matrix[0][1];
+		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+		{
+			*(m_Render.vertexBufferData + i * stride + 1) = condensed_matrix[0][0];
+			*(m_Render.vertexBufferData + i * stride + 2) = condensed_matrix[0][1];
+		}
+		m_Status &= ~0b10;
 	}
 	// update TransformRS
-	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+	if ((m_Status & 0b100) == 0b100)
 	{
-		*(m_Render.vertexBufferData + i * stride + 3) = condensed_matrix[1][0];
-		*(m_Render.vertexBufferData + i * stride + 4) = condensed_matrix[1][1];
-		*(m_Render.vertexBufferData + i * stride + 5) = condensed_matrix[2][0];
-		*(m_Render.vertexBufferData + i * stride + 6) = condensed_matrix[2][1];
+		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+		{
+			*(m_Render.vertexBufferData + i * stride + 3) = condensed_matrix[1][0];
+			*(m_Render.vertexBufferData + i * stride + 4) = condensed_matrix[1][1];
+			*(m_Render.vertexBufferData + i * stride + 5) = condensed_matrix[2][0];
+			*(m_Render.vertexBufferData + i * stride + 6) = condensed_matrix[2][1];
+		}
+		m_Status &= ~0b100;
 	}
 }

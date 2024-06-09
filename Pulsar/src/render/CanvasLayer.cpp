@@ -119,7 +119,7 @@ void CanvasLayer::OnDraw()
 			while (*iter)
 			{
 				ActorPrimitive2D* const primitive = *iter;
-				if (!primitive->m_Visible)
+				if ((primitive->m_Status & 1) == 0)
 				{
 					++iter;
 					continue;

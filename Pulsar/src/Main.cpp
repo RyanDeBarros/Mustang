@@ -86,6 +86,8 @@ void run(GLFWwindow* window)
 	actor->SetPosition(-0.3, 0.2);
 	actor->SetRotation(-1.0);
 	actor->SetScale(0.75, 1.25);
+	//actor->SetVisible(false);
+	//actor->SetVisible(true);
 
 	for (;;)
 	{
