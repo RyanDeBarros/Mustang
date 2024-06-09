@@ -41,7 +41,7 @@ int main()
 
 void run(GLFWwindow* window)
 {
-	Logger::LogInfo("Welcome to Mustang Engine! GL_VERSION:");
+	Logger::LogInfo("Welcome to Pulsar Engine! GL_VERSION:");
 	TRY(Logger::LogInfo(glGetString(GL_VERSION)));
 	Renderer::Init();
 
