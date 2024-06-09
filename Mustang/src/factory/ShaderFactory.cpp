@@ -1,7 +1,7 @@
 #include "ShaderFactory.h"
 
 #include "Logger.h"
-#include "Utility.h"
+#include "Macros.h"
 
 struct ShaderElement
 {

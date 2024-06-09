@@ -4,7 +4,29 @@
 #include <iostream>
 #include <GL/glew.h>
 
-#include "Utility.h"
+#include "Macros.h"
+
+char* read_file(const char* filepath)
+{
+	FILE* file;
+	fopen_s(&file, filepath, "rb");
+	if (file)
+	{
+		fseek(file, 0, SEEK_END);
+		const long filesize = ftell(file);
+		fseek(file, 0, SEEK_SET);
+
+		char* buffer = new char[filesize + 1];
+		fread(buffer, 1, filesize + 1, file);
+		buffer[filesize] = '\0';
+		return buffer;
+	}
+	else
+	{
+		Logger::LogError(std::string("Could not read file \"") + filepath + "\"");
+		return nullptr;
+	}
+}
 
 static GLuint compile_shader(GLenum type, const char* shader, const char*filepath)
 {
@@ -33,8 +55,8 @@ static GLuint compile_shader(GLenum type, const char* shader, const char*filepat
 Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
 	: m_RID(0)
 {
-	const char* vertex_shader = Utility::ReadFile(vertex_filepath);
-	const char* fragment_shader = Utility::ReadFile(fragment_filepath);
+	const char* vertex_shader = read_file(vertex_filepath);
+	const char* fragment_shader = read_file(fragment_filepath);
 	if (vertex_shader && fragment_shader)
 	{
 		TRY(m_RID = glCreateProgram());

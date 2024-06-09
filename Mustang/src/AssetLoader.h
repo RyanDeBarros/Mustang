@@ -15,3 +15,5 @@ enum class LOAD_STATUS
 LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle);
 LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle);
 LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable);
+
+bool _LoadRendererSettings();

@@ -1,6 +1,6 @@
-#include "render/Renderable.h"
+#include "Renderable.h"
 
-#include "Utility.h"
+#include "Macros.h"
 
 BatchModel::BatchModel(ShaderHandle shader, VertexLayout layout, VertexLayoutMask layoutMask)
 	: shader(shader), layout(layout), layoutMask(layoutMask)

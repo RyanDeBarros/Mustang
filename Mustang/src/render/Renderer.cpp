@@ -1,11 +1,11 @@
-#include "render/Renderer.h"
+#include "Renderer.h"
 
 #include <map>
 
-#include "Utility.h"
+#include "Macros.h"
 #include "Logger.h"
-#include "ShaderFactory.h"
-#include "TextureFactory.h"
+#include "factory/ShaderFactory.h"
+#include "factory/TextureFactory.h"
 
 std::map<CanvasIndex, CanvasLayer>* Renderer::layers = nullptr;
 std::unordered_map<BatchModel, VAO>* Renderer::rvaos;

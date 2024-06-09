@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "Utility.h"
+#include "Macros.h"
 
 namespace Logger {
 

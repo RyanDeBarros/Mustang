@@ -1,0 +1,6 @@
+[window]
+width = 1440
+height = 1080
+
+[rendering]
+max_texture_slots = 32

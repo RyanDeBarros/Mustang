@@ -3,7 +3,6 @@
 #include <string>
 #include <format>
 
-
 namespace Logger {
 	
 	void Wait();

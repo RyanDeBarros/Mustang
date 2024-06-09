@@ -1,4 +1,4 @@
-#include "render/ActorComposite.h"
+#include "ActorComposite.h"
 
 #include <string>
 #include <stdexcept>

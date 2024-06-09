@@ -1,7 +1,7 @@
 #include "TextureFactory.h"
 
 #include "Logger.h"
-#include "Utility.h"
+#include "Macros.h"
 
 struct TextureElement
 {

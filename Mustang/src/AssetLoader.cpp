@@ -2,27 +2,14 @@
 
 #include <toml/tomlcpp.hpp>
 
-#include "Utility.h"
-#include "ShaderFactory.h"
-#include "TextureFactory.h"
+#include "Logger.h"
+#include "RendererSettings.h"
+#include "factory/ShaderFactory.h"
+#include "factory/TextureFactory.h"
 #include "render/Renderable.h"
-
-static bool validExtension(const char* filepath)
-{
-	const char* dot = strrchr(filepath, '.');
-	if (!dot || dot == filepath) return false;
-	dot++;
-	bool valid = (strlen(dot) == 4 && tolower(dot[0]) == 'm' && tolower(dot[1]) == 'a' && tolower(dot[2]) == 's' && tolower(dot[3]) == 's')
-			|| (strlen(dot) == 4 && tolower(dot[0]) == 't' && tolower(dot[1]) == 'o' && tolower(dot[2]) == 'm' && tolower(dot[3]) == 'l');
-	if (!valid)
-		Logger::LogError("Asset file has incorrect file extension: " + std::string(filepath));
-	return valid;
-}
 
 LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
 {
-	if (!validExtension(filepath))
-		return LOAD_STATUS::READ_ERR;
 	auto res = toml::parseFile(filepath);
 	if (!res.table)
 	{
@@ -56,8 +43,6 @@ LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
 
 LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle)
 {
-	if (!validExtension(filepath))
-		return LOAD_STATUS::READ_ERR;
 	auto res = toml::parseFile(filepath);
 	if (!res.table)
 	{
@@ -127,8 +112,6 @@ LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle)
 
 LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
 {
-	if (!validExtension(filepath))
-		return LOAD_STATUS::READ_ERR;
 	auto res = toml::parseFile(filepath);
 	if (!res.table)
 	{
@@ -194,4 +177,35 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
 		return LOAD_STATUS::ASSET_LOAD_ERR;
 
 	return LOAD_STATUS::OK;
+}
+
+bool _LoadRendererSettings()
+{
+	auto res = toml::parseFile(_RendererSettings::settings_filepath);
+	if (!res.table)
+	{
+		Logger::LogErrorFatal("Cannot parse renderer settings file: " + res.errmsg);
+		return false;
+	}
+
+	auto window = res.table->getTable("window");
+	if (window)
+	{
+		auto [ok0, width] = window->getInt("width");
+		if (ok0)
+			_RendererSettings::window_width = width;
+		auto [ok1, height] = window->getInt("height");
+		if (ok1)
+			_RendererSettings::window_height = height;
+	}
+
+	auto rendering = res.table->getTable("rendering");
+	if (rendering)
+	{
+		auto [ok0, max_texture_slots] = rendering->getInt("max_texture_slots");
+		if (ok0)
+			_RendererSettings::max_texture_slots = max_texture_slots;
+	}
+
+	return true;
 }

@@ -1,10 +1,10 @@
 #include "render/CanvasLayer.h"
 
-#include "Utility.h"
+#include "Macros.h"
 #include "ActorRenderIterator.h"
 #include "Renderer.h"
-#include "ShaderFactory.h"
-#include "TextureFactory.h"
+#include "factory/ShaderFactory.h"
+#include "factory/TextureFactory.h"
 
 CanvasLayer::CanvasLayer(CanvasLayerData data)
 	: m_Data(data), m_Proj(glm::ortho<float>(m_Data.pLeft, m_Data.pRight, m_Data.pBottom, m_Data.pTop))
@@ -186,7 +186,7 @@ inline TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 			return it - m_TextureSlotBatch.begin();
 		}
 	}
-	if (m_TextureSlotBatch.size() >= RenderSettings::max_texture_slots)
+	if (m_TextureSlotBatch.size() >= _RendererSettings::max_texture_slots)
 	{
 		FlushAndReset();
 	}

@@ -3,10 +3,10 @@
 #include <string>
 #include <GL/glew.h>
 
-#include "stb_image/stb_image.h"
+#include <stb_image/stb_image.h>
 
 #include "Logger.h"
-#include "Utility.h"
+#include "Macros.h"
 
 Texture::Texture(const char* filepath, TextureSettings settings)
 	: m_RID(0), m_Width(0), m_Height(0), m_BPP(0)

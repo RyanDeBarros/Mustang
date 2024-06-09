@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Typedefs.h"
-#include "render/Renderable.h"
+#include "Renderable.h"
 #include "Transform.h"
 
 class ActorPrimitive2D

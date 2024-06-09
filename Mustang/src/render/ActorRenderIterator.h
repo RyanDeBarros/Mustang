@@ -1,7 +1,7 @@
 #pragma once
 
-#include "render/ActorPrimitive.h"
-#include "render/ActorComposite.h"
+#include "ActorPrimitive.h"
+#include "ActorComposite.h"
 
 class ActorRenderIterator
 {

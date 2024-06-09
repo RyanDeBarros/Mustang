@@ -3,30 +3,25 @@
 #include <GLFW/glfw3.h>
 
 #include "Typedefs.h"
-#include "RenderSettings.h"
+#include "RendererSettings.h"
 #include "Logger.h"
-#include "Utility.h"
-#include "Texture.h"
-#include "VertexArray.h"
-#include "ShaderFactory.h"
-#include "TextureFactory.h"
+#include "Macros.h"
 #include "AssetLoader.h"
 #include "render/Renderer.h"
 #include "render/ActorPrimitive.h"
-
-#include <iostream>
 
 void run(GLFWwindow*);
 
 int main()
 {
-	// TODO load RenderSettings via RenderSettings.ini here
+	if (!_LoadRendererSettings())
+		return -1;
 	if (!glfwInit())
 		return -1;
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	GLFWwindow* window = glfwCreateWindow((int)RenderSettings::window_width, (int)RenderSettings::window_height, "Mustang Engine", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow((int)_RendererSettings::window_width, (int)_RendererSettings::window_height, "Mustang Engine", nullptr, nullptr);
 	if (!window)
 	{
 		glfwTerminate();
@@ -57,11 +52,6 @@ void run(GLFWwindow* window)
 	double prevTime = time;
 	double totalTime = 0;
 
-	// Load shaders
-	ShaderHandle shader;
-	if (loadShader("res/assets/shader.toml", shader) != LOAD_STATUS::OK)
-		ASSERT(false);
-
 	// Load textures
 	TextureHandle texSnowman, texTux, texFlag;
 	if (loadTexture("res/assets/snowman.toml", texSnowman) != LOAD_STATUS::OK)
@@ -71,6 +61,7 @@ void run(GLFWwindow* window)
 	if (loadTexture("res/assets/flag.toml", texFlag) != LOAD_STATUS::OK)
 		ASSERT(false);
 
+	// Load renderables
 	Renderable renderable;
 	if (loadRenderable("res/assets/renderable.toml", renderable) != LOAD_STATUS::OK)
 		ASSERT(false);
@@ -80,7 +71,6 @@ void run(GLFWwindow* window)
 	ActorPrimitive2D* actor = new ActorPrimitive2D(renderable, transform);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor);
 
-	//actor->SetShaderHandle(shader);
 	//actor->SetTextureHandle(texSnowman);
 	//actor->SetTextureHandle(texTux);
 	//actor->SetTextureHandle(texFlag);

@@ -162,7 +162,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\AssetLoader.cpp" />
-    <ClCompile Include="src\RenderSettings.cpp" />
+    <ClCompile Include="src\RendererSettings.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\render\ActorComposite.cpp" />
@@ -170,12 +170,10 @@
     <ClCompile Include="src\render\CanvasLayer.cpp" />
     <ClCompile Include="src\render\Renderable.cpp" />
     <ClCompile Include="src\render\Renderer.cpp" />
-    <ClCompile Include="src\Shader.cpp" />
-    <ClCompile Include="src\ShaderFactory.cpp" />
-    <ClCompile Include="src\Texture.cpp" />
-    <ClCompile Include="src\TextureFactory.cpp" />
-    <ClCompile Include="src\Utility.cpp" />
-    <ClCompile Include="src\VertexArray.cpp" />
+    <ClCompile Include="src\factory\Shader.cpp" />
+    <ClCompile Include="src\factory\ShaderFactory.cpp" />
+    <ClCompile Include="src\factory\Texture.cpp" />
+    <ClCompile Include="src\factory\TextureFactory.cpp" />
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
@@ -191,15 +189,14 @@
     <ClInclude Include="src\render\CanvasLayer.h" />
     <ClInclude Include="src\render\Renderable.h" />
     <ClInclude Include="src\render\Renderer.h" />
-    <ClInclude Include="src\RenderSettings.h" />
-    <ClInclude Include="src\Shader.h" />
-    <ClInclude Include="src\ShaderFactory.h" />
-    <ClInclude Include="src\Texture.h" />
-    <ClInclude Include="src\TextureFactory.h" />
-    <ClInclude Include="src\Transform.h" />
+    <ClInclude Include="src\RendererSettings.h" />
+    <ClInclude Include="src\factory\Shader.h" />
+    <ClInclude Include="src\factory\ShaderFactory.h" />
+    <ClInclude Include="src\factory\Texture.h" />
+    <ClInclude Include="src\factory\TextureFactory.h" />
+    <ClInclude Include="src\render\Transform.h" />
     <ClInclude Include="src\Typedefs.h" />
-    <ClInclude Include="src\Utility.h" />
-    <ClInclude Include="src\VertexArray.h" />
+    <ClInclude Include="src\Macros.h" />
     <ClInclude Include="vendor\glm\common.hpp" />
     <ClInclude Include="vendor\glm\detail\compute_common.hpp" />
     <ClInclude Include="vendor\glm\detail\compute_vector_decl.hpp" />
