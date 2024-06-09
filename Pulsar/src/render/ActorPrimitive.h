@@ -23,4 +23,7 @@ public:
 	// TODO mostly just for testing. these properties will be set with subclasses that have access to the protected data members.
 	inline void SetShaderHandle(ShaderHandle handle) { m_Render.model.shader = handle; }
 	inline void SetTextureHandle(TextureHandle handle) { m_Render.textureHandle = handle; }
+	inline void SetPosition(float x, float y) { m_Transform.position.x = x; m_Transform.position.y = y; }
+	inline void SetRotation(float r) { m_Transform.rotation = r; }
+	inline void SetScale(float x, float y) { m_Transform.scale.x = x; m_Transform.scale.y = y; }
 };

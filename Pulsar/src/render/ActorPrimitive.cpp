@@ -22,10 +22,26 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 	if (!m_Render.vertexBufferData)
 		return;
 	const auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
-	// TODO if texture_slot == -1 and it was -1 in the previous frame, don't go through the for-loop below:
+	// update TextureSlot
+	if (m_Render.vertexBufferData[0] != texture_slot)
+	{
+		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+			*(m_Render.vertexBufferData + i * stride) = texture_slot;
+	}
+	// TODO insert transform into vertexBufferData. Keep bitset of visibility, transformPUpdated, transformRSUpdated, etc. Only do the following if the transform was updated since the last frame
+	glm::mat3x2 condensed_matrix = Transform::ToCondensedMatrix(m_Transform);
+	// update TransformP
 	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
-		*(m_Render.vertexBufferData + i * stride) = texture_slot;
+		*(m_Render.vertexBufferData + i * stride + 1) = condensed_matrix[0][0];
+		*(m_Render.vertexBufferData + i * stride + 2) = condensed_matrix[0][1];
 	}
-	// TODO insert transform into vertexBufferData
+	// update TransformRS
+	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+	{
+		*(m_Render.vertexBufferData + i * stride + 3) = condensed_matrix[1][0];
+		*(m_Render.vertexBufferData + i * stride + 4) = condensed_matrix[1][1];
+		*(m_Render.vertexBufferData + i * stride + 5) = condensed_matrix[2][0];
+		*(m_Render.vertexBufferData + i * stride + 6) = condensed_matrix[2][1];
+	}
 }

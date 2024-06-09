@@ -77,11 +77,15 @@ void run(GLFWwindow* window)
 	RectRender* actor = new RectRender();
 	Renderer::GetCanvasLayer(0)->OnAttach(actor);
 
+	// testing
 	actor->SetShaderHandle(shaderStandard32);
 	//actor->SetTextureHandle(textureSnowman);
 	//actor->SetTextureHandle(textureTux);
 	actor->SetTextureHandle(textureFlag);
 	//actor->SetTextureHandle(0);
+	actor->SetPosition(-0.3, 0.2);
+	actor->SetRotation(-1.0);
+	actor->SetScale(0.75, 1.25);
 
 	for (;;)
 	{

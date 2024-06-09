@@ -176,6 +176,7 @@
     <ClCompile Include="src\factory\ShaderFactory.cpp" />
     <ClCompile Include="src\factory\Texture.cpp" />
     <ClCompile Include="src\factory\TextureFactory.cpp" />
+    <ClCompile Include="src\render\Transform.cpp" />
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />

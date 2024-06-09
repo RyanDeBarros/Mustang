@@ -10,6 +10,7 @@ struct BatchModel
 	ShaderHandle shader;
 	VertexLayout layout;
 	VertexLayoutMask layoutMask;
+	// TODO material handle
 
 	BatchModel(ShaderHandle shader = 0, VertexLayout layout = 0, VertexLayoutMask layoutMask = 0);
 	bool operator==(const BatchModel&) const;
