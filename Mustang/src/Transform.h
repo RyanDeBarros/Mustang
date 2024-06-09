@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
 
 static inline glm::vec2 operator/(const float& f, const glm::vec2& v)
 {

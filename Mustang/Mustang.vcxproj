@@ -179,6 +179,8 @@
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
+    <ClCompile Include="vendor\toml\toml.c" />
+    <ClCompile Include="vendor\toml\tomlcpp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AssetLoader.h" />
@@ -487,6 +489,8 @@
     <ClInclude Include="vendor\glm\vec4.hpp" />
     <ClInclude Include="vendor\glm\vector_relational.hpp" />
     <ClInclude Include="vendor\stb_image\stb_image.h" />
+    <ClInclude Include="vendor\toml\toml.h" />
+    <ClInclude Include="vendor\toml\tomlcpp.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="vendor\glm\detail\func_common.inl" />

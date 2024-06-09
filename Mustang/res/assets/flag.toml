@@ -1,0 +1,11 @@
+header = "texture"
+
+[texture]
+path = "res/textures/flag.png"
+
+[texture.settings]
+min_filter = 1
+mag_filter = 0
+wrap_s = 0
+wrap_t = 0
+lod_level = 0

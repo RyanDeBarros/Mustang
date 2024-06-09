@@ -8,7 +8,7 @@
 #include "Logger.h"
 #include "Utility.h"
 
-Texture::Texture(const char* filepath, TextureSettings settings, GLint lod_level)
+Texture::Texture(const char* filepath, TextureSettings settings)
 	: m_RID(0), m_Width(0), m_Height(0), m_BPP(0)
 {
 	stbi_set_flip_vertically_on_load(1);
@@ -27,7 +27,7 @@ Texture::Texture(const char* filepath, TextureSettings settings, GLint lod_level
 	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)settings.mag_filter));
 	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.wrap_s));
 	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrap_t));
-	TRY(glTexImage2D(GL_TEXTURE_2D, lod_level, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_LocalBuffer));
+	TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_LocalBuffer));
 	Unbind();
 	stbi_image_free(m_LocalBuffer);
 }

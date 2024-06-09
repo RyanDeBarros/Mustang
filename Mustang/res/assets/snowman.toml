@@ -1,0 +1,4 @@
+header = "texture"
+
+[texture]
+path = "res/textures/snowman.png"

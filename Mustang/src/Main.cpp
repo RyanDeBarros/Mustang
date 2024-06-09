@@ -72,14 +72,16 @@ void run(GLFWwindow* window)
 
 	// Load shaders
 	ShaderHandle shader;
-	if (loadShader("res/assets/shader.mass", shader) != LOAD_STATUS::OK)
+	if (loadShader("res/assets/shader.toml", shader) != LOAD_STATUS::OK)
 		ASSERT(false);
 
 	// Load textures
-	TextureHandle texH0, texH1;
-	if (loadTexture("res/assets/snowman.mass", texH0) != LOAD_STATUS::OK)
+	TextureHandle texSnowman, texTux, texFlag;
+	if (loadTexture("res/assets/snowman.toml", texSnowman) != LOAD_STATUS::OK)
 		ASSERT(false);
-	if (loadTexture("res/assets/tux.mass", texH1) != LOAD_STATUS::OK)
+	if (loadTexture("res/assets/tux.toml", texTux) != LOAD_STATUS::OK)
+		ASSERT(false);
+	if (loadTexture("res/assets/flag.toml", texFlag) != LOAD_STATUS::OK)
 		ASSERT(false);
 
 	// Create actors
@@ -89,8 +91,9 @@ void run(GLFWwindow* window)
 	ActorPrimitive2D* actor = new ActorPrimitive2D(render, transform);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor);
 
-	//actor->SetTextureHandle(texH0);
-	//actor->SetTextureHandle(texH1);
+	actor->SetTextureHandle(texSnowman);
+	actor->SetTextureHandle(texTux);
+	actor->SetTextureHandle(texFlag);
 
 	for (;;)
 	{

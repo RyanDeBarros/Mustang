@@ -19,6 +19,8 @@
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
     <ClCompile Include="src\TextureFactory.cpp" />
+    <ClCompile Include="vendor\toml\toml.c" />
+    <ClCompile Include="vendor\toml\tomlcpp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h" />
@@ -327,6 +329,8 @@
     <ClInclude Include="src\Texture.h" />
     <ClInclude Include="vendor\stb_image\stb_image.h" />
     <ClInclude Include="src\TextureFactory.h" />
+    <ClInclude Include="vendor\toml\toml.h" />
+    <ClInclude Include="vendor\toml\tomlcpp.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="vendor\glm\detail\func_common.inl" />

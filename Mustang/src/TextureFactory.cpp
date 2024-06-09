@@ -8,34 +8,30 @@ struct TextureElement
 	Texture* texture;
 	char* filepath;
 	TextureSettings* settings;
-	GLint* lod_level;
 	TextureElement()
-		: texture(nullptr), filepath(nullptr), settings(nullptr), lod_level(nullptr)
+		: texture(nullptr), filepath(nullptr), settings(nullptr)
 	{}
 	TextureElement(TextureElement&& move) noexcept
-		: texture(move.texture), filepath(move.filepath), settings(move.settings), lod_level(move.lod_level)
+		: texture(move.texture), filepath(move.filepath), settings(move.settings)
 	{
 		move.texture = nullptr;
 		move.filepath = nullptr;
 		move.settings = nullptr;
-		move.lod_level = nullptr;
 	}
-	TextureElement(const char* filepath_, TextureSettings settings_, GLint lod_level_)
-		: texture(new Texture(filepath_, settings_, lod_level_))
+	TextureElement(const char* filepath_, TextureSettings settings_)
+		: texture(new Texture(filepath_, settings_))
 	{
 		size_t length = strlen(filepath_);
 		filepath = new char[length + 1];
 		strcpy_s(filepath, length + 1, filepath_);
 		filepath[length] = '\0';
 		settings = new TextureSettings(settings_);
-		lod_level = new GLint(lod_level_);
 	}
 	~TextureElement()
 	{
 		delete texture;
 		delete[] filepath;
 		delete settings;
-		delete lod_level;
 	}
 };
 
@@ -79,7 +75,7 @@ void TextureFactory::Terminate()
 	}
 }
 
-TextureHandle TextureFactory::GetHandle(const char* filepath, TextureSettings settings, GLint lod_level)
+TextureHandle TextureFactory::GetHandle(const char* filepath, TextureSettings settings)
 {
 	if (!factory)
 	{
@@ -88,10 +84,10 @@ TextureHandle TextureFactory::GetHandle(const char* filepath, TextureSettings se
 	}
 	for (const auto& [handle, element] : *factory)
 	{
-		if (lod_level = *element.lod_level && settings == *element.settings && strcmp(filepath, element.filepath) == 0)
+		if (settings == *element.settings && strcmp(filepath, element.filepath) == 0)
 			return handle;
 	}
-	TextureElement element(filepath, settings, lod_level);
+	TextureElement element(filepath, settings);
 	if (element.texture->IsValid())
 	{
 		TextureHandle handle = handle_cap++;
