@@ -156,7 +156,9 @@ inline void CanvasLayer::SetBlending() const
 		TRY(glBlendFunc(m_Data.sourceBlend, m_Data.destBlend));
 	}
 	else
+	{
 		TRY(glDisable(GL_BLEND));
+	}
 }
 
 inline void CanvasLayer::PoolOver(const Renderable& render)

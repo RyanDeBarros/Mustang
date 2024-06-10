@@ -46,8 +46,6 @@ void run(GLFWwindow* window)
 	TRY(Logger::LogInfo(glGetString(GL_VERSION)));
 	Renderer::Init();
 
-	Renderer::AddCanvasLayer(CanvasLayerData(0, 2048, 1024));
-
 	double time = glfwGetTime();
 	double deltaTime = 0;
 	double prevTime = time;
@@ -75,17 +73,22 @@ void run(GLFWwindow* window)
 	//if (loadRenderable("res/assets/renderable.toml", renderable) != LOAD_STATUS::OK)
 		//ASSERT(false);
 
-	// Create actors
-	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-0.6, 0.2), -1.0, glm::vec2(0.5, 0.75) });
-	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(0.5, -0.3), 0.25, glm::vec2(0.6, 0.6) });
-	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
-	//Renderer::GetCanvasLayer(0)->OnAttach(actor2);
+	Renderer::AddCanvasLayer(CanvasLayerData(0, 2048, 1024));
 
-	// testing
+	// Create actors
+	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-0.3, 0.2), -1.0, glm::vec2(0.8, 1.2) });
+	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(0.2, -0.1), 0.25, glm::vec2(1.0, 1.0) });
+
+	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
+	Renderer::GetCanvasLayer(0)->OnAttach(actor2);
+
 	actor1->SetShaderHandle(shaderStandard2);
 	actor1->SetTextureHandle(textureFlag);
 	actor2->SetShaderHandle(shaderStandard2);
 	//actor2->SetTextureHandle(textureFlag);
+
+	Renderer::GetCanvasLayer(0)->OnDetach(actor1);
+	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
 
 	for (;;)
 	{

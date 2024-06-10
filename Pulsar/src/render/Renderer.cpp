@@ -34,11 +34,9 @@ void Renderer::OnDraw(GLFWwindow* window)
 		for (auto& [z, layer] : *layers)
 			layer.OnDraw();
 		glfwSwapBuffers(window);
+		TRY(glClear(GL_COLOR_BUFFER_BIT));
 		// TODO RendererSettings custom clear color
-		//TRY(glClearColor(0.1, 0.1, 0.1, 0.0));
-		TRY(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-		TRY(glClearColor(1.0, 1.0, 1.0, 0.0));
-		//TRY(glClear(GL_COLOR_BUFFER_BIT));
+		TRY(glClearColor(0.05, 0.05, 0.05, 0.0));
 	}
 	else null_map();
 }

@@ -14,12 +14,4 @@ void main() {
 	} else {
 		o_Color = texture(TEXTURE_SLOTS[int(t_TexSlot)], t_TexCoord);
 	}
-
-	if (o_Color.w < 0.1) {
-		o_Color.rgb = vec3(1.0, 0.0, 0.0);
-	} else if (o_Color.w < 0.5) {
-		o_Color.rgb = vec3(0.0, 1.0, 0.0);
-	} else {
-		o_Color.rgb = vec3(0.0, 0.0, 1.0);
-	}
 }
