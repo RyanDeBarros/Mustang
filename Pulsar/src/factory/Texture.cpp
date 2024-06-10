@@ -22,10 +22,10 @@ Texture::Texture(const char* filepath, TextureSettings settings)
 
 	TRY(glGenTextures(1, &m_RID));
 	
-	// TODO remove these two lines
+	// TODO remove these lines
 	TRY(glEnable(GL_BLEND));
 	TRY(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
+	TRY(glDepthMask(GL_FALSE));
 
 	TRY(glBindTexture(GL_TEXTURE_2D, m_RID));
 	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)settings.min_filter));

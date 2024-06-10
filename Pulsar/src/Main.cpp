@@ -79,7 +79,7 @@ void run(GLFWwindow* window)
 	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-0.6, 0.2), -1.0, glm::vec2(0.5, 0.75) });
 	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(0.5, -0.3), 0.25, glm::vec2(0.6, 0.6) });
 	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
-	Renderer::GetCanvasLayer(0)->OnAttach(actor2);
+	//Renderer::GetCanvasLayer(0)->OnAttach(actor2);
 
 	// testing
 	actor1->SetShaderHandle(shaderStandard2);
@@ -97,7 +97,6 @@ void run(GLFWwindow* window)
 
 		// Render here
 		Renderer::OnDraw(window);
-		glClearColor(0.2, 0.3, 0.8, 1.0);
 		glfwPollEvents();
 		if (glfwWindowShouldClose(window))
 			break;
