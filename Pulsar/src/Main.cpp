@@ -57,6 +57,9 @@ void run(GLFWwindow* window)
 	ShaderHandle shaderStandard32;
 	if (loadShader(_RendererSettings::standard_shader32_assetfile, shaderStandard32) != LOAD_STATUS::OK)
 		ASSERT(false);
+	ShaderHandle shaderStandard2;
+	if (loadShader("res/shaders/StandardShader2.toml", shaderStandard2) != LOAD_STATUS::OK)
+		ASSERT(false);
 
 	// Load textures
 	TextureHandle textureSnowman, textureTux, textureFlag;
@@ -73,21 +76,16 @@ void run(GLFWwindow* window)
 		//ASSERT(false);
 
 	// Create actors
-	//ActorPrimitive2D* actor = new ActorPrimitive2D(renderable);
-	RectRender* actor = new RectRender();
-	Renderer::GetCanvasLayer(0)->OnAttach(actor);
+	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-0.6, 0.2), -1.0, glm::vec2(0.5, 0.75) });
+	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(0.5, -0.3), 0.25, glm::vec2(0.6, 0.6) });
+	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
+	Renderer::GetCanvasLayer(0)->OnAttach(actor2);
 
 	// testing
-	actor->SetShaderHandle(shaderStandard32);
-	//actor->SetTextureHandle(textureSnowman);
-	//actor->SetTextureHandle(textureTux);
-	actor->SetTextureHandle(textureFlag);
-	//actor->SetTextureHandle(0);
-	actor->SetPosition(-0.3, 0.2);
-	actor->SetRotation(-1.0);
-	actor->SetScale(0.75, 1.25);
-	//actor->SetVisible(false);
-	//actor->SetVisible(true);
+	actor1->SetShaderHandle(shaderStandard2);
+	actor1->SetTextureHandle(textureFlag);
+	actor2->SetShaderHandle(shaderStandard2);
+	//actor2->SetTextureHandle(textureFlag);
 
 	for (;;)
 	{
@@ -98,15 +96,15 @@ void run(GLFWwindow* window)
 		// OnUpdate here
 
 		// Render here
-		Renderer::OnDraw();
-		glfwSwapBuffers(window);
-		TRY(glClear(GL_COLOR_BUFFER_BIT));
+		Renderer::OnDraw(window);
+		glClearColor(0.2, 0.3, 0.8, 1.0);
 		glfwPollEvents();
 		if (glfwWindowShouldClose(window))
 			break;
 	}
 
-	delete actor;
+	delete actor1;
+	delete actor2;
 
 	Renderer::Terminate();
 }

@@ -3,17 +3,17 @@
 #include "Logger.h"
 
 ActorPrimitive2D::ActorPrimitive2D()
-	: m_Z(0), m_Status(1)
+	: m_Z(0), m_Status(0b111)
 {
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render)
-	: m_Render(render), m_Transform(), m_Z(0), m_Status(1)
+	: m_Render(render), m_Transform(), m_Z(0), m_Status(0b111)
 {
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, const ZIndex& z, const bool& visible)
-	: m_Render(render), m_Transform(transform), m_Z(z), m_Status(visible ? 1 : 0)
+	: m_Render(render), m_Transform(transform), m_Z(z), m_Status(visible ? 0b111 : 0b110)
 {
 }
 

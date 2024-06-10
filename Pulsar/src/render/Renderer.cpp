@@ -1,5 +1,6 @@
 #include "Renderer.h"
 
+#include <GLFW/glfw3.h>
 #include <map>
 
 #include "Macros.h"
@@ -26,12 +27,15 @@ void Renderer::Init()
 	rvaos = new std::unordered_map<BatchModel, VAO>();
 }
 
-void Renderer::OnDraw()
+void Renderer::OnDraw(GLFWwindow* window)
 {
 	if (layers)
 	{
 		for (auto& [z, layer] : *layers)
 			layer.OnDraw();
+		glfwSwapBuffers(window);
+		// TODO RendererSettings custom clear color
+		TRY(glClear(GL_COLOR_BUFFER_BIT));
 	}
 	else null_map();
 }

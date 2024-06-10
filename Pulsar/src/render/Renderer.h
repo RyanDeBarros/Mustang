@@ -12,7 +12,7 @@ class Renderer
 	static std::unordered_map<BatchModel, VAO>* rvaos;
 public:
 	static void Init();
-	static void OnDraw();
+	static void OnDraw(struct GLFWwindow*);
 	static void AddCanvasLayer(const CanvasLayerData);
 	static void RemoveCanvasLayer(const CanvasIndex);
 	static CanvasLayer* GetCanvasLayer(const CanvasIndex);

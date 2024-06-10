@@ -167,7 +167,7 @@ inline void CanvasLayer::PoolOver(const Renderable& render)
 		memcpy_s(indexPos, m_Data.maxIndexPoolSize - (indexPos - m_IndexPool), render.indexBufferData, render.indexCount * sizeof(GLuint));
 	if (render.vertexCount)
 		for (PointerOffset ic = 0; ic < render.indexCount; ic++)
-			*(indexPos + ic) += (GLuint)(vertexPos - m_VertexPool) / Render::VertexBufferLayoutCount(render);
+			*(indexPos + ic) += (GLuint)(vertexPos - m_VertexPool) / Render::StrideCountOf(render.model.layout, render.model.layoutMask);
 	vertexPos += Render::VertexBufferLayoutCount(render);
 	indexPos += render.indexCount;
 }

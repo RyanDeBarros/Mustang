@@ -3,5 +3,5 @@ width = 1440
 height = 1080
 
 [rendering]
-max_texture_slots = 32
+max_texture_slots = 2
 rect_renderable = "config/RectRenderable.toml"

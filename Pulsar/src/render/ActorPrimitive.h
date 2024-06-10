@@ -20,8 +20,8 @@ public:
 	
 	void OnDraw(signed char texture_slot);
 
-	inline ZIndex GetZIndex() const { return m_Z; }
 	// TODO mostly just for testing. these properties will be set with subclasses that have access to the protected data members.
+	inline ZIndex GetZIndex() const { return m_Z; }
 	inline void SetVisible(const bool& visible) { m_Status = (visible ? m_Status |= 1 : m_Status &= ~1); }
 	inline void SetShaderHandle(const ShaderHandle& handle) { m_Render.model.shader = handle; }
 	inline void SetTextureHandle(const TextureHandle& handle) { m_Render.textureHandle = handle; }

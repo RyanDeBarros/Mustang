@@ -74,7 +74,6 @@ struct TextureSettings
 class Texture
 {
 	RID m_RID;
-	unsigned char* m_LocalBuffer;
 	int m_Width, m_Height, m_BPP;
 public:
 	Texture(const char* filepath, TextureSettings settings = TextureSettings());
