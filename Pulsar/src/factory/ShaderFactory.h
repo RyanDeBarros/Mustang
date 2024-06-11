@@ -23,5 +23,6 @@ public:
 	static void Unbind();
 
 	static void SetUniform1f(ShaderHandle handle, const char* uniform_name, GLfloat v0);
-	static void SetUniform1iv(ShaderHandle handle, const char* uniform_name, GLsizei count, const GLint* value);
+	static void SetUniform1iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count = 1);
+	static void SetUniformMatrix3fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count = 1);
 };

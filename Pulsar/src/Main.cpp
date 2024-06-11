@@ -76,9 +76,12 @@ void run(GLFWwindow* window)
 	Renderer::AddCanvasLayer(CanvasLayerData(0, _RendererSettings::standard_vertex_pool_size, _RendererSettings::standard_index_pool_size));
 
 	// Create actors
-	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-0.3, 0.2), -1.0, glm::vec2(0.8, 1.2) });
-	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(0.2, -0.1), 0.25, glm::vec2(1.0, 1.0) });
-	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0, 0.0), 0.0, glm::vec2(1.0, 1.0) });
+	//float scale_factor = 800.0f;
+	float scale_factor = 1.0f;
+
+	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-0.3, 0.2), -1.0, scale_factor * glm::vec2(0.8, 1.2) });
+	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(0.2, -0.1), 0.25, scale_factor * glm::vec2(1.0, 1.0) });
+	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0, 0.0), 0.0, scale_factor * glm::vec2(1.0, 1.0) });
 
 	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor2);
@@ -96,9 +99,12 @@ void run(GLFWwindow* window)
 
 	Renderer::AddCanvasLayer(CanvasLayerData(-1, _RendererSettings::standard_vertex_pool_size, _RendererSettings::standard_index_pool_size));
 
-	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, Transform2D{ glm::vec2(-0.5, 0.0), 0.0, glm::vec2(1.0, 1.0) });
+	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, Transform2D{ glm::vec2(-0.5, 0.0), 0.0, scale_factor * glm::vec2(1.0, 1.0) });
 	Renderer::GetCanvasLayer(-1)->OnAttach(actor4);
 	
+	Renderer::GetCanvasLayer(0)->GetLayerView2DRef().ViewSetScale(1 / 400.0, 1 / 800.0);
+	Renderer::GetCanvasLayer(0)->GetLayerView2DRef().ViewSetRotation(1.0);
+	Renderer::GetCanvasLayer(-1)->GetLayerView2DRef().ViewSetScale(1 / 800.0, 1 / 800.0);
 
 	for (;;)
 	{
@@ -115,10 +121,7 @@ void run(GLFWwindow* window)
 			break;
 	}
 
-	delete actor1;
-	delete actor2;
-	delete actor3;
-	delete actor4;
+	delete actor1, actor2, actor3, actor4;
 
 	Renderer::Terminate();
 }

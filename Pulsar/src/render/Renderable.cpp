@@ -9,6 +9,7 @@ BatchModel::BatchModel(ShaderHandle shader, VertexLayout layout, VertexLayoutMas
 
 bool BatchModel::operator==(const BatchModel& m) const
 {
+	// TODO add material handle
 	return shader == m.shader && layout == m.layout && layoutMask == m.layoutMask;
 }
 

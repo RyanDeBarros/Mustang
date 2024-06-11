@@ -7,10 +7,8 @@
 #include "factory/TextureFactory.h"
 
 CanvasLayer::CanvasLayer(CanvasLayerData data)
-	: m_Data(data), m_Proj(glm::ortho<float>(m_Data.pLeft, m_Data.pRight, m_Data.pBottom, m_Data.pTop))
+	: m_Data(data), m_LayerView(m_Data.pLeft, m_Data.pRight, m_Data.pBottom, m_Data.pTop)
 {
-	m_CameraTransform = Transform2D();
-	m_View = Transform::ToMatrix(Transform::Inverse(m_CameraTransform));
 	m_Batcher = new std::map<ZIndex, std::list<ActorRenderBase2D>*>();
 	m_VertexPool = new GLfloat[m_Data.maxVertexPoolSize];
 	m_IndexPool = new GLuint[m_Data.maxIndexPoolSize];
@@ -208,6 +206,7 @@ inline void CanvasLayer::FlushAndReset()
 	TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
 	TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
 	ShaderFactory::Bind(currentModel.shader);
+	m_LayerView.PassVPUniform(currentModel.shader);
 	// TODO set shader uniforms here based on model's material handle (just call MaterialFactory::Apply(currentModel.material, currentModel.shader)
 	TRY(glDrawElements(GL_TRIANGLES, (GLsizei)(indexPos - m_IndexPool), GL_UNSIGNED_INT, nullptr));
 	ShaderFactory::Unbind();

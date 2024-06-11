@@ -170,6 +170,7 @@
     <ClCompile Include="src\render\ActorComposite.cpp" />
     <ClCompile Include="src\render\ActorPrimitive.cpp" />
     <ClCompile Include="src\render\CanvasLayer.cpp" />
+    <ClCompile Include="src\render\LayerView.cpp" />
     <ClCompile Include="src\render\Renderable.cpp" />
     <ClCompile Include="src\render\Renderer.cpp" />
     <ClCompile Include="src\factory\Shader.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="src\render\ActorPrimitive.h" />
     <ClInclude Include="src\render\ActorRenderIterator.h" />
     <ClInclude Include="src\render\CanvasLayer.h" />
+    <ClInclude Include="src\render\LayerView.h" />
     <ClInclude Include="src\render\Renderable.h" />
     <ClInclude Include="src\render\Renderer.h" />
     <ClInclude Include="src\RendererSettings.h" />

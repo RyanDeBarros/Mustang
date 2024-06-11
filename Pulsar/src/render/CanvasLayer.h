@@ -7,11 +7,10 @@
 #include <vector>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include "RendererSettings.h"
 #include "Typedefs.h"
-#include "Transform.h"
+#include "LayerView.h"
 #include "ActorPrimitive.h"
 #include "ActorComposite.h"
 #include "Renderable.h"
@@ -32,9 +31,7 @@ struct CanvasLayerData
 class CanvasLayer
 {
 	CanvasLayerData m_Data;
-	glm::mat3 m_Proj;
-	Transform2D m_CameraTransform;
-	glm::mat3 m_View;
+	LayerView2D m_LayerView;
 	std::map<ZIndex, std::list<ActorRenderBase2D>*>* m_Batcher;
 	GLfloat* m_VertexPool;
 	GLfloat* vertexPos;
@@ -55,8 +52,9 @@ public:
 	bool OnDetach(ActorComposite2D* const composite);
 	void OnDraw();
 
-	CanvasIndex getZIndex() const { return m_Data.ci; }
-	CanvasLayerData& getDataRef() { return m_Data; }
+	inline LayerView2D& GetLayerView2DRef() { return m_LayerView; }
+	inline CanvasIndex GetZIndex() const { return m_Data.ci; }
+	inline CanvasLayerData& GetDataRef() { return m_Data; }
 private:
 	inline void SetBlending() const;
 	inline void PoolOver(const Renderable& render);

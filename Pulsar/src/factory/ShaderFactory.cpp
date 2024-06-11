@@ -141,12 +141,23 @@ void ShaderFactory::SetUniform1f(ShaderHandle handle, const char* uniform_name, 
 		bad_uniform(handle);
 }
 
-void ShaderFactory::SetUniform1iv(ShaderHandle handle, const char* uniform_name, GLsizei count, const GLint* value)
+void ShaderFactory::SetUniform1iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
 {
 	Shader* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform1iv(shader->GetUniformLocation(uniform_name), count, value));
+		TRY(glUniform1iv(shader->GetUniformLocation(uniform_name), array_count, value));
+	}
+	else
+		bad_uniform(handle);
+}
+
+void ShaderFactory::SetUniformMatrix3fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
+{
+	Shader* shader = Get(handle);
+	if (shader)
+	{
+		TRY(glUniformMatrix3fv(shader->GetUniformLocation(uniform_name), array_count, GL_FALSE, value));
 	}
 	else
 		bad_uniform(handle);
