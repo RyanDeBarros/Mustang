@@ -69,15 +69,16 @@ void run(GLFWwindow* window)
 		ASSERT(false);
 
 	// Load renderables
-	//Renderable renderable;
-	//if (loadRenderable("res/assets/renderable.toml", renderable) != LOAD_STATUS::OK)
-		//ASSERT(false);
+	Renderable renderable;
+	if (loadRenderable("res/assets/renderable.toml", renderable) != LOAD_STATUS::OK)
+		ASSERT(false);
 
-	Renderer::AddCanvasLayer(CanvasLayerData(0, 2048, 1024));
+	Renderer::AddCanvasLayer(CanvasLayerData(0, _RendererSettings::standard_vertex_pool_size, _RendererSettings::standard_index_pool_size));
 
 	// Create actors
 	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-0.3, 0.2), -1.0, glm::vec2(0.8, 1.2) });
 	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(0.2, -0.1), 0.25, glm::vec2(1.0, 1.0) });
+	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0, 0.0), 0.0, glm::vec2(1.0, 1.0) });
 
 	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor2);
@@ -85,10 +86,19 @@ void run(GLFWwindow* window)
 	actor1->SetShaderHandle(shaderStandard2);
 	actor1->SetTextureHandle(textureFlag);
 	actor2->SetShaderHandle(shaderStandard2);
-	//actor2->SetTextureHandle(textureFlag);
+	actor2->SetTextureHandle(textureSnowman);
 
-	Renderer::GetCanvasLayer(0)->OnDetach(actor1);
-	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
+	Renderer::GetCanvasLayer(0)->OnSetZIndex(actor1, 1);
+
+	Renderer::GetCanvasLayer(0)->OnAttach(actor3);
+	actor3->SetShaderHandle(shaderStandard2);
+	actor3->SetTextureHandle(textureTux);
+
+	Renderer::AddCanvasLayer(CanvasLayerData(-1, _RendererSettings::standard_vertex_pool_size, _RendererSettings::standard_index_pool_size));
+
+	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, Transform2D{ glm::vec2(-0.5, 0.0), 0.0, glm::vec2(1.0, 1.0) });
+	Renderer::GetCanvasLayer(-1)->OnAttach(actor4);
+	
 
 	for (;;)
 	{
@@ -107,6 +117,8 @@ void run(GLFWwindow* window)
 
 	delete actor1;
 	delete actor2;
+	delete actor3;
+	delete actor4;
 
 	Renderer::Terminate();
 }

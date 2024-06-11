@@ -205,8 +205,14 @@ bool _LoadRendererSettings()
 		auto [ok0, max_texture_slots] = rendering->getInt("max_texture_slots");
 		if (ok0)
 			_RendererSettings::max_texture_slots = max_texture_slots;
-		auto [ok1, rect_renderable] = rendering->getString("rect_renderable");
+		auto [ok1, standard_vertex_pool_size] = rendering->getInt("standard_vertex_pool_size");
 		if (ok1)
+			_RendererSettings::standard_vertex_pool_size = standard_vertex_pool_size;
+		auto [ok2, standard_index_pool_size] = rendering->getInt("standard_index_pool_size");
+		if (ok2)
+			_RendererSettings::standard_index_pool_size = standard_index_pool_size;
+		auto [ok3, rect_renderable] = rendering->getString("rect_renderable");
+		if (ok3)
 			_RendererSettings::rect_renderable_filepath = rect_renderable;
 	}
 

@@ -4,4 +4,6 @@ height = 1080
 
 [rendering]
 max_texture_slots = 2
+standard_vertex_pool_size = 2048
+standard_index_pool_size = 1024
 rect_renderable = "config/RectRenderable.toml"
