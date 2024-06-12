@@ -74,9 +74,6 @@ void run(GLFWwindow* window)
 	ShaderHandle shaderStandard32;
 	if (loadShader(_RendererSettings::standard_shader32_assetfile, shaderStandard32) != LOAD_STATUS::OK)
 		ASSERT(false);
-	ShaderHandle shaderStandard2;
-	if (loadShader("res/shaders/StandardShader2.toml", shaderStandard2) != LOAD_STATUS::OK)
-		ASSERT(false);
 
 	// Load textures
 	TextureHandle textureSnowman, textureTux, textureFlag;
@@ -96,7 +93,7 @@ void run(GLFWwindow* window)
 
 	// Create actors
 
-	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-600, 400), -1.0, glm::vec2(0.8, 1.2) }, textureFlag, shaderStandard32);
+	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-500, 300), -1.0, glm::vec2(0.8, 1.2) }, textureFlag, shaderStandard32);
 	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(400, -200), 0.25, glm::vec2(0.7, 0.7) }, textureSnowman, shaderStandard32);
 	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0, 0.0), 0.0, glm::vec2(1.0, 1.0) }, textureTux, shaderStandard32);
 
@@ -113,7 +110,7 @@ void run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(-1)->OnAttach(actor4);
 	//actor4->SetPosition(0, 0);
 
-	actor1->SetScale(20.0, 20.0);
+	actor1->SetScale(16.0, 16.0);
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(actor3, -1);
 
 	actor3->SetPivot(0, 0);
@@ -122,6 +119,13 @@ void run(GLFWwindow* window)
 	actor3->SetScale(0.3, 0.3);
 	//actor2->SetRotation(0);
 	//actor2->SetPosition(0, 0);
+	actor2->SetModulation(glm::vec4(0.7, 0.7, 1.0, 1.0));
+	actor3->SetModulationPerPoint({
+		glm::vec4(1.0, 0.5, 0.5, 1.0),
+		glm::vec4(0.5, 1.0, 0.5, 1.0),
+		glm::vec4(0.5, 0.5, 1.0, 1.0),
+		glm::vec4(0.5, 0.5, 0.5, 1.0),
+	});
 
 	for (;;)
 	{

@@ -12,6 +12,6 @@ void main() {
 	if (t_TexSlot < 0) {
 		o_Color = t_Color;
 	} else {
-		o_Color = texture(TEXTURE_SLOTS[int(t_TexSlot)], t_TexCoord);
+		o_Color = t_Color * texture(TEXTURE_SLOTS[int(t_TexSlot)], t_TexCoord);
 	}
 }

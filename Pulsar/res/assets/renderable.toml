@@ -1,18 +1,18 @@
 header = "renderable"
 
 [renderable.model]
-layout = 0b110101110100
+layout = 0b011101110100
 mask = 0b111111
 shader = "config/StandardShader32.toml"
 
 [renderable]
 texture = "res/assets/flag.toml"
-# texture slot (1) | condensed P-transform (2) | condensed RS-transform (4) | vertex position (2) | texture coordinate (2) | RGBA color (4)
+# texture slot (1) | condensed P-transform (2) | condensed RS-transform (4) | vertex position (2) | RGBA modulation color (4) | texture coordinate (2) 
 vertices = [
-	-1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, -0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-	-1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,  0.5, -0.5, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0,
-	-1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,  0.5,  0.5, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0,
-	-1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, -0.5,  0.5, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0
+	-1.0,			0.0, 0.0,					1.0, 0.0, 0.0, 1.0,				-0.5, -0.5,			1.0, 0.0, 0.0, 1.0,			0.0, 0.0,
+	-1.0,			0.0, 0.0,					1.0, 0.0, 0.0, 1.0,				 0.5, -0.5,			0.0, 1.0, 0.0, 1.0,			1.0, 0.0,
+	-1.0,			0.0, 0.0,					1.0, 0.0, 0.0, 1.0,				 0.5,  0.5,			0.0, 0.0, 1.0, 1.0,			1.0, 1.0,
+	-1.0,			0.0, 0.0,					1.0, 0.0, 0.0, 1.0,				-0.5,  0.5,			1.0, 1.0, 1.0, 1.0,			0.0, 1.0
 ]
 num_vertices = 4
 indices = [
