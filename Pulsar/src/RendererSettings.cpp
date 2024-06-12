@@ -8,6 +8,7 @@ namespace _RendererSettings
 	TextureSlot max_texture_slots = 2;
 	VertexSize standard_vertex_pool_size = 2048;
 	VertexSize standard_index_pool_size = 1024;
+	glm::vec4 gl_clear_color = glm::vec4(0.08, 0.08, 0.08, 0.0);
 
 	const char* standard_shader8_assetfile = "config/StandardShader8.toml";
 	const char* standard_shader32_assetfile = "config/StandardShader32.toml";

@@ -1,6 +1,7 @@
 #include "AssetLoader.h"
 
 #include <toml/tomlcpp.hpp>
+#include <glm/glm.hpp>
 
 #include "Logger.h"
 #include "RendererSettings.h"
@@ -197,6 +198,13 @@ bool _LoadRendererSettings()
 		auto [ok1, height] = window->getInt("height");
 		if (ok1)
 			_RendererSettings::initial_window_height = height;
+		auto gl_clear_color = window->getArray("gl_clear_color");
+		if (gl_clear_color)
+		{
+			auto color = gl_clear_color->getDoubleVector();
+			if (color)
+				_RendererSettings::gl_clear_color = glm::vec4((*color)[0], (*color)[1], (*color)[2], (*color)[3]);
+		}
 	}
 
 	auto rendering = res.table->getTable("rendering");
