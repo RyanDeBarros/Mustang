@@ -42,6 +42,7 @@ class CanvasLayer
 	GLuint m_VB, m_IB;
 	BatchModel currentModel;
 	std::vector<TextureHandle> m_TextureSlotBatch;
+	std::unordered_map<BatchModel, VAO>* m_VAOs;
 public:
 	CanvasLayer(CanvasLayerData data);
 	~CanvasLayer();

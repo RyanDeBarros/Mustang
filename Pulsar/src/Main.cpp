@@ -15,7 +15,7 @@ void run(GLFWwindow*);
 
 void window_refresh_callback(GLFWwindow* window)
 {
-	Renderer::OnDraw(window);
+	Renderer::OnDraw();
 	TRY(glFinish()); // important, this waits until rendering result is actually visible, thus making resizing less ugly
 }
 
@@ -63,6 +63,7 @@ void run(GLFWwindow* window)
 	Logger::LogInfo("Welcome to Pulsar Engine! GL_VERSION:");
 	TRY(Logger::LogInfo(glGetString(GL_VERSION)));
 	Renderer::Init();
+	Renderer::FocusWindow(window);
 
 	double time = glfwGetTime();
 	double deltaTime = 0;
@@ -95,9 +96,9 @@ void run(GLFWwindow* window)
 
 	// Create actors
 
-	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-600, 400), -1.0, glm::vec2(0.8, 1.2) }, textureFlag, shaderStandard2);
-	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(400, -200), 0.25, glm::vec2(1.0, 1.0) }, textureSnowman, shaderStandard2);
-	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0, 0.0), 0.0, glm::vec2(1.0, 1.0) }, textureTux, shaderStandard2);
+	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-600, 400), -1.0, glm::vec2(0.8, 1.2) }, textureFlag, shaderStandard32);
+	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(400, -200), 0.25, glm::vec2(0.7, 0.7) }, textureSnowman, shaderStandard32);
+	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0, 0.0), 0.0, glm::vec2(1.0, 1.0) }, textureTux, shaderStandard32);
 
 	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor2);
@@ -108,11 +109,12 @@ void run(GLFWwindow* window)
 
 	Renderer::AddCanvasLayer(CanvasLayerData(-1, _RendererSettings::standard_vertex_pool_size, _RendererSettings::standard_index_pool_size));
 
-	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, Transform2D{ glm::vec2(-400.0, 0.0), 0.0, glm::vec2(800, 800) });
+	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, Transform2D{ glm::vec2(-200.0, 0.0), 0.0, glm::vec2(800, 800) });
 	Renderer::GetCanvasLayer(-1)->OnAttach(actor4);
+	//actor4->SetPosition(0, 0);
 
 	actor1->SetScale(20.0, 20.0);
-	//Renderer::GetCanvasLayer(0)->OnSetZIndex(actor3, -1);
+	Renderer::GetCanvasLayer(0)->OnSetZIndex(actor3, -1);
 
 	actor3->SetPivot(0, 0);
 	//actor3->SetPosition(0, 0);
@@ -130,7 +132,7 @@ void run(GLFWwindow* window)
 		// OnUpdate here
 
 		// Render here
-		Renderer::OnDraw(window);
+		Renderer::OnDraw();
 		glfwPollEvents();
 		if (glfwWindowShouldClose(window))
 			break;

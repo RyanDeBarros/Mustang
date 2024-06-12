@@ -9,6 +9,7 @@
 CanvasLayer::CanvasLayer(CanvasLayerData data)
 	: m_Data(data), m_LayerView(m_Data.pLeft, m_Data.pRight, m_Data.pBottom, m_Data.pTop)
 {
+	m_VAOs = new std::unordered_map<BatchModel, VAO>();
 	m_Batcher = new std::map<ZIndex, std::list<ActorRenderBase2D>*>();
 	m_VertexPool = new GLfloat[m_Data.maxVertexPoolSize];
 	m_IndexPool = new GLuint[m_Data.maxIndexPoolSize];
@@ -42,6 +43,15 @@ CanvasLayer::~CanvasLayer()
 
 	TRY(glDeleteBuffers(1, &m_VB));
 	TRY(glDeleteBuffers(1, &m_IB));
+
+	if (m_VAOs)
+	{
+		for (const auto& [model, vao] : *m_VAOs)
+		{
+			TRY(glDeleteVertexArrays(1, &vao));
+		}
+		delete m_VAOs;
+	}
 }
 
 void CanvasLayer::OnAttach(ActorPrimitive2D* const primitive)
@@ -127,7 +137,7 @@ void CanvasLayer::OnDraw()
 				{
 					FlushAndReset();
 					currentModel = render.model;
-					if (Renderer::rvaos->find(currentModel) == Renderer::rvaos->end())
+					if (m_VAOs->find(currentModel) == m_VAOs->end())
 					{
 						RegisterModel();
 					}
@@ -201,7 +211,7 @@ inline void CanvasLayer::FlushAndReset()
 {
 	if (currentModel == Render::NullModel)
 		return;
-	TRY(glBindVertexArray((*Renderer::rvaos)[currentModel]));
+	TRY(glBindVertexArray((*m_VAOs)[currentModel]));
 	BindBuffers();
 	TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
 	TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
@@ -226,7 +236,7 @@ inline void CanvasLayer::RegisterModel() const
 	Render::_AttribLayout(currentModel.layout, currentModel.layoutMask);
 	TRY(glBindVertexArray(0));
 	UnbindBuffers();
-	(*Renderer::rvaos)[currentModel] = vao;
+	(*m_VAOs)[currentModel] = vao;
 }
 
 inline void CanvasLayer::BindBuffers() const

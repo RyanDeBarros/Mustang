@@ -10,7 +10,7 @@
 #include "factory/RectRender.h"
 
 std::map<CanvasIndex, CanvasLayer>* Renderer::layers = nullptr;
-std::unordered_map<BatchModel, VAO>* Renderer::rvaos;
+GLFWwindow* focused_window;
 
 static void null_map()
 {
@@ -23,21 +23,29 @@ void Renderer::Init()
 	ShaderFactory::Init();
 	TextureFactory::Init();
 	RectRender::DefineRectRenderable();
-
-	rvaos = new std::unordered_map<BatchModel, VAO>();
 }
 
-void Renderer::OnDraw(GLFWwindow* window)
+void Renderer::OnDraw()
 {
 	if (layers)
 	{
 		for (auto& [z, layer] : *layers)
 			layer.OnDraw();
-		glfwSwapBuffers(window);
-		TRY(glClear(GL_COLOR_BUFFER_BIT));
-		TRY(glClearColor(_RendererSettings::gl_clear_color[0], _RendererSettings::gl_clear_color[1], _RendererSettings::gl_clear_color[2], _RendererSettings::gl_clear_color[3]));
+		ForceRefresh();
 	}
 	else null_map();
+}
+
+void Renderer::FocusWindow(GLFWwindow* window)
+{
+	focused_window = window;
+}
+
+void Renderer::ForceRefresh()
+{
+	glfwSwapBuffers(focused_window);
+	TRY(glClear(GL_COLOR_BUFFER_BIT));
+	TRY(glClearColor(_RendererSettings::gl_clear_color[0], _RendererSettings::gl_clear_color[1], _RendererSettings::gl_clear_color[2], _RendererSettings::gl_clear_color[3]));
 }
 
 void Renderer::AddCanvasLayer(const CanvasLayerData data)
@@ -88,11 +96,4 @@ void Renderer::Terminate()
 	else null_map();
 	TextureFactory::Terminate();
 	ShaderFactory::Terminate();
-
-	for (const auto& [model, vao] : *rvaos)
-	{
-		TRY(glDeleteVertexArrays(1, &vao));
-	}
-	if (rvaos)
-		delete rvaos;
 }

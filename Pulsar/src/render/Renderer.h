@@ -7,12 +7,12 @@
 
 class Renderer
 {
-	friend class CanvasLayer;
 	static std::map<CanvasIndex, CanvasLayer>* layers;
-	static std::unordered_map<BatchModel, VAO>* rvaos;
+	static void ForceRefresh();
 public:
 	static void Init();
-	static void OnDraw(struct GLFWwindow*);
+	static void FocusWindow(struct GLFWwindow*);
+	static void OnDraw();
 	static void AddCanvasLayer(const CanvasLayerData);
 	static void RemoveCanvasLayer(const CanvasIndex);
 	static CanvasLayer* GetCanvasLayer(const CanvasIndex);
