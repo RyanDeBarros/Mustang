@@ -150,7 +150,6 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
 		return LOAD_STATUS::SYNTAX_ERR;
 	renderable.model.layout = layout;
 	renderable.model.layoutMask = mask;
-	
 	ShaderHandle shader_handle = 0;
 	auto [ok5, shader] = model->getString("shader");
 	if (ok5)
@@ -159,6 +158,8 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
 			return LOAD_STATUS::REFERENCE_ERROR;
 	}
 	renderable.model.shader = shader_handle;
+
+	// TODO material handle
 
 	auto vertex_array = _renderable->getArray("vertices");
 	if (!vertex_array)

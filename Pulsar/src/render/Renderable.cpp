@@ -2,15 +2,14 @@
 
 #include "Macros.h"
 
-BatchModel::BatchModel(ShaderHandle shader, VertexLayout layout, VertexLayoutMask layoutMask)
-	: shader(shader), layout(layout), layoutMask(layoutMask)
+BatchModel::BatchModel(VertexLayout layout, VertexLayoutMask layoutMask, ShaderHandle shader, MaterialHandle material)
+	: layout(layout), layoutMask(layoutMask), shader(shader), material(material)
 {
 }
 
 bool BatchModel::operator==(const BatchModel& m) const
 {
-	// TODO add material handle
-	return shader == m.shader && layout == m.layout && layoutMask == m.layoutMask;
+	return layout == m.layout && layoutMask == m.layoutMask && shader == m.shader && material == m.material;
 }
 
 
@@ -24,7 +23,7 @@ size_t std::hash<BatchModel>::operator()(const BatchModel& model) const
 
 namespace Render
 {
-	BatchModel NullModel = { 0, 0, 0 };
+	BatchModel NullModel = { 0, 0, 0, 0 };
 
 	BufferCounter VertexBufferLayoutCount(const Renderable& render)
 	{

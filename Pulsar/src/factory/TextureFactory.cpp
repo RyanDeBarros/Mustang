@@ -3,6 +3,7 @@
 #include "Logger.h"
 #include "Macros.h"
 
+// TODO remove TextureElement. Just use map of TextureHandle to Texture*, and use texture->equivalent(filepath, settings) to check for existence without constructing.
 struct TextureElement
 {
 	Texture* texture;

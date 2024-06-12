@@ -14,9 +14,11 @@ class TextureFactory
 	TextureFactory() = delete;
 	~TextureFactory() = delete;
 
-public:
+	friend class Renderer;
 	static void Init();
 	static void Terminate();
+
+public:
 	static TextureHandle GetHandle(const char* filepath, TextureSettings settings = TextureSettings());
 	static void Bind(const TextureHandle& handle, const TextureSlot& slot);
 	static void Unbind(const TextureSlot& slot);

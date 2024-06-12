@@ -7,12 +7,12 @@
 
 struct BatchModel
 {
-	ShaderHandle shader;
 	VertexLayout layout;
 	VertexLayoutMask layoutMask;
-	// TODO material handle
+	ShaderHandle shader;
+	MaterialHandle material;
 
-	BatchModel(ShaderHandle shader = 0, VertexLayout layout = 0, VertexLayoutMask layoutMask = 0);
+	BatchModel(VertexLayout layout = 0, VertexLayoutMask layoutMask = 0, ShaderHandle shader = 0, MaterialHandle material = 0);
 	bool operator==(const BatchModel&) const;
 };
 
