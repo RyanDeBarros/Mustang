@@ -18,6 +18,8 @@ public:
 	static void Init();
 	static void Terminate();
 	static TextureHandle GetHandle(const char* filepath, TextureSettings settings = TextureSettings());
-	static void Bind(TextureHandle handle, TextureSlot slot);
-	static void Unbind(TextureSlot slot);
+	static void Bind(const TextureHandle& handle, const TextureSlot& slot);
+	static void Unbind(const TextureSlot& slot);
+	inline static int GetWidth(const TextureHandle& handle) { Texture* texture = Get(handle); return texture ? texture->GetWidth() : 0; }
+	inline static int GetHeight(const TextureHandle& handle) { Texture* texture = Get(handle); return texture ? texture->GetHeight() : 0; }
 };

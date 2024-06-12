@@ -193,10 +193,10 @@ bool _LoadRendererSettings()
 	{
 		auto [ok0, width] = window->getInt("width");
 		if (ok0)
-			_RendererSettings::window_width = width;
+			_RendererSettings::initial_window_width = width;
 		auto [ok1, height] = window->getInt("height");
 		if (ok1)
-			_RendererSettings::window_height = height;
+			_RendererSettings::initial_window_height = height;
 	}
 
 	auto rendering = res.table->getTable("rendering");

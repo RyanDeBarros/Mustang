@@ -13,6 +13,21 @@
 
 void run(GLFWwindow*);
 
+void window_refresh_callback(GLFWwindow* window)
+{
+	Renderer::OnDraw(window);
+	TRY(glFinish()); // important, this waits until rendering result is actually visible, thus making resizing less ugly
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+	// TODO
+	// If _RendererSettings::resize_mode is set to SCALE_IGNORE_ASPECT_RATIO, don't add anything.
+	// If it is set to SCALE_KEEP_ASPECT_RATIO, call new Renderer function that will scale objects as usual without stretching their aspect ratios.
+	// If it is set to NO_SCALE_KEEP_SIZE, call new Renderer function that will not scale objects - only display more of the scene.
+	TRY(glViewport(0, 0, width, height));
+}
+
 int main()
 {
 	if (!_LoadRendererSettings())
@@ -22,7 +37,8 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	GLFWwindow* window = glfwCreateWindow((int)_RendererSettings::window_width, (int)_RendererSettings::window_height, "Mustang Engine", nullptr, nullptr);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+	GLFWwindow* window = glfwCreateWindow((int)_RendererSettings::initial_window_width, (int)_RendererSettings::initial_window_height, "Mustang Engine", nullptr, nullptr);
 	if (!window)
 	{
 		glfwTerminate();
@@ -30,6 +46,8 @@ int main()
 	}
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
+	glfwSetWindowRefreshCallback(window, window_refresh_callback);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	if (glewInit() != GLEW_OK)
 	{
 		glfwTerminate();
@@ -76,35 +94,32 @@ void run(GLFWwindow* window)
 	Renderer::AddCanvasLayer(CanvasLayerData(0, _RendererSettings::standard_vertex_pool_size, _RendererSettings::standard_index_pool_size));
 
 	// Create actors
-	//float scale_factor = 800.0f;
-	float scale_factor = 1.0f;
 
-	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-0.3, 0.2), -1.0, scale_factor * glm::vec2(0.8, 1.2) });
-	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(0.2, -0.1), 0.25, scale_factor * glm::vec2(1.0, 1.0) });
-	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0, 0.0), 0.0, scale_factor * glm::vec2(1.0, 1.0) });
+	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-600, 400), -1.0, glm::vec2(0.8, 1.2) }, textureFlag, shaderStandard2);
+	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(400, -200), 0.25, glm::vec2(1.0, 1.0) }, textureSnowman, shaderStandard2);
+	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0, 0.0), 0.0, glm::vec2(1.0, 1.0) }, textureTux, shaderStandard2);
 
 	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor2);
 
-	actor1->SetShaderHandle(shaderStandard2);
-	actor1->SetTextureHandle(textureFlag);
-	actor2->SetShaderHandle(shaderStandard2);
-	actor2->SetTextureHandle(textureSnowman);
-
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(actor1, 1);
 
 	Renderer::GetCanvasLayer(0)->OnAttach(actor3);
-	actor3->SetShaderHandle(shaderStandard2);
-	actor3->SetTextureHandle(textureTux);
 
 	Renderer::AddCanvasLayer(CanvasLayerData(-1, _RendererSettings::standard_vertex_pool_size, _RendererSettings::standard_index_pool_size));
 
-	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, Transform2D{ glm::vec2(-0.5, 0.0), 0.0, scale_factor * glm::vec2(1.0, 1.0) });
+	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, Transform2D{ glm::vec2(-400.0, 0.0), 0.0, glm::vec2(800, 800) });
 	Renderer::GetCanvasLayer(-1)->OnAttach(actor4);
-	
-	Renderer::GetCanvasLayer(0)->GetLayerView2DRef().ViewSetScale(1 / 400.0, 1 / 800.0);
-	Renderer::GetCanvasLayer(0)->GetLayerView2DRef().ViewSetRotation(1.0);
-	Renderer::GetCanvasLayer(-1)->GetLayerView2DRef().ViewSetScale(1 / 800.0, 1 / 800.0);
+
+	actor1->SetScale(20.0, 20.0);
+	//Renderer::GetCanvasLayer(0)->OnSetZIndex(actor3, -1);
+
+	actor3->SetPivot(0, 0);
+	//actor3->SetPosition(0, 0);
+	actor3->SetPosition(-_RendererSettings::initial_window_width * 0.5, -_RendererSettings::initial_window_height * 0.5);
+	actor3->SetScale(0.3, 0.3);
+	//actor2->SetRotation(0);
+	//actor2->SetPosition(0, 0);
 
 	for (;;)
 	{

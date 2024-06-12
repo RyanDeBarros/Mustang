@@ -54,6 +54,7 @@ private:
 
 	friend class CanvasLayer;
 	friend class ActorPrimitive2D;
+	friend class RectRender;
 	friend enum class LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable);
 	friend BufferCounter Render::VertexBufferLayoutCount(const Renderable& render);
 };

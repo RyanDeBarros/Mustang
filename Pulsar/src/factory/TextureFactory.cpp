@@ -98,7 +98,7 @@ TextureHandle TextureFactory::GetHandle(const char* filepath, TextureSettings se
 		return 0;
 }
 
-void TextureFactory::Bind(TextureHandle handle, TextureSlot slot)
+void TextureFactory::Bind(const TextureHandle& handle, const TextureSlot& slot)
 {
 	Texture* texture = Get(handle);
 	if (texture)
@@ -107,7 +107,7 @@ void TextureFactory::Bind(TextureHandle handle, TextureSlot slot)
 		Logger::LogWarning("Failed to bind texture at handle (" + std::to_string(handle) + ") to slot (" + std::to_string(slot) + ").");
 }
 
-void TextureFactory::Unbind(TextureSlot slot)
+void TextureFactory::Unbind(const TextureSlot& slot)
 {
 	if (!factory)
 	{
