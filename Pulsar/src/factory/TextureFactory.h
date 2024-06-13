@@ -8,7 +8,7 @@
 class TextureFactory
 {
 	static TextureHandle handle_cap;
-	static std::unordered_map<TextureHandle, struct TextureElement>* factory;
+	static std::unordered_map<TextureHandle, Texture*> factory;
 	static Texture* Get(TextureHandle);
 
 	TextureFactory() = delete;

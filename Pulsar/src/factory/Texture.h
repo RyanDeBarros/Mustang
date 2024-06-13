@@ -2,6 +2,8 @@
 
 #include <GL/glew.h>
 
+#include <string>
+
 #include "Typedefs.h"
 
 enum class MinFilter : GLint
@@ -74,9 +76,13 @@ struct TextureSettings
 class Texture
 {
 	RID m_RID;
-	int m_Width, m_Height, m_BPP;
+	int m_Width, m_Height;
+	std::string m_Filepath;
+	TextureSettings m_Settings;
 public:
 	Texture(const char* filepath, TextureSettings settings = TextureSettings());
+	Texture(Texture&& texture) noexcept;
+	Texture(const Texture& texture) = delete;
 	~Texture();
 
 	void Bind(TextureSlot slot = 0) const;
@@ -85,5 +91,6 @@ public:
 	inline int GetWidth() const { return m_Width; }
 	inline int GetHeight() const { return m_Height; }
 
+	inline bool Equivalent(const char* filepath, const TextureSettings& settings) const { return m_Filepath == filepath && m_Settings == settings; }
 	inline bool IsValid() const { return m_RID > 0; }
 };

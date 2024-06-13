@@ -9,14 +9,15 @@
 #include "Macros.h"
 
 Texture::Texture(const char* filepath, TextureSettings settings)
-	: m_RID(0), m_Width(0), m_Height(0), m_BPP(0)
+	: m_RID(0), m_Width(0), m_Height(0), m_Filepath(filepath), m_Settings(settings)
 {
 	stbi_set_flip_vertically_on_load(1);
-	unsigned char* image_buffer = stbi_load(filepath, &m_Width, &m_Height, &m_BPP, STBI_rgb_alpha);
+	int bpp;
+	unsigned char* image_buffer = stbi_load(filepath, &m_Width, &m_Height, &bpp, STBI_rgb_alpha);
 
 	if (!image_buffer)
 	{
-		Logger::LogWarning("Texture '" + std::string(filepath) + "' could not be loaded!\n" + stbi_failure_reason());
+		Logger::LogWarning("Texture '" + m_Filepath + "' could not be loaded!\n" + stbi_failure_reason());
 		return;
 	}
 
@@ -31,6 +32,12 @@ Texture::Texture(const char* filepath, TextureSettings settings)
 
 	TRY(glBindTexture(GL_TEXTURE_2D, 0));
 	stbi_image_free(image_buffer);
+}
+
+Texture::Texture(Texture&& texture) noexcept
+	: m_RID(texture.m_RID), m_Width(texture.m_Width), m_Height(texture.m_Height), m_Filepath(texture.m_Filepath), m_Settings(texture.m_Settings)
+{
+	texture.m_RID = 0;
 }
 
 Texture::~Texture()

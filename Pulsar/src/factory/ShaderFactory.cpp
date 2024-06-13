@@ -34,7 +34,7 @@ ShaderHandle ShaderFactory::GetHandle(const char* vertex_shader, const char* fra
 {
 	for (const auto& [handle, shader] : factory)
 	{
-		if (shader->equivalent(vertex_shader, fragment_shader))
+		if (shader->Equivalent(vertex_shader, fragment_shader))
 			return handle;
 	}
 	Shader shader(vertex_shader, fragment_shader);

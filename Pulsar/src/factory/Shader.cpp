@@ -53,7 +53,7 @@ static GLuint compile_shader(GLenum type, const char* shader, const char*filepat
 }
 
 Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
-	: m_RID(0), vertex(vertex_filepath), fragment(fragment_filepath)
+	: m_RID(0), m_VertexFilepath(vertex_filepath), m_FragmentFilepath(fragment_filepath)
 {
 	const char* vertex_shader = read_file(vertex_filepath);
 	const char* fragment_shader = read_file(fragment_filepath);
@@ -92,7 +92,7 @@ Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
 }
 
 Shader::Shader(Shader&& shader) noexcept
-	: m_RID(shader.m_RID), vertex(shader.vertex), fragment(shader.fragment)
+	: m_RID(shader.m_RID), m_VertexFilepath(shader.m_VertexFilepath), m_FragmentFilepath(shader.m_FragmentFilepath)
 {
 	shader.m_RID = 0;
 }
