@@ -12,6 +12,8 @@ void MaterialFactory::Init()
 
 void MaterialFactory::Terminate()
 {
+	for (const auto& [handle, material] : factory)
+		delete material;
 	factory.clear();
 }
 

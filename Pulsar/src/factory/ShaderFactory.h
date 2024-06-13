@@ -9,8 +9,7 @@
 class ShaderFactory
 {
 	static ShaderHandle handle_cap;
-	// TODO make all factory maps just maps, not pointers?
-	static std::unordered_map<ShaderHandle, struct ShaderElement>* factory;
+	static std::unordered_map<ShaderHandle, Shader*> factory;
 	static Shader* Get(ShaderHandle);
 
 	ShaderFactory() = delete;
