@@ -2,8 +2,8 @@
 
 #include "Logger.h"
 
-static MaterialHandle handle_cap;
-static std::unordered_map<TextureHandle, Material*> factory;
+MaterialHandle MaterialFactory::handle_cap;
+std::unordered_map<TextureHandle, Material*> MaterialFactory::factory;
 
 void MaterialFactory::Init()
 {

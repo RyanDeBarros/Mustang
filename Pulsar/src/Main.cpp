@@ -93,9 +93,9 @@ void run(GLFWwindow* window)
 
 	// Create actors
 
-	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-500, 300), -1.0, glm::vec2(0.8, 1.2) }, textureFlag, shaderStandard32);
-	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(400, -200), 0.25, glm::vec2(0.7, 0.7) }, textureSnowman, shaderStandard32);
-	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0, 0.0), 0.0, glm::vec2(1.0, 1.0) }, textureTux, shaderStandard32);
+	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-500.0f, 300.0f), -1.0f, glm::vec2(0.8f, 1.2f) }, textureFlag, shaderStandard32);
+	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(400.0f, -200.0f), 0.25f, glm::vec2(0.7f, 0.7f) }, textureSnowman, shaderStandard32);
+	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(1.0f, 1.0f) }, textureTux, shaderStandard32);
 
 	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor2);
@@ -106,25 +106,25 @@ void run(GLFWwindow* window)
 
 	Renderer::AddCanvasLayer(CanvasLayerData(-1, _RendererSettings::standard_vertex_pool_size, _RendererSettings::standard_index_pool_size));
 
-	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, Transform2D{ glm::vec2(-200.0, 0.0), 0.0, glm::vec2(800, 800) });
+	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, Transform2D{ glm::vec2(-200.0f, 0.0f), 0.0f, glm::vec2(800.0f, 800.0f) });
 	Renderer::GetCanvasLayer(-1)->OnAttach(actor4);
-	//actor4->SetPosition(0, 0);
+	//actor4->SetPosition(0.0f, 0.0f);
 
-	actor1->SetScale(16.0, 16.0);
+	actor1->SetScale(16.0f, 16.0f);
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(actor3, -1);
 
-	actor3->SetPivot(0, 0);
-	//actor3->SetPosition(0, 0);
-	actor3->SetPosition(-_RendererSettings::initial_window_width * 0.5, -_RendererSettings::initial_window_height * 0.5);
-	actor3->SetScale(0.3, 0.3);
-	//actor2->SetRotation(0);
-	//actor2->SetPosition(0, 0);
-	actor2->SetModulation(glm::vec4(0.7, 0.7, 1.0, 1.0));
+	actor3->SetPivot(0.0f, 0.0f);
+	//actor3->SetPosition(0.0f, 0.0f);
+	actor3->SetPosition(-_RendererSettings::initial_window_width * 0.5f, -_RendererSettings::initial_window_height * 0.5f);
+	actor3->SetScale(0.3f, 0.3f);
+	//actor2->SetRotation(0.0f);
+	//actor2->SetPosition(0.0f, 0.0f);
+	actor2->SetModulation(glm::vec4(0.7f, 0.7f, 1.0f, 1.0f));
 	actor3->SetModulationPerPoint({
-		glm::vec4(1.0, 0.5, 0.5, 1.0),
-		glm::vec4(0.5, 1.0, 0.5, 1.0),
-		glm::vec4(0.5, 0.5, 1.0, 1.0),
-		glm::vec4(0.5, 0.5, 0.5, 1.0),
+		glm::vec4(1.0f, 0.5f, 0.5f, 1.0f),
+		glm::vec4(0.5f, 1.0f, 0.5f, 1.0f),
+		glm::vec4(0.5f, 0.5f, 1.0f, 1.0f),
+		glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
 	});
 
 	for (;;)
