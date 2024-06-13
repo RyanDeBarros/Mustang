@@ -100,7 +100,7 @@ LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle)
 		auto [ok6, lod_level] = settings->getInt("lod_level");
 		if (ok6)
 		{
-			texture_settings.lod_level = lod_level;
+			texture_settings.lod_level = (GLint)lod_level;
 		}
 	}
 
@@ -148,8 +148,8 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
 	auto [ok4, mask] = model->getInt("mask");
 	if (!ok4)
 		return LOAD_STATUS::SYNTAX_ERR;
-	renderable.model.layout = layout;
-	renderable.model.layoutMask = mask;
+	renderable.model.layout = (VertexLayout)layout;
+	renderable.model.layoutMask = (VertexLayoutMask)mask;
 	ShaderHandle shader_handle = 0;
 	auto [ok5, shader] = model->getString("shader");
 	if (ok5)
@@ -167,7 +167,7 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
 	auto [ok1, num_vertices] = _renderable->getInt("num_vertices");
 	if (!ok1)
 		return LOAD_STATUS::SYNTAX_ERR;
-	renderable.vertexCount = num_vertices;
+	renderable.vertexCount = (BufferCounter)num_vertices;
 	if (!renderable.AttachVertexBuffer(*vertex_array, Render::VertexBufferLayoutCount(renderable)))
 		return LOAD_STATUS::ASSET_LOAD_ERR;
 
@@ -195,10 +195,10 @@ bool _LoadRendererSettings()
 	{
 		auto [ok0, width] = window->getInt("width");
 		if (ok0)
-			_RendererSettings::initial_window_width = width;
+			_RendererSettings::initial_window_width = (int)width;
 		auto [ok1, height] = window->getInt("height");
 		if (ok1)
-			_RendererSettings::initial_window_height = height;
+			_RendererSettings::initial_window_height = (int)height;
 		auto gl_clear_color = window->getArray("gl_clear_color");
 		if (gl_clear_color)
 		{
@@ -213,13 +213,13 @@ bool _LoadRendererSettings()
 	{
 		auto [ok0, max_texture_slots] = rendering->getInt("max_texture_slots");
 		if (ok0)
-			_RendererSettings::max_texture_slots = max_texture_slots;
+			_RendererSettings::max_texture_slots = (TextureSlot)max_texture_slots;
 		auto [ok1, standard_vertex_pool_size] = rendering->getInt("standard_vertex_pool_size");
 		if (ok1)
-			_RendererSettings::standard_vertex_pool_size = standard_vertex_pool_size;
+			_RendererSettings::standard_vertex_pool_size = (VertexSize)standard_vertex_pool_size;
 		auto [ok2, standard_index_pool_size] = rendering->getInt("standard_index_pool_size");
 		if (ok2)
-			_RendererSettings::standard_index_pool_size = standard_index_pool_size;
+			_RendererSettings::standard_index_pool_size = (VertexSize)standard_index_pool_size;
 		auto [ok3, rect_renderable] = rendering->getString("rect_renderable");
 		if (ok3)
 			_RendererSettings::rect_renderable_filepath = rect_renderable;

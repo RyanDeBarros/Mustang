@@ -7,7 +7,7 @@
 #include "factory/TextureFactory.h"
 
 CanvasLayer::CanvasLayer(CanvasLayerData data)
-	: m_Data(data), m_LayerView(m_Data.pLeft, m_Data.pRight, m_Data.pBottom, m_Data.pTop)
+	: m_Data(data), m_LayerView((float)m_Data.pLeft, (float)m_Data.pRight, (float)m_Data.pBottom, (float)m_Data.pTop)
 {
 	m_VAOs = new std::unordered_map<BatchModel, VAO>();
 	m_Batcher = new std::map<ZIndex, std::list<ActorRenderBase2D>*>();

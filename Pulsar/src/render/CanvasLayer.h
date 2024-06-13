@@ -20,7 +20,7 @@ struct CanvasLayerData
 	CanvasIndex ci;
 	bool enableGLBlend;
 	GLenum sourceBlend, destBlend;
-	float pLeft, pRight, pBottom, pTop;
+	int pLeft, pRight, pBottom, pTop;
 	VertexSize maxVertexPoolSize, maxIndexPoolSize;
 	CanvasLayerData(CanvasIndex ci, VertexSize max_vertex_pool_size, VertexSize max_index_pool_size)
 		: ci(ci), enableGLBlend(true), sourceBlend(GL_SRC_ALPHA), destBlend(GL_ONE_MINUS_SRC_ALPHA),
