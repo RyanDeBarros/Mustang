@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include "factory/ShaderFactory.h"
 #include "factory/TextureFactory.h"
+#include "factory/MaterialFactory.h"
 
 CanvasLayer::CanvasLayer(CanvasLayerData data)
 	: m_Data(data), m_LayerView((float)m_Data.pLeft, (float)m_Data.pRight, (float)m_Data.pBottom, (float)m_Data.pTop)
@@ -217,7 +218,7 @@ inline void CanvasLayer::FlushAndReset()
 	TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
 	ShaderFactory::Bind(currentModel.shader);
 	m_LayerView.PassVPUniform(currentModel.shader);
-	// TODO set shader uniforms here based on model's material handle (just call MaterialFactory::Apply(currentModel.material, currentModel.shader)
+	MaterialFactory::Apply(currentModel.material, currentModel.shader);
 	TRY(glDrawElements(GL_TRIANGLES, (GLsizei)(indexPos - m_IndexPool), GL_UNSIGNED_INT, nullptr));
 	ShaderFactory::Unbind();
 	UnbindBuffers();

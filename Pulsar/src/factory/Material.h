@@ -7,7 +7,12 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-typedef std::variant<GLint, GLuint, GLfloat, glm::ivec2, glm::ivec3, glm::ivec4, glm::uvec2, glm::uvec3, glm::uvec4, glm::vec2, glm::vec3, glm::vec4, glm::mat2, glm::mat3, glm::mat4> MaterialUniformType;
+typedef std::variant<
+	GLint, glm::ivec2, glm::ivec3, glm::ivec4,
+	GLuint, glm::uvec2, glm::uvec3, glm::uvec4,
+	GLfloat, glm::vec2, glm::vec3, glm::vec4,
+	glm::mat2, glm::mat3, glm::mat4
+> MaterialUniformType;
 
 struct MaterialUniform
 {

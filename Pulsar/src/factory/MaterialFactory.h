@@ -20,5 +20,5 @@ class MaterialFactory
 
 public:
 	static MaterialHandle GetHandle(const std::vector<MaterialUniform>& uniform_vector);
-	static void Apply(const MaterialHandle& handle);
+	static void Apply(const MaterialHandle& material, const ShaderHandle& shader);
 };

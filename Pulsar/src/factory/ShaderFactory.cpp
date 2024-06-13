@@ -66,12 +66,12 @@ void bad_uniform(ShaderHandle handle)
 	Logger::LogWarning("Failed to set uniform for shader at handle (" + std::to_string(handle) + ").");
 }
 
-void ShaderFactory::SetUniform1iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
+void ShaderFactory::SetUniform1i(ShaderHandle handle, const char* uniform_name, const GLint value)
 {
 	Shader* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform1iv(shader->GetUniformLocation(uniform_name), array_count, value));
+		TRY(glUniform1i(shader->GetUniformLocation(uniform_name), value));
 	}
 	else
 		bad_uniform(handle);
@@ -110,12 +110,12 @@ void ShaderFactory::SetUniform4iv(ShaderHandle handle, const char* uniform_name,
 		bad_uniform(handle);
 }
 
-void ShaderFactory::SetUniform1uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
+void ShaderFactory::SetUniform1ui(ShaderHandle handle, const char* uniform_name, const GLuint value)
 {
 	Shader* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform1uiv(shader->GetUniformLocation(uniform_name), array_count, value));
+		TRY(glUniform1ui(shader->GetUniformLocation(uniform_name), value));
 	}
 	else
 		bad_uniform(handle);
@@ -154,12 +154,12 @@ void ShaderFactory::SetUniform4uiv(ShaderHandle handle, const char* uniform_name
 		bad_uniform(handle);
 }
 
-void ShaderFactory::SetUniform1fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
+void ShaderFactory::SetUniform1f(ShaderHandle handle, const char* uniform_name, const GLfloat value)
 {
 	Shader* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform1fv(shader->GetUniformLocation(uniform_name), array_count, value));
+		TRY(glUniform1f(shader->GetUniformLocation(uniform_name), value));
 	}
 	else
 		bad_uniform(handle);
