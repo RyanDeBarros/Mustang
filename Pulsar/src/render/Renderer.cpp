@@ -7,7 +7,7 @@
 #include "Logger.h"
 #include "factory/ShaderFactory.h"
 #include "factory/TextureFactory.h"
-#include "factory/MaterialFactory.h"
+#include "factory/UniformLexiconFactory.h"
 #include "factory/RectRender.h"
 
 std::map<CanvasIndex, CanvasLayer>* Renderer::layers = nullptr;
@@ -23,7 +23,7 @@ void Renderer::Init()
 	layers = new std::map<CanvasIndex, CanvasLayer>();
 	ShaderFactory::Init();
 	TextureFactory::Init();
-	MaterialFactory::Init();
+	UniformLexiconFactory::Init();
 	RectRender::DefineRectRenderable();
 }
 
@@ -96,7 +96,7 @@ void Renderer::Terminate()
 		delete layers;
 	}
 	else null_map();
-	MaterialFactory::Terminate();
+	UniformLexiconFactory::Terminate();
 	TextureFactory::Terminate();
 	ShaderFactory::Terminate();
 }

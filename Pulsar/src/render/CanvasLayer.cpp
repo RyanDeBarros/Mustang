@@ -5,7 +5,7 @@
 #include "Renderer.h"
 #include "factory/ShaderFactory.h"
 #include "factory/TextureFactory.h"
-#include "factory/MaterialFactory.h"
+#include "factory/UniformLexiconFactory.h"
 
 CanvasLayer::CanvasLayer(CanvasLayerData data)
 	: m_Data(data), m_LayerView((float)m_Data.pLeft, (float)m_Data.pRight, (float)m_Data.pBottom, (float)m_Data.pTop)
@@ -203,6 +203,7 @@ inline TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 	}
 	m_TextureSlotBatch.push_back(render.textureHandle);
 	TextureSlot slot = (TextureSlot)(m_TextureSlotBatch.size() - 1);
+	// TODO move this bind into FlushAndReset, and then move that into material structure
 	TextureFactory::Bind(render.textureHandle, slot);
 	// Note: due to the abstraction of glDrawElements and glBufferSubData behind CanvasLayer, there is currently no need to actually call TextureFactory::Unbind on anything.
 	return slot;
@@ -216,9 +217,10 @@ inline void CanvasLayer::FlushAndReset()
 	BindBuffers();
 	TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
 	TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
+	// TODO collapse into material structure
 	ShaderFactory::Bind(currentModel.shader);
 	m_LayerView.PassVPUniform(currentModel.shader);
-	MaterialFactory::Apply(currentModel.material, currentModel.shader);
+	UniformLexiconFactory::OnApply(currentModel.uniformLexicon, currentModel.shader);
 	TRY(glDrawElements(GL_TRIANGLES, (GLsizei)(indexPos - m_IndexPool), GL_UNSIGNED_INT, nullptr));
 	ShaderFactory::Unbind();
 	UnbindBuffers();

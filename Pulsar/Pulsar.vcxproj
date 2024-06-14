@@ -163,8 +163,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\AssetLoader.cpp" />
-    <ClCompile Include="src\factory\Material.cpp" />
-    <ClCompile Include="src\factory\MaterialFactory.cpp" />
+    <ClCompile Include="src\factory\UniformLexicon.cpp" />
+    <ClCompile Include="src\factory\UniformLexiconFactory.cpp" />
     <ClCompile Include="src\factory\RectRender.cpp" />
     <ClCompile Include="src\RendererSettings.cpp" />
     <ClCompile Include="src\Logger.cpp" />
@@ -188,8 +188,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AssetLoader.h" />
-    <ClInclude Include="src\factory\Material.h" />
-    <ClInclude Include="src\factory\MaterialFactory.h" />
+    <ClInclude Include="src\factory\UniformLexicon.h" />
+    <ClInclude Include="src\factory\UniformLexiconFactory.h" />
     <ClInclude Include="src\factory\RectRender.h" />
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\render\ActorComposite.h" />

@@ -10,9 +10,9 @@ struct BatchModel
 	VertexLayout layout;
 	VertexLayoutMask layoutMask;
 	ShaderHandle shader;
-	MaterialHandle material;
+	UniformLexiconHandle uniformLexicon;
 
-	BatchModel(VertexLayout layout = 0, VertexLayoutMask layoutMask = 0, ShaderHandle shader = 0, MaterialHandle material = 0);
+	BatchModel(VertexLayout layout = 0, VertexLayoutMask layoutMask = 0, ShaderHandle shader = 0, UniformLexiconHandle uniformLexicon = 0);
 	bool operator==(const BatchModel&) const;
 };
 

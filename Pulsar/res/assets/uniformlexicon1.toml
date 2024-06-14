@@ -1,0 +1,11 @@
+header = "uniform_lexicon"
+
+[[uniform]]
+name = "u_inttest"
+type = 0
+value = 1
+
+[[uniform]]
+name = "u_float2test"
+type = 9
+value = [0.5, 0.8]

@@ -1,15 +1,16 @@
 #include "Renderable.h"
 
 #include "Macros.h"
+#include "factory/UniformLexiconFactory.h"
 
-BatchModel::BatchModel(VertexLayout layout, VertexLayoutMask layoutMask, ShaderHandle shader, MaterialHandle material)
-	: layout(layout), layoutMask(layoutMask), shader(shader), material(material)
+BatchModel::BatchModel(VertexLayout layout, VertexLayoutMask layoutMask, ShaderHandle shader, UniformLexiconHandle uniformLexicon)
+	: layout(layout), layoutMask(layoutMask), shader(shader), uniformLexicon(uniformLexicon)
 {
 }
 
 bool BatchModel::operator==(const BatchModel& m) const
 {
-	return layout == m.layout && layoutMask == m.layoutMask && shader == m.shader && material == m.material;
+	return layout == m.layout && layoutMask == m.layoutMask && shader == m.shader && UniformLexiconFactory::Shares(uniformLexicon, m.uniformLexicon);
 }
 
 

@@ -111,6 +111,22 @@ LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle)
 		return LOAD_STATUS::ASSET_LOAD_ERR;
 }
 
+LOAD_STATUS loadMaterial(const char* filepath, UniformLexiconHandle& handle)
+{
+	auto res = toml::parseFile(filepath);
+	if (!res.table)
+	{
+		Logger::LogError("Cannot parse asset file: " + res.errmsg);
+		return LOAD_STATUS::READ_ERR;
+	}
+
+	auto [ok0, header] = res.table->getString("header");
+	if (!ok0)
+		return LOAD_STATUS::SYNTAX_ERR;
+	else if (header != "uniformLexicon")
+		return LOAD_STATUS::MISMATCH_ERR;
+}
+
 LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
 {
 	auto res = toml::parseFile(filepath);
@@ -131,8 +147,8 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
 		return LOAD_STATUS::SYNTAX_ERR;
 
 	TextureHandle texture_handle = 0;
-	auto [ok2, texture] = _renderable->getString("texture");
-	if (ok2)
+	auto [ok1, texture] = _renderable->getString("texture");
+	if (ok1)
 	{
 		if (loadTexture(texture.c_str(), texture_handle) != LOAD_STATUS::OK)
 			return LOAD_STATUS::REFERENCE_ERROR;
@@ -142,30 +158,38 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
 	auto model = _renderable->getTable("model");
 	if (!model)
 		return LOAD_STATUS::SYNTAX_ERR;
-	auto [ok3, layout] = model->getInt("layout");
-	if (!ok3)
+	auto [ok2, layout] = model->getInt("layout");
+	if (!ok2)
 		return LOAD_STATUS::SYNTAX_ERR;
-	auto [ok4, mask] = model->getInt("mask");
-	if (!ok4)
+	auto [ok3, mask] = model->getInt("mask");
+	if (!ok3)
 		return LOAD_STATUS::SYNTAX_ERR;
 	renderable.model.layout = (VertexLayout)layout;
 	renderable.model.layoutMask = (VertexLayoutMask)mask;
 	ShaderHandle shader_handle = 0;
-	auto [ok5, shader] = model->getString("shader");
-	if (ok5)
+	auto [ok4, shader] = model->getString("shader");
+	if (ok4)
 	{
 		if (loadShader(shader.c_str(), shader_handle) != LOAD_STATUS::OK)
 			return LOAD_STATUS::REFERENCE_ERROR;
 	}
 	renderable.model.shader = shader_handle;
 
-	// TODO material handle
+	// TODO uniformLexicon handle
+	UniformLexiconHandle lexicon_handle = 0;
+	auto [ok5, uniformLexicon] = model->getString("uniform_lexicon");
+	if (ok5)
+	{
+		if (loadMaterial(uniformLexicon.c_str(), lexicon_handle) != LOAD_STATUS::OK)
+			return LOAD_STATUS::REFERENCE_ERROR;
+	}
+	renderable.model.uniformLexicon = lexicon_handle;
 
 	auto vertex_array = _renderable->getArray("vertices");
 	if (!vertex_array)
 		return LOAD_STATUS::SYNTAX_ERR;
-	auto [ok1, num_vertices] = _renderable->getInt("num_vertices");
-	if (!ok1)
+	auto [ok6, num_vertices] = _renderable->getInt("num_vertices");
+	if (!ok6)
 		return LOAD_STATUS::SYNTAX_ERR;
 	renderable.vertexCount = (BufferCounter)num_vertices;
 	if (!renderable.AttachVertexBuffer(*vertex_array, Render::VertexBufferLayoutCount(renderable)))
