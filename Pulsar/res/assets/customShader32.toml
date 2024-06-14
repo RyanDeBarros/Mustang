@@ -1,0 +1,5 @@
+header = "shader"
+
+[shader]
+vertex = "config/Standard.vert"
+fragment = "res/shaders/custom32.frag"

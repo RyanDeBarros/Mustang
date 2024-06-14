@@ -3,10 +3,14 @@
 #include <toml/tomlcpp.hpp>
 #include <glm/glm.hpp>
 
+#include <map>
+
 #include "Logger.h"
 #include "RendererSettings.h"
 #include "factory/ShaderFactory.h"
 #include "factory/TextureFactory.h"
+#include "factory/UniformLexiconFactory.h"
+#include "factory/UniformLexicon.h"
 #include "render/Renderable.h"
 
 LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
@@ -111,7 +115,7 @@ LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle)
 		return LOAD_STATUS::ASSET_LOAD_ERR;
 }
 
-LOAD_STATUS loadMaterial(const char* filepath, UniformLexiconHandle& handle)
+LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handle)
 {
 	auto res = toml::parseFile(filepath);
 	if (!res.table)
@@ -123,8 +127,172 @@ LOAD_STATUS loadMaterial(const char* filepath, UniformLexiconHandle& handle)
 	auto [ok0, header] = res.table->getString("header");
 	if (!ok0)
 		return LOAD_STATUS::SYNTAX_ERR;
-	else if (header != "uniformLexicon")
+	else if (header != "uniform_lexicon")
 		return LOAD_STATUS::MISMATCH_ERR;
+
+	auto array = res.table->getArray("uniform");
+	if (!array)
+		return LOAD_STATUS::SYNTAX_ERR;
+	std::map<std::string, Uniform> uniform_map;
+	auto uniforms = array->getTableVector();
+	for (const auto& uniform : *uniforms)
+	{
+		auto [ok1, type] = uniform.getInt("type");
+		auto [ok2, name] = uniform.getString("name");
+		Uniform u;
+		if (!ok1 || !ok2)
+			return LOAD_STATUS::SYNTAX_ERR;
+		switch (type)
+		{
+		case 0:
+		{
+			auto a = uniform.getInt("value");
+			if (!a.first)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = (GLint)a.second;
+			break;
+		}
+		case 1:
+		{
+			auto a = uniform.getArray("value");
+			if (!a)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = glm::ivec2(a->getInt(0).second, a->getInt(1).second);
+			break;
+		}
+		case 2:
+		{
+			auto a = uniform.getArray("value");
+			if (!a)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = glm::ivec3(a->getInt(0).second, a->getInt(1).second, a->getInt(2).second);
+			break;
+		}
+		case 3:
+		{
+			auto a = uniform.getArray("value");
+			if (!a)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = glm::ivec4(a->getInt(0).second, a->getInt(1).second, a->getInt(2).second, a->getInt(3).second);
+			break;
+		}
+		case 4:
+		{
+			auto a = uniform.getInt("value");
+			if (!a.first)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = (GLuint)a.second;
+			break;
+		}
+		case 5:
+		{
+			auto a = uniform.getArray("value");
+			if (!a)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = glm::uvec2(a->getInt(0).second, a->getInt(1).second);
+			break;
+		}
+		case 6:
+		{
+			auto a = uniform.getArray("value");
+			if (!a)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = glm::uvec3(a->getInt(0).second, a->getInt(1).second, a->getInt(2).second);
+			break;
+		}
+		case 7:
+		{
+			auto a = uniform.getArray("value");
+			if (!a)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = glm::uvec4(a->getInt(0).second, a->getInt(1).second, a->getInt(2).second, a->getInt(3).second);
+			break;
+		}
+		case 8:
+		{
+			auto a = uniform.getDouble("value");
+			if (!a.first)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = (GLfloat)a.second;
+			break;
+		}
+		case 9:
+		{
+			auto a = uniform.getArray("value");
+			if (!a)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = glm::vec2((float)(a->getDouble(0).second), (float)(a->getDouble(1).second));
+			break;
+		}
+		case 10:
+		{
+			auto a = uniform.getArray("value");
+			if (!a)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = glm::vec3((float)(a->getDouble(0).second), (float)(a->getDouble(1).second), (float)(a->getDouble(2).second));
+			break;
+		}
+		case 11:
+		{
+			auto a = uniform.getArray("value");
+			if (!a)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = glm::vec4((float)(a->getDouble(0).second), (float)(a->getDouble(1).second), (float)(a->getDouble(2).second), (float)(a->getDouble(3).second));
+			break;
+		}
+		case 12:
+		{
+			auto a = uniform.getArray("value");
+			if (!a)
+				return LOAD_STATUS::SYNTAX_ERR;
+			auto col0 = a->getArray(0);
+			auto col1 = a->getArray(1);
+			if (!col0 || !col1)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = glm::mat2((float)(col0->getDouble(0).second), (float)(col0->getDouble(1).second), (float)(col1->getDouble(0).second), (float)(col1->getDouble(1).second));
+			break;
+		}
+		case 13:
+		{
+			auto a = uniform.getArray("value");
+			if (!a)
+				return LOAD_STATUS::SYNTAX_ERR;
+			auto col0 = a->getArray(0);
+			auto col1 = a->getArray(1);
+			auto col2 = a->getArray(2);
+			if (!col0 || !col1 || !col2)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = glm::mat3(
+				(float)(col0->getDouble(0).second), (float)(col0->getDouble(1).second), (float)(col0->getDouble(2).second),
+				(float)(col1->getDouble(0).second), (float)(col1->getDouble(1).second), (float)(col1->getDouble(2).second),
+				(float)(col2->getDouble(0).second), (float)(col2->getDouble(1).second), (float)(col2->getDouble(2).second)
+			);
+			break;
+		}
+		case 14:
+		{
+			auto a = uniform.getArray("value");
+			if (!a)
+				return LOAD_STATUS::SYNTAX_ERR;
+			auto col0 = a->getArray(0);
+			auto col1 = a->getArray(1);
+			auto col2 = a->getArray(2);
+			auto col3 = a->getArray(3);
+			if (!col0 || !col1 || !col2 || !col3)
+				return LOAD_STATUS::SYNTAX_ERR;
+			u = glm::mat4(
+				(float)(col0->getDouble(0).second), (float)(col0->getDouble(1).second), (float)(col0->getDouble(2).second), (float)(col0->getDouble(3).second),
+				(float)(col1->getDouble(0).second), (float)(col1->getDouble(1).second), (float)(col1->getDouble(2).second), (float)(col1->getDouble(3).second),
+				(float)(col2->getDouble(0).second), (float)(col2->getDouble(1).second), (float)(col2->getDouble(2).second), (float)(col2->getDouble(3).second),
+				(float)(col3->getDouble(0).second), (float)(col3->getDouble(1).second), (float)(col3->getDouble(2).second), (float)(col3->getDouble(3).second)
+			);
+			break;
+		}
+		}
+		uniform_map.insert({ name, u });
+	}
+	handle = UniformLexiconFactory::GetHandle(uniform_map);
+	return LOAD_STATUS::OK;
 }
 
 LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
@@ -166,6 +334,7 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
 		return LOAD_STATUS::SYNTAX_ERR;
 	renderable.model.layout = (VertexLayout)layout;
 	renderable.model.layoutMask = (VertexLayoutMask)mask;
+
 	ShaderHandle shader_handle = 0;
 	auto [ok4, shader] = model->getString("shader");
 	if (ok4)
@@ -175,12 +344,11 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
 	}
 	renderable.model.shader = shader_handle;
 
-	// TODO uniformLexicon handle
 	UniformLexiconHandle lexicon_handle = 0;
 	auto [ok5, uniformLexicon] = model->getString("uniform_lexicon");
 	if (ok5)
 	{
-		if (loadMaterial(uniformLexicon.c_str(), lexicon_handle) != LOAD_STATUS::OK)
+		if (loadUniformLexicon(uniformLexicon.c_str(), lexicon_handle) != LOAD_STATUS::OK)
 			return LOAD_STATUS::REFERENCE_ERROR;
 	}
 	renderable.model.uniformLexicon = lexicon_handle;

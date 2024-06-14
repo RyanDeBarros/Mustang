@@ -3,7 +3,8 @@ header = "renderable"
 [renderable.model]
 layout = 0b011101110100
 mask = 0b111111
-shader = "config/StandardShader32.toml"
+shader = "res/assets/customShader32.toml"
+uniform_lexicon = "res/assets/uniformlexicon1.toml"
 
 [renderable]
 texture = "res/assets/flag.toml"
