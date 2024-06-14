@@ -10,6 +10,7 @@
 #include "render/Renderer.h"
 #include "render/ActorPrimitive.h"
 #include "factory/RectRender.h"
+#include "factory/UniformLexiconFactory.h"
 
 void run(GLFWwindow*);
 
@@ -126,6 +127,17 @@ void run(GLFWwindow* window)
 		glm::vec4(0.5f, 0.5f, 1.0f, 1.0f),
 		glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
 	});
+	
+	Logger::LogInfo(std::to_string(std::get<GLint>(*const_cast<Uniform*>(UniformLexiconFactory::GetValue(1, "u_inttest")))));
+	auto u = UniformLexiconFactory::GetValue(1, "u_float3test");
+	if (u)
+		Logger::LogInfo(STR(std::get<glm::vec3>(*u)));
+	UniformLexiconFactory::SetValue(1, "u_float3test", glm::vec3(0.3, 0.6, 0.2));
+	UniformLexiconFactory::DefineNewValue(1, "u_float3test", glm::vec3(1.0, 0.0, 1.0));
+	UniformLexiconFactory::SetValue(1, "u_float3test", glm::vec3(0.3, 0.6, 0.2));
+	u = UniformLexiconFactory::GetValue(1, "u_float3test");
+	if (u)
+		Logger::LogInfo(STR(std::get<glm::vec3>(*u)));
 
 	for (;;)
 	{

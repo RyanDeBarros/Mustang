@@ -16,6 +16,9 @@ void main() {
 		o_Color = t_Color;
 	} else {
 		o_Color = t_Color * texture(TEXTURE_SLOTS[int(t_TexSlot)], t_TexCoord);
-		o_Color = vec4(u_float3test[0], u_float3test[1], u_float3test[2], 1.0);
+		if (o_Color[3] == 1.0)
+		{
+			o_Color = vec4(u_float3test[0], u_float3test[1], u_float3test[2], 1.0);
+		}
 	}
 }

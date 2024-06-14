@@ -20,11 +20,16 @@ class UniformLexicon
 	friend class UniformLexiconFactory;
 	std::map<std::string, Uniform> m_Uniforms;
 	inline bool Equivalent(const std::map<std::string, Uniform>& uniforms) const { return m_Uniforms == uniforms; }
-
+	
 public:
 	UniformLexicon(const std::map<std::string, Uniform>& uniforms);
 	~UniformLexicon();
 
 	void MergeLexicon(const UniformLexicon& lexicon);
 	bool Shares(const UniformLexicon& lexicon);
+
+private:
+	const Uniform* GetValue(const std::string& name);
+	bool SetValue(const std::string& name, const Uniform& uniform);
+	bool DefineNewValue(const std::string& name, const Uniform& uniform);
 };

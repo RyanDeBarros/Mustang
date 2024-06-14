@@ -5,7 +5,7 @@ name = "u_inttest"
 type = 0
 value = 1
 
-[[uniform]]
-name = "u_float3test"
-type = 10
-value = [0.5, 0.5, 0.5]
+#[[uniform]]
+#name = "u_float3test"
+#type = 10
+#value = [0.5, 0.5, 0.5]

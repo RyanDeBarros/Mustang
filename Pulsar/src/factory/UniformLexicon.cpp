@@ -31,3 +31,36 @@ bool UniformLexicon::Shares(const UniformLexicon& lexicon)
 	}
 	return true;
 }
+
+const Uniform* UniformLexicon::GetValue(const std::string& name)
+{
+	auto it = m_Uniforms.find(name);
+	if (it != m_Uniforms.end())
+		return &it->second;
+	else
+		return nullptr;
+}
+
+bool UniformLexicon::SetValue(const std::string& name, const Uniform& uniform) {
+	auto it = m_Uniforms.find(name);
+	if (it != m_Uniforms.end())
+	{
+		if (it->second != uniform)
+		{
+			it->second = uniform;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool UniformLexicon::DefineNewValue(const std::string& name, const Uniform& uniform)
+{
+	auto it = m_Uniforms.find(name);
+	if (it == m_Uniforms.end())
+	{
+		m_Uniforms.insert({ name, uniform });
+		return true;
+	}
+	return false;
+}

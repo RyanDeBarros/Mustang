@@ -12,10 +12,10 @@ LayerView2D::LayerView2D(float pLeft, float pRight, float pBottom, float pTop)
 
 void LayerView2D::PassVPUniform(const ShaderHandle& handle) const
 {
-	if (m_AppliedShaders.find(handle) == m_AppliedShaders.end())
+	if (shaderCache.find(handle) == shaderCache.end())
 	{
 		ShaderFactory::SetUniformMatrix3fv(handle, "u_VP", &m_VP[0][0]);
-		m_AppliedShaders.insert(handle);
+		shaderCache.insert(handle);
 	}
 }
 
@@ -46,5 +46,5 @@ void LayerView2D::ViewSetScale(const float& sx, const float& sy)
 void LayerView2D::UpdateVP()
 {
 	m_VP = m_ProjectionMatrix * Transform::ToInverseMatrix(m_ViewTransform);
-	m_AppliedShaders.clear();
+	shaderCache.clear();
 }

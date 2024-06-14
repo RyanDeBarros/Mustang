@@ -7,7 +7,10 @@
 #	define TRY(x) x;
 #endif
 
-#include "GL/glew.h"
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+
+#include <string>
 
 #include "Logger.h"
 
@@ -20,4 +23,9 @@ static bool glNoError(const char* function_name, const char* file, int line)
 		no_err = false;
 	}
 	return no_err;
+}
+
+inline std::string STR(const glm::vec3& vec3)
+{
+	return "<" + std::to_string(vec3[0]) + ", " + std::to_string(vec3[1]) + ", " + std::to_string(vec3[2]) + ">";
 }

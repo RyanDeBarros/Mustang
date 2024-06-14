@@ -5,6 +5,7 @@
 
 UniformLexiconHandle UniformLexiconFactory::handle_cap;
 std::unordered_map<UniformLexiconHandle, UniformLexicon*> UniformLexiconFactory::factory;
+std::unordered_map<UniformLexiconHandle, std::unordered_set<ShaderHandle>> UniformLexiconFactory::shaderCache;
 
 void UniformLexiconFactory::Init()
 {
@@ -16,6 +17,7 @@ void UniformLexiconFactory::Terminate()
 	for (const auto& [handle, uniformLexicon] : factory)
 		delete uniformLexicon;
 	factory.clear();
+	shaderCache.clear();
 }
 
 UniformLexicon* UniformLexiconFactory::Get(UniformLexiconHandle handle)
@@ -44,9 +46,21 @@ UniformLexiconHandle UniformLexiconFactory::GetHandle(const std::map<std::string
 
 void UniformLexiconFactory::OnApply(const UniformLexiconHandle& uniformLexicon, const ShaderHandle& shader)
 {
-	// TODO optimize by caching shader/uniformLexicon pairs.
 	if (uniformLexicon == 0 || shader == 0)
 		return;
+	std::unordered_map<UniformLexiconHandle, std::unordered_set<ShaderHandle>>::iterator set;
+	if ((set = shaderCache.find(uniformLexicon)) != shaderCache.end())
+	{
+		if (set->second.find(shader) != set->second.end())
+			return;
+		else
+			set->second.insert(shader);
+	}
+	else
+	{
+		shaderCache.insert({ uniformLexicon, { shader } });
+	}
+
 	UniformLexicon* lex = Get(uniformLexicon);
 	if (!lex)
 		return;
@@ -133,4 +147,32 @@ bool UniformLexiconFactory::Shares(const UniformLexiconHandle& lexicon1, const U
 		Logger::LogWarning("UniformLexicon handle (" + std::to_string(lexicon1) + ") does not exist in UniformLexiconFactory.");
 		return false;
 	}
+}
+
+const Uniform* UniformLexiconFactory::GetValue(const UniformLexiconHandle& lexicon, const std::string& name)
+{
+	UniformLexicon* lex = Get(lexicon);
+	if (lex)
+	{
+		return lex->GetValue(name);
+	}
+	else return nullptr;
+}
+
+void UniformLexiconFactory::SetValue(const UniformLexiconHandle& lexicon, const std::string& name, const Uniform& value)
+{
+	UniformLexicon* lex = Get(lexicon);
+	if (lex && lex->SetValue(name, value))
+		shaderCache.erase(lexicon);
+}
+
+bool UniformLexiconFactory::DefineNewValue(const UniformLexiconHandle& lexicon, const std::string& name, const Uniform& value)
+{
+	UniformLexicon* lex = Get(lexicon);
+	if (lex && lex->DefineNewValue(name, value))
+	{
+		shaderCache.erase(lexicon);
+		return true;
+	}
+	else return false;
 }

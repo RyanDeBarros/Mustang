@@ -12,7 +12,7 @@ class LayerView2D
 	Transform2D m_ViewTransform;
 	glm::mat3 m_ProjectionMatrix;
 	glm::mat3 m_VP;
-	mutable std::unordered_set<ShaderHandle> m_AppliedShaders;
+	mutable std::unordered_set<ShaderHandle> shaderCache;
 
 public:
 	LayerView2D(float pLeft, float pRight, float pBottom, float pTop);
