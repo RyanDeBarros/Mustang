@@ -13,6 +13,7 @@ class UniformLexiconFactory
 	static std::unordered_map<UniformLexiconHandle, UniformLexicon*> factory;
 	static UniformLexicon* Get(UniformLexiconHandle);
 	static std::unordered_map<UniformLexiconHandle, std::unordered_set<ShaderHandle>> shaderCache;
+	static std::unordered_set<UniformLexiconHandle> dynamicLexicons;
 
 	UniformLexiconFactory() = delete;
 	~UniformLexiconFactory() = delete;
@@ -28,4 +29,6 @@ public:
 	static const Uniform* GetValue(const UniformLexiconHandle& lexicon, const std::string& name);
 	static void SetValue(const UniformLexiconHandle& lexicon, const std::string& name, const Uniform& value);
 	static bool DefineNewValue(const UniformLexiconHandle& lexicon, const std::string& name, const Uniform& value);
+	static void MarkStatic(const UniformLexiconHandle& lexicon);
+	static void MarkDynamic(const UniformLexiconHandle& lexicon);
 };

@@ -6,6 +6,7 @@
 UniformLexiconHandle UniformLexiconFactory::handle_cap;
 std::unordered_map<UniformLexiconHandle, UniformLexicon*> UniformLexiconFactory::factory;
 std::unordered_map<UniformLexiconHandle, std::unordered_set<ShaderHandle>> UniformLexiconFactory::shaderCache;
+std::unordered_set<UniformLexiconHandle> UniformLexiconFactory::dynamicLexicons;
 
 void UniformLexiconFactory::Init()
 {
@@ -18,6 +19,7 @@ void UniformLexiconFactory::Terminate()
 		delete uniformLexicon;
 	factory.clear();
 	shaderCache.clear();
+	dynamicLexicons.clear();
 }
 
 UniformLexicon* UniformLexiconFactory::Get(UniformLexiconHandle handle)
@@ -48,17 +50,20 @@ void UniformLexiconFactory::OnApply(const UniformLexiconHandle& uniformLexicon, 
 {
 	if (uniformLexicon == 0 || shader == 0)
 		return;
-	std::unordered_map<UniformLexiconHandle, std::unordered_set<ShaderHandle>>::iterator set;
-	if ((set = shaderCache.find(uniformLexicon)) != shaderCache.end())
+	if (dynamicLexicons.find(uniformLexicon) == dynamicLexicons.end())
 	{
-		if (set->second.find(shader) != set->second.end())
-			return;
+		std::unordered_map<UniformLexiconHandle, std::unordered_set<ShaderHandle>>::iterator set;
+		if ((set = shaderCache.find(uniformLexicon)) != shaderCache.end())
+		{
+			if (set->second.find(shader) != set->second.end())
+				return;
+			else
+				set->second.insert(shader);
+		}
 		else
-			set->second.insert(shader);
-	}
-	else
-	{
-		shaderCache.insert({ uniformLexicon, { shader } });
+		{
+			shaderCache.insert({ uniformLexicon, { shader } });
+		}
 	}
 
 	UniformLexicon* lex = Get(uniformLexicon);
@@ -175,4 +180,14 @@ bool UniformLexiconFactory::DefineNewValue(const UniformLexiconHandle& lexicon, 
 		return true;
 	}
 	else return false;
+}
+
+void UniformLexiconFactory::MarkStatic(const UniformLexiconHandle& lexicon)
+{
+	dynamicLexicons.insert(lexicon);
+}
+
+void UniformLexiconFactory::MarkDynamic(const UniformLexiconHandle& lexicon)
+{
+	dynamicLexicons.erase(lexicon);
 }
