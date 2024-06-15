@@ -3,9 +3,15 @@
 #include <stb_image/stb_image.h>
 
 #include "Logger.h"
+#include "Atlas.h"
+
+bool Tile::Equivalent(const Atlas& atlas) const
+{ 
+	return m_AtlasID == atlas.id; 
+}
 
 Tile::Tile(const char* filepath)
-	: m_Filepath(filepath), m_ImageBuffer(nullptr), m_Width(0), m_Height(0), m_BPP(0)
+	: m_Filepath(filepath), m_ImageBuffer(nullptr), m_Width(0), m_Height(0), m_BPP(0), m_AtlasID(0)
 {
 	m_ImageBuffer = stbi_load(filepath, &m_Width, &m_Height, &m_BPP, 0);
 	if (!m_ImageBuffer)
@@ -15,8 +21,13 @@ Tile::Tile(const char* filepath)
 	}
 }
 
+Tile::Tile(const Atlas& atlas)
+	: m_Filepath(""), m_ImageBuffer(atlas.m_AtlasBuffer), m_Width(atlas.m_Width), m_Height(atlas.m_Height), m_BPP(4), m_AtlasID(atlas.id)
+{
+}
+
 Tile::Tile(Tile&& tile) noexcept
-	: m_Filepath(tile.m_Filepath), m_ImageBuffer(tile.m_ImageBuffer), m_Width(tile.m_Width), m_Height(tile.m_Height), m_BPP(tile.m_BPP)
+	: m_Filepath(tile.m_Filepath), m_ImageBuffer(tile.m_ImageBuffer), m_Width(tile.m_Width), m_Height(tile.m_Height), m_BPP(tile.m_BPP), m_AtlasID(tile.m_AtlasID)
 {
 	tile.m_ImageBuffer = nullptr;
 }

@@ -46,6 +46,23 @@ TileHandle TileFactory::GetHandle(const char* filepath)
 	else return 0;
 }
 
+TileHandle TileFactory::GetHandle(const Atlas& atlas)
+{
+	for (const auto& [handle, tile] : factory)
+	{
+		if (tile->Equivalent(atlas))
+			return handle;
+	}
+	Tile tile(atlas);
+	if (tile.IsValid())
+	{
+		TileHandle handle = handle_cap++;
+		factory.emplace(handle, new Tile(std::move(tile)));
+		return handle;
+	}
+	else return 0;
+}
+
 const unsigned char* TileFactory::GetImageBuffer(const TileHandle& tile)
 {
 	Tile* t = Get(tile);

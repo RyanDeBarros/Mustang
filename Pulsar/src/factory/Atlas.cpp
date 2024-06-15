@@ -30,8 +30,10 @@ POTwrapper Atlas::Wrap(const TileRect& rect)
 	return { rect, UpperPot(rect.w), UpperPot(rect.h) };
 }
 
+unsigned int id_count = 1;
+
 Atlas::Atlas(const int& width, const int& height)
-	: m_AtlasBuffer(nullptr), m_Width(width), m_Height(height)
+	: m_AtlasBuffer(nullptr), m_Width(width), m_Height(height), id(id_count++)
 {
 	m_AtlasBuffer = new unsigned char[BufferSize()];
 }

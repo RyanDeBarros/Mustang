@@ -6,6 +6,7 @@
 
 #include "Typedefs.h"
 #include "TileFactory.h"
+#include "Atlas.h"
 
 enum class MinFilter : GLint
 {
@@ -85,7 +86,8 @@ class Texture
 	inline bool IsValid() const { return m_RID > 0; }
 
 public:
-	Texture(const char* filepath, TextureSettings settings = TextureSettings(), bool temporary_buffer = false);
+	Texture(const char* filepath, TextureSettings settings = {}, bool temporary_buffer = false);
+	Texture(const Atlas& atlas, TextureSettings settings = {});
 	Texture(Texture&& texture) noexcept;
 	Texture(const Texture& texture) = delete;
 	~Texture();

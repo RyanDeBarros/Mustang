@@ -60,6 +60,7 @@ Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_
 	default:
 	{
 		Logger::LogError(std::string("Cannot create texture \"") + filepath + "\": BPP is not 4, 3, 2, or 1.");
+		TRY(glBindTexture(GL_TEXTURE_2D, 0));
 		if (temporary_buffer)
 			delete tile_ref;
 		return;
@@ -69,6 +70,31 @@ Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_
 	TRY(glBindTexture(GL_TEXTURE_2D, 0));
 	if (temporary_buffer)
 		delete tile_ref;
+}
+
+Texture::Texture(const Atlas& atlas, TextureSettings settings)
+	: m_RID(0), m_Tile(0), m_Settings(settings)
+{
+	m_Tile = TileFactory::GetHandle(atlas);
+	Tile* tile_ref = const_cast<Tile*>(TileFactory::GetConstTileRef(m_Tile));
+	if (!tile_ref)
+	{
+		Logger::LogError(std::string("Cannot create texture from atlas (id=") + std::to_string(atlas.id) + ").");
+		return;
+	}
+
+	TRY(glGenTextures(1, &m_RID));
+	TRY(glBindTexture(GL_TEXTURE_2D, m_RID));
+
+	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)settings.min_filter));
+	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)settings.mag_filter));
+	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.wrap_s));
+	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrap_t));
+
+	// atlas is guaranteed to have 4 channels
+	TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RGBA8, tile_ref->m_Width, tile_ref->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tile_ref->m_ImageBuffer));
+
+	TRY(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
 Texture::Texture(Texture&& texture) noexcept

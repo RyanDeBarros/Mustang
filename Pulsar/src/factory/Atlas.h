@@ -11,13 +11,16 @@ struct POTwrapper
 	int potW, potH;
 };
 
-static struct SortTileSet
+struct SortTileSet
 {
 	int operator() (const std::pair<TileHandle, POTwrapper>& p1, const std::pair<TileHandle, POTwrapper>& p2) const;
 };
 
 class Atlas
 {
+	friend class Tile;
+	friend class Texture;
+	const unsigned int id;
 	unsigned char* m_AtlasBuffer;
 	int m_Width, m_Height;
 	std::set<std::pair<TileHandle, POTwrapper>, SortTileSet> m_TileSet;
