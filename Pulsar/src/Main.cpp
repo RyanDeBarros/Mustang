@@ -1,3 +1,5 @@
+#include "Main.h"
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -31,6 +33,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 int main()
 {
+	return Pulsar::StartUp();
+}
+
+int Pulsar::StartUp()
+{
 	if (!_LoadRendererSettings())
 		return -1;
 	if (!glfwInit())
@@ -54,18 +61,18 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
+	Logger::LogInfo("Welcome to Pulsar Renderer! GL_VERSION:");
+	TRY(Logger::LogInfo(glGetString(GL_VERSION)));
+	Renderer::Init();
+	Renderer::FocusWindow(window);
 	run(window);
+	Renderer::Terminate();
 	glfwTerminate();
 	return 0;
 }
 
 void run(GLFWwindow* window)
 {
-	Logger::LogInfo("Welcome to Pulsar Engine! GL_VERSION:");
-	TRY(Logger::LogInfo(glGetString(GL_VERSION)));
-	Renderer::Init();
-	Renderer::FocusWindow(window);
-
 	double time = glfwGetTime();
 	double deltaTime = 0;
 	double prevTime = time;
@@ -155,6 +162,4 @@ void run(GLFWwindow* window)
 	}
 
 	delete actor1, actor2, actor3, actor4;
-
-	Renderer::Terminate();
 }

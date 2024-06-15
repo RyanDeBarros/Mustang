@@ -192,6 +192,7 @@
     <ClInclude Include="src\factory\UniformLexiconFactory.h" />
     <ClInclude Include="src\factory\RectRender.h" />
     <ClInclude Include="src\Logger.h" />
+    <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\render\ActorComposite.h" />
     <ClInclude Include="src\render\ActorPrimitive.h" />
     <ClInclude Include="src\render\ActorRenderIterator.h" />
