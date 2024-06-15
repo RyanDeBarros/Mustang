@@ -33,9 +33,9 @@ void TextureFactory::Terminate()
 	factory.clear();
 }
 
-TextureHandle TextureFactory::CreateHandle(const char* filepath, const TextureSettings& settings)
+TextureHandle TextureFactory::CreateHandle(const char* filepath, const TextureSettings& settings, const bool& temporary_buffer)
 {
-	Texture texture(filepath, settings);
+	Texture texture(filepath, settings, temporary_buffer);
 	if (texture.IsValid())
 	{
 		TextureHandle handle = handle_cap++;
@@ -45,18 +45,18 @@ TextureHandle TextureFactory::CreateHandle(const char* filepath, const TextureSe
 	else return 0;
 }
 
-TextureHandle TextureFactory::GetHandle(const char* filepath, const TextureSettings& settings, const bool& new_texture)
+TextureHandle TextureFactory::GetHandle(const char* filepath, const TextureSettings& settings, const bool& new_texture, const bool& temporary_buffer)
 {
 	if (new_texture)
 	{
-		return CreateHandle(filepath, settings);
+		return CreateHandle(filepath, settings, temporary_buffer);
 	}
 	for (const auto& [handle, texture] : factory)
 	{
 		if (texture->Equivalent(filepath, settings))
 			return handle;
 	}
-	return CreateHandle(filepath, settings);
+	return CreateHandle(filepath, settings, temporary_buffer);
 }
 
 void TextureFactory::Bind(const TextureHandle& handle, const TextureSlot& slot)
