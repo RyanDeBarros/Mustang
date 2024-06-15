@@ -9,6 +9,7 @@ typedef unsigned short Stride;
 typedef unsigned int ShaderHandle;
 typedef unsigned int TextureHandle;
 typedef unsigned int UniformLexiconHandle;
+typedef unsigned int TileHandle;
 
 typedef signed short ZIndex;
 typedef signed char CanvasIndex;

@@ -9,15 +9,12 @@
 #include "Macros.h"
 
 Texture::Texture(const char* filepath, TextureSettings settings)
-	: m_RID(0), m_Width(0), m_Height(0), m_Filepath(filepath), m_Settings(settings)
+	: m_RID(0), m_Tile(TileFactory::GetHandle(filepath)), m_Settings(settings)
 {
-	stbi_set_flip_vertically_on_load(1);
-	int bpp;
-	unsigned char* image_buffer = stbi_load(filepath, &m_Width, &m_Height, &bpp, STBI_rgb_alpha);
-
-	if (!image_buffer)
+	const Tile* tile_ref = TileFactory::GetConstTileRef(m_Tile);
+	if (!tile_ref)
 	{
-		Logger::LogWarning("Texture '" + m_Filepath + "' could not be loaded!\n" + stbi_failure_reason());
+		Logger::LogError(std::string("Cannot create texture \"") + filepath + "\": Const ref is null.");
 		return;
 	}
 
@@ -28,14 +25,41 @@ Texture::Texture(const char* filepath, TextureSettings settings)
 	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)settings.mag_filter));
 	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.wrap_s));
 	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrap_t));
-	TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_buffer));
+
+	switch (tile_ref->m_BPP)
+	{
+	case 4:
+	{
+		TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RGBA8, tile_ref->m_Width, tile_ref->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tile_ref->m_ImageBuffer));
+		break;
+	}
+	case 3:
+	{
+		TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RGB8, tile_ref->m_Width, tile_ref->m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, tile_ref->m_ImageBuffer));
+		break;
+	}
+	case 2:
+	{
+		TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RG8, tile_ref->m_Width, tile_ref->m_Height, 0, GL_RG, GL_UNSIGNED_BYTE, tile_ref->m_ImageBuffer));
+		break;
+	}
+	case 1:
+	{
+		TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_R8, tile_ref->m_Width, tile_ref->m_Height, 0, GL_RED, GL_UNSIGNED_BYTE, tile_ref->m_ImageBuffer));
+		break;
+	}
+	default:
+	{
+		Logger::LogError(std::string("Cannot create texture \"") + filepath + "\": BPP is not 4, 3, 2, or 1.");
+		return;
+	}
+	}
 
 	TRY(glBindTexture(GL_TEXTURE_2D, 0));
-	stbi_image_free(image_buffer);
 }
 
 Texture::Texture(Texture&& texture) noexcept
-	: m_RID(texture.m_RID), m_Width(texture.m_Width), m_Height(texture.m_Height), m_Filepath(texture.m_Filepath), m_Settings(texture.m_Settings)
+	: m_RID(texture.m_RID), m_Tile(texture.m_Tile), m_Settings(texture.m_Settings)
 {
 	texture.m_RID = 0;
 }

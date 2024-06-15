@@ -8,6 +8,7 @@
 #include "factory/ShaderFactory.h"
 #include "factory/TextureFactory.h"
 #include "factory/UniformLexiconFactory.h"
+#include "factory/TileFactory.h"
 #include "factory/RectRender.h"
 
 std::map<CanvasIndex, CanvasLayer>* Renderer::layers = nullptr;
@@ -24,6 +25,7 @@ void Renderer::Init()
 	ShaderFactory::Init();
 	TextureFactory::Init();
 	UniformLexiconFactory::Init();
+	TileFactory::Init();
 	RectRender::DefineRectRenderable();
 }
 
@@ -96,6 +98,7 @@ void Renderer::Terminate()
 		delete layers;
 	}
 	else null_map();
+	TileFactory::Terminate();
 	UniformLexiconFactory::Terminate();
 	TextureFactory::Terminate();
 	ShaderFactory::Terminate();

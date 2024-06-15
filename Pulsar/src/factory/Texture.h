@@ -5,6 +5,7 @@
 #include <string>
 
 #include "Typedefs.h"
+#include "TileFactory.h"
 
 enum class MinFilter : GLint
 {
@@ -76,8 +77,7 @@ struct TextureSettings
 class Texture
 {
 	RID m_RID;
-	int m_Width, m_Height;
-	std::string m_Filepath;
+	TileHandle m_Tile;
 	TextureSettings m_Settings;
 public:
 	Texture(const char* filepath, TextureSettings settings = TextureSettings());
@@ -88,9 +88,9 @@ public:
 	void Bind(TextureSlot slot = 0) const;
 	void Unbind(TextureSlot slot = 0) const;
 
-	inline int GetWidth() const { return m_Width; }
-	inline int GetHeight() const { return m_Height; }
+	inline int GetWidth() const { return TileFactory::GetWidth(m_Tile); }
+	inline int GetHeight() const { return TileFactory::GetHeight(m_Tile); }
 
-	inline bool Equivalent(const char* filepath, const TextureSettings& settings) const { return m_Filepath == filepath && m_Settings == settings; }
+	inline bool Equivalent(const char* filepath, const TextureSettings& settings) const { return TileFactory::GetFilepath(m_Tile) == filepath && m_Settings == settings; }
 	inline bool IsValid() const { return m_RID > 0; }
 };
