@@ -79,8 +79,13 @@ class Texture
 	RID m_RID;
 	TileHandle m_Tile;
 	TextureSettings m_Settings;
+
+	friend class TextureFactory;
+	inline bool Equivalent(const char* filepath, const TextureSettings& settings) const { return TileFactory::GetFilepath(m_Tile) == filepath && m_Settings == settings; }
+	inline bool IsValid() const { return m_RID > 0; }
+
 public:
-	Texture(const char* filepath, TextureSettings settings = TextureSettings());
+	Texture(const char* filepath, TextureSettings settings = TextureSettings(), bool temporary_buffer = false);
 	Texture(Texture&& texture) noexcept;
 	Texture(const Texture& texture) = delete;
 	~Texture();
@@ -88,9 +93,8 @@ public:
 	void Bind(TextureSlot slot = 0) const;
 	void Unbind(TextureSlot slot = 0) const;
 
+	void SetSettings(const TextureSettings& settings);
+
 	inline int GetWidth() const { return TileFactory::GetWidth(m_Tile); }
 	inline int GetHeight() const { return TileFactory::GetHeight(m_Tile); }
-
-	inline bool Equivalent(const char* filepath, const TextureSettings& settings) const { return TileFactory::GetFilepath(m_Tile) == filepath && m_Settings == settings; }
-	inline bool IsValid() const { return m_RID > 0; }
 };

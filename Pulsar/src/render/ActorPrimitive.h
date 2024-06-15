@@ -31,6 +31,8 @@ public:
 	inline void SetScale(const float& x, const float& y) { m_Transform.scale.x = x; m_Transform.scale.y = y; m_Status |= 0b100; }
 	inline void SetModulation(const glm::vec4& color) { m_ModulationColors = std::vector<glm::vec4>(m_Render.vertexCount, color); m_Status |= 0b1000; }
 	inline void SetModulationPerPoint(const std::vector<glm::vec4>& colors) { m_ModulationColors = colors; m_Status |= 0b1000; }
+
+	inline TextureHandle GetTextureHandle() const { return m_Render.textureHandle; }
 protected:
 	void OnDraw(signed char texture_slot);
 };

@@ -89,12 +89,12 @@ void run(GLFWwindow* window)
 		ASSERT(false);
 	if (loadTexture("res/assets/tux.toml", textureTux) != LOAD_STATUS::OK)
 		ASSERT(false);
-	if (loadTexture("res/assets/flag.toml", textureFlag) != LOAD_STATUS::OK)
+	if (loadTexture("res/assets/flag.toml", textureFlag, true) != LOAD_STATUS::OK)
 		ASSERT(false);
 
 	// Load renderables
 	Renderable renderable;
-	if (loadRenderable("res/assets/renderable.toml", renderable) != LOAD_STATUS::OK)
+	if (loadRenderable("res/assets/renderable.toml", renderable, true) != LOAD_STATUS::OK)
 		ASSERT(false);
 
 	Renderer::AddCanvasLayer(CanvasLayerData(0, _RendererSettings::standard_vertex_pool_size, _RendererSettings::standard_index_pool_size));
@@ -145,6 +145,10 @@ void run(GLFWwindow* window)
 	u = UniformLexiconFactory::GetValue(1, "u_float3test");
 	if (u)
 		Logger::LogInfo(STR(std::get<glm::vec3>(*u)));
+
+	TextureFactory::SetSettings(actor1->GetTextureHandle(), { MinFilter::Linear, MagFilter::Linear, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge });
+
+
 
 	for (;;)
 	{

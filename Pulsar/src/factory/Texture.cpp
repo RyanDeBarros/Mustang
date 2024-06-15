@@ -8,13 +8,22 @@
 #include "Logger.h"
 #include "Macros.h"
 
-Texture::Texture(const char* filepath, TextureSettings settings)
-	: m_RID(0), m_Tile(TileFactory::GetHandle(filepath)), m_Settings(settings)
+Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_buffer)
+	: m_RID(0), m_Tile(0), m_Settings(settings)
 {
-	const Tile* tile_ref = TileFactory::GetConstTileRef(m_Tile);
+	Tile* tile_ref = nullptr;
+	if (temporary_buffer)
+	{
+		tile_ref = new Tile(filepath);
+	}
+	else
+	{
+		m_Tile = TileFactory::GetHandle(filepath);
+		tile_ref = const_cast<Tile*>(TileFactory::GetConstTileRef(m_Tile));
+	}
 	if (!tile_ref)
 	{
-		Logger::LogError(std::string("Cannot create texture \"") + filepath + "\": Const ref is null.");
+		Logger::LogError(std::string("Cannot create texture \"") + filepath + "\": Tile ref is null.");
 		return;
 	}
 
@@ -51,11 +60,15 @@ Texture::Texture(const char* filepath, TextureSettings settings)
 	default:
 	{
 		Logger::LogError(std::string("Cannot create texture \"") + filepath + "\": BPP is not 4, 3, 2, or 1.");
+		if (temporary_buffer)
+			delete tile_ref;
 		return;
 	}
 	}
 
 	TRY(glBindTexture(GL_TEXTURE_2D, 0));
+	if (temporary_buffer)
+		delete tile_ref;
 }
 
 Texture::Texture(Texture&& texture) noexcept
@@ -79,4 +92,15 @@ void Texture::Unbind(TextureSlot slot) const
 {
 	TRY(glActiveTexture(GL_TEXTURE0 + slot));
 	TRY(glBindTexture(GL_TEXTURE_2D, 0));
+}
+
+void Texture::SetSettings(const TextureSettings& settings)
+{
+	Bind();
+	m_Settings = settings;
+	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)settings.min_filter));
+	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)settings.mag_filter));
+	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.wrap_s));
+	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrap_t));
+	Unbind();
 }

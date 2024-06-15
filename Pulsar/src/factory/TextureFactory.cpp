@@ -33,13 +33,8 @@ void TextureFactory::Terminate()
 	factory.clear();
 }
 
-TextureHandle TextureFactory::GetHandle(const char* filepath, TextureSettings settings)
+TextureHandle TextureFactory::CreateHandle(const char* filepath, const TextureSettings& settings)
 {
-	for (const auto& [handle, texture] : factory)
-	{
-		if (texture->Equivalent(filepath, settings))
-			return handle;
-	}
 	Texture texture(filepath, settings);
 	if (texture.IsValid())
 	{
@@ -48,6 +43,20 @@ TextureHandle TextureFactory::GetHandle(const char* filepath, TextureSettings se
 		return handle;
 	}
 	else return 0;
+}
+
+TextureHandle TextureFactory::GetHandle(const char* filepath, const TextureSettings& settings, const bool& new_texture)
+{
+	if (new_texture)
+	{
+		return CreateHandle(filepath, settings);
+	}
+	for (const auto& [handle, texture] : factory)
+	{
+		if (texture->Equivalent(filepath, settings))
+			return handle;
+	}
+	return CreateHandle(filepath, settings);
 }
 
 void TextureFactory::Bind(const TextureHandle& handle, const TextureSlot& slot)
@@ -63,4 +72,13 @@ void TextureFactory::Unbind(const TextureSlot& slot)
 {
 	TRY(glActiveTexture(GL_TEXTURE0 + slot));
 	TRY(glBindTexture(GL_TEXTURE_2D, 0));
+}
+
+void TextureFactory::SetSettings(const TextureHandle& handle, const TextureSettings& settings)
+{
+	Texture* texture = Get(handle);
+	if (texture)
+		texture->SetSettings(settings);
+	else
+		Logger::LogWarning("Failed to set settings at texture handle (" + std::to_string(handle) + ").");
 }

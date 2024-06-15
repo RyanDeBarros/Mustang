@@ -46,7 +46,7 @@ LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
 		return LOAD_STATUS::ASSET_LOAD_ERR;
 }
 
-LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle)
+LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, const bool& new_texture)
 {
 	auto res = toml::parseFile(filepath);
 	if (!res.table)
@@ -108,7 +108,7 @@ LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle)
 		}
 	}
 
-	handle = TextureFactory::GetHandle(path.c_str(), texture_settings);
+	handle = TextureFactory::GetHandle(path.c_str(), texture_settings, new_texture);
 	if (handle > 0)
 		return LOAD_STATUS::OK;
 	else
@@ -295,7 +295,7 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 	return LOAD_STATUS::OK;
 }
 
-LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
+LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, const bool& new_texture)
 {
 	auto res = toml::parseFile(filepath);
 	if (!res.table)
@@ -318,7 +318,7 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable)
 	auto [ok1, texture] = _renderable->getString("texture");
 	if (ok1)
 	{
-		if (loadTexture(texture.c_str(), texture_handle) != LOAD_STATUS::OK)
+		if (loadTexture(texture.c_str(), texture_handle, new_texture) != LOAD_STATUS::OK)
 			return LOAD_STATUS::REFERENCE_ERROR;
 	}
 	renderable.textureHandle = texture_handle;
