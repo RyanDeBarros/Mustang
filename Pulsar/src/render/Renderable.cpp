@@ -103,7 +103,7 @@ bool Renderable::AttachVertexBuffer(toml::Array vertex_array, size_t size)
 	if (vertexBufferData)
 		delete[] vertexBufferData;
 	vertexBufferData = new GLfloat[size];
-	for (size_t i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 	{
 		auto [ok, _double] = vertex_array.getDouble(i);
 		if (!ok)
@@ -122,7 +122,7 @@ bool Renderable::AttachIndexBuffer(toml::Array index_array, size_t size)
 	if (indexBufferData)
 		delete[] indexBufferData;
 	indexBufferData = new GLuint[size];
-	for (size_t i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 	{
 		auto [ok, _int] = index_array.getInt(i);
 		if (!ok)

@@ -182,6 +182,7 @@
     <ClCompile Include="src\factory\ShaderFactory.cpp" />
     <ClCompile Include="src\factory\Texture.cpp" />
     <ClCompile Include="src\factory\TextureFactory.cpp" />
+    <ClCompile Include="src\render\TileMap.cpp" />
     <ClCompile Include="src\render\Transform.cpp" />
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
@@ -211,6 +212,7 @@
     <ClInclude Include="src\factory\ShaderFactory.h" />
     <ClInclude Include="src\factory\Texture.h" />
     <ClInclude Include="src\factory\TextureFactory.h" />
+    <ClInclude Include="src\render\TileMap.h" />
     <ClInclude Include="src\render\Transform.h" />
     <ClInclude Include="src\Typedefs.h" />
     <ClInclude Include="src\Macros.h" />

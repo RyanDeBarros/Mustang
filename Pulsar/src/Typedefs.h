@@ -14,6 +14,8 @@ typedef unsigned int TileHandle;
 typedef signed short ZIndex;
 typedef signed char CanvasIndex;
 
+typedef int AtlasPos;
+
 #include <variant>
 class ActorPrimitive2D;
 class ActorComposite2D;

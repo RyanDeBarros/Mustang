@@ -1,20 +1,9 @@
 #pragma once
 
-#include <set>
+#include <unordered_map>
 
 #include "Typedefs.h"
 #include "Tile.h"
-
-struct POTwrapper
-{
-	TileRect rect;
-	int potW, potH;
-};
-
-struct SortTileSet
-{
-	int operator() (const std::pair<TileHandle, POTwrapper>& p1, const std::pair<TileHandle, POTwrapper>& p2) const;
-};
 
 class Atlas
 {
@@ -22,22 +11,19 @@ class Atlas
 	friend class Texture;
 	const unsigned int id;
 	unsigned char* m_AtlasBuffer;
+	AtlasPos insert_pos;
 	int m_Width, m_Height;
-	std::set<std::pair<TileHandle, POTwrapper>, SortTileSet> m_TileSet;
-
-	static int UpperPot(int n);
-	static int LowerPot(int n);
-	static inline POTwrapper Wrap(const TileRect& rect);
-
-	inline size_t BufferSize() const { return 4 * m_Width * m_Height; }
+	int m_BufferSize;
+	std::unordered_map<TileHandle, AtlasPos> m_Tileset;
 
 public:
 	Atlas(const int& width, const int& height);
+	Atlas(const Atlas&) = delete;
 	~Atlas();
 
 	static void SaveAtlas(const Atlas& atlas, const char* texture_filepath, const char* asset_filepath);
 	static Atlas LoadAtlas(const char* asset_filepath);
 
-	void Insert(const TileHandle& tile);
-	void Pack();
+	bool Insert(const TileHandle& tile);
+	bool Remove(const TileHandle& tile);
 };

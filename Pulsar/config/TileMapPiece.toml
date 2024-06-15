@@ -1,0 +1,19 @@
+header = "renderable"
+
+[renderable.model]
+layout = 0b001101110100
+mask = 0b111111
+
+[renderable]
+# texture slot (1) | condensed P-transform (2) | condensed RS-transform (4) | vertex position (2) | RGBA modulation color (4) | atlas pos (1) 
+vertices = [
+	-1.0,			0.0, 0.0,					1.0, 0.0, 0.0, 1.0,				-0.5, -0.5,			1.0, 1.0, 1.0, 1.0,			0.0,
+	-1.0,			0.0, 0.0,					1.0, 0.0, 0.0, 1.0,				 0.5, -0.5,			1.0, 1.0, 1.0, 1.0,			1.0,
+	-1.0,			0.0, 0.0,					1.0, 0.0, 0.0, 1.0,				 0.5,  0.5,			1.0, 1.0, 1.0, 1.0,			2.0,
+	-1.0,			0.0, 0.0,					1.0, 0.0, 0.0, 1.0,				-0.5,  0.5,			1.0, 1.0, 1.0, 1.0,			1.0
+]
+num_vertices = 4
+indices = [
+	0, 1, 2,
+	2, 3, 0
+]
