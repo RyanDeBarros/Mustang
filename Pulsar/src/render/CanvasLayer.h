@@ -59,11 +59,12 @@ public:
 	inline CanvasIndex GetZIndex() const { return m_Data.ci; }
 	inline CanvasLayerData& GetDataRef() { return m_Data; }
 private:
-	inline void SetBlending() const;
-	inline void PoolOver(const Renderable& render);
-	inline TextureSlot GetTextureSlot(const Renderable&);
-	inline void FlushAndReset();
-	inline void RegisterModel() const;
-	inline void BindBuffers() const;
-	inline void UnbindBuffers() const;
+	void DrawPrimitive(ActorPrimitive2D* const);
+	void SetBlending() const;
+	void PoolOver(const Renderable&);
+	TextureSlot GetTextureSlot(const Renderable&);
+	void FlushAndReset();
+	void RegisterModel() const;
+	void BindBuffers() const;
+	void UnbindBuffers() const;
 };

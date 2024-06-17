@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Typedefs.h"
+#include "ActorSequencer.h"
 #include "ActorPrimitive.h"
 
 enum class CompositeMode
@@ -10,7 +11,7 @@ enum class CompositeMode
 	VOLATILE
 };
 
-class ActorComposite2D
+class ActorComposite2D : virtual public ActorSequencer2D
 {
 	friend class ActorRenderIterator;
 	friend class CanvasLayer;
@@ -22,6 +23,8 @@ class ActorComposite2D
 public:
 	ActorComposite2D(CompositeMode mode, ActorPrimitiveCounter initial_size = 1, ZIndex z = 0);
 	~ActorComposite2D();
+
+	ActorPrimitive2D* operator[](const int& i) const override;
 
 	void Push(ActorPrimitive2D* primitive);
 	ActorPrimitive2D* Get(ActorPrimitiveCounter index);

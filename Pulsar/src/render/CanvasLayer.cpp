@@ -1,7 +1,6 @@
 #include "render/CanvasLayer.h"
 
 #include "Macros.h"
-#include "ActorRenderIterator.h"
 #include "Renderer.h"
 #include "factory/ShaderFactory.h"
 #include "factory/TextureFactory.h"
@@ -116,7 +115,9 @@ bool CanvasLayer::OnDetach(ActorComposite2D* const composite)
 void CanvasLayer::OnDraw()
 {
 	SetBlending();
-	ActorRenderIterator iter;
+	int prim_i = 0;
+	ActorPrimitive2D* primitive = nullptr;
+	ActorSequencer2D* sequencer = nullptr;
 	currentModel = BatchModel();
 	vertexPos = m_VertexPool;
 	indexPos = m_IndexPool;
@@ -124,40 +125,43 @@ void CanvasLayer::OnDraw()
 	{
 		for (const auto& element : *list.second)
 		{
-			iter = std::visit([](auto&& arg) { return ActorRenderIterator(arg); }, element);
-			while (*iter)
+			if (element.index() == 0)
+				DrawPrimitive(std::get<ActorPrimitive2D* const>(element));
+			else
 			{
-				ActorPrimitive2D* const primitive = *iter;
-				if ((primitive->m_Status & 1) == 0)
-				{
-					++iter;
-					continue;
-				}
-				const auto& render = primitive->m_Render;
-				if (render.model != currentModel)
-				{
-					FlushAndReset();
-					currentModel = render.model;
-					if (m_VAOs->find(currentModel) == m_VAOs->end())
-					{
-						RegisterModel();
-					}
-				}
-				else if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(render)
-						|| m_Data.maxIndexPoolSize - (indexPos - m_IndexPool) < render.indexCount)
-				{
-					FlushAndReset();
-				}
-				primitive->OnDraw(GetTextureSlot(render));
-				PoolOver(render);
-				++iter;
+				prim_i = 0;
+				sequencer = std::get<ActorSequencer2D* const>(element);
+				while ((primitive = sequencer->operator[](prim_i++)) != nullptr)
+					DrawPrimitive(primitive);
 			}
 		}
 	}
 	FlushAndReset();
 }
 
-inline void CanvasLayer::SetBlending() const
+void CanvasLayer::DrawPrimitive(ActorPrimitive2D* const primitive)
+{
+	if ((primitive->m_Status & 1) > 0)
+	{
+		const auto& render = primitive->m_Render;
+		if (render.model != currentModel)
+		{
+			FlushAndReset();
+			currentModel = render.model;
+			if (m_VAOs->find(currentModel) == m_VAOs->end())
+				RegisterModel();
+		}
+		else if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(render)
+				|| m_Data.maxIndexPoolSize - (indexPos - m_IndexPool) < render.indexCount)
+		{
+			FlushAndReset();
+		}
+		primitive->OnDraw(GetTextureSlot(render));
+		PoolOver(render);
+	}
+}
+
+void CanvasLayer::SetBlending() const
 {
 	if (m_Data.enableGLBlend)
 	{

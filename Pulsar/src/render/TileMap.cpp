@@ -15,3 +15,9 @@ TileMap::~TileMap()
 	if (m_Atlas)
 		delete m_Atlas;
 }
+
+ActorPrimitive2D* TileMap::operator[](const int& i) const
+{
+	// TODO
+	return nullptr;
+}

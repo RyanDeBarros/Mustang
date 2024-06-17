@@ -202,7 +202,7 @@
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\render\ActorComposite.h" />
     <ClInclude Include="src\render\ActorPrimitive.h" />
-    <ClInclude Include="src\render\ActorRenderIterator.h" />
+    <ClInclude Include="src\render\ActorSequencer.h" />
     <ClInclude Include="src\render\CanvasLayer.h" />
     <ClInclude Include="src\render\LayerView.h" />
     <ClInclude Include="src\render\Renderable.h" />

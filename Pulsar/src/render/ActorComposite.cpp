@@ -22,6 +22,13 @@ ActorComposite2D::~ActorComposite2D()
 	cap = head = tail = nullptr;
 }
 
+ActorPrimitive2D* ActorComposite2D::operator[](const int& i) const
+{
+	if (head - tail > i)
+		return nullptr;
+	return *(tail + i);
+}
+
 void ActorComposite2D::Push(ActorPrimitive2D* primitive)
 {
 	_try_increase_alloc();
