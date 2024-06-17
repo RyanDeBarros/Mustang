@@ -65,7 +65,7 @@ void CanvasLayer::OnAttach(ActorPrimitive2D* const primitive)
 	entry->second->push_back(primitive);
 }
 
-void CanvasLayer::OnAttach(ActorComposite2D* const composite)
+void CanvasLayer::OnAttach(ActorSequencer2D* const composite)
 {
 	auto entry = m_Batcher->find(composite->GetZIndex());
 	if (entry == m_Batcher->end())
@@ -85,11 +85,11 @@ bool CanvasLayer::OnSetZIndex(ActorPrimitive2D* const primitive, const ZIndex ne
 	return true;
 }
 
-bool CanvasLayer::OnSetZIndex(ActorComposite2D* const composite, const ZIndex new_val)
+bool CanvasLayer::OnSetZIndex(ActorSequencer2D* const composite, const ZIndex new_val)
 {
 	if (!OnDetach(composite))
 		return false;
-	composite->m_CompositeZ = new_val;
+	composite->SetZIndex(new_val);
 	OnAttach(composite);
 	return true;
 }
@@ -103,7 +103,7 @@ bool CanvasLayer::OnDetach(ActorPrimitive2D* const primitive)
 	return true;
 }
 
-bool CanvasLayer::OnDetach(ActorComposite2D* const composite)
+bool CanvasLayer::OnDetach(ActorSequencer2D* const composite)
 {
 	auto entry = m_Batcher->find(composite->GetZIndex());
 	if (entry == m_Batcher->end())

@@ -24,7 +24,8 @@ public:
 	ActorComposite2D(CompositeMode mode, ActorPrimitiveCounter initial_size = 1, ZIndex z = 0);
 	~ActorComposite2D();
 
-	ActorPrimitive2D* operator[](const int& i) const override;
+	ActorPrimitive2D* operator[](const int& i) override;
+	inline ZIndex GetZIndex() const override { return m_CompositeZ; }
 
 	void Push(ActorPrimitive2D* primitive);
 	ActorPrimitive2D* Get(ActorPrimitiveCounter index);
@@ -34,8 +35,8 @@ public:
 	ActorPrimitive2D* Remove(ActorPrimitiveCounter index);
 	bool Erase(ActorPrimitive2D* primitive);
 
-	inline ZIndex GetZIndex() const { return m_CompositeZ; }
 private:
+	inline void SetZIndex(const ZIndex& z) override { m_CompositeZ = z; }
 	void _assert_valid_index(ActorPrimitiveCounter index);
 	void _try_increase_alloc();
 	void _try_decrease_alloc();

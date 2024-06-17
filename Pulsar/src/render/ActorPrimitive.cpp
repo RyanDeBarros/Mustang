@@ -7,6 +7,11 @@ ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& 
 {
 }
 
+ActorPrimitive2D::ActorPrimitive2D(const ActorPrimitive2D& primitive)
+	: m_Render(primitive.m_Render), m_Transform(primitive.m_Transform), m_Z(primitive.m_Z), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
+{
+}
+
 void ActorPrimitive2D::OnDraw(signed char texture_slot)
 {
 	if (!m_Render.vertexBufferData)

@@ -13,6 +13,7 @@
 #include "render/ActorPrimitive.h"
 #include "factory/RectRender.h"
 #include "factory/UniformLexiconFactory.h"
+#include "render/ActorTesselation.h"
 
 void run(GLFWwindow*);
 
@@ -149,6 +150,25 @@ void run(GLFWwindow* window)
 	TextureFactory::SetSettings(actor1->GetTextureHandle(), { MinFilter::Linear, MagFilter::Linear, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge });
 
 
+	actor3->SetPivot(0.5f, 0.5f);
+	actor3->SetPosition(0.0f, 0.0f);
+	actor3->SetScale(0.1f, 0.1f);
+	Renderer::GetCanvasLayer(0)->OnDetach(actor3);
+
+	ActorTesselation2D tessel(*actor3);
+	Renderer::GetCanvasLayer(0)->OnAttach(&tessel);
+
+	float sx = actor3->GetTransform().scale.x, sy = actor3->GetTransform().scale.y;
+	float w = actor3->GetWidth() * sx, h = actor3->GetHeight() * sy;
+	tessel.RectVectorRef() = {{0.0f, 0.0f, 0.0f, sx, sy}, {w , 0.0f, 0.0f, sx, sy}, {2 * w, 0.0f, 0.0f, sx, sy}};
+	Renderer::GetCanvasLayer(0)->OnSetZIndex(&tessel, 10);
+
+	tessel.ActorRef().SetModulationPerPoint({
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
+		glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
+	});
 
 	for (;;)
 	{

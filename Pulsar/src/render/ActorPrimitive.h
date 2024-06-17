@@ -10,6 +10,7 @@ class ActorPrimitive2D
 {
 protected:
 	friend class CanvasLayer;
+	friend class ActorTesselation2D;
 	ZIndex m_Z;
 	Renderable m_Render;
 	Transform2D m_Transform;
@@ -19,9 +20,11 @@ protected:
 
 public:
 	ActorPrimitive2D(const Renderable& render = Renderable(), const Transform2D& transform = Transform2D(), const ZIndex& z = 0, const bool& visible = true);
+	ActorPrimitive2D(const ActorPrimitive2D& primitive);
 	
 	// TODO mostly just for testing. these properties will be set with subclasses that have access to the protected data members.
 	inline ZIndex GetZIndex() const { return m_Z; }
+	inline const Transform2D& GetTransform() const { return m_Transform; }
 	inline void SetShaderHandle(const ShaderHandle& handle) { m_Render.model.shader = handle; }
 	inline void SetTextureHandle(const TextureHandle& handle) { m_Render.textureHandle = handle; }
 	// TODO mostly just for testing. these methods will be protected eventually.

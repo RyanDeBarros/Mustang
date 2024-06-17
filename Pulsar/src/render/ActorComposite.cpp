@@ -22,7 +22,7 @@ ActorComposite2D::~ActorComposite2D()
 	cap = head = tail = nullptr;
 }
 
-ActorPrimitive2D* ActorComposite2D::operator[](const int& i) const
+ActorPrimitive2D* ActorComposite2D::operator[](const int& i)
 {
 	if (head - tail > i)
 		return nullptr;

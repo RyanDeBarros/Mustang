@@ -47,12 +47,12 @@ public:
 	CanvasLayer(CanvasLayerData data);
 	~CanvasLayer();
 
-	void OnAttach(ActorPrimitive2D* const primitive);
-	void OnAttach(ActorComposite2D* const composite);
-	bool OnSetZIndex(ActorPrimitive2D* const primitive, const ZIndex new_val);
-	bool OnSetZIndex(ActorComposite2D* const composite, const ZIndex new_val);
-	bool OnDetach(ActorPrimitive2D* const primitive);
-	bool OnDetach(ActorComposite2D* const composite);
+	void OnAttach(ActorPrimitive2D* const actor);
+	void OnAttach(ActorSequencer2D* const seq);
+	bool OnSetZIndex(ActorPrimitive2D* const actor, const ZIndex new_val);
+	bool OnSetZIndex(ActorSequencer2D* const actor, const ZIndex new_val);
+	bool OnDetach(ActorPrimitive2D* const actor);
+	bool OnDetach(ActorSequencer2D* const actor);
 	void OnDraw();
 
 	inline LayerView2D& GetLayerView2DRef() { return m_LayerView; }
