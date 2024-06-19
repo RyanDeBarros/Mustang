@@ -19,7 +19,7 @@ typedef int AtlasPos;
 #include <variant>
 class ActorPrimitive2D;
 class ActorSequencer2D;
-typedef std::variant<ActorPrimitive2D* const, ActorSequencer2D* const> ActorRenderBase2D;
+typedef std::variant<ActorPrimitive2D* const, ActorSequencer2D* const> ActorRenderBase2D_P;
 
 #include "GL/glew.h"
 typedef GLuint RID;

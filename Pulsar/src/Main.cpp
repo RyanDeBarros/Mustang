@@ -155,7 +155,7 @@ void run(GLFWwindow* window)
 	actor3->SetScale(0.1f, 0.1f);
 	Renderer::GetCanvasLayer(0)->OnDetach(actor3);
 
-	ActorTesselation2D tessel(*actor3);
+	ActorTesselation2D tessel(actor3);
 	Renderer::GetCanvasLayer(0)->OnAttach(&tessel);
 
 	float sx = actor3->GetTransform().scale.x, sy = actor3->GetTransform().scale.y;
@@ -163,12 +163,17 @@ void run(GLFWwindow* window)
 	tessel.RectVectorRef() = {{0.0f, 0.0f, 0.0f, sx, sy}, {w , 0.0f, 0.0f, sx, sy}, {2 * w, 0.0f, 0.0f, sx, sy}};
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(&tessel, 10);
 
-	tessel.ActorRef().SetModulationPerPoint({
+	std::get<ActorPrimitive2D* const>(tessel.ActorRef())->SetModulationPerPoint({
 		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 		glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
 		glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
 	});
+
+	ActorTesselation2D tesselVertical(&tessel);
+	Renderer::GetCanvasLayer(0)->OnDetach(&tessel);
+	Renderer::GetCanvasLayer(0)->OnAttach(&tesselVertical);
+	tesselVertical.RectVectorRef() = { {0.0f, 0.0f, 0.0f, sx, sy}, {0.0f, -h, 0.0f, sx, sy}, {0.0f, -2 * h, 0.0f, sx, sy} };
 
 	for (;;)
 	{

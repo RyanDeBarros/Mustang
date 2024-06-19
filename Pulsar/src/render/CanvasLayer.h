@@ -34,7 +34,7 @@ class CanvasLayer
 {
 	CanvasLayerData m_Data;
 	LayerView2D m_LayerView;
-	std::map<ZIndex, std::list<ActorRenderBase2D>*>* m_Batcher;
+	std::map<ZIndex, std::list<ActorRenderBase2D_P>*>* m_Batcher;
 	GLfloat* m_VertexPool;
 	GLfloat* vertexPos;
 	GLuint* m_IndexPool;

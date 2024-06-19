@@ -26,6 +26,7 @@ public:
 
 	ActorPrimitive2D* operator[](const int& i) override;
 	inline ZIndex GetZIndex() const override { return m_CompositeZ; }
+	BufferCounter PrimitiveCount() const override { return head - tail; }
 
 	void Push(ActorPrimitive2D* primitive);
 	ActorPrimitive2D* Get(ActorPrimitiveCounter index);

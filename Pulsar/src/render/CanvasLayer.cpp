@@ -10,7 +10,7 @@ CanvasLayer::CanvasLayer(CanvasLayerData data)
 	: m_Data(data), m_LayerView((float)m_Data.pLeft, (float)m_Data.pRight, (float)m_Data.pBottom, (float)m_Data.pTop)
 {
 	m_VAOs = new std::unordered_map<BatchModel, VAO>();
-	m_Batcher = new std::map<ZIndex, std::list<ActorRenderBase2D>*>();
+	m_Batcher = new std::map<ZIndex, std::list<ActorRenderBase2D_P>*>();
 	m_VertexPool = new GLfloat[m_Data.maxVertexPoolSize];
 	m_IndexPool = new GLuint[m_Data.maxIndexPoolSize];
 	vertexPos = m_VertexPool;
@@ -59,7 +59,7 @@ void CanvasLayer::OnAttach(ActorPrimitive2D* const primitive)
 	auto entry = m_Batcher->find(primitive->GetZIndex());
 	if (entry == m_Batcher->end())
 	{
-		m_Batcher->emplace(primitive->GetZIndex(), new std::list<ActorRenderBase2D>());
+		m_Batcher->emplace(primitive->GetZIndex(), new std::list<ActorRenderBase2D_P>());
 		entry = m_Batcher->find(primitive->GetZIndex());
 	}
 	entry->second->push_back(primitive);
@@ -70,7 +70,7 @@ void CanvasLayer::OnAttach(ActorSequencer2D* const composite)
 	auto entry = m_Batcher->find(composite->GetZIndex());
 	if (entry == m_Batcher->end())
 	{
-		m_Batcher->emplace(composite->GetZIndex(), new std::list<ActorRenderBase2D>());
+		m_Batcher->emplace(composite->GetZIndex(), new std::list<ActorRenderBase2D_P>());
 		entry = m_Batcher->find(composite->GetZIndex());
 	}
 	entry->second->push_back(composite);

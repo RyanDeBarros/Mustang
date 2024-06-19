@@ -13,19 +13,20 @@ struct TesselRect
 
 class ActorTesselation2D : virtual public ActorSequencer2D
 {
-	ActorPrimitive2D m_Actor;
+	ActorRenderBase2D_P m_Actor;
 	std::vector<TesselRect> m_RectVector;
 
-	inline void SetZIndex(const ZIndex& z) override { m_Actor.m_Z = z; }
+	void SetZIndex(const ZIndex& z) override;
 public:
-	ActorTesselation2D(ActorPrimitive2D actor);
+	ActorTesselation2D(ActorRenderBase2D_P actor);
 	~ActorTesselation2D();
 
-	inline ActorPrimitive2D& ActorRef() { return m_Actor; }
+	inline ActorRenderBase2D_P ActorRef() const { return m_Actor; }
 	inline std::vector<TesselRect>& RectVectorRef() { return m_RectVector; }
 
 	void Insert(const TesselRect& rect);
 	
 	ActorPrimitive2D* operator[](const int& i) override;
-	inline ZIndex GetZIndex() const override { return m_Actor.m_Z; }
+	ZIndex GetZIndex() const override;
+	BufferCounter PrimitiveCount() const override;
 };
