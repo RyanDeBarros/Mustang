@@ -158,22 +158,30 @@ void run(GLFWwindow* window)
 	ActorTesselation2D tessel(actor3);
 	Renderer::GetCanvasLayer(0)->OnAttach(&tessel);
 
-	float sx = actor3->GetTransform().scale.x, sy = actor3->GetTransform().scale.y;
-	float w = actor3->GetWidth() * sx, h = actor3->GetHeight() * sy;
-	tessel.RectVectorRef() = {{0.0f, 0.0f, 0.0f, sx, sy}, {w , 0.0f, 0.0f, sx, sy}, {2 * w, 0.0f, 0.0f, sx, sy}};
+	float w = actor3->GetWidth() * actor3->GetTransform().scale.x;
+	float h = actor3->GetHeight() * actor3->GetTransform().scale.y;
+	tessel.RectVectorRef() = { {{0.0f, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{w, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{2 * w, 0.0f}, 0.5f, {1.0f, 1.0f}} };
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(&tessel, 10);
 
-	std::get<ActorPrimitive2D* const>(tessel.ActorRef())->SetModulationPerPoint({
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-		glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
-		glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
-	});
+	if (tessel.ActorRef().index() == 0)
+	{
+		std::get<ActorPrimitive2D* const>(tessel.ActorRef())->SetModulationPerPoint({
+			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+			glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
+			glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
+		});
+	}
 
 	ActorTesselation2D tesselVertical(&tessel);
 	Renderer::GetCanvasLayer(0)->OnDetach(&tessel);
 	Renderer::GetCanvasLayer(0)->OnAttach(&tesselVertical);
-	tesselVertical.RectVectorRef() = { {0.0f, 0.0f, 0.0f, sx, sy}, {0.0f, -h, 0.0f, sx, sy}, {0.0f, -2 * h, 0.0f, sx, sy} };
+	tesselVertical.RectVectorRef() = { {{0.0f, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{0.0f, -h}, 0.0f, {1.0f, 1.0f}}, {{0.0f, -2 * h}, 0.5f, {1.0f, 1.0f}} };
+
+	ActorTesselation2D tesselDiagonal(&tesselVertical);
+	Renderer::GetCanvasLayer(0)->OnDetach(&tesselVertical);
+	Renderer::GetCanvasLayer(0)->OnAttach(&tesselDiagonal);
+	tesselDiagonal.RectVectorRef() = { {{0.0f, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{-0.5f * w, 0.5 * h}, -0.8f, {0.75f, -0.75f}} };
 
 	for (;;)
 	{

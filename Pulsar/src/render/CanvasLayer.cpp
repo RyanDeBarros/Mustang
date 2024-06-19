@@ -131,8 +131,10 @@ void CanvasLayer::OnDraw()
 			{
 				prim_i = 0;
 				sequencer = std::get<ActorSequencer2D* const>(element);
+				sequencer->OnPreDraw();
 				while ((primitive = sequencer->operator[](prim_i++)) != nullptr)
 					DrawPrimitive(primitive);
+				sequencer->OnPostDraw();
 			}
 		}
 	}

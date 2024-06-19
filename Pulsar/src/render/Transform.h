@@ -7,6 +7,8 @@ struct Transform2D
 	glm::vec2 position = glm::vec2(0.0f, 0.0f);
 	glm::float32 rotation = 0.0f;
 	glm::vec2 scale = glm::vec2(1.0f, 1.0f);
+
+	Transform2D operator^(const Transform2D& transform);
 };
 
 namespace Transform

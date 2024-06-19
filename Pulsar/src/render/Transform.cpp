@@ -28,3 +28,8 @@ namespace Transform {
 	}
 
 }
+
+Transform2D Transform2D::operator^(const Transform2D& transform)
+{
+	return { position + transform.position, rotation + transform.rotation, scale * transform.scale };
+}
