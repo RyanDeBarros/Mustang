@@ -9,7 +9,8 @@
 #include "factory/TextureFactory.h"
 #include "factory/UniformLexiconFactory.h"
 #include "factory/TileFactory.h"
-#include "factory/RectRender.h"
+#include "render/RectRender.h"
+#include "render/AtlasPrimitive.h"
 
 std::map<CanvasIndex, CanvasLayer>* Renderer::layers = nullptr;
 GLFWwindow* focused_window;
@@ -27,6 +28,7 @@ void Renderer::Init()
 	UniformLexiconFactory::Init();
 	TileFactory::Init();
 	RectRender::DefineRectRenderable();
+	AtlasPrimitive::DefineRectRenderable();
 }
 
 void Renderer::OnDraw()

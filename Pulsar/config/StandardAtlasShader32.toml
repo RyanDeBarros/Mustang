@@ -1,0 +1,5 @@
+header = "shader"
+
+[shader]
+vertex = "config/StandardAtlas.vert"
+fragment = "config/Standard32.frag"

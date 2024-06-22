@@ -51,10 +51,10 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 	{
 		for (BufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
 		{
-			m_Render.vertexBufferData[i * stride + 9] = m_ModulationColors[i][0];
-			m_Render.vertexBufferData[i * stride + 10] = m_ModulationColors[i][1];
-			m_Render.vertexBufferData[i * stride + 11] = m_ModulationColors[i][2];
-			m_Render.vertexBufferData[i * stride + 12] = m_ModulationColors[i][3];
+			m_Render.vertexBufferData[i * stride + 7] = m_ModulationColors[i][0];
+			m_Render.vertexBufferData[i * stride + 8] = m_ModulationColors[i][1];
+			m_Render.vertexBufferData[i * stride + 9] = m_ModulationColors[i][2];
+			m_Render.vertexBufferData[i * stride + 10] = m_ModulationColors[i][3];
 		}
 		m_Status &= ~0b1000;
 	}

@@ -6,6 +6,7 @@ layout(location=2) in vec4 i_TransformRS;
 layout(location=3) in vec4 i_Color;
 layout(location=4) in vec2 i_Position;
 layout(location=5) in vec2 i_TexCoord;
+layout(location=6) in float i_AtlasTexel;
 
 uniform mat3 u_VP = mat3(vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0));
 

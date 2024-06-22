@@ -30,12 +30,12 @@ void RectRender::SetPivot(float pivotX, float pivotY)
 	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
 	int width = GetWidth();
 	int height = GetHeight();
-	m_Render.vertexBufferData[7] = -pivotX * width;
-	m_Render.vertexBufferData[8] = -pivotY * height;
-	m_Render.vertexBufferData[7 + stride] = (1 - pivotX) * width;
-	m_Render.vertexBufferData[8 + stride] = -pivotY * height;
-	m_Render.vertexBufferData[7 + 2 * stride] = (1 - pivotX) * width;
-	m_Render.vertexBufferData[8 + 2 * stride] = (1 - pivotY) * height;
-	m_Render.vertexBufferData[7 + 3 * stride] = -pivotX * width;
-	m_Render.vertexBufferData[8 + 3 * stride] = (1 - pivotY) * height;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos] = -pivotX * width;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 1] = -pivotY * height;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + stride] = (1 - pivotX) * width;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 1 + stride] = -pivotY * height;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 * stride] = (1 - pivotX) * width;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 1 + 2 * stride] = (1 - pivotY) * height;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 * stride] = -pivotX * width;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 1 + 3 * stride] = (1 - pivotY) * height;
 }

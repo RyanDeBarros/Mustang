@@ -168,7 +168,8 @@
     <ClCompile Include="src\factory\TileFactory.cpp" />
     <ClCompile Include="src\factory\UniformLexicon.cpp" />
     <ClCompile Include="src\factory\UniformLexiconFactory.cpp" />
-    <ClCompile Include="src\factory\RectRender.cpp" />
+    <ClCompile Include="src\render\AtlasPrimitive.cpp" />
+    <ClCompile Include="src\render\RectRender.cpp" />
     <ClCompile Include="src\RendererSettings.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -198,7 +199,8 @@
     <ClInclude Include="src\factory\TileFactory.h" />
     <ClInclude Include="src\factory\UniformLexicon.h" />
     <ClInclude Include="src\factory\UniformLexiconFactory.h" />
-    <ClInclude Include="src\factory\RectRender.h" />
+    <ClInclude Include="src\render\AtlasPrimitive.h" />
+    <ClInclude Include="src\render\RectRender.h" />
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\render\ActorComposite.h" />

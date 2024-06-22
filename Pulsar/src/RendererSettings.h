@@ -9,6 +9,7 @@ namespace _RendererSettings
 {
 	extern const char* settings_filepath;
 	extern std::string rect_renderable_filepath;
+	extern std::string atlas_renderable_filepath;
 	extern int initial_window_width, initial_window_height;
 	extern TextureSlot max_texture_slots;
 	extern VertexSize standard_vertex_pool_size;
@@ -17,4 +18,6 @@ namespace _RendererSettings
 
 	extern const char* standard_shader8_assetfile;
 	extern const char* standard_shader32_assetfile;
+	extern const char* standard_atlas_shader8_assetfile;
+	extern const char* standard_atlas_shader32_assetfile;
 }

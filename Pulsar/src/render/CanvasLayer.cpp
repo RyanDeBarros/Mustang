@@ -179,9 +179,9 @@ void CanvasLayer::SetBlending() const
 inline void CanvasLayer::PoolOver(const Renderable& render)
 {
 	if (render.vertexBufferData)
-		memcpy_s(vertexPos, m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool), render.vertexBufferData, Render::VertexBufferLayoutCount(render) * sizeof(GLfloat));
+		memcpy_s(vertexPos, (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool)) * sizeof(VertexSize), render.vertexBufferData, Render::VertexBufferLayoutCount(render) * sizeof(GLfloat));
 	if (render.indexBufferData)
-		memcpy_s(indexPos, m_Data.maxIndexPoolSize - (indexPos - m_IndexPool), render.indexBufferData, render.indexCount * sizeof(GLuint));
+		memcpy_s(indexPos, (m_Data.maxIndexPoolSize - (indexPos - m_IndexPool)) * sizeof(VertexSize), render.indexBufferData, render.indexCount * sizeof(GLuint));
 	if (render.vertexCount)
 		for (PointerOffset ic = 0; ic < render.indexCount; ic++)
 			*(indexPos + ic) += (GLuint)(vertexPos - m_VertexPool) / Render::StrideCountOf(render.model.layout, render.model.layoutMask);

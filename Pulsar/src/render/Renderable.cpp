@@ -90,6 +90,28 @@ Renderable::Renderable(const Renderable& other) noexcept
 	}
 }
 
+void Renderable::operator=(const Renderable& other) noexcept
+{
+	model = other.model;
+	textureHandle = other.textureHandle;
+	if (vertexBufferData)
+		delete[] vertexBufferData;
+	vertexBufferData = nullptr;
+	vertexCount = other.vertexCount;
+	if (indexBufferData)
+		delete[] indexBufferData;
+	indexBufferData = nullptr;
+	indexCount = other.indexCount;
+	if (other.vertexBufferData && other.indexBufferData)
+	{
+		auto buffer_size = Render::VertexBufferLayoutCount(other);
+		vertexBufferData = new GLfloat[buffer_size];
+		indexBufferData = new GLuint[indexCount];
+		memcpy_s(vertexBufferData, buffer_size * sizeof(GLfloat), other.vertexBufferData, buffer_size * sizeof(GLfloat));
+		memcpy_s(indexBufferData, indexCount * sizeof(GLuint), other.indexBufferData, indexCount * sizeof(GLuint));
+	}
+}
+
 Renderable::~Renderable()
 {
 	if (vertexBufferData)
