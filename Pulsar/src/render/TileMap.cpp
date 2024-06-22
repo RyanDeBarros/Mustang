@@ -25,7 +25,7 @@ ActorPrimitive2D* TileMap::operator[](const int& i)
 		ClearCache();
 	while (cache_iter != m_Map.end())
 	{
-		primitive = cache_iter->second[i - cache_iter_offset];
+		primitive = cache_iter->second[static_cast<int>(i - cache_iter_offset)];
 		if (primitive)
 		{
 			cache_i = i;

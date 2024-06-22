@@ -188,9 +188,10 @@ void run(GLFWwindow* window)
 	//Renderer::GetCanvasLayer(0)->OnAttach(&tessel);
 	//Renderer::GetCanvasLayer(0)->OnAttach(actor3);
 	
-	w = TextureFactory::GetWidth(textureSnowman);
-	h = TextureFactory::GetHeight(textureSnowman);
-	actor2->CropToRect({ 0.3f * w, 0.4f * h, 0.4f * w, 0.55f * h }, w, h);
+	//w = static_cast<float>(TextureFactory::GetWidth(textureSnowman));
+	//h = static_cast<float>(TextureFactory::GetHeight(textureSnowman));
+	//actor2->CropToRect({ 0.3f * w, 0.4f * h, 0.4f * w, 0.55f * h }, static_cast<int>(w), static_cast<int>(h));
+	actor2->CropToRelativeRect({ 0.3f, 0.4f, 0.4f, 0.55f });
 
 	for (;;)
 	{

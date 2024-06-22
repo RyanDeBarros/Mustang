@@ -11,7 +11,7 @@ ActorTesselation2D::ActorTesselation2D(ActorRenderBase2D_P actor)
 	else
 	{
 		m_ActorOffsets.reserve(RenderSeqCount());
-		for (int i = 0; i < RenderSeqCount(); i++)
+		for (BufferCounter i = 0; i < RenderSeqCount(); i++)
 			m_ActorOffsets.push_back({});
 	}
 }
@@ -27,7 +27,7 @@ void ActorTesselation2D::Insert(const Transform2D& rect)
 
 ActorPrimitive2D* ActorTesselation2D::operator[](const int& i)
 {
-	if (i >= PrimitiveCount())
+	if (i >= static_cast<int>(PrimitiveCount()))
 		return nullptr;
 	if (m_Actor.index() == 0)
 	{
@@ -62,9 +62,9 @@ ZIndex ActorTesselation2D::GetZIndex() const
 BufferCounter ActorTesselation2D::PrimitiveCount() const
 {
 	if (m_Actor.index() == 0)
-		return m_RectVector.size();
+		return static_cast<BufferCounter>(m_RectVector.size());
 	else
-		return m_RectVector.size() * RenderSeqCount();
+		return static_cast<BufferCounter>(m_RectVector.size()) * RenderSeqCount();
 }
 
 void ActorTesselation2D::OnPreDraw()

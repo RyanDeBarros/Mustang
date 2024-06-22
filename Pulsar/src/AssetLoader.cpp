@@ -104,7 +104,7 @@ LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, const bool&
 		auto [ok6, lod_level] = settings->getInt("lod_level");
 		if (ok6)
 		{
-			texture_settings.lod_level = (GLint)lod_level;
+			texture_settings.lod_level = static_cast<GLint>(lod_level);
 		}
 	}
 
@@ -149,7 +149,7 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 			auto a = uniform.getInt("value");
 			if (!a.first)
 				return LOAD_STATUS::SYNTAX_ERR;
-			u = (GLint)a.second;
+			u = static_cast<GLint>(a.second);
 			break;
 		}
 		case 1:
@@ -181,7 +181,7 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 			auto a = uniform.getInt("value");
 			if (!a.first)
 				return LOAD_STATUS::SYNTAX_ERR;
-			u = (GLuint)a.second;
+			u = static_cast<GLint>(a.second);
 			break;
 		}
 		case 5:
@@ -213,7 +213,7 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 			auto a = uniform.getDouble("value");
 			if (!a.first)
 				return LOAD_STATUS::SYNTAX_ERR;
-			u = (GLfloat)a.second;
+			u = static_cast<GLint>(a.second);
 			break;
 		}
 		case 9:
@@ -221,7 +221,7 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 			auto a = uniform.getArray("value");
 			if (!a)
 				return LOAD_STATUS::SYNTAX_ERR;
-			u = glm::vec2((float)(a->getDouble(0).second), (float)(a->getDouble(1).second));
+			u = glm::vec2(static_cast<float>(a->getDouble(0).second), static_cast<float>(a->getDouble(1).second));
 			break;
 		}
 		case 10:
@@ -229,7 +229,7 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 			auto a = uniform.getArray("value");
 			if (!a)
 				return LOAD_STATUS::SYNTAX_ERR;
-			u = glm::vec3((float)(a->getDouble(0).second), (float)(a->getDouble(1).second), (float)(a->getDouble(2).second));
+			u = glm::vec3(static_cast<float>(a->getDouble(0).second), static_cast<float>(a->getDouble(1).second), static_cast<float>(a->getDouble(2).second));
 			break;
 		}
 		case 11:
@@ -237,7 +237,7 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 			auto a = uniform.getArray("value");
 			if (!a)
 				return LOAD_STATUS::SYNTAX_ERR;
-			u = glm::vec4((float)(a->getDouble(0).second), (float)(a->getDouble(1).second), (float)(a->getDouble(2).second), (float)(a->getDouble(3).second));
+			u = glm::vec4(static_cast<float>(a->getDouble(0).second), static_cast<float>(a->getDouble(1).second), static_cast<float>(a->getDouble(2).second), static_cast<float>(a->getDouble(3).second));
 			break;
 		}
 		case 12:
@@ -249,7 +249,7 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 			auto col1 = a->getArray(1);
 			if (!col0 || !col1)
 				return LOAD_STATUS::SYNTAX_ERR;
-			u = glm::mat2((float)(col0->getDouble(0).second), (float)(col0->getDouble(1).second), (float)(col1->getDouble(0).second), (float)(col1->getDouble(1).second));
+			u = glm::mat2(static_cast<float>(col0->getDouble(0).second), static_cast<float>(col0->getDouble(1).second), static_cast<float>(col1->getDouble(0).second), static_cast<float>(col1->getDouble(1).second));
 			break;
 		}
 		case 13:
@@ -263,9 +263,9 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 			if (!col0 || !col1 || !col2)
 				return LOAD_STATUS::SYNTAX_ERR;
 			u = glm::mat3(
-				(float)(col0->getDouble(0).second), (float)(col0->getDouble(1).second), (float)(col0->getDouble(2).second),
-				(float)(col1->getDouble(0).second), (float)(col1->getDouble(1).second), (float)(col1->getDouble(2).second),
-				(float)(col2->getDouble(0).second), (float)(col2->getDouble(1).second), (float)(col2->getDouble(2).second)
+				static_cast<float>(col0->getDouble(0).second), static_cast<float>(col0->getDouble(1).second), static_cast<float>(col0->getDouble(2).second),
+				static_cast<float>(col1->getDouble(0).second), static_cast<float>(col1->getDouble(1).second), static_cast<float>(col1->getDouble(2).second),
+				static_cast<float>(col2->getDouble(0).second), static_cast<float>(col2->getDouble(1).second), static_cast<float>(col2->getDouble(2).second)
 			);
 			break;
 		}
@@ -281,10 +281,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 			if (!col0 || !col1 || !col2 || !col3)
 				return LOAD_STATUS::SYNTAX_ERR;
 			u = glm::mat4(
-				(float)(col0->getDouble(0).second), (float)(col0->getDouble(1).second), (float)(col0->getDouble(2).second), (float)(col0->getDouble(3).second),
-				(float)(col1->getDouble(0).second), (float)(col1->getDouble(1).second), (float)(col1->getDouble(2).second), (float)(col1->getDouble(3).second),
-				(float)(col2->getDouble(0).second), (float)(col2->getDouble(1).second), (float)(col2->getDouble(2).second), (float)(col2->getDouble(3).second),
-				(float)(col3->getDouble(0).second), (float)(col3->getDouble(1).second), (float)(col3->getDouble(2).second), (float)(col3->getDouble(3).second)
+				static_cast<float>(col0->getDouble(0).second), static_cast<float>(col0->getDouble(1).second), static_cast<float>(col0->getDouble(2).second), static_cast<float>(col0->getDouble(3).second),
+				static_cast<float>(col1->getDouble(0).second), static_cast<float>(col1->getDouble(1).second), static_cast<float>(col1->getDouble(2).second), static_cast<float>(col1->getDouble(3).second),
+				static_cast<float>(col2->getDouble(0).second), static_cast<float>(col2->getDouble(1).second), static_cast<float>(col2->getDouble(2).second), static_cast<float>(col2->getDouble(3).second),
+				static_cast<float>(col3->getDouble(0).second), static_cast<float>(col3->getDouble(1).second), static_cast<float>(col3->getDouble(2).second), static_cast<float>(col3->getDouble(3).second)
 			);
 			break;
 		}
@@ -332,8 +332,8 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, const b
 	auto [ok3, mask] = model->getInt("mask");
 	if (!ok3)
 		return LOAD_STATUS::SYNTAX_ERR;
-	renderable.model.layout = (VertexLayout)layout;
-	renderable.model.layoutMask = (VertexLayoutMask)mask;
+	renderable.model.layout = static_cast<VertexLayout>(layout);
+	renderable.model.layoutMask = static_cast<VertexLayoutMask>(mask);
 
 	ShaderHandle shader_handle = 0;
 	auto [ok4, shader] = model->getString("shader");
@@ -359,7 +359,7 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, const b
 	auto [ok6, num_vertices] = _renderable->getInt("num_vertices");
 	if (!ok6)
 		return LOAD_STATUS::SYNTAX_ERR;
-	renderable.vertexCount = (BufferCounter)num_vertices;
+	renderable.vertexCount = static_cast<BufferCounter>(num_vertices);
 	if (!renderable.AttachVertexBuffer(*vertex_array, Render::VertexBufferLayoutCount(renderable)))
 		return LOAD_STATUS::ASSET_LOAD_ERR;
 

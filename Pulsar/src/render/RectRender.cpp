@@ -52,3 +52,16 @@ void RectRender::CropToRect(glm::vec4 rect, int atlas_width, int atlas_height)
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 + 3 * stride] = rect[0] / atlas_width;
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 + 3 * stride] = (rect[1] + rect[3]) / atlas_height;
 }
+
+void RectRender::CropToRelativeRect(glm::vec4 rect)
+{
+	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2] = rect[0];
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3] = rect[1];
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 + stride] = rect[0] + rect[2];
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 + stride] = rect[1];
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 + 2 * stride] = rect[0] + rect[2];
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 + 2 * stride] = rect[1] + rect[3];
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 + 3 * stride] = rect[0];
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 + 3 * stride] = rect[1] + rect[3];
+}

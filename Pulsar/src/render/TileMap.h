@@ -11,7 +11,7 @@
 class TileMap : public ActorSequencer2D
 {
 	mutable int cache_i = 0;
-	mutable int cache_iter_offset = 0;
+	mutable size_t cache_iter_offset = 0;
 	mutable std::map<TileHandle, ActorTesselation2D>::iterator cache_iter;
 	Atlas* m_Atlas;
 	std::map<TileHandle, ActorTesselation2D> m_Map;
