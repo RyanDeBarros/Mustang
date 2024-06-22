@@ -13,6 +13,4 @@ namespace _RendererSettings
 
 	const char* standard_shader8_assetfile = "config/StandardShader8.toml";
 	const char* standard_shader32_assetfile = "config/StandardShader32.toml";
-	const char* standard_atlas_shader8_assetfile = "config/StandardAtlasShader8.toml";
-	const char* standard_atlas_shader32_assetfile = "config/StandardAtlasShader32.toml";
 }

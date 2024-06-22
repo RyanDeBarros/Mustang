@@ -28,7 +28,6 @@ void Renderer::Init()
 	UniformLexiconFactory::Init();
 	TileFactory::Init();
 	RectRender::DefineRectRenderable();
-	AtlasPrimitive::DefineRectRenderable();
 }
 
 void Renderer::OnDraw()

@@ -81,10 +81,8 @@ void run(GLFWwindow* window)
 	double totalTime = 0;
 
 	// Load shaders
-	ShaderHandle shaderStandard32, shaderAtlas32;
+	ShaderHandle shaderStandard32;
 	if (loadShader(_RendererSettings::standard_shader32_assetfile, shaderStandard32) != LOAD_STATUS::OK)
-		ASSERT(false);
-	if (loadShader(_RendererSettings::standard_atlas_shader32_assetfile, shaderAtlas32) != LOAD_STATUS::OK)
 		ASSERT(false);
 
 	// Load textures
@@ -193,8 +191,10 @@ void run(GLFWwindow* window)
 	//Renderer::GetCanvasLayer(0)->OnAttach(&tessel);
 	//Renderer::GetCanvasLayer(0)->OnAttach(actor3);
 	
-	actor2->SetShaderHandle(shaderAtlas32);
-	actor2->SetAtlasTexel({0.0f, 0.0f, 1.0f, 1.0f}, TextureFactory::GetWidth(textureSnowman), TextureFactory::GetHeight(textureSnowman));
+	//actor2->SetShaderHandle(shaderAtlas32);
+	w = TextureFactory::GetWidth(textureSnowman);
+	h = TextureFactory::GetHeight(textureSnowman);
+	actor2->SetAtlasTexel({ 0.3f * w, 0.5f * h, 0.4f * w, 0.4f * h }, w, h);
 
 	for (;;)
 	{

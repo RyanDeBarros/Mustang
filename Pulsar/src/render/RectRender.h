@@ -8,7 +8,7 @@ class RectRender : public ActorPrimitive2D
 {
 protected:
 	static Renderable rect_renderable;
-	static constexpr Stride end_attrib_pos = ActorPrimitive2D::end_attrib_pos + 4;
+	static constexpr Stride end_attrib_pos = ActorPrimitive2D::end_attrib_pos + 2;
 
 public:
 	RectRender(const Transform2D& transform = Transform2D(), const TextureHandle& texture = 0, const ShaderHandle& shader = 0, const ZIndex& z = 0, const bool& visible = true);

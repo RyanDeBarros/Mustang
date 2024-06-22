@@ -18,6 +18,4 @@ namespace _RendererSettings
 
 	extern const char* standard_shader8_assetfile;
 	extern const char* standard_shader32_assetfile;
-	extern const char* standard_atlas_shader8_assetfile;
-	extern const char* standard_atlas_shader32_assetfile;
 }
