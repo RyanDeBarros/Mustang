@@ -10,7 +10,6 @@
 #include "factory/UniformLexiconFactory.h"
 #include "factory/TileFactory.h"
 #include "render/RectRender.h"
-#include "render/AtlasPrimitive.h"
 
 std::map<CanvasIndex, CanvasLayer>* Renderer::layers = nullptr;
 GLFWwindow* focused_window;

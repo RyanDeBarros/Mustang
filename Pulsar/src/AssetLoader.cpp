@@ -415,9 +415,6 @@ bool _LoadRendererSettings()
 		auto [ok3, rect_renderable] = rendering->getString("rect_renderable");
 		if (ok3)
 			_RendererSettings::rect_renderable_filepath = rect_renderable;
-		auto [ok4, atlas_renderable] = rendering->getString("atlas_renderable");
-		if (ok4)
-			_RendererSettings::atlas_renderable_filepath = atlas_renderable;
 	}
 
 	return true;

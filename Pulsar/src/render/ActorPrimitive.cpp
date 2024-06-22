@@ -59,3 +59,13 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 		m_Status &= ~0b1000;
 	}
 }
+
+void ActorPrimitive2D::CropPoint(const std::vector<glm::vec2>& points, int atlas_width, int atlas_height)
+{
+	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
+	for (size_t i = 0; i < points.size() && i < m_Render.vertexCount; i++)
+	{
+		m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2] = points[i][0] / atlas_width;
+		m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3] = points[i][1] / atlas_height;
+	}
+}

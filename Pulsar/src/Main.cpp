@@ -14,7 +14,6 @@
 #include "render/RectRender.h"
 #include "factory/UniformLexiconFactory.h"
 #include "render/ActorTesselation.h"
-#include "render/AtlasPrimitive.h"
 
 void run(GLFWwindow*);
 
@@ -104,9 +103,7 @@ void run(GLFWwindow* window)
 	// Create actors
 
 	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-500.0f, 300.0f), -1.0f, glm::vec2(0.8f, 1.2f) }, textureFlag, shaderStandard32);
-
-	AtlasPrimitive* actor2 = new AtlasPrimitive(Transform2D{ glm::vec2(400.0f, -200.0f), 0.25f, glm::vec2(0.7f, 0.7f) }, textureSnowman, shaderStandard32);
-	
+	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(400.0f, -200.0f), 0.25f, glm::vec2(0.7f, 0.7f) }, textureSnowman, shaderStandard32);
 	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(1.0f, 1.0f) }, textureTux, shaderStandard32);
 
 	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
@@ -186,15 +183,14 @@ void run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(0)->OnAttach(&tesselDiagonal);
 	tesselDiagonal.RectVectorRef() = { {{0.0f, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{-0.5f * w, 0.5 * h}, -0.8f, {0.75f, -0.75f}} };
 
-	Renderer::GetCanvasLayer(0)->OnDetach(&tesselDiagonal);
+	//Renderer::GetCanvasLayer(0)->OnDetach(&tesselDiagonal);
 	//Renderer::GetCanvasLayer(0)->OnAttach(&tesselVertical);
 	//Renderer::GetCanvasLayer(0)->OnAttach(&tessel);
 	//Renderer::GetCanvasLayer(0)->OnAttach(actor3);
 	
-	//actor2->SetShaderHandle(shaderAtlas32);
 	w = TextureFactory::GetWidth(textureSnowman);
 	h = TextureFactory::GetHeight(textureSnowman);
-	actor2->SetAtlasTexel({ 0.3f * w, 0.5f * h, 0.4f * w, 0.4f * h }, w, h);
+	actor2->CropToRect({ 0.3f * w, 0.4f * h, 0.4f * w, 0.55f * h }, w, h);
 
 	for (;;)
 	{

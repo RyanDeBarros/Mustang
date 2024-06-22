@@ -4,7 +4,6 @@ namespace _RendererSettings
 {
 	const char* settings_filepath = "config/Renderer.toml";
 	std::string rect_renderable_filepath = "config/RectRenderable.toml";
-	std::string atlas_renderable_filepath = "config/AtlasRenderable.toml";
 	int initial_window_width = 1440, initial_window_height = 1080;
 	TextureSlot max_texture_slots = 2;
 	VertexSize standard_vertex_pool_size = 2048;

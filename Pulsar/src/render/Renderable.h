@@ -56,7 +56,6 @@ private:
 	friend class CanvasLayer;
 	friend class ActorPrimitive2D;
 	friend class RectRender;
-	friend class AtlasPrimitive;
 	friend enum class LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable, const bool& new_texture, const bool& temporary_buffer);
 	friend BufferCounter Render::VertexBufferLayoutCount(const Renderable& render);
 };

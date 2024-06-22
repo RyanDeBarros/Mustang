@@ -48,6 +48,8 @@ public:
 	inline void SetModulation(const glm::vec4& color) { m_ModulationColors = std::vector<glm::vec4>(m_Render.vertexCount, color); m_Status |= 0b1000; }
 	inline void SetModulationPerPoint(const std::vector<glm::vec4>& colors) { m_ModulationColors = colors; m_Status |= 0b1000; }
 
+	void CropPoint(const std::vector<glm::vec2>& points, int atlas_width, int atlas_height);
+
 	inline TextureHandle GetTextureHandle() const { return m_Render.textureHandle; }
 
 protected:
