@@ -45,18 +45,40 @@ TextureHandle TextureFactory::CreateHandle(const char* filepath, const TextureSe
 	else return 0;
 }
 
+TextureHandle TextureFactory::CreateHandle(const Atlas& atlas, const TextureSettings& settings)
+{
+	Texture texture(atlas, settings);
+	if (texture.IsValid())
+	{
+		TextureHandle handle = handle_cap++;
+		factory.emplace(handle, new Texture(std::move(texture)));
+		return handle;
+	}
+	else return 0;
+}
+
 TextureHandle TextureFactory::GetHandle(const char* filepath, const TextureSettings& settings, const bool& new_texture, const bool& temporary_buffer)
 {
 	if (new_texture)
-	{
 		return CreateHandle(filepath, settings, temporary_buffer);
-	}
 	for (const auto& [handle, texture] : factory)
 	{
 		if (texture->Equivalent(filepath, settings))
 			return handle;
 	}
 	return CreateHandle(filepath, settings, temporary_buffer);
+}
+
+TextureHandle TextureFactory::GetHandle(const Atlas& atlas, const TextureSettings& settings, const bool& new_texture)
+{
+	if (new_texture)
+		return CreateHandle(atlas, settings);
+	for (const auto& [handle, texture] : factory)
+	{
+		if (texture->Equivalent(atlas, settings))
+			return handle;
+	}
+	return CreateHandle(atlas, settings);
 }
 
 void TextureFactory::Bind(const TextureHandle& handle, const TextureSlot& slot)

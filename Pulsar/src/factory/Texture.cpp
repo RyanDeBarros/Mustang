@@ -9,7 +9,7 @@
 #include "Macros.h"
 
 Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_buffer)
-	: m_RID(0), m_Tile(0), m_Settings(settings)
+	: m_RID(0), m_Tile(0), m_Settings(settings), m_Atlas(nullptr)
 {
 	Tile* tile_ref = nullptr;
 	if (temporary_buffer)
@@ -73,7 +73,7 @@ Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_
 }
 
 Texture::Texture(const Atlas& atlas, TextureSettings settings)
-	: m_RID(0), m_Tile(0), m_Settings(settings)
+	: m_RID(0), m_Tile(0), m_Settings(settings), m_Atlas(&atlas)
 {
 	m_Tile = TileFactory::GetHandle(atlas);
 	Tile* tile_ref = const_cast<Tile*>(TileFactory::GetConstTileRef(m_Tile));
@@ -98,7 +98,7 @@ Texture::Texture(const Atlas& atlas, TextureSettings settings)
 }
 
 Texture::Texture(Texture&& texture) noexcept
-	: m_RID(texture.m_RID), m_Tile(texture.m_Tile), m_Settings(texture.m_Settings)
+	: m_RID(texture.m_RID), m_Tile(texture.m_Tile), m_Settings(texture.m_Settings), m_Atlas(texture.m_Atlas)
 {
 	texture.m_RID = 0;
 }

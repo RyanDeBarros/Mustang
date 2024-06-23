@@ -34,7 +34,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 int main()
 {
-	return Pulsar::StartUp();
+	int startup = Pulsar::StartUp();
+	Pulsar::Terminate();
+	return startup;
 }
 
 int Pulsar::StartUp()
@@ -67,9 +69,13 @@ int Pulsar::StartUp()
 	Renderer::Init();
 	Renderer::FocusWindow(window);
 	run(window);
+	return 0;
+}
+
+void Pulsar::Terminate()
+{
 	Renderer::Terminate();
 	glfwTerminate();
-	return 0;
 }
 
 void run(GLFWwindow* window)
@@ -101,7 +107,6 @@ void run(GLFWwindow* window)
 	Renderer::AddCanvasLayer(CanvasLayerData(0, _RendererSettings::standard_vertex_pool_size, _RendererSettings::standard_index_pool_size));
 
 	// Create actors
-
 	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-500.0f, 300.0f), -1.0f, glm::vec2(0.8f, 1.2f) }, textureFlag, shaderStandard32);
 	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(400.0f, -200.0f), 0.25f, glm::vec2(0.7f, 0.7f) }, textureSnowman, shaderStandard32);
 	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(1.0f, 1.0f) }, textureTux, shaderStandard32);
@@ -149,7 +154,6 @@ void run(GLFWwindow* window)
 
 	TextureFactory::SetSettings(actor1->GetTextureHandle(), { MinFilter::Linear, MagFilter::Linear, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge });
 
-
 	actor3->SetPivot(0.5f, 0.5f);
 	actor3->SetPosition(0.0f, 0.0f);
 	actor3->SetScale(0.1f, 0.1f);
@@ -192,6 +196,24 @@ void run(GLFWwindow* window)
 	//h = static_cast<float>(TextureFactory::GetHeight(textureSnowman));
 	//actor2->CropToRect({ 0.3f * w, 0.4f * h, 0.4f * w, 0.55f * h }, static_cast<int>(w), static_cast<int>(h));
 	actor2->CropToRelativeRect({ 0.3f, 0.4f, 0.4f, 0.55f });
+	
+	// TODO DON'T create atlas directly. use AtlasFactory instead. Otherwise, when actor's desctructor is called, all the tiles referencing it will have hanging pointers.
+	Atlas atlas(1024, 1024);
+	atlas.Insert(TextureFactory::GetTileHandle(textureSnowman));
+	atlas.Insert(TextureFactory::GetTileHandle(textureFlag));
+	TextureHandle atlasTexture = TextureFactory::GetHandle(atlas);
+	RectRender* actor5 = new RectRender();
+	actor5->SetTextureHandle(atlasTexture);
+	actor5->SetShaderHandle(shaderStandard32);
+	actor5->SetPivot(0.5, 0.5);
+
+	Renderer::GetCanvasLayer(0)->OnDetach(actor1);
+	Renderer::GetCanvasLayer(0)->OnDetach(actor2);
+	Renderer::GetCanvasLayer(0)->OnDetach(actor3);
+	Renderer::GetCanvasLayer(0)->OnDetach(&tesselDiagonal);
+	Renderer::GetCanvasLayer(-1)->OnDetach(actor4);
+
+	Renderer::GetCanvasLayer(0)->OnAttach(actor5);
 
 	for (;;)
 	{
@@ -208,5 +230,5 @@ void run(GLFWwindow* window)
 			break;
 	}
 
-	delete actor1, actor2, actor3, actor4;
+	delete actor1, actor2, actor3, actor4, actor5;
 }

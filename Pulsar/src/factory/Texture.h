@@ -80,9 +80,12 @@ class Texture
 	RID m_RID;
 	TileHandle m_Tile;
 	TextureSettings m_Settings;
+	const Atlas* const m_Atlas;
 
 	friend class TextureFactory;
 	inline bool Equivalent(const char* filepath, const TextureSettings& settings) const { return TileFactory::GetFilepath(m_Tile) == filepath && m_Settings == settings; }
+	// TODO more sophisticated check for atlas? id may be the same for two distinct atlas objects, but they can have different subtiles.
+	inline bool Equivalent(const Atlas& atlas, const TextureSettings& settings) const { return m_Atlas && m_Atlas->id == atlas.id && m_Settings == settings; }
 	inline bool IsValid() const { return m_RID > 0; }
 
 public:
@@ -99,4 +102,5 @@ public:
 
 	inline int GetWidth() const { return TileFactory::GetWidth(m_Tile); }
 	inline int GetHeight() const { return TileFactory::GetHeight(m_Tile); }
+	inline TileHandle GetTileHandle() const { return m_Tile; }
 };

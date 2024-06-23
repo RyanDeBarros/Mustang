@@ -6,6 +6,7 @@
 
 unsigned int id_count = 1;
 
+// TODO use factory? so that id is not incremented if atlas is loaded from same file. This would probably be in a different constructor. Perhaps not a full factory class, but a static map that maps atlas filepaths to ids.
 Atlas::Atlas(const int& width, const int& height)
 	: m_AtlasBuffer(nullptr), m_Width(width), m_Height(height), id(id_count++)
 {

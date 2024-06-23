@@ -13,6 +13,53 @@
 #include "factory/UniformLexicon.h"
 #include "render/Renderable.h"
 
+bool _LoadRendererSettings()
+{
+	auto res = toml::parseFile(_RendererSettings::settings_filepath);
+	if (!res.table)
+	{
+		Logger::LogErrorFatal("Cannot parse renderer settings file: " + res.errmsg);
+		return false;
+	}
+
+	auto window = res.table->getTable("window");
+	if (window)
+	{
+		auto [ok0, width] = window->getInt("width");
+		if (ok0)
+			_RendererSettings::initial_window_width = (int)width;
+		auto [ok1, height] = window->getInt("height");
+		if (ok1)
+			_RendererSettings::initial_window_height = (int)height;
+		auto gl_clear_color = window->getArray("gl_clear_color");
+		if (gl_clear_color)
+		{
+			auto color = gl_clear_color->getDoubleVector();
+			if (color)
+				_RendererSettings::gl_clear_color = glm::vec4((*color)[0], (*color)[1], (*color)[2], (*color)[3]);
+		}
+	}
+
+	auto rendering = res.table->getTable("rendering");
+	if (rendering)
+	{
+		auto [ok0, max_texture_slots] = rendering->getInt("max_texture_slots");
+		if (ok0)
+			_RendererSettings::max_texture_slots = (TextureSlot)max_texture_slots;
+		auto [ok1, standard_vertex_pool_size] = rendering->getInt("standard_vertex_pool_size");
+		if (ok1)
+			_RendererSettings::standard_vertex_pool_size = (VertexSize)standard_vertex_pool_size;
+		auto [ok2, standard_index_pool_size] = rendering->getInt("standard_index_pool_size");
+		if (ok2)
+			_RendererSettings::standard_index_pool_size = (VertexSize)standard_index_pool_size;
+		auto [ok3, rect_renderable] = rendering->getString("rect_renderable");
+		if (ok3)
+			_RendererSettings::rect_renderable_filepath = rect_renderable;
+	}
+
+	return true;
+}
+
 LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
 {
 	auto res = toml::parseFile(filepath);
@@ -371,51 +418,4 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, const b
 		return LOAD_STATUS::ASSET_LOAD_ERR;
 
 	return LOAD_STATUS::OK;
-}
-
-bool _LoadRendererSettings()
-{
-	auto res = toml::parseFile(_RendererSettings::settings_filepath);
-	if (!res.table)
-	{
-		Logger::LogErrorFatal("Cannot parse renderer settings file: " + res.errmsg);
-		return false;
-	}
-
-	auto window = res.table->getTable("window");
-	if (window)
-	{
-		auto [ok0, width] = window->getInt("width");
-		if (ok0)
-			_RendererSettings::initial_window_width = (int)width;
-		auto [ok1, height] = window->getInt("height");
-		if (ok1)
-			_RendererSettings::initial_window_height = (int)height;
-		auto gl_clear_color = window->getArray("gl_clear_color");
-		if (gl_clear_color)
-		{
-			auto color = gl_clear_color->getDoubleVector();
-			if (color)
-				_RendererSettings::gl_clear_color = glm::vec4((*color)[0], (*color)[1], (*color)[2], (*color)[3]);
-		}
-	}
-
-	auto rendering = res.table->getTable("rendering");
-	if (rendering)
-	{
-		auto [ok0, max_texture_slots] = rendering->getInt("max_texture_slots");
-		if (ok0)
-			_RendererSettings::max_texture_slots = (TextureSlot)max_texture_slots;
-		auto [ok1, standard_vertex_pool_size] = rendering->getInt("standard_vertex_pool_size");
-		if (ok1)
-			_RendererSettings::standard_vertex_pool_size = (VertexSize)standard_vertex_pool_size;
-		auto [ok2, standard_index_pool_size] = rendering->getInt("standard_index_pool_size");
-		if (ok2)
-			_RendererSettings::standard_index_pool_size = (VertexSize)standard_index_pool_size;
-		auto [ok3, rect_renderable] = rendering->getString("rect_renderable");
-		if (ok3)
-			_RendererSettings::rect_renderable_filepath = rect_renderable;
-	}
-
-	return true;
 }

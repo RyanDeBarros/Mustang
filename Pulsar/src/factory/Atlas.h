@@ -3,7 +3,6 @@
 #include <unordered_map>
 
 #include "Typedefs.h"
-#include "Tile.h"
 
 class Atlas
 {
@@ -21,9 +20,7 @@ public:
 	Atlas(const Atlas&) = delete;
 	~Atlas();
 
-	static void SaveAtlas(const Atlas& atlas, const char* texture_filepath, const char* asset_filepath);
-	static Atlas LoadAtlas(const char* asset_filepath);
-
 	bool Insert(const TileHandle& tile);
+	// TODO insert a subtile, i.e. tile with (x,y,w,h)
 	bool Remove(const TileHandle& tile);
 };

@@ -5,11 +5,6 @@
 #include "Logger.h"
 #include "Atlas.h"
 
-bool Tile::Equivalent(const Atlas& atlas) const
-{ 
-	return m_AtlasID == atlas.id; 
-}
-
 Tile::Tile(const char* filepath)
 	: m_Filepath(filepath), m_ImageBuffer(nullptr), m_Width(0), m_Height(0), m_BPP(0), m_AtlasID(0)
 {
@@ -34,6 +29,6 @@ Tile::Tile(Tile&& tile) noexcept
 
 Tile::~Tile()
 {
-	if (m_ImageBuffer)
+	if (m_ImageBuffer && m_AtlasID == 0)
 		stbi_image_free(m_ImageBuffer);
 }
