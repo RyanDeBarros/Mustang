@@ -200,12 +200,15 @@ void run(GLFWwindow* window)
 	// TODO DON'T create atlas directly. use AtlasFactory instead. Otherwise, when actor's desctructor is called, all the tiles referencing it will have hanging pointers.
 	Atlas atlas(1024, 1024);
 	atlas.Insert(TextureFactory::GetTileHandle(textureSnowman));
-	atlas.Insert(TextureFactory::GetTileHandle(textureFlag));
+	//atlas.Insert(TextureFactory::GetTileHandle(textureFlag));
+
+	saveAtlas(atlas, "res/textures/atlas.png", "");
+
 	TextureHandle atlasTexture = TextureFactory::GetHandle(atlas);
 	RectRender* actor5 = new RectRender();
 	actor5->SetTextureHandle(atlasTexture);
 	actor5->SetShaderHandle(shaderStandard32);
-	actor5->SetPivot(0.5, 0.5);
+	actor5->SetPivot(0.0, 0.0);
 
 	Renderer::GetCanvasLayer(0)->OnDetach(actor1);
 	Renderer::GetCanvasLayer(0)->OnDetach(actor2);

@@ -1,6 +1,7 @@
 #include "TextureFactory.h"
 
-#include <stb_image/stb_image.h>
+#include <stb/stb_image.h>
+#include <stb/stb_image_write.h>
 
 #include "Logger.h"
 #include "Macros.h"
@@ -24,6 +25,7 @@ void TextureFactory::Init()
 {
 	handle_cap = 1;
 	stbi_set_flip_vertically_on_load(1);
+	stbi_flip_vertically_on_write(1);
 }
 
 void TextureFactory::Terminate()

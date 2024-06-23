@@ -1,6 +1,6 @@
 #include "Tile.h"
 
-#include <stb_image/stb_image.h>
+#include <stb/stb_image.h>
 
 #include "Logger.h"
 #include "Atlas.h"

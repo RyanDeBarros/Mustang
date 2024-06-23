@@ -2,6 +2,7 @@
 
 #include <toml/tomlcpp.hpp>
 #include <glm/glm.hpp>
+#include <stb/stb_image_write.h>
 
 #include <map>
 
@@ -418,4 +419,12 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, const b
 		return LOAD_STATUS::ASSET_LOAD_ERR;
 
 	return LOAD_STATUS::OK;
+}
+
+void saveAtlas(const Atlas& atlas, const char* texture_filepath, const char* asset_filepath)
+{
+	// TODO create asset file that encapsulates the subtextures of the atlas.
+	
+	// TODO add possibility of other image formats
+	stbi_write_png(texture_filepath, atlas.m_Width, atlas.m_Height, Atlas::BPP, atlas.m_AtlasBuffer, atlas.m_Width * Atlas::STRIDE_BYTES);
 }

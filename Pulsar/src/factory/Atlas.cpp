@@ -10,7 +10,7 @@ unsigned int id_count = 1;
 Atlas::Atlas(const int& width, const int& height)
 	: m_AtlasBuffer(nullptr), m_Width(width), m_Height(height), id(id_count++)
 {
-	m_BufferSize = 4 * m_Width * m_Height;
+	m_BufferSize = Atlas::BPP * m_Width * m_Height; // 4 is BPP
 	m_AtlasBuffer = new unsigned char[m_BufferSize](0);
 	insert_pos = 0;
 }
@@ -24,14 +24,34 @@ Atlas::~Atlas()
 bool Atlas::Insert(const TileHandle& tile)
 {
 	const Tile* t = TileFactory::GetConstTileRef(tile);
-	if (!t)
+	if (!t || t->m_BPP > Atlas::BPP)
 		return false;
 
-	int area = t->m_Width * t->m_Height;
+	int area = Atlas::BPP * t->m_Width * t->m_Height;
 	if (insert_pos + area > m_BufferSize)
 		return false;
 	m_Tileset.insert({ tile, insert_pos });
-	memcpy_s(m_AtlasBuffer + insert_pos, m_BufferSize - insert_pos, t->m_ImageBuffer, area);
+	if (t->m_BPP == Atlas::BPP)
+		memcpy_s(m_AtlasBuffer + insert_pos, m_BufferSize - insert_pos, t->m_ImageBuffer, area);
+	else
+	{
+		int j = 0;
+		for (auto i = 0; i < area; i++)
+		{
+			if (i % Atlas::BPP < t->m_BPP)
+			{
+				m_AtlasBuffer[insert_pos + i] = t->m_ImageBuffer[j];
+				j++;
+			}
+			else
+				m_AtlasBuffer[insert_pos + i] = 255;
+		}
+	}
+	//int area = t->m_Width * t->m_Height;
+	//if (insert_pos + area > m_BufferSize)
+	//	return false;
+	//m_Tileset.insert({ tile, insert_pos });
+	//memcpy_s(m_AtlasBuffer + insert_pos, m_BufferSize - insert_pos, t->m_ImageBuffer, area);
 	insert_pos += area;
 	return true;
 }

@@ -8,6 +8,8 @@ class Atlas
 {
 	friend class Tile;
 	friend class Texture;
+	friend void saveAtlas(const class Atlas& atlas, const char* texture_filepath, const char* asset_filepath);
+
 	const unsigned int id;
 	unsigned char* m_AtlasBuffer;
 	AtlasPos insert_pos;
@@ -16,6 +18,9 @@ class Atlas
 	std::unordered_map<TileHandle, AtlasPos> m_Tileset;
 
 public:
+	static constexpr unsigned char BPP = 4;
+	static constexpr unsigned char STRIDE_BYTES = sizeof(unsigned char);
+
 	Atlas(const int& width, const int& height);
 	Atlas(const Atlas&) = delete;
 	~Atlas();
