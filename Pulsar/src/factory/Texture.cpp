@@ -73,16 +73,8 @@ Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_
 }
 
 Texture::Texture(const Atlas& atlas, TextureSettings settings)
-	: m_RID(0), m_Tile(0), m_Settings(settings), m_Atlas(&atlas)
+	: m_RID(0), m_Tile(TileFactory::GetHandle(atlas)), m_Settings(settings), m_Atlas(&atlas)
 {
-	m_Tile = TileFactory::GetHandle(atlas);
-	Tile* tile_ref = const_cast<Tile*>(TileFactory::GetConstTileRef(m_Tile));
-	if (!tile_ref)
-	{
-		Logger::LogError(std::string("Cannot create texture from atlas (id=") + std::to_string(atlas.id) + ").");
-		return;
-	}
-
 	TRY(glGenTextures(1, &m_RID));
 	TRY(glBindTexture(GL_TEXTURE_2D, m_RID));
 
@@ -92,7 +84,7 @@ Texture::Texture(const Atlas& atlas, TextureSettings settings)
 	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrap_t));
 
 	// atlas is guaranteed to have 4 channels
-	TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RGBA8, tile_ref->m_Width, tile_ref->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tile_ref->m_ImageBuffer));
+	TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RGBA8, atlas.m_Width, atlas.m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas.m_AtlasBuffer));
 
 	TRY(glBindTexture(GL_TEXTURE_2D, 0));
 }

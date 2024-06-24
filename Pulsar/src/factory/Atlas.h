@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <unordered_map>
 
 #include "Typedefs.h"
@@ -12,20 +13,23 @@ class Atlas
 
 	const unsigned int id;
 	unsigned char* m_AtlasBuffer;
-	AtlasPos insert_pos;
 	int m_Width, m_Height;
 	int m_BufferSize;
-	std::unordered_map<TileHandle, AtlasPos> m_Tileset;
+	std::vector<struct Placement> m_Placements;
 
 public:
 	static constexpr unsigned char BPP = 4;
-	static constexpr unsigned char STRIDE_BYTES = sizeof(unsigned char);
+	static constexpr unsigned char STRIDE_BYTES = sizeof(unsigned char) * BPP;
 
-	Atlas(const int& width, const int& height);
+	// TODO insert subtiles, i.e. tile with (x,y,w,h)
+	Atlas(std::vector<TileHandle>& tiles, const int& width = -1, const int& height = -1);
 	Atlas(const Atlas&) = delete;
 	~Atlas();
 
-	bool Insert(const TileHandle& tile);
-	// TODO insert a subtile, i.e. tile with (x,y,w,h)
-	bool Remove(const TileHandle& tile);
+	inline int GetWidth() const { return m_Width; }
+	inline int GetHeight() const { return m_Height; }
+
+private:
+	void RectPack(std::vector<TileHandle>& tiles, const int& width = -1, const int& height = -1);
+	void PlaceTiles();
 };

@@ -1,18 +1,19 @@
 #include "Atlas.h"
 
-#include <algorithm>
+#include <queue>
 
 #include "TileFactory.h"
 
 unsigned int id_count = 1;
 
 // TODO use factory? so that id is not incremented if atlas is loaded from same file. This would probably be in a different constructor. Perhaps not a full factory class, but a static map that maps atlas filepaths to ids.
-Atlas::Atlas(const int& width, const int& height)
-	: m_AtlasBuffer(nullptr), m_Width(width), m_Height(height), id(id_count++)
+Atlas::Atlas(std::vector<TileHandle>& tiles, const int& width, const int& height)
+	: m_AtlasBuffer(nullptr), id(id_count++)
 {
+	RectPack(tiles, width, height);
 	m_BufferSize = Atlas::BPP * m_Width * m_Height; // 4 is BPP
 	m_AtlasBuffer = new unsigned char[m_BufferSize](0);
-	insert_pos = 0;
+	PlaceTiles();
 }
 
 Atlas::~Atlas()
@@ -21,55 +22,154 @@ Atlas::~Atlas()
 		delete m_AtlasBuffer;
 }
 
-bool Atlas::Insert(const TileHandle& tile)
+static int min_bound(const std::vector<TileHandle>& tiles)
 {
-	const Tile* t = TileFactory::GetConstTileRef(tile);
-	if (!t || t->m_BPP > Atlas::BPP)
-		return false;
-
-	int area = Atlas::BPP * t->m_Width * t->m_Height;
-	if (insert_pos + area > m_BufferSize)
-		return false;
-	m_Tileset.insert({ tile, insert_pos });
-	if (t->m_BPP == Atlas::BPP)
-		memcpy_s(m_AtlasBuffer + insert_pos, m_BufferSize - insert_pos, t->m_ImageBuffer, area);
-	else
-	{
-		int j = 0;
-		for (auto i = 0; i < area; i++)
-		{
-			if (i % Atlas::BPP < t->m_BPP)
-			{
-				m_AtlasBuffer[insert_pos + i] = t->m_ImageBuffer[j];
-				j++;
-			}
-			else
-				m_AtlasBuffer[insert_pos + i] = 255;
-		}
-	}
-	//int area = t->m_Width * t->m_Height;
-	//if (insert_pos + area > m_BufferSize)
-	//	return false;
-	//m_Tileset.insert({ tile, insert_pos });
-	//memcpy_s(m_AtlasBuffer + insert_pos, m_BufferSize - insert_pos, t->m_ImageBuffer, area);
-	insert_pos += area;
-	return true;
+	int bound = 0;
+	for (const TileHandle& tile : tiles)
+		bound += std::max(TileFactory::GetWidth(tile), TileFactory::GetHeight(tile));
+	return bound;
 }
 
-bool Atlas::Remove(const TileHandle& tile)
+struct Placement
 {
-	const Tile* t = TileFactory::GetConstTileRef(tile);
-	if (!t)
-		return false;
+	TileHandle tile;
+	int x, y, w, h;
+	bool r;
+};
+
+struct Subsection
+{
+	int x, y, w, h, rw = 0, rh = 0;
+
+	Placement insert(TileHandle tile, int rect_w, int rect_h)
+	{
+		if (rect_w <= w && rect_h <= h)
+		{
+			rw = rect_w;
+			rh = rect_h;
+			return { tile, x, y, rw, rh, false };
+		}
+		else if (rect_h <= w && rect_w <= h)
+		{
+			rw = rect_h;
+			rh = rect_w;
+			return { tile, x, y, rw, rh, true };
+		}
+		else return { 0, 0, 0, 0, 0, false };
+	}
+
+	std::pair<Subsection, Subsection> split() const
+	{
+		if (rw > 0 && rh > 0)
+		{
+			if (w - rw > h - rh)
+			{
+				Subsection s1{ x + rw, y, w - rw, h };
+				Subsection s2{ x, y + rh, rw, h - rh };
+				return { s1, s2 };
+			}
+			else
+			{
+				Subsection s1{ x + rw, y, w - rw, rh };
+				Subsection s2{ x, y + rh, w, h - rh };
+				return { s1, s2 };
+			}
+		}
+		else return { {-1}, {} };
+	}
+};
+
+void Atlas::RectPack(std::vector<TileHandle>& tiles, const int& width, const int& height)
+{
+	int bound = min_bound(tiles);
+	m_Width = width > 0 ? width : bound;
+	m_Height = height > 0 ? height : bound;
 	
-	auto ts = m_Tileset.find(tile);
-	if (ts == m_Tileset.end())
-		return false;
-	m_Tileset.erase(tile);
-	int area = t->m_Width * t->m_Height;
-	memmove_s(m_AtlasBuffer + ts->second, m_BufferSize - ts->second, m_AtlasBuffer + ts->second + area,
-			std::max(m_BufferSize - ts->second - area, 0));
-	insert_pos -= area;
-	memset(m_AtlasBuffer + insert_pos, 0, m_BufferSize - insert_pos);
-	return true;
+	std::sort(tiles.begin(), tiles.end(), [](const TileHandle& a, const TileHandle& b)
+	{
+		return std::max(TileFactory::GetWidth(a), TileFactory::GetHeight(a))
+				> std::max(TileFactory::GetWidth(b), TileFactory::GetHeight(b));
+	});
+
+	m_Placements.reserve(tiles.size());
+	Subsection root{ 0, 0, m_Width, m_Height };
+	auto comparator = [](const Subsection& l, const Subsection& r) { return std::max(l.w, l.h) < std::max(r.w, r.h); };
+	std::priority_queue<Subsection, std::vector<Subsection>, decltype(comparator)> subsections(comparator);
+	subsections.push(root);
+	std::vector<Subsection> tried_subsections;
+	tried_subsections.reserve(tiles.size() + 1);
+
+	for (const TileHandle& tile : tiles)
+	{
+		tried_subsections.clear();
+		bool fits = false;
+		while (!subsections.empty())
+		{
+			Subsection subsection = subsections.top();
+			subsections.pop();
+			Placement result = subsection.insert(tile, TileFactory::GetWidth(tile), TileFactory::GetHeight(tile));
+			if (result.tile > 0)
+			{
+				m_Placements.push_back(result);
+				auto split = subsection.split();
+				if (split.first.x >= 0)
+				{
+					subsections.push(split.first);
+					subsections.push(split.second);
+				}
+				else
+				{
+					subsections.push(subsection);
+				}
+				fits = true;
+				break;
+			}
+			else
+			{
+				tried_subsections.push_back(subsection);
+			}
+		}
+		for (const auto& subsection : tried_subsections)
+		{
+			subsections.push(subsection);
+		}
+		if (!fits)
+		{
+			m_Placements.push_back({0, -1, -1, -1, -1, false});
+		}
+	}
+}
+
+void Atlas::PlaceTiles()
+{
+	for (const Placement& placement : m_Placements)
+	{
+		if (placement.tile == 0)
+			continue;
+		const unsigned char* image_buffer = TileFactory::GetImageBuffer(placement.tile);
+		const auto width = placement.w;
+		const auto height = placement.h;
+		const auto bpp = TileFactory::GetBPP(placement.tile);
+		for (size_t h = 0; h < height; h++)
+		{
+			for (size_t w = 0; w < width; w++)
+			{
+				for (unsigned char c = 0; c < bpp && c < Atlas::BPP; c++)
+				{
+					if (placement.r)
+					{
+						m_AtlasBuffer[(placement.x + h + (placement.y + w) * m_Width) * Atlas::BPP + c] = image_buffer[(w + h * height) * bpp + c];
+					}
+					else
+					{
+						m_AtlasBuffer[(placement.x + w + (placement.y + h) * m_Width) * Atlas::BPP + c] = image_buffer[(w + h * width) * bpp + c];
+					}
+				}
+				for (unsigned char c = bpp; c < Atlas::BPP; c++)
+				{
+					m_AtlasBuffer[(placement.x + w + (placement.y + h) * m_Width) * Atlas::BPP + c] = 255;
+				}
+			}
+		}
+	}
 }

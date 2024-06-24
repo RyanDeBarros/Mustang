@@ -65,3 +65,10 @@ void RectRender::CropToRelativeRect(glm::vec4 rect)
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 + 3 * stride] = rect[0];
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 + 3 * stride] = rect[1] + rect[3];
 }
+
+void RectRender::ResetTransformUVs()
+{
+	SetTransform({});
+	CropToRelativeRect({ 0.0f, 0.0f, 1.0f, 1.0f });
+	SetPivot(0.5f, 0.5f);
+}

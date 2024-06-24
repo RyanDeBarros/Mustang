@@ -80,6 +80,7 @@ class Texture
 	RID m_RID;
 	TileHandle m_Tile;
 	TextureSettings m_Settings;
+	// TODO AtlasHandle instead
 	const Atlas* const m_Atlas;
 
 	friend class TextureFactory;

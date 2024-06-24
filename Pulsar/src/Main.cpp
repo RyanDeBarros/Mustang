@@ -30,6 +30,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	// If it is set to SCALE_KEEP_ASPECT_RATIO, call new Renderer function that will scale objects as usual without stretching their aspect ratios.
 	// If it is set to NO_SCALE_KEEP_SIZE, call new Renderer function that will not scale objects - only display more of the scene.
 	TRY(glViewport(0, 0, width, height));
+	Renderer::OnDraw();
 }
 
 int main()
@@ -91,12 +92,14 @@ void run(GLFWwindow* window)
 		ASSERT(false);
 
 	// Load textures
-	TextureHandle textureSnowman, textureTux, textureFlag;
+	TextureHandle textureSnowman, textureTux, textureFlag, textureAtlas;
 	if (loadTexture("res/assets/snowman.toml", textureSnowman) != LOAD_STATUS::OK)
 		ASSERT(false);
 	if (loadTexture("res/assets/tux.toml", textureTux) != LOAD_STATUS::OK)
 		ASSERT(false);
 	if (loadTexture("res/assets/flag.toml", textureFlag, true) != LOAD_STATUS::OK)
+		ASSERT(false);
+	if (loadTexture("res/assets/atlas.toml", textureAtlas) != LOAD_STATUS::OK)
 		ASSERT(false);
 
 	// Load renderables
@@ -197,26 +200,31 @@ void run(GLFWwindow* window)
 	//actor2->CropToRect({ 0.3f * w, 0.4f * h, 0.4f * w, 0.55f * h }, static_cast<int>(w), static_cast<int>(h));
 	actor2->CropToRelativeRect({ 0.3f, 0.4f, 0.4f, 0.55f });
 	
-	// TODO DON'T create atlas directly. use AtlasFactory instead. Otherwise, when actor's desctructor is called, all the tiles referencing it will have hanging pointers.
-	Atlas atlas(1024, 1024);
-	atlas.Insert(TextureFactory::GetTileHandle(textureSnowman));
-	//atlas.Insert(TextureFactory::GetTileHandle(textureFlag));
-
+	// TODO DON'T create atlas directly. use AtlasFactory instead. Otherwise, when actor's desctructor is called, all the tiles referencing it will have hanging pointers. Therefore, there should be communication between AtlasFactory and TileFactory. Perhaps shared_ptr?
+	//std::vector<TileHandle> tiles{ TextureFactory::GetTileHandle(textureSnowman), TextureFactory::GetTileHandle(textureTux) };
+	std::vector<TileHandle> tiles{ TextureFactory::GetTileHandle(textureSnowman) };
+	Atlas atlas(tiles, 1024, 1024);
+	
 	saveAtlas(atlas, "res/textures/atlas.png", "");
 
 	TextureHandle atlasTexture = TextureFactory::GetHandle(atlas);
 	RectRender* actor5 = new RectRender();
 	actor5->SetTextureHandle(atlasTexture);
+	//actor5->SetTextureHandle(textureAtlas);
 	actor5->SetShaderHandle(shaderStandard32);
-	actor5->SetPivot(0.0, 0.0);
-
+	actor5->SetPivot(0.5, 0.5);
+	
 	Renderer::GetCanvasLayer(0)->OnDetach(actor1);
-	Renderer::GetCanvasLayer(0)->OnDetach(actor2);
+	//Renderer::GetCanvasLayer(0)->OnDetach(actor2);
 	Renderer::GetCanvasLayer(0)->OnDetach(actor3);
 	Renderer::GetCanvasLayer(0)->OnDetach(&tesselDiagonal);
 	Renderer::GetCanvasLayer(-1)->OnDetach(actor4);
 
-	Renderer::GetCanvasLayer(0)->OnAttach(actor5);
+	//Renderer::GetCanvasLayer(0)->OnAttach(actor5);
+	//actor5->SetScale(0.5, 0.5);
+	actor2->SetTextureHandle(textureAtlas);
+	//actor2->SetModulation({ 1.0f, 1.0f, 1.0f, 1.0f });
+	actor2->ResetTransformUVs();
 
 	for (;;)
 	{

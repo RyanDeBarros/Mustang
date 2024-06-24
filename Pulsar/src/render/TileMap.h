@@ -17,7 +17,7 @@ class TileMap : public ActorSequencer2D
 	std::map<TileHandle, ActorTesselation2D> m_Map;
 
 public:
-	TileMap(const int& atlas_width, const int& atlas_height);
+	TileMap(std::vector<TileHandle>& tiles, const int& atlas_width = -1, const int& atlas_height = -1);
 	TileMap(Atlas* atlas);
 	~TileMap();
 

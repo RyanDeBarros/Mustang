@@ -17,7 +17,7 @@ Tile::Tile(const char* filepath)
 }
 
 Tile::Tile(const Atlas& atlas)
-	: m_Filepath(""), m_ImageBuffer(atlas.m_AtlasBuffer), m_Width(atlas.m_Width), m_Height(atlas.m_Height), m_BPP(4), m_AtlasID(atlas.id)
+	: m_Filepath(""), m_ImageBuffer(atlas.m_AtlasBuffer), m_Width(atlas.m_Width), m_Height(atlas.m_Height), m_BPP(Atlas::BPP), m_AtlasID(atlas.id)
 {
 }
 

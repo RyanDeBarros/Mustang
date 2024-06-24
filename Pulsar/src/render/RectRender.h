@@ -20,4 +20,5 @@ public:
 
 	void CropToRect(glm::vec4 rect, int atlas_width, int atlas_height);
 	void CropToRelativeRect(glm::vec4 rect);
+	void ResetTransformUVs();
 };

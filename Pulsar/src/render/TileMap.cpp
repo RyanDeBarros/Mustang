@@ -1,7 +1,7 @@
 #include "TileMap.h"
 
-TileMap::TileMap(const int& atlas_width, const int& atlas_height)
-	: m_Atlas(new Atlas(atlas_width, atlas_height))
+TileMap::TileMap(std::vector<TileHandle>& tiles, const int& atlas_width, const int& atlas_height)
+	: m_Atlas(new Atlas(tiles, atlas_width, atlas_height))
 {
 	ClearCache();
 }
