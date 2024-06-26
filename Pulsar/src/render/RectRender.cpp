@@ -14,6 +14,8 @@ RectRender::RectRender(const Transform2D& transform, const TextureHandle& textur
 	SetShaderHandle(shader);
 	SetTextureHandle(texture);
 	SetPivot(0.5, 0.5);
+	m_UVWidth = GetWidth();
+	m_UVHeight = GetHeight();
 }
 
 void RectRender::DefineRectRenderable()
@@ -43,6 +45,8 @@ void RectRender::SetPivot(float pivotX, float pivotY)
 void RectRender::CropToRect(glm::vec4 rect, int atlas_width, int atlas_height)
 {
 	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
+	m_UVWidth = rect[2];
+	m_UVHeight = rect[3];
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2] = rect[0] / atlas_width;
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3] = rect[1] / atlas_height;
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 + stride] = (rect[0] + rect[2]) / atlas_width;
@@ -56,6 +60,8 @@ void RectRender::CropToRect(glm::vec4 rect, int atlas_width, int atlas_height)
 void RectRender::CropToRelativeRect(glm::vec4 rect)
 {
 	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
+	m_UVWidth = rect[2] * GetWidth();
+	m_UVHeight = rect[2] * GetHeight();
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2] = rect[0];
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3] = rect[1];
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 + stride] = rect[0] + rect[2];

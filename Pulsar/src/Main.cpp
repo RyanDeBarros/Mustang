@@ -15,15 +15,15 @@
 #include "factory/UniformLexiconFactory.h"
 #include "render/ActorTesselation.h"
 
-void run(GLFWwindow*);
+static void run(GLFWwindow*);
 
-void window_refresh_callback(GLFWwindow* window)
+static void window_refresh_callback(GLFWwindow* window)
 {
 	Renderer::OnDraw();
 	TRY(glFinish()); // important, this waits until rendering result is actually visible, thus making resizing less ugly
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	// TODO
 	// If _RendererSettings::resize_mode is set to SCALE_IGNORE_ASPECT_RATIO, don't add anything.
@@ -161,7 +161,7 @@ void run(GLFWwindow* window)
 	if (u)
 		Logger::LogInfo(STR(std::get<glm::vec3>(*u)));
 
-	TextureFactory::SetSettings(actor1->GetTextureHandle(), { MinFilter::Linear, MagFilter::Linear, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge });
+	TextureFactory::SetSettings(actor1->GetTextureHandle(), Texture::linear_settings);
 
 	actor3->SetPivot(0.5f, 0.5f);
 	actor3->SetPosition(0.0f, 0.0f);
@@ -242,6 +242,34 @@ void run(GLFWwindow* window)
 	Atlas tileAtlas(tiles, -1, -1, 1);
 
 	saveAtlas(tileAtlas, "res/textures/atlas.png", "");
+
+	RectRender atlasRender1 = tileAtlas.SampleSubtile(3, Texture::nearest_settings, shaderStandard32);
+	RectRender atlasRender2 = tileAtlas.SampleSubtile(4, Texture::nearest_settings, shaderStandard32);
+	// TODO use tesselation instead of copying
+	RectRender atlasRender3 = atlasRender2;
+	RectRender atlasRender4 = atlasRender2;
+	RectRender atlasRender5 = tileAtlas.SampleSubtile(5, Texture::nearest_settings, shaderStandard32);
+	Renderer::GetCanvasLayer(0)->OnAttach(&atlasRender1);
+	Renderer::GetCanvasLayer(0)->OnAttach(&atlasRender2);
+	Renderer::GetCanvasLayer(0)->OnAttach(&atlasRender3);
+	Renderer::GetCanvasLayer(0)->OnAttach(&atlasRender4);
+	Renderer::GetCanvasLayer(0)->OnAttach(&atlasRender5);
+
+	float side = 5.0f;
+
+	atlasRender1.MultScale(side, side);
+	atlasRender2.MultScale(side, side);
+	atlasRender3.MultScale(side, side);
+	atlasRender4.MultScale(side, side);
+	atlasRender5.MultScale(side, side);
+
+	float uvw = atlasRender1.GetUVWidth() * side;
+
+	atlasRender1.SetPosition(-2 * uvw, 0);
+	atlasRender2.SetPosition(-uvw, 0);
+	atlasRender3.SetPosition(0, 0);
+	atlasRender4.SetPosition(uvw, 0);
+	atlasRender5.SetPosition(2 * uvw, 0);
 
 	for (;;)
 	{

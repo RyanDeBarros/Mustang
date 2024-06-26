@@ -104,4 +104,7 @@ public:
 	inline int GetWidth() const { return TileFactory::GetWidth(m_Tile); }
 	inline int GetHeight() const { return TileFactory::GetHeight(m_Tile); }
 	inline TileHandle GetTileHandle() const { return m_Tile; }
+
+	static TextureSettings linear_settings;
+	static TextureSettings nearest_settings;
 };

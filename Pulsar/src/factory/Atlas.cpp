@@ -3,6 +3,7 @@
 #include <queue>
 
 #include "TileFactory.h"
+#include "render/RectRender.h"
 
 unsigned int id_count = 1;
 
@@ -224,18 +225,40 @@ void Atlas::PlaceTiles()
 				{
 					if (placement.r)
 					{
-						m_AtlasBuffer[(placement.x + h + (placement.y + w) * m_Width) * Atlas::BPP + c] = image_buffer[(w + h * height) * bpp + c];
+						m_AtlasBuffer[(placement.x + m_Border + h + (placement.y + m_Border + w) * m_Width) * Atlas::BPP + c] = image_buffer[(w + h * height) * bpp + c];
 					}
 					else
 					{
-						m_AtlasBuffer[(placement.x + w + (placement.y + h) * m_Width) * Atlas::BPP + c] = image_buffer[(w + h * width) * bpp + c];
+						m_AtlasBuffer[(placement.x + m_Border + w + (placement.y + m_Border + h) * m_Width) * Atlas::BPP + c] = image_buffer[(w + h * width) * bpp + c];
 					}
 				}
 				for (unsigned char c = bpp; c < Atlas::BPP; c++)
 				{
-					m_AtlasBuffer[(placement.x + w + (placement.y + h) * m_Width) * Atlas::BPP + c] = 255;
+					if (placement.r)
+					{
+						m_AtlasBuffer[(placement.x + m_Border + h + (placement.y + m_Border + w) * m_Width) * Atlas::BPP + c] = 255;
+					}
+					else
+					{
+						m_AtlasBuffer[(placement.x + m_Border + w + (placement.y + m_Border + h) * m_Width) * Atlas::BPP + c] = 255;
+					}
 				}
 			}
 		}
 	}
+}
+
+RectRender Atlas::SampleSubtile(const size_t& index, const TextureSettings& texture_settings, const ShaderHandle& shader, const ZIndex& z, const bool& visible) const
+{
+	if (index >= m_Placements.size() || m_Placements[index].x < 0)
+		return { {}, 0, 0, 0, false };
+	RectRender actor({}, TextureFactory::GetHandle(*this, texture_settings), shader, z, visible);
+	const Placement& rect = m_Placements[index];
+	if (rect.r)
+		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.h - m_Border, rect.w - m_Border }, m_Width, m_Height);
+	else
+		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.w - m_Border, rect.h - m_Border }, m_Width, m_Height);
+	actor.SetPivot(0.5, 0.5);
+	actor.SetScale((rect.w - m_Border) / (float)m_Width, (rect.h - m_Border) / (float)m_Height);
+	return actor;
 }

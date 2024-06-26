@@ -28,6 +28,9 @@ public:
 
 	inline int GetWidth() const { return m_Width; }
 	inline int GetHeight() const { return m_Height; }
+	
+	// TODO default shader handle for standard shader 32/8
+	class RectRender SampleSubtile(const size_t& index, const struct TextureSettings& texture_settings, const ShaderHandle& shader, const ZIndex& z = 0, const bool& visible = true) const;
 
 private:
 	void RectPack(std::vector<TileHandle>& tiles, const int& width = -1, const int& height = -1);
