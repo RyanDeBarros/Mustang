@@ -14,8 +14,8 @@ RectRender::RectRender(const Transform2D& transform, const TextureHandle& textur
 	SetShaderHandle(shader);
 	SetTextureHandle(texture);
 	SetPivot(0.5, 0.5);
-	m_UVWidth = GetWidth();
-	m_UVHeight = GetHeight();
+	m_UVWidth = static_cast<float>(GetWidth());
+	m_UVHeight = static_cast<float>(GetHeight());
 }
 
 void RectRender::DefineRectRenderable()

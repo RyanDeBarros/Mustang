@@ -4,6 +4,7 @@
 
 #include "TileFactory.h"
 #include "render/RectRender.h"
+#include "render/ActorTesselation.h"
 
 unsigned int id_count = 1;
 

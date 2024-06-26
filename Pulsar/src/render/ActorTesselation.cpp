@@ -80,7 +80,7 @@ void ActorTesselation2D::OnPreDraw()
 }
 
 void ActorTesselation2D::OnPostDraw()
-{
+{	
 	if (m_Actor.index() == 0)
 		std::get<ActorPrimitive2D* const>(m_Actor)->SetTransform(m_ActorOffsets[0]);
 	else

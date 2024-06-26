@@ -119,6 +119,8 @@ void run(GLFWwindow* window)
 	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-500.0f, 300.0f), -1.0f, glm::vec2(0.8f, 1.2f) }, textureFlag, shaderStandard32);
 	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(400.0f, -200.0f), 0.25f, glm::vec2(0.7f, 0.7f) }, textureSnowman, shaderStandard32);
 	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(1.0f, 1.0f) }, textureTux, shaderStandard32);
+	//std::shared_ptr<RectRender> actor3 = std::make_shared<RectRender>(Transform2D{ glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(1.0f, 1.0f) }, textureTux, shaderStandard32);
+	//ActorRenderBase2D_SP actor3SP = std::make_shared<std::variant<ActorPrimitive2D, ActorSequencer2D>>(*actor3);
 
 	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor2);
@@ -236,40 +238,34 @@ void run(GLFWwindow* window)
 
 
 	// TODO default constructor of RectRender should only need to accept textureHandle. initial transform should be {}. initial shader handle should not be 0, but _RendererSettings::default_rect_render_shader_handle, which would be set in Renderer::Init() as shaderStandard32 (or shaderStandard8).
-	//RectRender* renderTiles = new RectRender[6]{ RectRender({}, tex_dirtTL, shaderStandard32), RectRender({}, tex_dirtTR, shaderStandard32), RectRender({}, tex_grassSingle, shaderStandard32), RectRender({}, tex_grassTL, shaderStandard32), RectRender({}, tex_grassTE, shaderStandard32), RectRender({}, tex_grassTR, shaderStandard32) };
 	TileHandle tile_dirtTL(TextureFactory::GetTileHandle(tex_dirtTL)), tile_dirtTR(TextureFactory::GetTileHandle(tex_dirtTR)), tile_grassSingle(TextureFactory::GetTileHandle(tex_grassSingle)), tile_grassTL(TextureFactory::GetTileHandle(tex_grassTL)), tile_grassTE(TextureFactory::GetTileHandle(tex_grassTE)), tile_grassTR(TextureFactory::GetTileHandle(tex_grassTR));
 	std::vector<TileHandle> tiles = { tile_dirtTL, tile_dirtTR, tile_grassSingle, tile_grassTL, tile_grassTE, tile_grassTR };
 	Atlas tileAtlas(tiles, -1, -1, 1);
 
 	saveAtlas(tileAtlas, "res/textures/atlas.png", "");
+	
+	auto _atlasTessel1 = tileAtlas.SampleSubtile(3, Texture::nearest_settings, shaderStandard32);
+	ActorTesselation2D atlasTessel1(&_atlasTessel1);
+	auto _atlasTessel2 = tileAtlas.SampleSubtile(4, Texture::nearest_settings, shaderStandard32);
+	ActorTesselation2D atlasTessel2(&_atlasTessel2);
+	auto _atlasTessel3 = tileAtlas.SampleSubtile(5, Texture::nearest_settings, shaderStandard32);
+	ActorTesselation2D atlasTessel3(&_atlasTessel3);
 
-	RectRender atlasRender1 = tileAtlas.SampleSubtile(3, Texture::nearest_settings, shaderStandard32);
-	RectRender atlasRender2 = tileAtlas.SampleSubtile(4, Texture::nearest_settings, shaderStandard32);
-	// TODO use tesselation instead of copying
-	RectRender atlasRender3 = atlasRender2;
-	RectRender atlasRender4 = atlasRender2;
-	RectRender atlasRender5 = tileAtlas.SampleSubtile(5, Texture::nearest_settings, shaderStandard32);
-	Renderer::GetCanvasLayer(0)->OnAttach(&atlasRender1);
-	Renderer::GetCanvasLayer(0)->OnAttach(&atlasRender2);
-	Renderer::GetCanvasLayer(0)->OnAttach(&atlasRender3);
-	Renderer::GetCanvasLayer(0)->OnAttach(&atlasRender4);
-	Renderer::GetCanvasLayer(0)->OnAttach(&atlasRender5);
+	Renderer::GetCanvasLayer(0)->OnAttach(&atlasTessel1);
+	Renderer::GetCanvasLayer(0)->OnAttach(&atlasTessel2);
+	Renderer::GetCanvasLayer(0)->OnAttach(&atlasTessel3);
 
 	float side = 5.0f;
+	ActorRenderBase2D_P actor_ref = atlasTessel1.ActorRef();
+	ActorPrimitive2D* const prim = std::get<ActorPrimitive2D* const>(actor_ref);
+	RectRender* const rect = static_cast<RectRender* const>(prim);
+	float uvw = rect->GetUVWidth() * side;
 
-	atlasRender1.MultScale(side, side);
-	atlasRender2.MultScale(side, side);
-	atlasRender3.MultScale(side, side);
-	atlasRender4.MultScale(side, side);
-	atlasRender5.MultScale(side, side);
-
-	float uvw = atlasRender1.GetUVWidth() * side;
-
-	atlasRender1.SetPosition(-2 * uvw, 0);
-	atlasRender2.SetPosition(-uvw, 0);
-	atlasRender3.SetPosition(0, 0);
-	atlasRender4.SetPosition(uvw, 0);
-	atlasRender5.SetPosition(2 * uvw, 0);
+	atlasTessel1.Insert({ {-2 * uvw, 0}, 0, {side, side} });
+	atlasTessel2.Insert({ {-uvw, 0}, 0, {side, side} });
+	atlasTessel2.Insert({ {0, 0}, 0, {side, side} });
+	atlasTessel2.Insert({ {uvw, 0}, 0, {side, side} });
+	atlasTessel3.Insert({ {2 * uvw, 0}, 0, {side, side} });
 
 	for (;;)
 	{
@@ -286,7 +282,6 @@ void run(GLFWwindow* window)
 			break;
 	}
 
-	//delete[] renderTiles;
 	delete actor1, actor2, actor3, actor4;
 	//delete actor1, actor2, actor3, actor4, actor5;
 }
