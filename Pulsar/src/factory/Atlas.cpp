@@ -7,8 +7,8 @@
 unsigned int id_count = 1;
 
 // TODO use factory? so that id is not incremented if atlas is loaded from same file. This would probably be in a different constructor. Perhaps not a full factory class, but a static map that maps atlas filepaths to ids.
-Atlas::Atlas(std::vector<TileHandle>& tiles, const int& width, const int& height)
-	: m_AtlasBuffer(nullptr), id(id_count++)
+Atlas::Atlas(std::vector<TileHandle>& tiles, const int& width, const int& height, const int& border)
+	: m_Border(border), m_AtlasBuffer(nullptr), id(id_count++)
 {
 	RectPack(tiles, width, height);
 	m_BufferSize = Atlas::BPP * m_Width * m_Height; // 4 is BPP
@@ -22,11 +22,11 @@ Atlas::~Atlas()
 		delete m_AtlasBuffer;
 }
 
-static int min_bound(const std::vector<TileHandle>& tiles)
+static int min_bound(const std::vector<TileHandle>& tiles, const int& border)
 {
-	int bound = 0;
+	int bound = border;
 	for (const TileHandle& tile : tiles)
-		bound += std::max(TileFactory::GetWidth(tile), TileFactory::GetHeight(tile));
+		bound += std::max(TileFactory::GetWidth(tile), TileFactory::GetHeight(tile)) + border;
 	return bound;
 }
 
@@ -135,7 +135,7 @@ struct Subsection
 
 void Atlas::RectPack(std::vector<TileHandle>& tiles, const int& width, const int& height)
 {
-	int bound = min_bound(tiles);
+	int bound = min_bound(tiles, m_Border);
 	m_Width = width > 0 ? width : bound;
 	m_Height = height > 0 ? height : bound;
 	
@@ -161,7 +161,7 @@ void Atlas::RectPack(std::vector<TileHandle>& tiles, const int& width, const int
 		{
 			Subsection subsection = subsections.top();
 			subsections.pop();
-			Placement result = subsection.insert(tile, TileFactory::GetWidth(tile), TileFactory::GetHeight(tile));
+			Placement result = subsection.insert(tile, TileFactory::GetWidth(tile) + m_Border, TileFactory::GetHeight(tile) + m_Border);
 			if (result.tile > 0)
 			{
 				m_Placements.push_back(result);
@@ -213,8 +213,8 @@ void Atlas::PlaceTiles()
 		if (placement.tile == 0)
 			continue;
 		const unsigned char* image_buffer = TileFactory::GetImageBuffer(placement.tile);
-		const auto width = placement.w;
-		const auto height = placement.h;
+		const auto width = placement.w - m_Border;
+		const auto height = placement.h - m_Border;
 		const auto bpp = TileFactory::GetBPP(placement.tile);
 		for (size_t h = 0; h < height; h++)
 		{

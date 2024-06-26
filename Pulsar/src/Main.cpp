@@ -239,7 +239,7 @@ void run(GLFWwindow* window)
 	//RectRender* renderTiles = new RectRender[6]{ RectRender({}, tex_dirtTL, shaderStandard32), RectRender({}, tex_dirtTR, shaderStandard32), RectRender({}, tex_grassSingle, shaderStandard32), RectRender({}, tex_grassTL, shaderStandard32), RectRender({}, tex_grassTE, shaderStandard32), RectRender({}, tex_grassTR, shaderStandard32) };
 	TileHandle tile_dirtTL(TextureFactory::GetTileHandle(tex_dirtTL)), tile_dirtTR(TextureFactory::GetTileHandle(tex_dirtTR)), tile_grassSingle(TextureFactory::GetTileHandle(tex_grassSingle)), tile_grassTL(TextureFactory::GetTileHandle(tex_grassTL)), tile_grassTE(TextureFactory::GetTileHandle(tex_grassTE)), tile_grassTR(TextureFactory::GetTileHandle(tex_grassTR));
 	std::vector<TileHandle> tiles = { tile_dirtTL, tile_dirtTR, tile_grassSingle, tile_grassTL, tile_grassTE, tile_grassTR };
-	Atlas tileAtlas(tiles);
+	Atlas tileAtlas(tiles, -1, -1, 1);
 
 	saveAtlas(tileAtlas, "res/textures/atlas.png", "");
 

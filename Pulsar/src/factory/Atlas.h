@@ -13,7 +13,7 @@ class Atlas
 
 	const unsigned int id;
 	unsigned char* m_AtlasBuffer;
-	int m_Width, m_Height;
+	int m_Width, m_Height, m_Border;
 	int m_BufferSize;
 	std::vector<struct Placement> m_Placements;
 
@@ -22,8 +22,7 @@ public:
 	static constexpr unsigned char STRIDE_BYTES = sizeof(unsigned char) * BPP;
 
 	// TODO insert subtiles, i.e. tile with (x,y,w,h)
-	// TODO border between tiles
-	Atlas(std::vector<TileHandle>& tiles, const int& width = -1, const int& height = -1);
+	Atlas(std::vector<TileHandle>& tiles, const int& width = -1, const int& height = -1, const int& border = 0);
 	Atlas(const Atlas&) = delete;
 	~Atlas();
 
