@@ -62,7 +62,7 @@ struct Subsection
 	{
 		if (rw > 0 && rh > 0)
 		{
-			if (w - rw > h - rh)
+			if (w - rw >= h - rh)
 			{
 				Subsection s1{ x + rw, y, w - rw, h };
 				Subsection s2{ x, y + rh, rw, h - rh };
@@ -77,6 +77,60 @@ struct Subsection
 		}
 		else return { {-1}, {} };
 	}
+
+	bool merge(const Subsection& other)
+	{
+		if (w == other.w && x == other.x)
+		{
+			if (y + h == other.y)
+			{
+				h += other.h;
+				return true;
+			}
+			else if (y == other.y + other.h)
+			{
+				y -= other.h;
+				h += other.h;
+				return true;
+			}
+		}
+		else if (h == other.h && y == other.y)
+		{
+			if (x + w == other.x)
+			{
+				w += other.w;
+				return true;
+			}
+			else if (x == other.x + other.w)
+			{
+				x -= other.w;
+				w += other.w;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	static void merge(std::vector<Subsection>& subsections)
+	{
+		// TODO optimize so that merge only happens when split occurs such that adjacent subsections can merge.
+		size_t i = 0;
+		while (i < subsections.size())
+		{
+			Subsection& orig = subsections[i];
+			size_t j = i + 1;
+			while (j < subsections.size())
+			{
+				if (orig.merge(subsections[j]))
+				{
+					subsections.erase(subsections.begin() + j);
+				}
+				else j++;
+			}
+			i++;
+		}
+	}
+
 };
 
 void Atlas::RectPack(std::vector<TileHandle>& tiles, const int& width, const int& height)
@@ -116,6 +170,18 @@ void Atlas::RectPack(std::vector<TileHandle>& tiles, const int& width, const int
 				{
 					subsections.push(split.first);
 					subsections.push(split.second);
+					std::vector<Subsection> old_subsections;
+					while (!subsections.empty())
+					{
+						old_subsections.push_back(subsections.top());
+						subsections.pop();
+					}
+					Subsection::merge(old_subsections);
+					while (!old_subsections.empty())
+					{
+						subsections.push(old_subsections[0]);
+						old_subsections.erase(old_subsections.begin());
+					}
 				}
 				else
 				{

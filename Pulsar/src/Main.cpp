@@ -92,15 +92,21 @@ void run(GLFWwindow* window)
 		ASSERT(false);
 
 	// Load textures
-	TextureHandle textureSnowman, textureTux, textureFlag, textureAtlas;
+	TextureHandle textureSnowman, textureTux, textureFlag;
 	if (loadTexture("res/assets/snowman.toml", textureSnowman) != LOAD_STATUS::OK)
 		ASSERT(false);
 	if (loadTexture("res/assets/tux.toml", textureTux) != LOAD_STATUS::OK)
 		ASSERT(false);
 	if (loadTexture("res/assets/flag.toml", textureFlag, true) != LOAD_STATUS::OK)
 		ASSERT(false);
-	if (loadTexture("res/assets/atlas.toml", textureAtlas) != LOAD_STATUS::OK)
-		ASSERT(false);
+	//if (loadTexture("res/assets/atlas.toml", textureAtlas) != LOAD_STATUS::OK)
+	//	ASSERT(false);
+	TextureHandle tex_dirtTL = TextureFactory::GetHandle("res/textures/dirtTL.png");
+	TextureHandle tex_dirtTR = TextureFactory::GetHandle("res/textures/dirtTR.png");
+	TextureHandle tex_grassSingle = TextureFactory::GetHandle("res/textures/grassSingle.png");
+	TextureHandle tex_grassTL = TextureFactory::GetHandle("res/textures/grassTL.png");
+	TextureHandle tex_grassTE = TextureFactory::GetHandle("res/textures/grassTE.png");
+	TextureHandle tex_grassTR = TextureFactory::GetHandle("res/textures/grassTR.png");
 
 	// Load renderables
 	Renderable renderable;
@@ -202,29 +208,40 @@ void run(GLFWwindow* window)
 	
 	// TODO DON'T create atlas directly. use AtlasFactory instead. Otherwise, when actor's desctructor is called, all the tiles referencing it will have hanging pointers. Therefore, there should be communication between AtlasFactory and TileFactory. Perhaps shared_ptr?
 	//std::vector<TileHandle> tiles{ TextureFactory::GetTileHandle(textureSnowman), TextureFactory::GetTileHandle(textureTux) };
-	std::vector<TileHandle> tiles{ TextureFactory::GetTileHandle(textureSnowman) };
-	Atlas atlas(tiles, 1024, 1024);
+	//for (int i = 0; i < 20; i++)
+		//tiles.push_back(TextureFactory::GetTileHandle(textureFlag));
+	//Atlas atlas(tiles, 4096, 4096);
 	
-	saveAtlas(atlas, "res/textures/atlas.png", "");
+	//saveAtlas(atlas, "res/textures/atlas.png", "");
 
-	TextureHandle atlasTexture = TextureFactory::GetHandle(atlas);
-	RectRender* actor5 = new RectRender();
-	actor5->SetTextureHandle(atlasTexture);
-	//actor5->SetTextureHandle(textureAtlas);
-	actor5->SetShaderHandle(shaderStandard32);
-	actor5->SetPivot(0.5, 0.5);
+	//TextureHandle atlasTexture = TextureFactory::GetHandle(atlas);
+	//RectRender* actor5 = new RectRender();
+	//actor5->SetTextureHandle(atlasTexture);
+	//actor5->SetShaderHandle(shaderStandard32);
+	//actor5->SetPivot(0.5, 0.5);
 	
 	Renderer::GetCanvasLayer(0)->OnDetach(actor1);
-	//Renderer::GetCanvasLayer(0)->OnDetach(actor2);
+	Renderer::GetCanvasLayer(0)->OnDetach(actor2);
 	Renderer::GetCanvasLayer(0)->OnDetach(actor3);
 	Renderer::GetCanvasLayer(0)->OnDetach(&tesselDiagonal);
 	Renderer::GetCanvasLayer(-1)->OnDetach(actor4);
 
 	//Renderer::GetCanvasLayer(0)->OnAttach(actor5);
 	//actor5->SetScale(0.5, 0.5);
-	actor2->SetTextureHandle(textureAtlas);
+	//actor2->SetTextureHandle(textureAtlas);
 	//actor2->SetModulation({ 1.0f, 1.0f, 1.0f, 1.0f });
-	actor2->ResetTransformUVs();
+	//actor2->ResetTransformUVs();
+	//actor2->SetScale(0.25f, 0.25f);
+	//actor5->SetScale(0.5f, 0.5f);
+
+
+	// TODO default constructor of RectRender should only need to accept textureHandle. initial transform should be {}. initial shader handle should not be 0, but _RendererSettings::default_rect_render_shader_handle, which would be set in Renderer::Init() as shaderStandard32 (or shaderStandard8).
+	//RectRender* renderTiles = new RectRender[6]{ RectRender({}, tex_dirtTL, shaderStandard32), RectRender({}, tex_dirtTR, shaderStandard32), RectRender({}, tex_grassSingle, shaderStandard32), RectRender({}, tex_grassTL, shaderStandard32), RectRender({}, tex_grassTE, shaderStandard32), RectRender({}, tex_grassTR, shaderStandard32) };
+	TileHandle tile_dirtTL(TextureFactory::GetTileHandle(tex_dirtTL)), tile_dirtTR(TextureFactory::GetTileHandle(tex_dirtTR)), tile_grassSingle(TextureFactory::GetTileHandle(tex_grassSingle)), tile_grassTL(TextureFactory::GetTileHandle(tex_grassTL)), tile_grassTE(TextureFactory::GetTileHandle(tex_grassTE)), tile_grassTR(TextureFactory::GetTileHandle(tex_grassTR));
+	std::vector<TileHandle> tiles = { tile_dirtTL, tile_dirtTR, tile_grassSingle, tile_grassTL, tile_grassTE, tile_grassTR };
+	Atlas tileAtlas(tiles);
+
+	saveAtlas(tileAtlas, "res/textures/atlas.png", "");
 
 	for (;;)
 	{
@@ -241,5 +258,7 @@ void run(GLFWwindow* window)
 			break;
 	}
 
-	delete actor1, actor2, actor3, actor4, actor5;
+	//delete[] renderTiles;
+	delete actor1, actor2, actor3, actor4;
+	//delete actor1, actor2, actor3, actor4, actor5;
 }

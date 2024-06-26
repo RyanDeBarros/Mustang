@@ -22,6 +22,7 @@ public:
 	static constexpr unsigned char STRIDE_BYTES = sizeof(unsigned char) * BPP;
 
 	// TODO insert subtiles, i.e. tile with (x,y,w,h)
+	// TODO border between tiles
 	Atlas(std::vector<TileHandle>& tiles, const int& width = -1, const int& height = -1);
 	Atlas(const Atlas&) = delete;
 	~Atlas();
