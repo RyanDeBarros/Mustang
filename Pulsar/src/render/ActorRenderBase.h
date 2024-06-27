@@ -8,7 +8,8 @@ class ActorRenderBase2D
 public:
 	static constexpr unsigned int static_classID = 0;
 	virtual constexpr unsigned int classID() const { return ActorRenderBase2D::static_classID; }
-
+	
+	virtual void RequestDraw(class CanvasLayer* canvas_layer) = 0;
 	virtual ZIndex GetZIndex() const = 0;
 	virtual void SetZIndex(const ZIndex& z) = 0;
 };

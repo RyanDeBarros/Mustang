@@ -13,7 +13,7 @@
 #include "ActorRenderBase.h"
 #include "LayerView.h"
 #include "ActorPrimitive.h"
-#include "ActorComposite.h"
+#include "ActorSequencer.h"
 #include "Renderable.h"
 
 struct CanvasLayerData
@@ -56,8 +56,11 @@ public:
 	inline LayerView2D& GetLayerView2DRef() { return m_LayerView; }
 	inline CanvasIndex GetZIndex() const { return m_Data.ci; }
 	inline CanvasLayerData& GetDataRef() { return m_Data; }
-private:
+
 	void DrawPrimitive(ActorPrimitive2D* const);
+	void DrawSequencer(ActorSequencer2D* const);
+
+private:
 	void SetBlending() const;
 	void PoolOver(const Renderable&);
 	TextureSlot GetTextureSlot(const Renderable&);

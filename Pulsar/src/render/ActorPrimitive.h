@@ -26,6 +26,7 @@ public:
 	ActorPrimitive2D(const Renderable& render = Renderable(), const Transform2D& transform = Transform2D(), const ZIndex& z = 0, const bool& visible = true);
 	ActorPrimitive2D(const ActorPrimitive2D& primitive);
 	
+	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 	inline virtual ZIndex GetZIndex() const override { return m_Z; }
 	inline virtual void SetZIndex(const ZIndex& z) override { m_Z = z; }
 	inline const Transform2D& GetTransform() const { return m_Transform; }

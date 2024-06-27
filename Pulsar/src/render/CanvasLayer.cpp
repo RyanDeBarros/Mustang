@@ -86,7 +86,6 @@ bool CanvasLayer::OnDetach(ActorRenderBase2D* const actor)
 void CanvasLayer::OnDraw()
 {
 	SetBlending();
-	int prim_i = 0;
 	ActorPrimitive2D* primitive = nullptr;
 	ActorSequencer2D* sequencer = nullptr;
 	currentModel = BatchModel();
@@ -96,17 +95,7 @@ void CanvasLayer::OnDraw()
 	{
 		for (const auto& element : *list.second)
 		{
-			if (INHERITS(*element, ActorPrimitive2D))
-				DrawPrimitive(static_cast<ActorPrimitive2D* const>(element));
-			else if (INHERITS(*element, ActorSequencer2D))
-			{
-				prim_i = 0;
-				sequencer = static_cast<ActorSequencer2D* const>(element);
-				sequencer->OnPreDraw();
-				while ((primitive = sequencer->operator[](prim_i++)) != nullptr)
-					DrawPrimitive(primitive);
-				sequencer->OnPostDraw();
-			}
+			element->RequestDraw(this);
 		}
 	}
 	FlushAndReset();
@@ -132,6 +121,16 @@ void CanvasLayer::DrawPrimitive(ActorPrimitive2D* const primitive)
 		primitive->OnDraw(GetTextureSlot(render));
 		PoolOver(render);
 	}
+}
+
+void CanvasLayer::DrawSequencer(ActorSequencer2D* const sequencer)
+{
+	int prim_i = 0;
+	ActorPrimitive2D* primitive = nullptr;
+	sequencer->OnPreDraw();
+	while ((primitive = sequencer->operator[](prim_i++)) != nullptr)
+		DrawPrimitive(primitive);
+	sequencer->OnPostDraw();
 }
 
 void CanvasLayer::SetBlending() const

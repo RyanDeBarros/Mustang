@@ -11,6 +11,7 @@ private:
 	friend class CanvasLayer;
 	friend class ActorTesselation2D;
 public:
+	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 	virtual ActorPrimitive2D* const operator[](const int& i) = 0;
 	virtual BufferCounter PrimitiveCount() const = 0;
 	virtual void OnPreDraw() {}
