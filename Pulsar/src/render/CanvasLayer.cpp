@@ -54,15 +54,15 @@ CanvasLayer::~CanvasLayer()
 	}
 }
 
-void CanvasLayer::OnAttach(ActorRenderBase2D* const primitive)
+void CanvasLayer::OnAttach(ActorRenderBase2D* const actor)
 {
-	auto entry = m_Batcher->find(primitive->GetZIndex());
+	auto entry = m_Batcher->find(actor->GetZIndex());
 	if (entry == m_Batcher->end())
 	{
-		m_Batcher->emplace(primitive->GetZIndex(), new std::list<ActorRenderBase2D*>());
-		entry = m_Batcher->find(primitive->GetZIndex());
+		m_Batcher->emplace(actor->GetZIndex(), new std::list<ActorRenderBase2D*>());
+		entry = m_Batcher->find(actor->GetZIndex());
 	}
-	entry->second->push_back(primitive);
+	entry->second->push_back(actor);
 }
 
 bool CanvasLayer::OnSetZIndex(ActorRenderBase2D* const actor, const ZIndex new_val)
@@ -86,8 +86,6 @@ bool CanvasLayer::OnDetach(ActorRenderBase2D* const actor)
 void CanvasLayer::OnDraw()
 {
 	SetBlending();
-	ActorPrimitive2D* primitive = nullptr;
-	ActorSequencer2D* sequencer = nullptr;
 	currentModel = BatchModel();
 	vertexPos = m_VertexPool;
 	indexPos = m_IndexPool;

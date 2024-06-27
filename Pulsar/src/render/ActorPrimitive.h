@@ -9,7 +9,6 @@
 
 class ActorPrimitive2D : public ActorRenderBase2D
 {
-	ACTOR_RENDER_INHERIT(ActorPrimitive2D, ActorRenderBase2D)
 protected:
 	friend class CanvasLayer;
 	friend class ActorTesselation2D;
@@ -27,6 +26,8 @@ public:
 	ActorPrimitive2D(const ActorPrimitive2D& primitive);
 	
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
+	inline virtual BufferCounter PrimitiveCount() const override { return 1; }
+	inline virtual ActorPrimitive2D* const operator[](const int& i) { return i == 0 ? this : nullptr; }
 	inline virtual ZIndex GetZIndex() const override { return m_Z; }
 	inline virtual void SetZIndex(const ZIndex& z) override { m_Z = z; }
 	inline const Transform2D& GetTransform() const { return m_Transform; }

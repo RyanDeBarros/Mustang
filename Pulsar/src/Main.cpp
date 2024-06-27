@@ -178,9 +178,10 @@ void run(GLFWwindow* window)
 	tessel.RectVectorRef() = { {{0.0f, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{w, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{2 * w, 0.0f}, 0.5f, {1.0f, 1.0f}} };
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(&tessel, 10);
 
-	if (INHERITS(*tessel.ActorRef(), ActorPrimitive2D))
+	ActorPrimitive2D* const actor_ref = dynamic_cast<ActorPrimitive2D* const>(tessel.ActorRef());
+	if (actor_ref)
 	{
-		static_cast<ActorPrimitive2D* const>(tessel.ActorRef())->SetModulationPerPoint({
+		actor_ref->SetModulationPerPoint({
 			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 			glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),

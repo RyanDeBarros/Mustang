@@ -8,14 +8,13 @@
 
 class ActorTesselation2D : virtual public ActorSequencer2D
 {
-	ACTOR_RENDER_INHERIT(ActorTesselation2D, ActorSequencer2D)
 private:
 	ActorRenderBase2D* const m_Actor;
 	std::vector<Transform2D> m_RectVector;
 	std::vector<Transform2D> m_ActorOffsets;
 	Transform2D m_GlobalTransform;
 
-	inline BufferCounter RenderSeqCount() const { return static_cast<ActorSequencer2D* const>(m_Actor)->PrimitiveCount(); }
+	inline BufferCounter RenderSeqCount() const { return m_Actor->PrimitiveCount(); }
 
 	void SetZIndex(const ZIndex& z) override;
 public:

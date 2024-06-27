@@ -13,8 +13,6 @@ enum class CompositeMode
 
 class ActorComposite2D : virtual public ActorSequencer2D
 {
-	ACTOR_RENDER_INHERIT(ActorComposite2D, ActorSequencer2D)
-private:
 	friend class ActorRenderIterator;
 	friend class CanvasLayer;
 	CompositeMode m_Mode;
