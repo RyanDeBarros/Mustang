@@ -13,6 +13,8 @@ enum class CompositeMode
 
 class ActorComposite2D : virtual public ActorSequencer2D
 {
+	ACTOR_RENDER_INHERIT(ActorComposite2D, ActorSequencer2D)
+private:
 	friend class ActorRenderIterator;
 	friend class CanvasLayer;
 	CompositeMode m_Mode;
@@ -24,7 +26,7 @@ public:
 	ActorComposite2D(CompositeMode mode, ActorPrimitiveCounter initial_size = 1, ZIndex z = 0);
 	~ActorComposite2D();
 
-	ActorPrimitive2D* operator[](const int& i) override;
+	ActorPrimitive2D* const operator[](const int& i) override;
 	inline ZIndex GetZIndex() const override { return m_CompositeZ; }
 	BufferCounter PrimitiveCount() const override { return static_cast<BufferCounter>(head - tail); }
 

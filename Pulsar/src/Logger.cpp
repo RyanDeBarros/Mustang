@@ -11,6 +11,11 @@ namespace Logger {
 		std::cin.get();
 	}
 
+	void NewLine()
+	{
+		std::cout << std::endl;
+	}
+
 	void LogInfo(const char* message)
 	{
 		std::cout << message << std::endl;

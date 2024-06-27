@@ -6,6 +6,7 @@
 
 class RectRender : public ActorPrimitive2D
 {
+	ACTOR_RENDER_INHERIT(RectRender, ActorPrimitive2D)
 protected:
 	static Renderable rect_renderable;
 	static constexpr Stride end_attrib_pos = ActorPrimitive2D::end_attrib_pos + 4;

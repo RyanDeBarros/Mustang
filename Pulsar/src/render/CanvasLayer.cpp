@@ -10,7 +10,7 @@ CanvasLayer::CanvasLayer(CanvasLayerData data)
 	: m_Data(data), m_LayerView((float)m_Data.pLeft, (float)m_Data.pRight, (float)m_Data.pBottom, (float)m_Data.pTop)
 {
 	m_VAOs = new std::unordered_map<BatchModel, VAO>();
-	m_Batcher = new std::map<ZIndex, std::list<ActorRenderBase2D_P>*>();
+	m_Batcher = new std::map<ZIndex, std::list<ActorRenderBase2D*>*>();
 	m_VertexPool = new GLfloat[m_Data.maxVertexPoolSize];
 	m_IndexPool = new GLuint[m_Data.maxIndexPoolSize];
 	vertexPos = m_VertexPool;
@@ -54,61 +54,32 @@ CanvasLayer::~CanvasLayer()
 	}
 }
 
-void CanvasLayer::OnAttach(ActorPrimitive2D* const primitive)
+void CanvasLayer::OnAttach(ActorRenderBase2D* const primitive)
 {
 	auto entry = m_Batcher->find(primitive->GetZIndex());
 	if (entry == m_Batcher->end())
 	{
-		m_Batcher->emplace(primitive->GetZIndex(), new std::list<ActorRenderBase2D_P>());
+		m_Batcher->emplace(primitive->GetZIndex(), new std::list<ActorRenderBase2D*>());
 		entry = m_Batcher->find(primitive->GetZIndex());
 	}
 	entry->second->push_back(primitive);
 }
 
-void CanvasLayer::OnAttach(ActorSequencer2D* const composite)
+bool CanvasLayer::OnSetZIndex(ActorRenderBase2D* const actor, const ZIndex new_val)
 {
-	auto entry = m_Batcher->find(composite->GetZIndex());
-	if (entry == m_Batcher->end())
-	{
-		m_Batcher->emplace(composite->GetZIndex(), new std::list<ActorRenderBase2D_P>());
-		entry = m_Batcher->find(composite->GetZIndex());
-	}
-	entry->second->push_back(composite);
-}
-
-bool CanvasLayer::OnSetZIndex(ActorPrimitive2D* const primitive, const ZIndex new_val)
-{
-	if (!OnDetach(primitive))
+	if (!OnDetach(actor))
 		return false;
-	primitive->m_Z = new_val;
-	OnAttach(primitive);
+	actor->SetZIndex(new_val);
+	OnAttach(actor);
 	return true;
 }
 
-bool CanvasLayer::OnSetZIndex(ActorSequencer2D* const composite, const ZIndex new_val)
+bool CanvasLayer::OnDetach(ActorRenderBase2D* const actor)
 {
-	if (!OnDetach(composite))
-		return false;
-	composite->SetZIndex(new_val);
-	OnAttach(composite);
-	return true;
-}
-
-bool CanvasLayer::OnDetach(ActorPrimitive2D* const primitive)
-{
-	auto entry = m_Batcher->find(primitive->GetZIndex());
+	auto entry = m_Batcher->find(actor->GetZIndex());
 	if (entry == m_Batcher->end())
 		return false;
-	entry->second->remove(primitive);
-	return true;
-}
-
-bool CanvasLayer::OnDetach(ActorSequencer2D* const composite)
-{
-	auto entry = m_Batcher->find(composite->GetZIndex());
-	if (entry == m_Batcher->end())
-		return false;
-	entry->second->remove(composite);
+	entry->second->remove(actor);
 	return true;
 }
 
@@ -125,12 +96,12 @@ void CanvasLayer::OnDraw()
 	{
 		for (const auto& element : *list.second)
 		{
-			if (element.index() == 0)
-				DrawPrimitive(std::get<ActorPrimitive2D* const>(element));
-			else
+			if (INHERITS(*element, ActorPrimitive2D))
+				DrawPrimitive(static_cast<ActorPrimitive2D* const>(element));
+			else if (INHERITS(*element, ActorSequencer2D))
 			{
 				prim_i = 0;
-				sequencer = std::get<ActorSequencer2D* const>(element);
+				sequencer = static_cast<ActorSequencer2D* const>(element);
 				sequencer->OnPreDraw();
 				while ((primitive = sequencer->operator[](prim_i++)) != nullptr)
 					DrawPrimitive(primitive);

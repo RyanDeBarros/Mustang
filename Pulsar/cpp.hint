@@ -4,3 +4,4 @@
 #define glCreateProgram GLEW_GET_FUN(__glewCreateProgram)
 #define TRY(x) ASSERT(glNoError(#x)) x ASSERT(glNoError(#x))
 #define TRY(x)
+#define ACTOR_RENDER_INHERIT(class_name) public: static const std::type_index StaticType() { static const std::type_index type_index = typeid(#class_name); return type_index; } virtual const std::type_index Type() const override { return StaticType(); }

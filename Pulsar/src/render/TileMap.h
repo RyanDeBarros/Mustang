@@ -10,6 +10,8 @@
 
 class TileMap : public ActorSequencer2D
 {
+	ACTOR_RENDER_INHERIT(TileMap, ActorSequencer2D)
+private:
 	mutable int cache_i = 0;
 	mutable size_t cache_iter_offset = 0;
 	mutable std::map<TileHandle, ActorTesselation2D>::iterator cache_iter;
@@ -21,7 +23,7 @@ public:
 	TileMap(Atlas* atlas);
 	~TileMap();
 
-	ActorPrimitive2D* operator[](const int& i) override;
+	ActorPrimitive2D* const operator[](const int& i) override;
 
 private:
 	void ClearCache();

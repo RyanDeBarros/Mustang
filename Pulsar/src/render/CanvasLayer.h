@@ -8,8 +8,9 @@
 
 #include <glm/glm.hpp>
 
-#include "RendererSettings.h"
 #include "Typedefs.h"
+#include "RendererSettings.h"
+#include "ActorRenderBase.h"
 #include "LayerView.h"
 #include "ActorPrimitive.h"
 #include "ActorComposite.h"
@@ -34,7 +35,7 @@ class CanvasLayer
 {
 	CanvasLayerData m_Data;
 	LayerView2D m_LayerView;
-	std::map<ZIndex, std::list<ActorRenderBase2D_P>*>* m_Batcher;
+	std::map<ZIndex, std::list<ActorRenderBase2D*>*>* m_Batcher;
 	GLfloat* m_VertexPool;
 	GLfloat* vertexPos;
 	GLuint* m_IndexPool;
@@ -47,12 +48,9 @@ public:
 	CanvasLayer(CanvasLayerData data);
 	~CanvasLayer();
 
-	void OnAttach(ActorPrimitive2D* const actor);
-	void OnAttach(ActorSequencer2D* const seq);
-	bool OnSetZIndex(ActorPrimitive2D* const actor, const ZIndex new_val);
-	bool OnSetZIndex(ActorSequencer2D* const actor, const ZIndex new_val);
-	bool OnDetach(ActorPrimitive2D* const actor);
-	bool OnDetach(ActorSequencer2D* const actor);
+	void OnAttach(ActorRenderBase2D* const actor);
+	bool OnSetZIndex(ActorRenderBase2D* const actor, const ZIndex new_val);
+	bool OnDetach(ActorRenderBase2D* const actor);
 	void OnDraw();
 
 	inline LayerView2D& GetLayerView2DRef() { return m_LayerView; }

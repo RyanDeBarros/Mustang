@@ -18,7 +18,7 @@ TileMap::~TileMap()
 		delete m_Atlas;
 }
 
-ActorPrimitive2D* TileMap::operator[](const int& i)
+ActorPrimitive2D* const TileMap::operator[](const int& i)
 {
 	ActorPrimitive2D* primitive = nullptr;
 	if (i < cache_i)

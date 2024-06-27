@@ -16,14 +16,6 @@ typedef signed char CanvasIndex;
 
 typedef int AtlasPos;
 
-#include <variant>
-class ActorPrimitive2D;
-class ActorSequencer2D;
-typedef std::variant<ActorPrimitive2D* const, ActorSequencer2D* const> ActorRenderBase2D_P;
-
-#include <memory>
-typedef std::shared_ptr<std::variant<ActorPrimitive2D, ActorSequencer2D>> ActorRenderBase2D_SP;
-
 #include "GL/glew.h"
 typedef GLuint RID;
 typedef GLuint VAO;

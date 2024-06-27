@@ -178,9 +178,9 @@ void run(GLFWwindow* window)
 	tessel.RectVectorRef() = { {{0.0f, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{w, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{2 * w, 0.0f}, 0.5f, {1.0f, 1.0f}} };
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(&tessel, 10);
 
-	if (tessel.ActorRef().index() == 0)
+	if (INHERITS(*tessel.ActorRef(), ActorPrimitive2D))
 	{
-		std::get<ActorPrimitive2D* const>(tessel.ActorRef())->SetModulationPerPoint({
+		static_cast<ActorPrimitive2D* const>(tessel.ActorRef())->SetModulationPerPoint({
 			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 			glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
@@ -222,11 +222,11 @@ void run(GLFWwindow* window)
 	//actor5->SetShaderHandle(shaderStandard32);
 	//actor5->SetPivot(0.5, 0.5);
 	
-	Renderer::GetCanvasLayer(0)->OnDetach(actor1);
-	Renderer::GetCanvasLayer(0)->OnDetach(actor2);
-	Renderer::GetCanvasLayer(0)->OnDetach(actor3);
-	Renderer::GetCanvasLayer(0)->OnDetach(&tesselDiagonal);
-	Renderer::GetCanvasLayer(-1)->OnDetach(actor4);
+	//Renderer::GetCanvasLayer(0)->OnDetach(actor1);
+	//Renderer::GetCanvasLayer(0)->OnDetach(actor2);
+	//Renderer::GetCanvasLayer(0)->OnDetach(actor3);
+	//Renderer::GetCanvasLayer(0)->OnDetach(&tesselDiagonal);
+	//Renderer::GetCanvasLayer(-1)->OnDetach(actor4);
 
 	//Renderer::GetCanvasLayer(0)->OnAttach(actor5);
 	//actor5->SetScale(0.5, 0.5);
@@ -256,10 +256,7 @@ void run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(0)->OnAttach(&atlasTessel3);
 
 	float side = 5.0f;
-	ActorRenderBase2D_P actor_ref = atlasTessel1.ActorRef();
-	ActorPrimitive2D* const prim = std::get<ActorPrimitive2D* const>(actor_ref);
-	RectRender* const rect = static_cast<RectRender* const>(prim);
-	float uvw = rect->GetUVWidth() * side;
+	float uvw = static_cast<RectRender* const>(atlasTessel1.ActorRef())->GetUVWidth() * side;
 
 	atlasTessel1.Insert({ {-2 * uvw, 0}, 0, {side, side} });
 	atlasTessel2.Insert({ {-uvw, 0}, 0, {side, side} });
