@@ -35,7 +35,7 @@ class CanvasLayer
 {
 	CanvasLayerData m_Data;
 	LayerView2D m_LayerView;
-	std::map<ZIndex, std::list<ActorRenderBase2D*>*>* m_Batcher;
+	std::map<ZIndex, std::list<ActorRenderBase2D*>*> m_Batcher;
 	GLfloat* m_VertexPool;
 	GLfloat* vertexPos;
 	GLuint* m_IndexPool;
@@ -43,7 +43,7 @@ class CanvasLayer
 	GLuint m_VB, m_IB;
 	BatchModel currentModel;
 	std::vector<TextureHandle> m_TextureSlotBatch;
-	std::unordered_map<BatchModel, VAO>* m_VAOs;
+	std::unordered_map<BatchModel, VAO> m_VAOs;
 public:
 	CanvasLayer(CanvasLayerData data);
 	~CanvasLayer();
@@ -65,7 +65,7 @@ private:
 	void PoolOver(const Renderable&);
 	TextureSlot GetTextureSlot(const Renderable&);
 	void FlushAndReset();
-	void RegisterModel() const;
+	void RegisterModel();
 	void BindBuffers() const;
 	void UnbindBuffers() const;
 };

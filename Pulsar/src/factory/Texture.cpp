@@ -73,23 +73,6 @@ Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_
 		delete tile_ref;
 }
 
-//Texture::Texture(const Atlas& atlas, TextureSettings settings)
-//	: m_RID(0), m_Tile(TileFactory::GetHandle(atlas)), m_Settings(settings), m_Atlas(&atlas)
-//{
-//	TRY(glGenTextures(1, &m_RID));
-//	TRY(glBindTexture(GL_TEXTURE_2D, m_RID));
-//
-//	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)settings.min_filter));
-//	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)settings.mag_filter));
-//	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.wrap_s));
-//	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrap_t));
-//
-//	// atlas is guaranteed to have 4 channels
-//	TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RGBA8, atlas.m_Width, atlas.m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas.m_AtlasBuffer));
-//
-//	TRY(glBindTexture(GL_TEXTURE_2D, 0));
-//}
-
 Texture::Texture(const TileHandle& tile, TextureSettings settings)
 	: m_RID(0), m_Tile(tile), m_Settings(settings)//, m_Atlas(nullptr)
 {
@@ -142,7 +125,7 @@ Texture::Texture(const TileHandle& tile, TextureSettings settings)
 }
 
 Texture::Texture(Texture&& texture) noexcept
-	: m_RID(texture.m_RID), m_Tile(texture.m_Tile), m_Settings(texture.m_Settings)//, m_Atlas(texture.m_Atlas)
+	: m_RID(texture.m_RID), m_Tile(texture.m_Tile), m_Settings(texture.m_Settings)
 {
 	texture.m_RID = 0;
 }
@@ -150,12 +133,8 @@ Texture::Texture(Texture&& texture) noexcept
 Texture::~Texture()
 {
 	TRY(glDeleteTextures(1, &m_RID));
+	m_RID = 0;
 }
-
-//bool Texture::Equivalent(const Atlas& atlas, const TextureSettings& settings) const
-//{
-//	return m_Atlas && m_Atlas->id == atlas.id && m_Settings == settings;
-//}
 
 void Texture::Bind(TextureSlot slot) const
 {

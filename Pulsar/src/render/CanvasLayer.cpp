@@ -9,8 +9,6 @@
 CanvasLayer::CanvasLayer(CanvasLayerData data)
 	: m_Data(data), m_LayerView((float)m_Data.pLeft, (float)m_Data.pRight, (float)m_Data.pBottom, (float)m_Data.pTop)
 {
-	m_VAOs = new std::unordered_map<BatchModel, VAO>();
-	m_Batcher = new std::map<ZIndex, std::list<ActorRenderBase2D*>*>();
 	m_VertexPool = new GLfloat[m_Data.maxVertexPoolSize];
 	m_IndexPool = new GLuint[m_Data.maxIndexPoolSize];
 	vertexPos = m_VertexPool;
@@ -26,41 +24,41 @@ CanvasLayer::CanvasLayer(CanvasLayerData data)
 
 CanvasLayer::~CanvasLayer()
 {
-	if (m_Batcher)
+	for (const auto& list : m_Batcher)
 	{
-		for (const auto& list : *m_Batcher)
-		{
-			if (list.second)
-				delete list.second;
-		}
-		m_Batcher->clear();
-		delete m_Batcher;
+		if (list.second)
+			delete list.second;
 	}
+	m_Batcher.clear();
 	if (m_VertexPool)
+	{
 		delete m_VertexPool;
+		m_VertexPool = nullptr;
+	}
 	if (m_IndexPool)
+	{
 		delete m_IndexPool;
+		m_IndexPool = nullptr;
+	}
 
 	TRY(glDeleteBuffers(1, &m_VB));
 	TRY(glDeleteBuffers(1, &m_IB));
+	m_VB = m_IB = 0;
 
-	if (m_VAOs)
+	for (const auto& [model, vao] : m_VAOs)
 	{
-		for (const auto& [model, vao] : *m_VAOs)
-		{
-			TRY(glDeleteVertexArrays(1, &vao));
-		}
-		delete m_VAOs;
+		TRY(glDeleteVertexArrays(1, &vao));
 	}
+	m_VAOs.clear();
 }
 
 void CanvasLayer::OnAttach(ActorRenderBase2D* const actor)
 {
-	auto entry = m_Batcher->find(actor->GetZIndex());
-	if (entry == m_Batcher->end())
+	auto entry = m_Batcher.find(actor->GetZIndex());
+	if (entry == m_Batcher.end())
 	{
-		m_Batcher->emplace(actor->GetZIndex(), new std::list<ActorRenderBase2D*>());
-		entry = m_Batcher->find(actor->GetZIndex());
+		m_Batcher.emplace(actor->GetZIndex(), new std::list<ActorRenderBase2D*>());
+		entry = m_Batcher.find(actor->GetZIndex());
 	}
 	entry->second->push_back(actor);
 }
@@ -76,8 +74,8 @@ bool CanvasLayer::OnSetZIndex(ActorRenderBase2D* const actor, const ZIndex new_v
 
 bool CanvasLayer::OnDetach(ActorRenderBase2D* const actor)
 {
-	auto entry = m_Batcher->find(actor->GetZIndex());
-	if (entry == m_Batcher->end())
+	auto entry = m_Batcher.find(actor->GetZIndex());
+	if (entry == m_Batcher.end())
 		return false;
 	entry->second->remove(actor);
 	return true;
@@ -89,7 +87,7 @@ void CanvasLayer::OnDraw()
 	currentModel = BatchModel();
 	vertexPos = m_VertexPool;
 	indexPos = m_IndexPool;
-	for (const auto& list : *m_Batcher)
+	for (const auto& list : m_Batcher)
 	{
 		for (const auto& element : *list.second)
 		{
@@ -108,7 +106,7 @@ void CanvasLayer::DrawPrimitive(ActorPrimitive2D* const primitive)
 		{
 			FlushAndReset();
 			currentModel = render.model;
-			if (m_VAOs->find(currentModel) == m_VAOs->end())
+			if (m_VAOs.find(currentModel) == m_VAOs.end())
 				RegisterModel();
 		}
 		else if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(render)
@@ -144,7 +142,7 @@ void CanvasLayer::SetBlending() const
 	}
 }
 
-inline void CanvasLayer::PoolOver(const Renderable& render)
+void CanvasLayer::PoolOver(const Renderable& render)
 {
 	if (render.vertexBufferData)
 		memcpy_s(vertexPos, (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool)) * sizeof(VertexSize), render.vertexBufferData, Render::VertexBufferLayoutCount(render) * sizeof(GLfloat));
@@ -157,7 +155,7 @@ inline void CanvasLayer::PoolOver(const Renderable& render)
 	indexPos += render.indexCount;
 }
 
-inline TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
+TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 {
 	if (render.textureHandle == 0)
 	{
@@ -180,11 +178,11 @@ inline TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 	return slot;
 }
 
-inline void CanvasLayer::FlushAndReset()
+void CanvasLayer::FlushAndReset()
 {
 	if (currentModel == BatchModel{})
 		return;
-	TRY(glBindVertexArray((*m_VAOs)[currentModel]));
+	TRY(glBindVertexArray(m_VAOs[currentModel]));
 	BindBuffers();
 	TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
 	TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
@@ -205,7 +203,7 @@ inline void CanvasLayer::FlushAndReset()
 	m_TextureSlotBatch.clear();
 }
 
-inline void CanvasLayer::RegisterModel() const
+void CanvasLayer::RegisterModel()
 {
 	BindBuffers();
 	GLuint vao;
@@ -214,16 +212,16 @@ inline void CanvasLayer::RegisterModel() const
 	Render::_AttribLayout(currentModel.layout, currentModel.layoutMask);
 	TRY(glBindVertexArray(0));
 	UnbindBuffers();
-	(*m_VAOs)[currentModel] = vao;
+	m_VAOs[currentModel] = vao;
 }
 
-inline void CanvasLayer::BindBuffers() const
+void CanvasLayer::BindBuffers() const
 {
 	TRY(glBindBuffer(GL_ARRAY_BUFFER, m_VB));
 	TRY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IB));
 }
 
-inline void CanvasLayer::UnbindBuffers() const
+void CanvasLayer::UnbindBuffers() const
 {
 	TRY(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	TRY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));

@@ -16,7 +16,10 @@ void UniformLexiconFactory::Init()
 void UniformLexiconFactory::Terminate()
 {
 	for (const auto& [handle, uniformLexicon] : factory)
-		delete uniformLexicon;
+	{
+		if (uniformLexicon)
+			delete uniformLexicon;
+	}
 	factory.clear();
 	shaderCache.clear();
 	dynamicLexicons.clear();

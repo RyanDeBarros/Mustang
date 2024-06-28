@@ -93,12 +93,16 @@ void Renderable::operator=(const Renderable& other) noexcept
 	model = other.model;
 	textureHandle = other.textureHandle;
 	if (vertexBufferData)
+	{
 		delete[] vertexBufferData;
-	vertexBufferData = nullptr;
+		vertexBufferData = nullptr;
+	}
 	vertexCount = other.vertexCount;
 	if (indexBufferData)
+	{
 		delete[] indexBufferData;
-	indexBufferData = nullptr;
+		indexBufferData = nullptr;
+	}
 	indexCount = other.indexCount;
 	if (other.vertexBufferData && other.indexBufferData)
 	{
@@ -113,9 +117,15 @@ void Renderable::operator=(const Renderable& other) noexcept
 Renderable::~Renderable()
 {
 	if (vertexBufferData)
+	{
 		delete[] vertexBufferData;
+		vertexBufferData = nullptr;
+	}
 	if (indexBufferData)
+	{
 		delete[] indexBufferData;
+		indexBufferData = nullptr;
+	}
 }
 
 bool Renderable::AttachVertexBuffer(toml::Array vertex_array, size_t size)
@@ -129,7 +139,10 @@ bool Renderable::AttachVertexBuffer(toml::Array vertex_array, size_t size)
 		if (!ok)
 		{
 			if (vertexBufferData)
+			{
 				delete[] vertexBufferData;
+				vertexBufferData = nullptr;
+			}
 			return false;
 		}
 		vertexBufferData[i] = (GLfloat)_double;
@@ -148,7 +161,10 @@ bool Renderable::AttachIndexBuffer(toml::Array index_array, size_t size)
 		if (!ok)
 		{
 			if (indexBufferData)
+			{
 				delete[] indexBufferData;
+				indexBufferData = nullptr;
+			}
 			return false;
 		}
 		indexBufferData[i] = (GLuint)_int;

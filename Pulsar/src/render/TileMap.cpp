@@ -15,7 +15,10 @@ TileMap::TileMap(Atlas* atlas)
 TileMap::~TileMap()
 {
 	if (m_Atlas)
+	{
 		delete m_Atlas;
+		m_Atlas = nullptr;
+	}
 }
 
 ActorPrimitive2D* const TileMap::operator[](const int& i)

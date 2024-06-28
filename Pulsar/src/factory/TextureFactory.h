@@ -11,7 +11,6 @@ class TextureFactory
 	static std::unordered_map<TextureHandle, Texture*> factory;
 	static Texture* Get(TextureHandle);
 	static TextureHandle CreateHandle(const char* filepath, const TextureSettings& settings, const bool& temporary_buffer);
-	//static TextureHandle CreateHandle(const Atlas& atlas, const TextureSettings& settings);
 	static TextureHandle CreateHandle(const TileHandle& tile, const TextureSettings& settings);
 
 	TextureFactory() = delete;
@@ -23,7 +22,6 @@ class TextureFactory
 
 public:
 	static TextureHandle GetHandle(const char* filepath, const TextureSettings& settings = TextureSettings(), const bool& new_texture = false, const bool& temporary_buffer = false);
-	//static TextureHandle GetHandle(const Atlas& atlas, const TextureSettings& settings = TextureSettings(), const bool& new_texture = false);
 	static TextureHandle GetHandle(const TileHandle& tile, const TextureSettings& settings = TextureSettings(), const bool& new_texture = false);
 	static void Bind(const TextureHandle& handle, const TextureSlot& slot);
 	static void Unbind(const TextureSlot& slot);

@@ -100,6 +100,7 @@ Shader::Shader(Shader&& shader) noexcept
 Shader::~Shader()
 {
 	TRY(glDeleteProgram(m_RID));
+	m_RID = 0;
 }
 
 void Shader::Bind() const

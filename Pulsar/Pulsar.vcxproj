@@ -168,7 +168,6 @@
     <ClCompile Include="src\factory\TileFactory.cpp" />
     <ClCompile Include="src\factory\UniformLexicon.cpp" />
     <ClCompile Include="src\factory\UniformLexiconFactory.cpp" />
-    <ClCompile Include="src\render\ActorRenderBase.cpp" />
     <ClCompile Include="src\render\ActorSequencer.cpp" />
     <ClCompile Include="src\render\RectRender.cpp" />
     <ClCompile Include="src\RendererSettings.cpp" />

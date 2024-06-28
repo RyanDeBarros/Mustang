@@ -7,7 +7,6 @@
 #include "render/RectRender.h"
 #include "render/ActorTesselation.h"
 
-// TODO use factory? so that id is not incremented if atlas is loaded from same file. This would probably be in a different constructor. Perhaps not a full factory class, but a static map that maps atlas filepaths to ids.
 Atlas::Atlas(std::vector<TileHandle>& tiles, int width, int height, int border)
 	: m_Border(border)
 {

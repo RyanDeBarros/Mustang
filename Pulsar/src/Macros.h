@@ -7,6 +7,8 @@
 #	define TRY(x) x;
 #endif
 
+#define PULSAR_ASSUME_INITIALIZED
+
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 

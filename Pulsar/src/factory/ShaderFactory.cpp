@@ -32,7 +32,10 @@ void ShaderFactory::Init()
 void ShaderFactory::Terminate()
 {
 	for (const auto& [handle, shader] : factory)
-		delete shader;
+	{
+		if (shader)
+			delete shader;
+	}
 	factory.clear();
 }
 
@@ -67,7 +70,7 @@ void ShaderFactory::Unbind()
 	TRY(glUseProgram(0));
 }
 
-void bad_uniform(ShaderHandle handle)
+static void bad_uniform(ShaderHandle handle)
 {
 	Logger::LogWarning("Failed to set uniform for shader at handle (" + std::to_string(handle) + ").");
 }

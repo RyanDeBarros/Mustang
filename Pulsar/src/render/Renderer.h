@@ -7,7 +7,7 @@
 
 class Renderer
 {
-	static std::map<CanvasIndex, CanvasLayer>* layers;
+	static std::map<CanvasIndex, CanvasLayer> layers;
 	static void ForceRefresh();
 public:
 	static void Init();
