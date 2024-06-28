@@ -8,7 +8,7 @@
 
 Renderable RectRender::rect_renderable;
 
-RectRender::RectRender(const Transform2D& transform, const TextureHandle& texture, const ShaderHandle& shader, const ZIndex& z, const bool& visible)
+RectRender::RectRender(const TextureHandle& texture, const Transform2D& transform, const ShaderHandle& shader, const ZIndex& z, const bool& visible)
 	: ActorPrimitive2D(rect_renderable, transform, z, visible)
 {
 	SetShaderHandle(shader);

@@ -1,36 +1,64 @@
 #include "Atlas.h"
 
 #include <queue>
+#include <unordered_map>
 
 #include "TileFactory.h"
 #include "render/RectRender.h"
 #include "render/ActorTesselation.h"
 
-unsigned int id_count = 1;
-
 // TODO use factory? so that id is not incremented if atlas is loaded from same file. This would probably be in a different constructor. Perhaps not a full factory class, but a static map that maps atlas filepaths to ids.
-Atlas::Atlas(std::vector<TileHandle>& tiles, const int& width, const int& height, const int& border)
-	: m_Border(border), m_AtlasBuffer(nullptr), id(id_count++)
+Atlas::Atlas(std::vector<TileHandle>& tiles, int width, int height, int border)
+	: m_Border(border)
 {
+	m_BPP = 4;
 	RectPack(tiles, width, height);
-	m_BufferSize = Atlas::BPP * m_Width * m_Height; // 4 is BPP
-	m_AtlasBuffer = new unsigned char[m_BufferSize](0);
+	m_BufferSize = Atlas::BPP * m_Width * m_Height;
+	m_ImageBuffer = new unsigned char[m_BufferSize](0);
 	PlaceTiles();
 }
 
-Atlas::Atlas(std::vector<TileHandle>&& tiles, const int& width, const int& height, const int& border)
-	: m_Border(border), m_AtlasBuffer(nullptr), id(id_count++)
+Atlas::Atlas(std::vector<TileHandle>&& tiles, int width, int height, int border)
+	: m_Border(border)
 {
+	m_BPP = 4;
 	RectPack(tiles, width, height);
-	m_BufferSize = Atlas::BPP * m_Width * m_Height; // 4 is BPP
-	m_AtlasBuffer = new unsigned char[m_BufferSize](0);
+	m_BufferSize = Atlas::BPP * m_Width * m_Height;
+	m_ImageBuffer = new unsigned char[m_BufferSize](0);
 	PlaceTiles();
+}
+
+Atlas::Atlas(Atlas&& atlas) noexcept
+	: Tile(std::move(atlas)), m_Border(atlas.m_Border), m_BufferSize(atlas.m_BufferSize), m_Placements(atlas.m_Placements)
+{
+}
+
+Atlas::Atlas(const Atlas* const atlas)
+{
+	m_Filepath = atlas->m_Filepath;
+	m_Width = atlas->m_Width;
+	m_Height = atlas->m_Height;
+	m_BPP = atlas->m_BPP;
+	m_Border = atlas->m_Border;
+	m_BufferSize = atlas->m_BufferSize;
+	m_Placements = atlas->m_Placements;
+	m_ImageBuffer = new unsigned char[m_BufferSize](0);
+	memcpy_s(m_ImageBuffer, m_BufferSize, atlas->m_ImageBuffer, m_BufferSize);
 }
 
 Atlas::~Atlas()
 {
-	if (m_AtlasBuffer)
-		delete m_AtlasBuffer;
+	if (m_ImageBuffer)
+	{
+		delete m_ImageBuffer;
+		m_ImageBuffer = nullptr;
+	}
+}
+
+bool Atlas::operator==(const Atlas& other) const
+{
+	return m_Filepath == other.m_Filepath && m_Width == other.m_Width && m_Height == other.m_Height && m_BPP == other.m_BPP
+			&& m_Border == other.m_Border && m_BufferSize == other.m_BufferSize && m_BufferSize == m_BufferSize && memcmp(m_ImageBuffer, other.m_ImageBuffer, m_BufferSize);
 }
 
 static int min_bound(const std::vector<TileHandle>& tiles, const int& border)
@@ -47,6 +75,60 @@ struct Placement
 	int x, y, w, h;
 	bool r;
 };
+
+bool Atlas::Equivalent(std::vector<TileHandle>& tiles, int width, int height, int border) const
+{
+	if (m_Border != border)
+		return false;
+	int bound = min_bound(tiles, m_Border);
+	if (width <= 0)
+		width = bound;
+	if (height <= 0)
+		height = bound;
+	if (m_Width != width || m_Height != height)
+		return false;
+
+	std::unordered_map<TileHandle, int> occurences;
+	for (const auto& tile : tiles)
+		occurences[tile]++;
+
+	for (auto iter = m_Placements.begin(); iter != m_Placements.end(); iter++)
+	{
+		auto leftover = occurences[iter->tile]--;
+		if (leftover < 0)
+			return false;
+		else if (leftover == 0)
+			occurences.erase(iter->tile);
+	}
+	return occurences.empty();
+}
+
+bool Atlas::Equivalent(std::vector<TileHandle>&& tiles, int width, int height, int border) const
+{
+	if (m_Border != border)
+		return false;
+	int bound = min_bound(tiles, m_Border);
+	if (width <= 0)
+		width = bound;
+	if (height <= 0)
+		height = bound;
+	if (m_Width != width || m_Height != height)
+		return false;
+
+	std::unordered_map<TileHandle, int> occurences;
+	for (const auto& tile : tiles)
+		occurences[tile]++;
+
+	for (auto iter = m_Placements.begin(); iter != m_Placements.end(); iter++)
+	{
+		auto leftover = occurences[iter->tile]--;
+		if (leftover < 0)
+			return false;
+		else if (leftover == 0)
+			occurences.erase(iter->tile);
+	}
+	return occurences.empty();
+}
 
 struct Subsection
 {
@@ -235,22 +317,22 @@ void Atlas::PlaceTiles()
 				{
 					if (placement.r)
 					{
-						m_AtlasBuffer[(placement.x + m_Border + h + (placement.y + m_Border + w) * m_Width) * Atlas::BPP + c] = image_buffer[(w + h * height) * bpp + c];
+						m_ImageBuffer[(placement.x + m_Border + h + (placement.y + m_Border + w) * m_Width) * Atlas::BPP + c] = image_buffer[(w + h * height) * bpp + c];
 					}
 					else
 					{
-						m_AtlasBuffer[(placement.x + m_Border + w + (placement.y + m_Border + h) * m_Width) * Atlas::BPP + c] = image_buffer[(w + h * width) * bpp + c];
+						m_ImageBuffer[(placement.x + m_Border + w + (placement.y + m_Border + h) * m_Width) * Atlas::BPP + c] = image_buffer[(w + h * width) * bpp + c];
 					}
 				}
 				for (unsigned char c = bpp; c < Atlas::BPP; c++)
 				{
 					if (placement.r)
 					{
-						m_AtlasBuffer[(placement.x + m_Border + h + (placement.y + m_Border + w) * m_Width) * Atlas::BPP + c] = 255;
+						m_ImageBuffer[(placement.x + m_Border + h + (placement.y + m_Border + w) * m_Width) * Atlas::BPP + c] = 255;
 					}
 					else
 					{
-						m_AtlasBuffer[(placement.x + m_Border + w + (placement.y + m_Border + h) * m_Width) * Atlas::BPP + c] = 255;
+						m_ImageBuffer[(placement.x + m_Border + w + (placement.y + m_Border + h) * m_Width) * Atlas::BPP + c] = 255;
 					}
 				}
 			}
@@ -261,8 +343,8 @@ void Atlas::PlaceTiles()
 RectRender Atlas::SampleSubtile(const size_t& index, const TextureSettings& texture_settings, const ShaderHandle& shader, const ZIndex& z, const bool& visible) const
 {
 	if (index >= m_Placements.size() || m_Placements[index].x < 0)
-		return { {}, 0, 0, 0, false };
-	RectRender actor({}, TextureFactory::GetHandle(*this, texture_settings), shader, z, visible);
+		return { 0, {}, 0, 0, false };
+	RectRender actor(TextureFactory::GetHandle(TileFactory::GetAtlasHandle(this), texture_settings), {}, shader, z, visible);
 	const Placement& rect = m_Placements[index];
 	if (rect.r)
 		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.h - m_Border, rect.w - m_Border }, m_Width, m_Height);

@@ -193,7 +193,6 @@ inline void CanvasLayer::FlushAndReset()
 		// Note: due to the abstraction of glDrawElements and glBufferSubData behind CanvasLayer, there is currently no need to actually call TextureFactory::Unbind on anything.
 		TextureFactory::Bind(*it, (TextureSlot)(it - m_TextureSlotBatch.begin()));
 	}
-	// TODO collapse into material structure?
 	ShaderFactory::Bind(currentModel.shader);
 	m_LayerView.PassVPUniform(currentModel.shader);
 	UniformLexiconFactory::OnApply(currentModel.uniformLexicon, currentModel.shader);

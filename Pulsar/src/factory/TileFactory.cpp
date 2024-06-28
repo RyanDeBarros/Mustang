@@ -50,18 +50,55 @@ TileHandle TileFactory::GetHandle(const char* filepath)
 	else return 0;
 }
 
-TileHandle TileFactory::GetHandle(const Atlas& atlas)
+TileHandle TileFactory::GetAtlasHandle(std::vector<TileHandle>& tiles, int width, int height, int border)
 {
 	for (const auto& [handle, tile] : factory)
 	{
-		if (tile->Equivalent(atlas))
+		auto at = dynamic_cast<Atlas* const>(tile);
+		if (at && at->Equivalent(tiles, width, height, border))
 			return handle;
 	}
-	Tile tile(atlas);
+	Atlas tile(tiles, width, height, border);
 	if (tile.IsValid())
 	{
 		TileHandle handle = handle_cap++;
-		factory.emplace(handle, new Tile(std::move(tile)));
+		factory.emplace(handle, new Atlas(std::move(tile)));
+		return handle;
+	}
+	else return 0;
+}
+
+TileHandle TileFactory::GetAtlasHandle(std::vector<TileHandle>&& tiles, int width, int height, int border)
+{
+	for (const auto& [handle, tile] : factory)
+	{
+		auto at = dynamic_cast<Atlas* const>(tile);
+		if (at && at->Equivalent(tiles, width, height, border))
+			return handle;
+	}
+	Atlas tile(tiles, width, height, border);
+	if (tile.IsValid())
+	{
+		TileHandle handle = handle_cap++;
+		factory.emplace(handle, new Atlas(std::move(tile)));
+		return handle;
+	}
+	else return 0;
+}
+
+TileHandle TileFactory::GetAtlasHandle(const Atlas* const atlas)
+{
+	for (const auto& [handle, tile] : factory)
+	{
+		auto at = dynamic_cast<Atlas* const>(tile);
+		if (at && at == atlas)
+			return handle;
+	}
+	Atlas tile(atlas);
+	if (tile.IsValid())
+	{
+		TileHandle handle = handle_cap++;
+		factory.emplace(handle, new Atlas(std::move(tile)));
 		return handle;
 	}
 	else return 0;

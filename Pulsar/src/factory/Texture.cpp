@@ -10,7 +10,7 @@
 #include "Atlas.h"
 
 Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_buffer)
-	: m_RID(0), m_Tile(0), m_Settings(settings), m_Atlas(nullptr)
+	: m_RID(0), m_Tile(0), m_Settings(settings)//, m_Atlas(nullptr)
 {
 	Tile* tile_ref = nullptr;
 	if (temporary_buffer)
@@ -73,9 +73,33 @@ Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_
 		delete tile_ref;
 }
 
-Texture::Texture(const Atlas& atlas, TextureSettings settings)
-	: m_RID(0), m_Tile(TileFactory::GetHandle(atlas)), m_Settings(settings), m_Atlas(&atlas)
+//Texture::Texture(const Atlas& atlas, TextureSettings settings)
+//	: m_RID(0), m_Tile(TileFactory::GetHandle(atlas)), m_Settings(settings), m_Atlas(&atlas)
+//{
+//	TRY(glGenTextures(1, &m_RID));
+//	TRY(glBindTexture(GL_TEXTURE_2D, m_RID));
+//
+//	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)settings.min_filter));
+//	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)settings.mag_filter));
+//	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.wrap_s));
+//	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrap_t));
+//
+//	// atlas is guaranteed to have 4 channels
+//	TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RGBA8, atlas.m_Width, atlas.m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas.m_AtlasBuffer));
+//
+//	TRY(glBindTexture(GL_TEXTURE_2D, 0));
+//}
+
+Texture::Texture(const TileHandle& tile, TextureSettings settings)
+	: m_RID(0), m_Tile(tile), m_Settings(settings)//, m_Atlas(nullptr)
 {
+	const Tile* const tile_ref = TileFactory::GetConstTileRef(m_Tile);
+	if (!tile_ref)
+	{
+		Logger::LogError(std::string("Cannot create texture from tile \"") + std::to_string(tile) + "\": Tile ref is null.");
+		return;
+	}
+
 	TRY(glGenTextures(1, &m_RID));
 	TRY(glBindTexture(GL_TEXTURE_2D, m_RID));
 
@@ -84,14 +108,41 @@ Texture::Texture(const Atlas& atlas, TextureSettings settings)
 	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.wrap_s));
 	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrap_t));
 
-	// atlas is guaranteed to have 4 channels
-	TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RGBA8, atlas.m_Width, atlas.m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas.m_AtlasBuffer));
+	switch (tile_ref->m_BPP)
+	{
+	case 4:
+	{
+		TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RGBA8, tile_ref->m_Width, tile_ref->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tile_ref->m_ImageBuffer));
+		break;
+	}
+	case 3:
+	{
+		TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RGB8, tile_ref->m_Width, tile_ref->m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, tile_ref->m_ImageBuffer));
+		break;
+	}
+	case 2:
+	{
+		TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_RG8, tile_ref->m_Width, tile_ref->m_Height, 0, GL_RG, GL_UNSIGNED_BYTE, tile_ref->m_ImageBuffer));
+		break;
+	}
+	case 1:
+	{
+		TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lod_level, GL_R8, tile_ref->m_Width, tile_ref->m_Height, 0, GL_RED, GL_UNSIGNED_BYTE, tile_ref->m_ImageBuffer));
+		break;
+	}
+	default:
+	{
+		Logger::LogError(std::string("Cannot create texture from tile  \"") + std::to_string(tile) + "\": BPP is not 4, 3, 2, or 1.");
+		TRY(glBindTexture(GL_TEXTURE_2D, 0));
+		return;
+	}
+	}
 
 	TRY(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
 Texture::Texture(Texture&& texture) noexcept
-	: m_RID(texture.m_RID), m_Tile(texture.m_Tile), m_Settings(texture.m_Settings), m_Atlas(texture.m_Atlas)
+	: m_RID(texture.m_RID), m_Tile(texture.m_Tile), m_Settings(texture.m_Settings)//, m_Atlas(texture.m_Atlas)
 {
 	texture.m_RID = 0;
 }
@@ -101,10 +152,10 @@ Texture::~Texture()
 	TRY(glDeleteTextures(1, &m_RID));
 }
 
-bool Texture::Equivalent(const Atlas& atlas, const TextureSettings& settings) const
-{
-	return m_Atlas && m_Atlas->id == atlas.id && m_Settings == settings;
-}
+//bool Texture::Equivalent(const Atlas& atlas, const TextureSettings& settings) const
+//{
+//	return m_Atlas && m_Atlas->id == atlas.id && m_Settings == settings;
+//}
 
 void Texture::Bind(TextureSlot slot) const
 {

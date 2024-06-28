@@ -105,27 +105,22 @@ void run(GLFWwindow* window)
 	TextureHandle tex_grassTE = TextureFactory::GetHandle("res/textures/grassTE.png");
 	TextureHandle tex_grassTR = TextureFactory::GetHandle("res/textures/grassTR.png");
 
-	// Load renderables
-	Renderable renderable;
-	if (loadRenderable("res/assets/renderable.toml", renderable, true) != LOAD_STATUS::OK)
-		ASSERT(false);
-
 	Renderer::AddCanvasLayer(0);
 
 	// Create actors
-	RectRender* actor1 = new RectRender({ {-500.0f, 300.0f}, -1.0f, {0.8f, 1.2f} }, textureFlag);
-	RectRender* actor2 = new RectRender({ {400.0f, -200.0f}, 0.25f, {0.7f, 0.7f} }, textureSnowman);
-	RectRender* actor3 = new RectRender({ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} }, textureTux);
+	RectRender* actor1 = new RectRender(textureFlag, { {-500.0f, 300.0f}, -1.0f, {0.8f, 1.2f} });
+	RectRender* actor2 = new RectRender(textureSnowman, { {400.0f, -200.0f}, 0.25f, {0.7f, 0.7f} });
+	RectRender* actor3 = new RectRender(textureTux, { {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} });
 
 	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor2);
-
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(actor1, 1);
-
 	Renderer::GetCanvasLayer(0)->OnAttach(actor3);
-
 	Renderer::AddCanvasLayer(-1);
 
+	Renderable renderable;
+	if (loadRenderable("res/assets/renderable.toml", renderable, true) != LOAD_STATUS::OK)
+		ASSERT(false);
 	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, { {-200.0f, 0.0f}, 0.0f, {800.0f, 800.0f} });
 	Renderer::GetCanvasLayer(-1)->OnAttach(actor4);
 
@@ -189,59 +184,26 @@ void run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(0)->OnDetach(&tesselVertical);
 	Renderer::GetCanvasLayer(0)->OnAttach(&tesselDiagonal);
 	tesselDiagonal.RectVectorRef() = { {{0.0f, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{-0.5f * w, 0.5 * h}, -0.8f, {0.75f, -0.75f}} };
-
-	//Renderer::GetCanvasLayer(0)->OnDetach(&tesselDiagonal);
-	//Renderer::GetCanvasLayer(0)->OnAttach(&tesselVertical);
-	//Renderer::GetCanvasLayer(0)->OnAttach(&tessel);
-	//Renderer::GetCanvasLayer(0)->OnAttach(actor3);
 	
-	//w = static_cast<float>(TextureFactory::GetWidth(textureSnowman));
-	//h = static_cast<float>(TextureFactory::GetHeight(textureSnowman));
-	//actor2->CropToRect({ 0.3f * w, 0.4f * h, 0.4f * w, 0.55f * h }, static_cast<int>(w), static_cast<int>(h));
 	actor2->CropToRelativeRect({ 0.3f, 0.4f, 0.4f, 0.55f });
-	
-	// TODO DON'T create atlas directly. use AtlasFactory instead. Otherwise, when actor's desctructor is called, all the tiles referencing it will have hanging pointers. Therefore, there should be communication between AtlasFactory and TileFactory. Perhaps shared_ptr?
-	//std::vector<TileHandle> tiles{ TextureFactory::GetTileHandle(textureSnowman), TextureFactory::GetTileHandle(textureTux) };
-	//for (int i = 0; i < 20; i++)
-		//tiles.push_back(TextureFactory::GetTileHandle(textureFlag));
-	//Atlas atlas(tiles, 4096, 4096);
-	
-	//saveAtlas(atlas, "res/textures/atlas.png", "");
 
-	//TextureHandle atlasTexture = TextureFactory::GetHandle(atlas);
-	//RectRender* actor5 = new RectRender();
-	//actor5->SetTextureHandle(atlasTexture);
-	//actor5->SetShaderHandle(shaderStandard32);
-	//actor5->SetPivot(0.5, 0.5);
-	
-	//Renderer::GetCanvasLayer(0)->OnDetach(actor1);
-	//Renderer::GetCanvasLayer(0)->OnDetach(actor2);
-	//Renderer::GetCanvasLayer(0)->OnDetach(actor3);
-	//Renderer::GetCanvasLayer(0)->OnDetach(&tesselDiagonal);
-	//Renderer::GetCanvasLayer(-1)->OnDetach(actor4);
-
-	//Renderer::GetCanvasLayer(0)->OnAttach(actor5);
-	//actor5->SetScale(0.5, 0.5);
-	//actor2->SetTextureHandle(textureAtlas);
-	//actor2->SetModulation({ 1.0f, 1.0f, 1.0f, 1.0f });
-	//actor2->ResetTransformUVs();
-	//actor2->SetScale(0.25f, 0.25f);
-	//actor5->SetScale(0.5f, 0.5f);
-
-
-	// TODO default constructor of RectRender should only need to accept textureHandle. initial transform should be {}. initial shader handle should not be 0, but _RendererSettings::default_rect_render_shader_handle, which would be set in Renderer::Init() as shaderStandard32 (or shaderStandard8).
 	TileHandle tile_dirtTL(TextureFactory::GetTileHandle(tex_dirtTL)), tile_dirtTR(TextureFactory::GetTileHandle(tex_dirtTR)), tile_grassSingle(TextureFactory::GetTileHandle(tex_grassSingle)), tile_grassTL(TextureFactory::GetTileHandle(tex_grassTL)), tile_grassTE(TextureFactory::GetTileHandle(tex_grassTE)), tile_grassTR(TextureFactory::GetTileHandle(tex_grassTR));
 	std::vector<TileHandle> tiles = { tile_dirtTL, tile_dirtTR, tile_grassSingle, tile_grassTL, tile_grassTE, tile_grassTR };
-	Atlas tileAtlas(tiles, -1, -1, 1);
+	
+	
+	TileHandle tileAtlas = TileFactory::GetAtlasHandle(tiles, -1, -1, 1);
+	const Atlas* atlas = dynamic_cast<const Atlas*>(TileFactory::GetConstTileRef(tileAtlas));
+	if (!atlas)
+		ASSERT(false);
 
-	if (!saveAtlas(tileAtlas, "res/textures/atlas.png", ""))
+	if (!saveAtlas(atlas, "res/textures/atlas.png", ""))
 		ASSERT(false);
 	
-	auto _atlasTessel1 = tileAtlas.SampleSubtile(3);
+	auto _atlasTessel1 = atlas->SampleSubtile(3);
 	ActorTesselation2D atlasTessel1(&_atlasTessel1);
-	auto _atlasTessel2 = tileAtlas.SampleSubtile(4);
+	auto _atlasTessel2 = atlas->SampleSubtile(4);
 	ActorTesselation2D atlasTessel2(&_atlasTessel2);
-	auto _atlasTessel3 = tileAtlas.SampleSubtile(5);
+	auto _atlasTessel3 = atlas->SampleSubtile(5);
 	ActorTesselation2D atlasTessel3(&_atlasTessel3);
 
 	Renderer::GetCanvasLayer(0)->OnAttach(&atlasTessel1);
@@ -265,7 +227,6 @@ void run(GLFWwindow* window)
 		totalTime += deltaTime;
 		// OnUpdate here
 
-		// Render here
 		Renderer::OnDraw();
 		glfwPollEvents();
 		if (glfwWindowShouldClose(window))
@@ -273,5 +234,4 @@ void run(GLFWwindow* window)
 	}
 
 	delete actor1, actor2, actor3, actor4;
-	//delete actor1, actor2, actor3, actor4, actor5;
 }
