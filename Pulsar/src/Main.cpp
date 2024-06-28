@@ -14,6 +14,8 @@
 #include "render/RectRender.h"
 #include "factory/UniformLexiconFactory.h"
 #include "render/ActorTesselation.h"
+#include "factory/ShaderFactory.h"
+#include "factory/Atlas.h"
 
 static void run(GLFWwindow*);
 
@@ -50,7 +52,7 @@ int Pulsar::StartUp()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-	GLFWwindow* window = glfwCreateWindow((int)_RendererSettings::initial_window_width, (int)_RendererSettings::initial_window_height, "Mustang Engine", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow((int)_RendererSettings::initial_window_width, (int)_RendererSettings::initial_window_height, "Pulsar Renderer", nullptr, nullptr);
 	if (!window)
 	{
 		glfwTerminate();
@@ -86,11 +88,6 @@ void run(GLFWwindow* window)
 	double prevTime = time;
 	double totalTime = 0;
 
-	// Load shaders
-	ShaderHandle shaderStandard32;
-	if (loadShader(_RendererSettings::standard_shader32_assetfile, shaderStandard32) != LOAD_STATUS::OK)
-		ASSERT(false);
-
 	// Load textures
 	TextureHandle textureSnowman, textureTux, textureFlag;
 	if (loadTexture("res/assets/snowman.toml", textureSnowman) != LOAD_STATUS::OK)
@@ -113,14 +110,12 @@ void run(GLFWwindow* window)
 	if (loadRenderable("res/assets/renderable.toml", renderable, true) != LOAD_STATUS::OK)
 		ASSERT(false);
 
-	Renderer::AddCanvasLayer(CanvasLayerData(0, _RendererSettings::standard_vertex_pool_size, _RendererSettings::standard_index_pool_size));
+	Renderer::AddCanvasLayer(0);
 
 	// Create actors
-	RectRender* actor1 = new RectRender(Transform2D{ glm::vec2(-500.0f, 300.0f), -1.0f, glm::vec2(0.8f, 1.2f) }, textureFlag, shaderStandard32);
-	RectRender* actor2 = new RectRender(Transform2D{ glm::vec2(400.0f, -200.0f), 0.25f, glm::vec2(0.7f, 0.7f) }, textureSnowman, shaderStandard32);
-	RectRender* actor3 = new RectRender(Transform2D{ glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(1.0f, 1.0f) }, textureTux, shaderStandard32);
-	//std::shared_ptr<RectRender> actor3 = std::make_shared<RectRender>(Transform2D{ glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(1.0f, 1.0f) }, textureTux, shaderStandard32);
-	//ActorRenderBase2D_SP actor3SP = std::make_shared<std::variant<ActorPrimitive2D, ActorSequencer2D>>(*actor3);
+	RectRender* actor1 = new RectRender({ {-500.0f, 300.0f}, -1.0f, {0.8f, 1.2f} }, textureFlag);
+	RectRender* actor2 = new RectRender({ {400.0f, -200.0f}, 0.25f, {0.7f, 0.7f} }, textureSnowman);
+	RectRender* actor3 = new RectRender({ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} }, textureTux);
 
 	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
 	Renderer::GetCanvasLayer(0)->OnAttach(actor2);
@@ -129,21 +124,17 @@ void run(GLFWwindow* window)
 
 	Renderer::GetCanvasLayer(0)->OnAttach(actor3);
 
-	Renderer::AddCanvasLayer(CanvasLayerData(-1, _RendererSettings::standard_vertex_pool_size, _RendererSettings::standard_index_pool_size));
+	Renderer::AddCanvasLayer(-1);
 
-	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, Transform2D{ glm::vec2(-200.0f, 0.0f), 0.0f, glm::vec2(800.0f, 800.0f) });
+	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, { {-200.0f, 0.0f}, 0.0f, {800.0f, 800.0f} });
 	Renderer::GetCanvasLayer(-1)->OnAttach(actor4);
-	//actor4->SetPosition(0.0f, 0.0f);
 
 	actor1->SetScale(16.0f, 16.0f);
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(actor3, -1);
 
 	actor3->SetPivot(0.0f, 0.0f);
-	//actor3->SetPosition(0.0f, 0.0f);
-	actor3->SetPosition(-_RendererSettings::initial_window_width * 0.5f, -_RendererSettings::initial_window_height * 0.5f);
+	actor3->SetPosition(_RendererSettings::initial_window_rel_pos(-0.5f, 0.5f));
 	actor3->SetScale(0.3f, 0.3f);
-	//actor2->SetRotation(0.0f);
-	//actor2->SetPosition(0.0f, 0.0f);
 	actor2->SetModulation(glm::vec4(0.7f, 0.7f, 1.0f, 1.0f));
 	actor3->SetModulationPerPoint({
 		glm::vec4(1.0f, 0.5f, 0.5f, 1.0f),
@@ -182,10 +173,10 @@ void run(GLFWwindow* window)
 	if (actor_ref)
 	{
 		actor_ref->SetModulationPerPoint({
-			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-			glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
-			glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
+			{1.0f, 1.0f, 1.0f, 1.0f},
+			{1.0f, 1.0f, 1.0f, 1.0f},
+			{0.0f, 0.0f, 0.0f, 0.0f},
+			{0.0f, 0.0f, 0.0f, 0.0f},
 		});
 	}
 
@@ -243,13 +234,14 @@ void run(GLFWwindow* window)
 	std::vector<TileHandle> tiles = { tile_dirtTL, tile_dirtTR, tile_grassSingle, tile_grassTL, tile_grassTE, tile_grassTR };
 	Atlas tileAtlas(tiles, -1, -1, 1);
 
-	saveAtlas(tileAtlas, "res/textures/atlas.png", "");
+	if (!saveAtlas(tileAtlas, "res/textures/atlas.png", ""))
+		ASSERT(false);
 	
-	auto _atlasTessel1 = tileAtlas.SampleSubtile(3, Texture::nearest_settings, shaderStandard32);
+	auto _atlasTessel1 = tileAtlas.SampleSubtile(3);
 	ActorTesselation2D atlasTessel1(&_atlasTessel1);
-	auto _atlasTessel2 = tileAtlas.SampleSubtile(4, Texture::nearest_settings, shaderStandard32);
+	auto _atlasTessel2 = tileAtlas.SampleSubtile(4);
 	ActorTesselation2D atlasTessel2(&_atlasTessel2);
-	auto _atlasTessel3 = tileAtlas.SampleSubtile(5, Texture::nearest_settings, shaderStandard32);
+	auto _atlasTessel3 = tileAtlas.SampleSubtile(5);
 	ActorTesselation2D atlasTessel3(&_atlasTessel3);
 
 	Renderer::GetCanvasLayer(0)->OnAttach(&atlasTessel1);

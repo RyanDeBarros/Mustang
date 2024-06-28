@@ -41,14 +41,20 @@ public:
 	inline void SetTransform(const Transform2D& transform) { m_Transform = transform; m_Status |= 0b110; }
 
 	inline void SetPosition(const float& x, const float& y) { m_Transform.position.x = x; m_Transform.position.y = y; FlushPosition(); }
+	inline void SetPosition(const glm::vec2& pos) { m_Transform.position = pos; FlushPosition(); }
 	inline void SetRotation(const float& r) { m_Transform.rotation = r; FlushRotation(); }
 	inline void SetScale(const float& x, const float& y) { m_Transform.scale.x = x; m_Transform.scale.y = y; FlushScale(); }
+	inline void SetScale(const glm::vec2& scale) { m_Transform.scale = scale; FlushScale(); }
 	inline void AddPosition(const float& x, const float& y) { m_Transform.position.x += x; m_Transform.position.y += y; FlushPosition(); }
+	inline void AddPosition(const glm::vec2& pos) { m_Transform.position += pos; FlushPosition(); }
 	inline void AddRotation(const float& r) { m_Transform.rotation += r; FlushRotation(); }
 	inline void AddScale(const float& x, const float& y) { m_Transform.scale.x += x; m_Transform.scale.y += y; FlushScale(); }
+	inline void AddScale(const glm::vec2& scale) { m_Transform.scale += scale; FlushScale(); }
 	inline void MultPosition(const float& x, const float& y) { m_Transform.position.x *= x; m_Transform.position.y *= y; FlushPosition(); }
+	inline void MultPosition(const glm::vec2& pos) { m_Transform.position *= pos; FlushPosition(); }
 	inline void MultRotation(const float& r) { m_Transform.rotation *= r; FlushRotation(); }
 	inline void MultScale(const float& x, const float& y) { m_Transform.scale.x *= x; m_Transform.scale.y *= y; FlushScale(); }
+	inline void MultScale(const glm::vec2& scale) { m_Transform.scale *= scale; FlushScale(); }
 	
 	inline void SetModulation(const glm::vec4& color) { m_ModulationColors = std::vector<glm::vec4>(m_Render.vertexCount, color); m_Status |= 0b1000; }
 	inline void SetModulationPerPoint(const std::vector<glm::vec4>& colors) { m_ModulationColors = colors; m_Status |= 0b1000; }

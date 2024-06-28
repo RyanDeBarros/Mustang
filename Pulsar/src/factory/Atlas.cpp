@@ -18,6 +18,15 @@ Atlas::Atlas(std::vector<TileHandle>& tiles, const int& width, const int& height
 	PlaceTiles();
 }
 
+Atlas::Atlas(std::vector<TileHandle>&& tiles, const int& width, const int& height, const int& border)
+	: m_Border(border), m_AtlasBuffer(nullptr), id(id_count++)
+{
+	RectPack(tiles, width, height);
+	m_BufferSize = Atlas::BPP * m_Width * m_Height; // 4 is BPP
+	m_AtlasBuffer = new unsigned char[m_BufferSize](0);
+	PlaceTiles();
+}
+
 Atlas::~Atlas()
 {
 	if (m_AtlasBuffer)

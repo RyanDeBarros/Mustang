@@ -32,3 +32,8 @@ Tile::~Tile()
 	if (m_ImageBuffer && m_AtlasID == 0)
 		stbi_image_free(m_ImageBuffer);
 }
+
+bool Tile::Equivalent(const Atlas& atlas) const
+{
+	return m_AtlasID == atlas.id;
+}

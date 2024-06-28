@@ -24,8 +24,6 @@ size_t std::hash<BatchModel>::operator()(const BatchModel& model) const
 
 namespace Render
 {
-	BatchModel NullModel = { 0, 0, 0, 0 };
-
 	BufferCounter VertexBufferLayoutCount(const Renderable& render)
 	{
 		return render.vertexCount * StrideCountOf(render.model.layout, render.model.layoutMask);

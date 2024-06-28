@@ -5,7 +5,6 @@
 
 #include "Typedefs.h"
 #include "Tile.h"
-#include "Atlas.h"
 
 class TileFactory
 {
@@ -22,7 +21,7 @@ class TileFactory
 
 public:
 	static TileHandle GetHandle(const char* filepath);
-	static TileHandle GetHandle(const Atlas& atlas);
+	static TileHandle GetHandle(const class Atlas& atlas);
 
 	static inline const Tile* GetConstTileRef(const TileHandle& tile) { return Get(tile); }
 	static const unsigned char* GetImageBuffer(const TileHandle& tile);

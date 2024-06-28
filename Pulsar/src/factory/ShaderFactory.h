@@ -19,10 +19,16 @@ class ShaderFactory
 	static void Init();
 	static void Terminate();
 
+	friend struct BatchModel;
+	friend class RectRender;
+	friend class Atlas;
+	static ShaderHandle standard_shader;
+
 public:
 	static ShaderHandle GetHandle(const char* vertex_shader, const char* fragment_shader);
 	static void Bind(ShaderHandle handle);
 	static void Unbind();
+	inline static ShaderHandle Standard() { return standard_shader; }
 
 	static void SetUniform1i(ShaderHandle handle, const char* uniform_name, const GLint value);
 	static void SetUniform2iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count = 1);

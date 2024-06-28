@@ -1,10 +1,13 @@
 #include "ShaderFactory.h"
 
-#include "Logger.h"
 #include "Macros.h"
+#include "Logger.h"
+#include "AssetLoader.h"
+#include "RendererSettings.h"
 
 ShaderHandle ShaderFactory::handle_cap;
 std::unordered_map<ShaderHandle, Shader*> ShaderFactory::factory;
+ShaderHandle ShaderFactory::standard_shader;
 
 Shader* ShaderFactory::Get(ShaderHandle handle)
 {
@@ -21,6 +24,9 @@ Shader* ShaderFactory::Get(ShaderHandle handle)
 void ShaderFactory::Init()
 {
 	handle_cap = 1;
+	auto status = loadShader(_RendererSettings::standard_shader_assetfile.c_str(), standard_shader);
+	if (status != LOAD_STATUS::OK)
+		Logger::LogErrorFatal("Standard shader could not be loaded (error code " + std::to_string(static_cast<int>(status)) + "): " + _RendererSettings::standard_shader_assetfile);
 }
 
 void ShaderFactory::Terminate()

@@ -43,5 +43,3 @@ void TileMap::ClearCache()
 	cache_iter = m_Map.begin();
 	cache_iter_offset = 0;
 }
-
-// TODO set atlas tessel in primitive's vertex buffer data upon editing m_Map

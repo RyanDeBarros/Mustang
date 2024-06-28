@@ -4,6 +4,7 @@
 #include <toml/tomlcpp.hpp>
 
 #include "Typedefs.h"
+#include "factory/ShaderFactory.h"
 
 struct BatchModel
 {
@@ -12,7 +13,7 @@ struct BatchModel
 	ShaderHandle shader;
 	UniformLexiconHandle uniformLexicon;
 
-	BatchModel(VertexLayout layout = 0, VertexLayoutMask layoutMask = 0, ShaderHandle shader = 0, UniformLexiconHandle uniformLexicon = 0);
+	BatchModel(VertexLayout layout = 0, VertexLayoutMask layoutMask = 0, ShaderHandle shader = ShaderFactory::standard_shader, UniformLexiconHandle uniformLexicon = 0);
 	bool operator==(const BatchModel&) const;
 };
 
@@ -26,7 +27,6 @@ struct Renderable;
 
 namespace Render
 {
-	extern BatchModel NullModel;
 	extern inline BufferCounter VertexBufferLayoutCount(const Renderable&);
 	extern inline BufferCounter VertexBufferLayoutCount(const BufferCounter&, const VertexLayout&, const VertexLayoutMask&);
 	extern inline Stride StrideCountOf(const VertexLayout&, const VertexLayoutMask&);

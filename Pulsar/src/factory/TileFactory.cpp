@@ -1,6 +1,7 @@
 #include "TileFactory.h"
 
 #include "Logger.h"
+#include "Atlas.h"
 
 TileHandle TileFactory::handle_cap;
 std::unordered_map<TileHandle, Tile*> TileFactory::factory;

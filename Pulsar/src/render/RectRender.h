@@ -13,7 +13,7 @@ protected:
 	float m_UVWidth, m_UVHeight;
 
 public:
-	RectRender(const Transform2D& transform = Transform2D(), const TextureHandle& texture = 0, const ShaderHandle& shader = 0, const ZIndex& z = 0, const bool& visible = true);
+	RectRender(const Transform2D& transform = Transform2D(), const TextureHandle& texture = 0, const ShaderHandle& shader = ShaderFactory::standard_shader, const ZIndex& z = 0, const bool& visible = true);
 	static void DefineRectRenderable();
 
 	inline int GetWidth() const { return TextureFactory::GetWidth(m_Render.textureHandle); }

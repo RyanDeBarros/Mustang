@@ -182,7 +182,7 @@ inline TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 
 inline void CanvasLayer::FlushAndReset()
 {
-	if (currentModel == Render::NullModel)
+	if (currentModel == BatchModel{})
 		return;
 	TRY(glBindVertexArray((*m_VAOs)[currentModel]));
 	BindBuffers();

@@ -12,6 +12,7 @@
 #include "factory/TextureFactory.h"
 #include "factory/UniformLexiconFactory.h"
 #include "factory/UniformLexicon.h"
+#include "factory/Atlas.h"
 #include "render/Renderable.h"
 
 bool _LoadRendererSettings()
@@ -53,8 +54,11 @@ bool _LoadRendererSettings()
 		auto [ok2, standard_index_pool_size] = rendering->getInt("standard_index_pool_size");
 		if (ok2)
 			_RendererSettings::standard_index_pool_size = (VertexSize)standard_index_pool_size;
-		auto [ok3, rect_renderable] = rendering->getString("rect_renderable");
+		auto [ok3, standard_shader_filepath] = rendering->getString("standard_shader");
 		if (ok3)
+			_RendererSettings::standard_shader_assetfile = standard_shader_filepath;
+		auto [ok4, rect_renderable] = rendering->getString("rect_renderable");
+		if (ok4)
 			_RendererSettings::rect_renderable_filepath = rect_renderable;
 	}
 
@@ -421,10 +425,26 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, const b
 	return LOAD_STATUS::OK;
 }
 
-void saveAtlas(const Atlas& atlas, const char* texture_filepath, const char* asset_filepath)
+bool saveAtlas(const Atlas& atlas, const char* texture_filepath, const char* asset_filepath, const char* image_format, unsigned char jpg_quality)
 {
 	// TODO create asset file that encapsulates the subtextures of the atlas.
 	
-	// TODO add possibility of other image formats
-	stbi_write_png(texture_filepath, atlas.m_Width, atlas.m_Height, Atlas::BPP, atlas.m_AtlasBuffer, atlas.m_Width * Atlas::STRIDE_BYTES);
+	if (strcmp(image_format, "png"))
+		stbi_write_png(texture_filepath, atlas.GetWidth(), atlas.GetHeight(), Atlas::BPP, atlas.GetBuffer(), atlas.GetWidth() * Atlas::STRIDE_BYTES);
+	else if (strcmp(image_format, "bmp"))
+		stbi_write_bmp(texture_filepath, atlas.GetWidth(), atlas.GetHeight(), Atlas::BPP, atlas.GetBuffer());
+	else if (strcmp(image_format, "jpg"))
+		stbi_write_jpg(texture_filepath, atlas.GetWidth(), atlas.GetHeight(), Atlas::BPP, atlas.GetBuffer(), jpg_quality);
+	else if (strcmp(image_format, "tga"))
+		stbi_write_tga(texture_filepath, atlas.GetWidth(), atlas.GetHeight(), Atlas::BPP, atlas.GetBuffer());
+	else
+		return false;
+
+	return true;
+}
+
+Atlas loadAtlas(const char* asset_filepath)
+{
+	// TODO load atlas
+	return Atlas({});
 }

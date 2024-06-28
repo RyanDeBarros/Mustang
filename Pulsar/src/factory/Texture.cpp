@@ -7,6 +7,7 @@
 
 #include "Logger.h"
 #include "Macros.h"
+#include "Atlas.h"
 
 Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_buffer)
 	: m_RID(0), m_Tile(0), m_Settings(settings), m_Atlas(nullptr)
@@ -100,6 +101,11 @@ Texture::~Texture()
 	TRY(glDeleteTextures(1, &m_RID));
 }
 
+bool Texture::Equivalent(const Atlas& atlas, const TextureSettings& settings) const
+{
+	return m_Atlas && m_Atlas->id == atlas.id && m_Settings == settings;
+}
+
 void Texture::Bind(TextureSlot slot) const
 {
 	TRY(glActiveTexture(GL_TEXTURE0 + slot));
@@ -123,5 +129,5 @@ void Texture::SetSettings(const TextureSettings& settings)
 	Unbind();
 }
 
-TextureSettings Texture::linear_settings = { MinFilter::Linear, MagFilter::Linear, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge };
-TextureSettings Texture::nearest_settings = { MinFilter::Nearest, MagFilter::Nearest, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge };
+const TextureSettings Texture::linear_settings = { MinFilter::Linear, MagFilter::Linear, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge };
+const TextureSettings Texture::nearest_settings = { MinFilter::Nearest, MagFilter::Nearest, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge };

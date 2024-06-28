@@ -7,5 +7,6 @@ gl_clear_color = [0.08, 0.08, 0.08, 0.0]
 max_texture_slots = 32
 standard_vertex_pool_size = 2048
 standard_index_pool_size = 1024
+# config/StandardShader<max_texture_slots>.toml
+standard_shader = "config/StandardShader32.toml"
 rect_renderable = "config/RectRenderable.toml"
-atlas_renderable = "config/AtlasRenderable.toml"
