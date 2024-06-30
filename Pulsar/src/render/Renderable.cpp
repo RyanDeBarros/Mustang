@@ -145,7 +145,7 @@ bool Renderable::AttachVertexBuffer(toml::v3::array* vertex_array, size_t size)
 			}
 			return false;
 		}
-		vertexBufferData[i] = (GLfloat)_double->get();
+		vertexBufferData[i] = static_cast<GLfloat>(_double->get());
 	}
 	return true;
 }
@@ -167,7 +167,7 @@ bool Renderable::AttachIndexBuffer(toml::v3::array* index_array, size_t size)
 			}
 			return false;
 		}
-		indexBufferData[i] = (GLuint)_int->get();
+		indexBufferData[i] = static_cast<GLuint>(_int->get());
 	}
 	return true;
 }

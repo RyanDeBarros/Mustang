@@ -15,6 +15,8 @@
 #include "factory/Atlas.h"
 #include "render/Renderable.h"
 
+// TODO instead of simply returning invalid LOAD_STATUS, also print reason for the invalidity
+
 static LOAD_STATUS verify_header(const toml::v3::ex::parse_result& file, const char* header_name)
 {
 	if (auto header = file["header"].value<std::string>())
@@ -143,7 +145,7 @@ LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, const bool&
 				texture_settings.wrap_t = TextureWrapLookup[wrap_t.value()];
 			}
 			if (auto lod_level = settings["lod_level"].value<int64_t>())
-				texture_settings.lod_level = lod_level.value();
+				texture_settings.lod_level = static_cast<GLint>(lod_level.value());
 		}
 		handle = TextureFactory::GetHandle(path.value().c_str(), texture_settings, new_texture, temporary_buffer);
 		return handle > 0 ? LOAD_STATUS::OK : LOAD_STATUS::ASSET_LOAD_ERR;
@@ -168,14 +170,18 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 		if (!array)
 			return LOAD_STATUS::SYNTAX_ERR;
 		std::map<std::string, Uniform> uniform_map;
-		array->for_each([&uniform_map](auto&& uniform)
+		LOAD_STATUS status = LOAD_STATUS::OK;
+		array->for_each([&uniform_map, &status](auto&& uniform)
 		{
 				if constexpr (toml::is_table<decltype(uniform)>)
 				{
 					auto type = uniform["type"].value<int64_t>();
 					auto name = uniform["name"].value<std::string>();
 					if (!type || !name)
-						return LOAD_STATUS::SYNTAX_ERR;
+					{
+						status = LOAD_STATUS::SYNTAX_ERR;
+						return;
+					}
 					Uniform u;
 					switch (type.value())
 					{
@@ -183,7 +189,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].value<int64_t>();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = static_cast<GLint>(a.value());
 						break;
 					}
@@ -191,7 +200,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].as_array();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = glm::ivec2(a->get_as<int64_t>(0)->get(), a->get_as<int64_t>(1)->get());
 						break;
 					}
@@ -199,7 +211,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].as_array();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = glm::ivec3(a->get_as<int64_t>(0)->get(), a->get_as<int64_t>(1)->get(), a->get_as<int64_t>(2)->get());
 						break;
 					}
@@ -207,7 +222,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].as_array();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = glm::ivec4(a->get_as<int64_t>(0)->get(), a->get_as<int64_t>(1)->get(), a->get_as<int64_t>(2)->get(), a->get_as<int64_t>(3)->get());
 						break;
 					}
@@ -215,7 +233,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].value<int64_t>();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = static_cast<GLuint>(a.value());
 						break;
 					}
@@ -223,7 +244,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].as_array();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = glm::uvec2(a->get_as<int64_t>(0)->get(), a->get_as<int64_t>(1)->get());
 						break;
 					}
@@ -231,7 +255,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].as_array();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = glm::uvec3(a->get_as<int64_t>(0)->get(), a->get_as<int64_t>(1)->get(), a->get_as<int64_t>(2)->get());
 						break;
 					}
@@ -239,7 +266,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].as_array();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = glm::uvec4(a->get_as<int64_t>(0)->get(), a->get_as<int64_t>(1)->get(), a->get_as<int64_t>(2)->get(), a->get_as<int64_t>(3)->get());
 						break;
 					}
@@ -247,7 +277,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].value<double>();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = static_cast<GLfloat>(a.value());
 						break;
 					}
@@ -255,7 +288,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].as_array();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = glm::vec2(static_cast<float>(a->get_as<double>(0)->get()), static_cast<float>(a->get_as<double>(1)->get()));
 						break;
 					}
@@ -263,7 +299,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].as_array();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = glm::vec3(static_cast<float>(a->get_as<double>(0)->get()), static_cast<float>(a->get_as<double>(1)->get()), static_cast<float>(a->get_as<double>(2)->get()));
 						break;
 					}
@@ -271,7 +310,10 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].as_array();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = glm::vec4(static_cast<float>(a->get_as<double>(0)->get()), static_cast<float>(a->get_as<double>(1)->get()), static_cast<float>(a->get_as<double>(2)->get()), static_cast<float>(a->get_as<double>(3)->get()));
 						break;
 					}
@@ -279,11 +321,17 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].as_array();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						auto col0 = a->get_as<toml::array>(0)->as_array();
 						auto col1 = a->get_as<toml::array>(1)->as_array();
 						if (!col0 || !col1)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = glm::mat2(static_cast<float>(col0->get_as<double>(0)->get()), static_cast<float>(col0->get_as<double>(1)->get()), static_cast<float>(col1->get_as<double>(0)->get()), static_cast<float>(col1->get_as<double>(1)->get()));
 						break;
 					}
@@ -291,12 +339,18 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].as_array();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						auto col0 = a->get_as<toml::array>(0)->as_array();
 						auto col1 = a->get_as<toml::array>(1)->as_array();
 						auto col2 = a->get_as<toml::array>(2)->as_array();
 						if (!col0 || !col1 || !col2)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = glm::mat3(
 							static_cast<float>(col0->get_as<double>(0)->get()), static_cast<float>(col0->get_as<double>(1)->get()), static_cast<float>(col0->get_as<double>(2)->get()),
 							static_cast<float>(col1->get_as<double>(0)->get()), static_cast<float>(col1->get_as<double>(1)->get()), static_cast<float>(col1->get_as<double>(2)->get()),
@@ -308,13 +362,19 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					{
 						auto a = uniform["value"].as_array();
 						if (!a)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						auto col0 = a->get_as<toml::array>(0)->as_array();
 						auto col1 = a->get_as<toml::array>(1)->as_array();
 						auto col2 = a->get_as<toml::array>(2)->as_array();
 						auto col3 = a->get_as<toml::array>(3)->as_array();
 						if (!col0 || !col1 || !col2 || !col3)
-							return LOAD_STATUS::SYNTAX_ERR;
+						{
+							status = LOAD_STATUS::SYNTAX_ERR;
+							return;
+						}
 						u = glm::mat4(
 							static_cast<float>(col0->get_as<double>(0)->get()), static_cast<float>(col0->get_as<double>(1)->get()), static_cast<float>(col0->get_as<double>(2)->get()), static_cast<float>(col0->get_as<double>(3)->get()),
 							static_cast<float>(col1->get_as<double>(0)->get()), static_cast<float>(col1->get_as<double>(1)->get()), static_cast<float>(col1->get_as<double>(2)->get()), static_cast<float>(col1->get_as<double>(3)->get()),
@@ -326,8 +386,14 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 					}
 					uniform_map.insert({ name.value(), u });
 				}
-				else return LOAD_STATUS::SYNTAX_ERR;
+				else
+				{
+					status = LOAD_STATUS::SYNTAX_ERR;
+					return;
+				}
 		});
+		if (status != LOAD_STATUS::OK)
+			return status;
 		handle = UniformLexiconFactory::GetHandle(uniform_map);
 		return LOAD_STATUS::OK;
 	}
@@ -396,7 +462,7 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, const b
 		auto index_array = render["indices"].as_array();
 		if (!index_array)
 			return LOAD_STATUS::SYNTAX_ERR;
-		renderable.indexCount = index_array->size();
+		renderable.indexCount = static_cast<BufferCounter>(index_array->size());
 		
 		if (!renderable.AttachIndexBuffer(index_array, renderable.indexCount))
 			return LOAD_STATUS::ASSET_LOAD_ERR;
