@@ -128,15 +128,15 @@ Renderable::~Renderable()
 	}
 }
 
-bool Renderable::AttachVertexBuffer(toml::Array vertex_array, size_t size)
+bool Renderable::AttachVertexBuffer(toml::v3::array* vertex_array, size_t size)
 {
 	if (vertexBufferData)
 		delete[] vertexBufferData;
 	vertexBufferData = new GLfloat[size];
 	for (int i = 0; i < size; i++)
 	{
-		auto [ok, _double] = vertex_array.getDouble(i);
-		if (!ok)
+		auto _double = vertex_array->get_as<double>(i);
+		if (!_double)
 		{
 			if (vertexBufferData)
 			{
@@ -145,20 +145,20 @@ bool Renderable::AttachVertexBuffer(toml::Array vertex_array, size_t size)
 			}
 			return false;
 		}
-		vertexBufferData[i] = (GLfloat)_double;
+		vertexBufferData[i] = (GLfloat)_double->get();
 	}
 	return true;
 }
 
-bool Renderable::AttachIndexBuffer(toml::Array index_array, size_t size)
+bool Renderable::AttachIndexBuffer(toml::v3::array* index_array, size_t size)
 {
 	if (indexBufferData)
 		delete[] indexBufferData;
 	indexBufferData = new GLuint[size];
 	for (int i = 0; i < size; i++)
 	{
-		auto [ok, _int] = index_array.getInt(i);
-		if (!ok)
+		auto _int = index_array->get_as<int64_t>(i);
+		if (!_int)
 		{
 			if (indexBufferData)
 			{
@@ -167,7 +167,7 @@ bool Renderable::AttachIndexBuffer(toml::Array index_array, size_t size)
 			}
 			return false;
 		}
-		indexBufferData[i] = (GLuint)_int;
+		indexBufferData[i] = (GLuint)_int->get();
 	}
 	return true;
 }

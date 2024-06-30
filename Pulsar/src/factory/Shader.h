@@ -1,8 +1,8 @@
 #pragma once
 
-#include <unordered_map>
 #include <GL/glew.h>
 
+#include <unordered_map>
 #include <string>
 
 #include "Typedefs.h"

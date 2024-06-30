@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <toml/tomlcpp.hpp>
+#include <toml/toml.hpp>
 
 #include "Typedefs.h"
 #include "factory/ShaderFactory.h"
@@ -50,8 +50,8 @@ private:
 	GLuint* indexBufferData;
 	BufferCounter indexCount;
 	
-	bool AttachVertexBuffer(toml::Array vertex_array, size_t size);
-	bool AttachIndexBuffer(toml::Array index_array, size_t size);
+	bool AttachVertexBuffer(toml::v3::array* vertex_array, size_t size);
+	bool AttachIndexBuffer(toml::v3::array* index_array, size_t size);
 
 	friend class CanvasLayer;
 	friend class ActorPrimitive2D;
