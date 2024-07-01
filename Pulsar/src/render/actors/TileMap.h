@@ -1,28 +1,26 @@
 #pragma once
 
-#include <map>
+#include <vector>
 
 #include "Typedefs.h"
 #include "ActorSequencer.h"
 #include "ActorPrimitive.h"
 #include "ActorTesselation.h"
 #include "factory/Atlas.h"
+#include "RectRender.h"
 
 class TileMap : public ActorSequencer2D
 {
-	mutable int cache_i = 0;
-	mutable size_t cache_iter_offset = 0;
-	mutable std::map<TileHandle, ActorTesselation2D>::iterator cache_iter;
 	Atlas* m_Atlas;
-	std::map<TileHandle, ActorTesselation2D> m_Map;
+	std::vector<std::pair<RectRender*, ActorTesselation2D*>> m_Map;
 
 public:
-	TileMap(std::vector<TileHandle>& tiles, const int& atlas_width = -1, const int& atlas_height = -1);
-	TileMap(Atlas* atlas);
+	TileMap(const TileHandle& atlas_handle, const TextureSettings& texture_settings = Texture::nearest_settings, const ShaderHandle& shader = ShaderFactory::standard_shader, const ZIndex& z = 0, const bool& visible = true);
 	~TileMap();
 
 	ActorPrimitive2D* const operator[](const int& i) override;
+	virtual BufferCounter PrimitiveCount() const;
+	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
-private:
-	void ClearCache();
+	ActorTesselation2D* const TesselationRef(const int& i) const;
 };

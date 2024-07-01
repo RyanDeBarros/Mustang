@@ -16,6 +16,7 @@
 #include "render/actors/ActorTesselation.h"
 #include "factory/ShaderFactory.h"
 #include "factory/Atlas.h"
+#include "render/actors/TileMap.h"
 
 static void run(GLFWwindow*);
 
@@ -200,31 +201,30 @@ void run(GLFWwindow* window)
 	if (loadAtlas("res/assets/atlas_asset.toml", tileAtlas) != LOAD_STATUS::OK)
 		ASSERT(false);
 	
-	const Atlas* atlas = dynamic_cast<const Atlas*>(TileFactory::GetConstTileRef(tileAtlas));
+	Atlas* atlas = dynamic_cast<Atlas*>(TileFactory::GetTileRef(tileAtlas));
 	if (!atlas)
 		ASSERT(false);
 
-	
-	auto _atlasTessel1 = atlas->SampleSubtile(3);
-	ActorTesselation2D atlasTessel1(&_atlasTessel1);
-	auto _atlasTessel2 = atlas->SampleSubtile(4);
-	ActorTesselation2D atlasTessel2(&_atlasTessel2);
-	auto _atlasTessel3 = atlas->SampleSubtile(5);
-	ActorTesselation2D atlasTessel3(&_atlasTessel3);
+	TileMap tilemap(tileAtlas);
 
-	Renderer::GetCanvasLayer(0)->OnAttach(&atlasTessel1);
-	Renderer::GetCanvasLayer(0)->OnAttach(&atlasTessel2);
-	Renderer::GetCanvasLayer(0)->OnAttach(&atlasTessel3);
+	Renderer::GetCanvasLayer(0)->OnAttach(&tilemap);
+	Renderer::GetCanvasLayer(0)->OnDetach(&tesselDiagonal);
+	Renderer::GetCanvasLayer(0)->OnDetach(actor1);
+	Renderer::GetCanvasLayer(0)->OnDetach(actor2);
+	Renderer::GetCanvasLayer(0)->OnDetach(actor3);
+	Renderer::GetCanvasLayer(-1)->OnDetach(actor4);
 
 	float side = 5.0f;
-	float uvw = static_cast<RectRender* const>(atlasTessel1.ActorRef())->GetUVWidth() * side;
+	float uvw3 = static_cast<RectRender* const>(tilemap.TesselationRef(0)->ActorRef())->GetUVWidth() * side;
+	float uvw4 = static_cast<RectRender* const>(tilemap.TesselationRef(1)->ActorRef())->GetUVWidth() * side;
+	float uvw5 = static_cast<RectRender* const>(tilemap.TesselationRef(2)->ActorRef())->GetUVWidth() * side;
 
-	atlasTessel1.Insert({ {-2 * uvw, 0}, 0, {side, side} });
-	atlasTessel2.Insert({ {-uvw, 0}, 0, {side, side} });
-	atlasTessel2.Insert({ {0, 0}, 0, {side, side} });
-	atlasTessel2.Insert({ {uvw, 0}, 0, {side, side} });
-	atlasTessel3.Insert({ {2 * uvw, 0}, 0, {side, side} });
-
+	tilemap.TesselationRef(3)->Insert({{-2 * uvw3, 0}, 0, {side, side}});
+	tilemap.TesselationRef(4)->Insert({{-uvw4, 0}, 0, {side, side} });
+	tilemap.TesselationRef(4)->Insert({{0, 0}, 0, {side, side} });
+	tilemap.TesselationRef(4)->Insert({{uvw4, 0}, 0, {side, side} });
+	tilemap.TesselationRef(5)->Insert({{2 * uvw5, 0}, 0, {side, side} });
+	
 	for (;;)
 	{
 		time = glfwGetTime();

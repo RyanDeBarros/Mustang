@@ -23,6 +23,7 @@ class ShaderFactory
 	friend struct BatchModel;
 	friend class RectRender;
 	friend class Atlas;
+	friend class TileMap;
 	static ShaderHandle standard_shader;
 
 public:

@@ -20,6 +20,10 @@ struct Placement
 	}
 };
 
+class atlas_cast_error : public std::exception
+{
+};
+
 class Atlas : public Tile
 {
 	friend class Tile;

@@ -15,10 +15,13 @@ void TileFactory::Init()
 
 void TileFactory::Terminate()
 {
-	for (const auto& [handle, tile] : factory)
+	for (auto& [handle, tile] : factory)
 	{
 		if (tile)
+		{
 			delete tile;
+			tile = nullptr;
+		}
 	}
 	factory.clear();
 }

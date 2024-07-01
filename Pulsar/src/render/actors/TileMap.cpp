@@ -1,48 +1,54 @@
 #include "TileMap.h"
 
-TileMap::TileMap(std::vector<TileHandle>& tiles, const int& atlas_width, const int& atlas_height)
-	: m_Atlas(new Atlas(tiles, atlas_width, atlas_height))
+TileMap::TileMap(const TileHandle& atlas_handle, const TextureSettings& texture_settings, const ShaderHandle& shader, const ZIndex& z, const bool& visible)
 {
-	ClearCache();
-}
-
-TileMap::TileMap(Atlas* atlas)
-	: m_Atlas(atlas)
-{
-	ClearCache();
+	Tile* t = TileFactory::GetTileRef(atlas_handle);
+	m_Atlas = dynamic_cast<Atlas*>(t);
+	if (!m_Atlas)
+		throw atlas_cast_error();
+	for (size_t i = 0; i < m_Atlas->GetPlacements().size(); i++)
+	{
+		RectRender* rect_render = new RectRender(m_Atlas->SampleSubtile(i, texture_settings, shader, z, visible));
+		ActorTesselation2D* tessel = new ActorTesselation2D(rect_render);
+		m_Map.push_back({rect_render, tessel});
+	}
 }
 
 TileMap::~TileMap()
 {
-	if (m_Atlas)
+	for (auto& [rect_render, tessel] : m_Map)
 	{
-		delete m_Atlas;
-		m_Atlas = nullptr;
+		if (rect_render)
+			delete rect_render;
+		if (tessel)
+			delete tessel;
 	}
+	m_Map.clear();
 }
 
 ActorPrimitive2D* const TileMap::operator[](const int& i)
 {
-	ActorPrimitive2D* primitive = nullptr;
-	if (i < cache_i)
-		ClearCache();
-	while (cache_iter != m_Map.end())
-	{
-		primitive = cache_iter->second[static_cast<int>(i - cache_iter_offset)];
-		if (primitive)
-		{
-			cache_i = i;
-			return primitive;
-		}
-		cache_iter_offset += cache_iter->second.RectVectorRef().size();
-		cache_iter++;
-	}
-	return primitive;
+	// TODO?
+	return nullptr;
 }
 
-void TileMap::ClearCache()
+BufferCounter TileMap::PrimitiveCount() const
 {
-	cache_i = 0;
-	cache_iter = m_Map.begin();
-	cache_iter_offset = 0;
+	BufferCounter count = 0;
+	for (auto iter = m_Map.begin(); iter != m_Map.end(); iter++)
+		count += iter->second->PrimitiveCount();
+	return count;
+}
+
+void TileMap::RequestDraw(CanvasLayer* canvas_layer)
+{
+	for (auto& tessel : m_Map)
+		tessel.second->RequestDraw(canvas_layer);
+}
+
+ActorTesselation2D* const TileMap::TesselationRef(const int& i) const
+{
+	if (i >= 0 && i < m_Map.size())
+		return m_Map[i].second;
+	else return nullptr;
 }

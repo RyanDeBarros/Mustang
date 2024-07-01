@@ -28,6 +28,7 @@ public:
 	static TileHandle GetSubtileHandle(const TileHandle& full_handle, int x, int y, int w, int h);
 
 	static inline const Tile* GetConstTileRef(const TileHandle& tile) { return Get(tile); }
+	static inline Tile* GetTileRef(const TileHandle& tile) { return Get(tile); }
 	static const unsigned char* GetImageBuffer(const TileHandle& tile);
 	static int GetWidth(const TileHandle& tile);
 	static int GetHeight(const TileHandle& tile);
