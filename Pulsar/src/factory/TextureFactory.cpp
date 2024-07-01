@@ -3,8 +3,8 @@
 #include <stb/stb_image.h>
 #include <stb/stb_image_write.h>
 
-#include "Logger.h"
 #include "Macros.h"
+#include "Logger.h"
 
 TextureHandle TextureFactory::handle_cap;
 std::unordered_map<TextureHandle, Texture*> TextureFactory::factory;
@@ -16,7 +16,9 @@ Texture* TextureFactory::Get(TextureHandle handle)
 		return iter->second;
 	else
 	{
+#if !PULSAR_IGNORE_WARNINGS_NULL_TEXTURE
 		Logger::LogWarning("Texture handle (" + std::to_string(handle) + ") does not exist in TextureFactory.");
+#endif
 		return nullptr;
 	}
 }
@@ -91,8 +93,10 @@ void TextureFactory::Bind(const TextureHandle& handle, const TextureSlot& slot)
 	Texture* texture = Get(handle);
 	if (texture)
 		texture->Bind(slot);
+#if !PULSAR_IGNORE_WARNINGS_NULL_TEXTURE
 	else
 		Logger::LogWarning("Failed to bind texture at handle (" + std::to_string(handle) + ") to slot (" + std::to_string(slot) + ").");
+#endif
 }
 
 void TextureFactory::Unbind(const TextureSlot& slot)
@@ -106,6 +110,8 @@ void TextureFactory::SetSettings(const TextureHandle& handle, const TextureSetti
 	Texture* texture = Get(handle);
 	if (texture)
 		texture->SetSettings(settings);
+#if !PULSAR_IGNORE_WARNINGS_NULL_TEXTURE
 	else
 		Logger::LogWarning("Failed to set settings at texture handle (" + std::to_string(handle) + ").");
+#endif
 }

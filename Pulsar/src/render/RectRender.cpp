@@ -23,7 +23,7 @@ void RectRender::DefineRectRenderable()
 	LOAD_STATUS load_status = loadRenderable(_RendererSettings::rect_renderable_filepath.c_str(), rect_renderable);
 	if (load_status != LOAD_STATUS::OK)
 	{
-		Logger::LogErrorFatal("Could not load quad renderable. Load Status = " + std::to_string(static_cast<int>(load_status)));
+		Logger::LogErrorFatal("Could not load rect renderable. Load Status = " + std::to_string(static_cast<int>(load_status)));
 	}
 }
 

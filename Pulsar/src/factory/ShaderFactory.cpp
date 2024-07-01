@@ -5,6 +5,14 @@
 #include "AssetLoader.h"
 #include "RendererSettings.h"
 
+#if PULSAR_IGNORE_WARNINGS_NULL_SHADER
+#define ELSE_CHECK_BAD_UNIFORM(handle)
+#else
+#define ELSE_CHECK_BAD_UNIFORM(handle) else\
+	Logger::LogWarning("Failed to set uniform for shader at handle (" + std::to_string(handle) + ").");
+#endif
+
+
 ShaderHandle ShaderFactory::handle_cap;
 std::unordered_map<ShaderHandle, Shader*> ShaderFactory::factory;
 ShaderHandle ShaderFactory::standard_shader;
@@ -16,7 +24,9 @@ Shader* ShaderFactory::Get(ShaderHandle handle)
 		return iter->second;
 	else
 	{
+#if !PULSAR_IGNORE_WARNINGS_NULL_SHADER
 		Logger::LogWarning("Shader handle (" + std::to_string(handle) + ") does not exist in ShaderFactory.");
+#endif
 		return nullptr;
 	}
 }
@@ -61,18 +71,15 @@ void ShaderFactory::Bind(ShaderHandle handle)
 	Shader* shader = Get(handle);
 	if (shader)
 		shader->Bind();
+#if !PULSAR_IGNORE_WARNINGS_NULL_SHADER
 	else
 		Logger::LogWarning("Failed to bind shader at handle (" + std::to_string(handle) + ").");
+#endif
 }
 
 void ShaderFactory::Unbind()
 {
 	TRY(glUseProgram(0));
-}
-
-static void bad_uniform(ShaderHandle handle)
-{
-	Logger::LogWarning("Failed to set uniform for shader at handle (" + std::to_string(handle) + ").");
 }
 
 void ShaderFactory::SetUniform1i(ShaderHandle handle, const char* uniform_name, const GLint value)
@@ -82,8 +89,7 @@ void ShaderFactory::SetUniform1i(ShaderHandle handle, const char* uniform_name, 
 	{
 		TRY(glUniform1i(shader->GetUniformLocation(uniform_name), value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniform2iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
@@ -93,8 +99,7 @@ void ShaderFactory::SetUniform2iv(ShaderHandle handle, const char* uniform_name,
 	{
 		TRY(glUniform2iv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniform3iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
@@ -104,8 +109,7 @@ void ShaderFactory::SetUniform3iv(ShaderHandle handle, const char* uniform_name,
 	{
 		TRY(glUniform3iv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniform4iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
@@ -115,8 +119,7 @@ void ShaderFactory::SetUniform4iv(ShaderHandle handle, const char* uniform_name,
 	{
 		TRY(glUniform4iv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniform1ui(ShaderHandle handle, const char* uniform_name, const GLuint value)
@@ -126,8 +129,7 @@ void ShaderFactory::SetUniform1ui(ShaderHandle handle, const char* uniform_name,
 	{
 		TRY(glUniform1ui(shader->GetUniformLocation(uniform_name), value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniform2uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
@@ -137,8 +139,7 @@ void ShaderFactory::SetUniform2uiv(ShaderHandle handle, const char* uniform_name
 	{
 		TRY(glUniform2uiv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniform3uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
@@ -148,8 +149,7 @@ void ShaderFactory::SetUniform3uiv(ShaderHandle handle, const char* uniform_name
 	{
 		TRY(glUniform3uiv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniform4uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
@@ -159,8 +159,7 @@ void ShaderFactory::SetUniform4uiv(ShaderHandle handle, const char* uniform_name
 	{
 		TRY(glUniform4uiv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniform1f(ShaderHandle handle, const char* uniform_name, const GLfloat value)
@@ -170,8 +169,7 @@ void ShaderFactory::SetUniform1f(ShaderHandle handle, const char* uniform_name, 
 	{
 		TRY(glUniform1f(shader->GetUniformLocation(uniform_name), value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniform2fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
@@ -181,8 +179,7 @@ void ShaderFactory::SetUniform2fv(ShaderHandle handle, const char* uniform_name,
 	{
 		TRY(glUniform2fv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniform3fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
@@ -192,8 +189,7 @@ void ShaderFactory::SetUniform3fv(ShaderHandle handle, const char* uniform_name,
 	{
 		TRY(glUniform3fv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniform4fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
@@ -203,8 +199,7 @@ void ShaderFactory::SetUniform4fv(ShaderHandle handle, const char* uniform_name,
 	{
 		TRY(glUniform4fv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniformMatrix2fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
@@ -214,8 +209,7 @@ void ShaderFactory::SetUniformMatrix2fv(ShaderHandle handle, const char* uniform
 	{
 		TRY(glUniformMatrix2fv(shader->GetUniformLocation(uniform_name), array_count, GL_FALSE, value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniformMatrix3fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
@@ -225,8 +219,7 @@ void ShaderFactory::SetUniformMatrix3fv(ShaderHandle handle, const char* uniform
 	{
 		TRY(glUniformMatrix3fv(shader->GetUniformLocation(uniform_name), array_count, GL_FALSE, value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderFactory::SetUniformMatrix4fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
@@ -236,6 +229,5 @@ void ShaderFactory::SetUniformMatrix4fv(ShaderHandle handle, const char* uniform
 	{
 		TRY(glUniformMatrix4fv(shader->GetUniformLocation(uniform_name), array_count, GL_FALSE, value));
 	}
-	else
-		bad_uniform(handle);
+	ELSE_CHECK_BAD_UNIFORM(handle)
 }

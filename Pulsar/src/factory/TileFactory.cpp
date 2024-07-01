@@ -1,5 +1,6 @@
 #include "TileFactory.h"
 
+#include "Macros.h"
 #include "Logger.h"
 #include "Atlas.h"
 #include "Subtile.h"
@@ -29,7 +30,9 @@ Tile* TileFactory::Get(const TileHandle& handle)
 		return iter->second;
 	else
 	{
+#if !PULSAR_IGNORE_WARNINGS_NULL_TILE
 		Logger::LogWarning("Tile handle (" + std::to_string(handle) + ") does not exist in TileFactory.");
+#endif
 		return nullptr;
 	}
 }

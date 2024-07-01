@@ -7,7 +7,13 @@
 #	define TRY(x) x;
 #endif
 
-#define PULSAR_ASSUME_INITIALIZED
+/******************************/
+#define PULSAR_ASSUME_INITIALIZED 1
+#define PULSAR_IGNORE_WARNINGS_NULL_UNIFORM_LEXICON 1
+#define PULSAR_IGNORE_WARNINGS_NULL_TEXTURE 1
+#define PULSAR_IGNORE_WARNINGS_NULL_SHADER 1
+#define PULSAR_IGNORE_WARNINGS_NULL_TILE 1
+/******************************/
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>

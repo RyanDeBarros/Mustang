@@ -1,12 +1,13 @@
 #include "Shader.h"
 
+#include <GL/glew.h>
+
 #include <string>
 #include <iostream>
-#include <GL/glew.h>
 
 #include "Macros.h"
 
-char* read_file(const char* filepath)
+static char* read_file(const char* filepath)
 {
 	FILE* file;
 	fopen_s(&file, filepath, "rb");
@@ -118,8 +119,10 @@ GLint Shader::GetUniformLocation(const char* uniform_name) const
 	if (m_UniformLocationCache.find(uniform_name) != m_UniformLocationCache.end())
 		return m_UniformLocationCache[uniform_name];
 	TRY(GLint location = glGetUniformLocation(m_RID, uniform_name));
+#if !PULSAR_IGNORE_WARNINGS_NULL_SHADER
 	if (location == -1)
 		Logger::LogWarning(std::string("No uniform exists or is in use under the name: ") + uniform_name);
+#endif
 	m_UniformLocationCache[uniform_name] = location;
 	return location;
 }

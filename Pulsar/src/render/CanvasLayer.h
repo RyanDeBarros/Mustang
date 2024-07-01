@@ -15,6 +15,7 @@
 #include "ActorPrimitive.h"
 #include "ActorSequencer.h"
 #include "Renderable.h"
+#include "factory/UniformLexicon.h"
 
 struct CanvasLayerData
 {
@@ -42,6 +43,8 @@ class CanvasLayer
 	GLuint* indexPos;
 	GLuint m_VB, m_IB;
 	BatchModel currentModel;
+	UniformLexicon currentLexicon;
+	UniformLexiconHandle currentLexiconHandle = 0;
 	std::vector<TextureHandle> m_TextureSlotBatch;
 	std::unordered_map<BatchModel, VAO> m_VAOs;
 public:

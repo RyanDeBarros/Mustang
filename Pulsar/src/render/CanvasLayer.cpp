@@ -87,6 +87,7 @@ void CanvasLayer::OnDraw()
 	currentModel = BatchModel();
 	vertexPos = m_VertexPool;
 	indexPos = m_IndexPool;
+	currentLexicon.Clear();
 	for (const auto& list : m_Batcher)
 	{
 		for (const auto& element : *list.second)
@@ -106,6 +107,9 @@ void CanvasLayer::DrawPrimitive(ActorPrimitive2D* const primitive)
 		{
 			FlushAndReset();
 			currentModel = render.model;
+			currentLexiconHandle = render.model.uniformLexicon;
+			currentLexicon.Clear();
+			currentLexicon.MergeLexicon(render.model.uniformLexicon);
 			if (m_VAOs.find(currentModel) == m_VAOs.end())
 				RegisterModel();
 		}
@@ -153,6 +157,8 @@ void CanvasLayer::PoolOver(const Renderable& render)
 			*(indexPos + ic) += (GLuint)(vertexPos - m_VertexPool) / Render::StrideCountOf(render.model.layout, render.model.layoutMask);
 	vertexPos += Render::VertexBufferLayoutCount(render);
 	indexPos += render.indexCount;
+	if (render.model.uniformLexicon != currentLexiconHandle)
+		currentLexicon.MergeLexicon(render.model.uniformLexicon);
 }
 
 TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
@@ -165,15 +171,13 @@ TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 	for (auto it = m_TextureSlotBatch.begin(); it != m_TextureSlotBatch.end(); it++)
 	{
 		if (*it == render.textureHandle)
-		{
-			return (TextureSlot)(it - m_TextureSlotBatch.begin());
-		}
+			return static_cast<TextureSlot>(it - m_TextureSlotBatch.begin());
 	}
 	if (m_TextureSlotBatch.size() >= _RendererSettings::max_texture_slots)
 	{
 		FlushAndReset();
 	}
-	TextureSlot slot = (TextureSlot)m_TextureSlotBatch.size();
+	TextureSlot slot = static_cast<TextureSlot>(m_TextureSlotBatch.size());
 	m_TextureSlotBatch.push_back(render.textureHandle);
 	return slot;
 }

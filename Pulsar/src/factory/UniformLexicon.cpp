@@ -1,5 +1,11 @@
 #include "UniformLexicon.h"
 
+#include "UniformLexiconFactory.h"
+
+UniformLexicon::UniformLexicon()
+{
+}
+
 UniformLexicon::UniformLexicon(const std::map<std::string, Uniform>& uniform_set)
 	: m_Uniforms(uniform_set)
 {
@@ -9,9 +15,13 @@ UniformLexicon::~UniformLexicon()
 {
 }
 
-void UniformLexicon::MergeLexicon(const UniformLexicon& lexicon)
+void UniformLexicon::MergeLexicon(const UniformLexiconHandle& lexicon_handle)
 {
-	m_Uniforms.insert(lexicon.m_Uniforms.begin(), lexicon.m_Uniforms.end());
+	if (lexicon_handle > 0)
+	{
+		UniformLexicon lexicon = *UniformLexiconFactory::GetConstRef(lexicon_handle);
+		m_Uniforms.insert(lexicon.m_Uniforms.begin(), lexicon.m_Uniforms.end());
+	}
 }
 
 bool UniformLexicon::Shares(const UniformLexicon& lexicon)
@@ -20,14 +30,14 @@ bool UniformLexicon::Shares(const UniformLexicon& lexicon)
 	auto bit = lexicon.m_Uniforms.begin();
 	while (ait != m_Uniforms.end() && bit != lexicon.m_Uniforms.end())
 	{
-		const std::string akey = ait->first;
-		const std::string bkey = bit->first;
+		const std::string& akey = ait->first;
+		const std::string& bkey = bit->first;
 		if (akey < bkey)
 			ait++;
 		else if (akey > bkey)
 			bit++;
 		else if (ait->second != bit->second)
-				return false;
+			return false;
 	}
 	return true;
 }
@@ -63,4 +73,9 @@ bool UniformLexicon::DefineNewValue(const std::string& name, const Uniform& unif
 		return true;
 	}
 	return false;
+}
+
+void UniformLexicon::Clear()
+{
+	m_Uniforms.clear();
 }

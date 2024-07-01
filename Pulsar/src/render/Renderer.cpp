@@ -11,26 +11,25 @@
 #include "factory/TileFactory.h"
 #include "render/RectRender.h"
 
+#if PULSAR_ASSUME_INITIALIZED
+#define CHECK_INITIALIZED
+#else
+#define CHECK_INITIALIZED if (uninitialized)\
+	Logger::LogErrorFatal("Renderer is not initialized. Call Renderer::Init() before application loop.");
+#endif
+
 std::map<CanvasIndex, CanvasLayer> Renderer::layers;
 GLFWwindow* focused_window;
 
+#if !PULSAR_ASSUME_INITIALIZED
 bool uninitialized = true;
-
-#ifdef PULSAR_ASSUME_INITIALIZED
-#define CHECK_INITIALIZED check_initialized();
-#else
-#define CHECK_INITIALIZED
 #endif
-
-static void check_initialized()
-{
-	if (uninitialized)
-		Logger::LogErrorFatal("Renderer is not initialized. Call Renderer::Init() before application loop.");
-}
 
 void Renderer::Init()
 {
+#if !PULSAR_ASSUME_INITIALIZED
 	uninitialized = false;
+#endif
 	ShaderFactory::Init();
 	TextureFactory::Init();
 	UniformLexiconFactory::Init();
@@ -41,7 +40,9 @@ void Renderer::Init()
 void Renderer::Terminate()
 {
 	CHECK_INITIALIZED
+#if !PULSAR_ASSUME_INITIALIZED
 	uninitialized = true;
+#endif
 	layers.clear();
 	TileFactory::Terminate();
 	UniformLexiconFactory::Terminate();

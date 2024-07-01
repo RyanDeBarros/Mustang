@@ -26,6 +26,7 @@ public:
 	static UniformLexiconHandle GetHandle(const std::map<std::string, Uniform>& uniforms);
 	static void OnApply(const UniformLexiconHandle& uniformLexicon, const ShaderHandle& shader);
 	static bool Shares(const UniformLexiconHandle& lexicon1, const UniformLexiconHandle& lexicon2);
+	inline static const UniformLexicon* GetConstRef(const UniformLexiconHandle& lexicon) { return Get(lexicon); }
 	static const Uniform* GetValue(const UniformLexiconHandle& lexicon, const std::string& name);
 	static void SetValue(const UniformLexiconHandle& lexicon, const std::string& name, const Uniform& value);
 	static bool DefineNewValue(const UniformLexiconHandle& lexicon, const std::string& name, const Uniform& value);

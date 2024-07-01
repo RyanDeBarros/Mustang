@@ -1,5 +1,6 @@
 #include "UniformLexiconFactory.h"
 
+#include "Macros.h"
 #include "Logger.h"
 #include "ShaderFactory.h"
 
@@ -32,7 +33,9 @@ UniformLexicon* UniformLexiconFactory::Get(UniformLexiconHandle handle)
 		return iter->second;
 	else
 	{
+#if !PULSAR_IGNORE_WARNINGS_NULL_UNIFORM_LEXICON
 		Logger::LogWarning("UniformLexicon handle (" + std::to_string(handle) + ") does not exist in UniformLexiconFactory.");
+#endif
 		return nullptr;
 	}
 }
@@ -146,14 +149,18 @@ bool UniformLexiconFactory::Shares(const UniformLexiconHandle& lexicon1, const U
 		}
 		else
 		{
+#if !PULSAR_IGNORE_WARNINGS_NULL_UNIFORM_LEXICON
 			Logger::LogWarning("UniformLexicon handle (" + std::to_string(lexicon2) + ") does not exist in UniformLexiconFactory.");
-			return false;
+#endif
+			return true;
 		}
 	}
 	else
 	{
+#if !PULSAR_IGNORE_WARNINGS_NULL_UNIFORM_LEXICON
 		Logger::LogWarning("UniformLexicon handle (" + std::to_string(lexicon1) + ") does not exist in UniformLexiconFactory.");
-		return false;
+#endif
+		return true;
 	}
 }
 
