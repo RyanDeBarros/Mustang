@@ -12,8 +12,8 @@
 #include "RendererSettings.h"
 #include "ActorRenderBase.h"
 #include "LayerView.h"
-#include "ActorPrimitive.h"
-#include "ActorSequencer.h"
+#include "actors/ActorPrimitive.h"
+#include "actors/ActorSequencer.h"
 #include "Renderable.h"
 #include "factory/UniformLexicon.h"
 

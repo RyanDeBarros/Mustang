@@ -6,8 +6,8 @@
 
 #include "Macros.h"
 #include "TileFactory.h"
-#include "render/RectRender.h"
-#include "render/ActorTesselation.h"
+#include "render/actors/RectRender.h"
+#include "render/actors/ActorTesselation.h"
 
 Atlas::Atlas(std::vector<TileHandle>& tiles, int width, int height, int border)
 	: m_Border(border)

@@ -9,7 +9,7 @@
 #include "factory/TextureFactory.h"
 #include "factory/UniformLexiconFactory.h"
 #include "factory/TileFactory.h"
-#include "render/RectRender.h"
+#include "render/actors/RectRender.h"
 
 #if PULSAR_ASSUME_INITIALIZED
 #define CHECK_INITIALIZED

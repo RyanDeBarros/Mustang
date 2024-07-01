@@ -1,7 +1,7 @@
 #include "ActorPrimitive.h"
 
 #include "Logger.h"
-#include "CanvasLayer.h"
+#include "render/CanvasLayer.h"
 
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, const ZIndex& z, const bool& visible)
 	: m_Render(render), m_Transform(transform), m_Z(z), m_Status(visible ? 0b111 : 0b110)

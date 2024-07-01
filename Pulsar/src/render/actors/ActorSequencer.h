@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Typedefs.h"
-#include "ActorRenderBase.h"
+#include "render/ActorRenderBase.h"
 #include "ActorPrimitive.h"
 
 class ActorSequencer2D : public ActorRenderBase2D

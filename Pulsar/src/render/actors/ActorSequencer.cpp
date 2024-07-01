@@ -1,6 +1,6 @@
 #include "ActorSequencer.h"
 
-#include "CanvasLayer.h"
+#include "render/CanvasLayer.h"
 
 void ActorSequencer2D::RequestDraw(CanvasLayer* canvas_layer)
 {

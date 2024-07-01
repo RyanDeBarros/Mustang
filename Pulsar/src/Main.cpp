@@ -10,10 +10,10 @@
 #include "Macros.h"
 #include "AssetLoader.h"
 #include "render/Renderer.h"
-#include "render/ActorPrimitive.h"
-#include "render/RectRender.h"
+#include "render/actors/ActorPrimitive.h"
+#include "render/actors/RectRender.h"
 #include "factory/UniformLexiconFactory.h"
-#include "render/ActorTesselation.h"
+#include "render/actors/ActorTesselation.h"
 #include "factory/ShaderFactory.h"
 #include "factory/Atlas.h"
 
