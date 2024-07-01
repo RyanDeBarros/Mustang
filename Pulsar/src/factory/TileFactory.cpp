@@ -86,6 +86,24 @@ TileHandle TileFactory::GetAtlasHandle(std::vector<TileHandle>&& tiles, int widt
 	else return 0;
 }
 
+TileHandle TileFactory::GetAtlasHandle(const char* texture_filepath, const std::vector<Placement>& placements, int border)
+{
+	for (const auto& [handle, tile] : factory)
+	{
+		auto at = dynamic_cast<Atlas* const>(tile);
+		if (at && at->Equivalent(texture_filepath, placements, border))
+			return handle;
+	}
+	Atlas tile(texture_filepath, placements, border);
+	if (tile.IsValid())
+	{
+		TileHandle handle = handle_cap++;
+		factory.emplace(handle, new Atlas(std::move(tile)));
+		return handle;
+	}
+	else return 0;
+}
+
 TileHandle TileFactory::GetAtlasHandle(const Atlas* const atlas)
 {
 	for (const auto& [handle, tile] : factory)

@@ -187,17 +187,23 @@ void run(GLFWwindow* window)
 	
 	actor2->CropToRelativeRect({ 0.3f, 0.4f, 0.4f, 0.55f });
 
-	TileHandle tile_dirtTL(TextureFactory::GetTileHandle(tex_dirtTL)), tile_dirtTR(TextureFactory::GetTileHandle(tex_dirtTR)), tile_grassSingle(TextureFactory::GetTileHandle(tex_grassSingle)), tile_grassTL(TextureFactory::GetTileHandle(tex_grassTL)), tile_grassTE(TextureFactory::GetTileHandle(tex_grassTE)), tile_grassTR(TextureFactory::GetTileHandle(tex_grassTR));
-	std::vector<TileHandle> tiles = { tile_dirtTL, tile_dirtTR, tile_grassSingle, tile_grassTL, tile_grassTE, tile_grassTR };
+	//TileHandle tile_dirtTL(TextureFactory::GetTileHandle(tex_dirtTL)), tile_dirtTR(TextureFactory::GetTileHandle(tex_dirtTR)), tile_grassSingle(TextureFactory::GetTileHandle(tex_grassSingle)), tile_grassTL(TextureFactory::GetTileHandle(tex_grassTL)), tile_grassTE(TextureFactory::GetTileHandle(tex_grassTE)), tile_grassTR(TextureFactory::GetTileHandle(tex_grassTR));
+	//std::vector<TileHandle> tiles = { tile_dirtTL, tile_dirtTR, tile_grassSingle, tile_grassTL, tile_grassTE, tile_grassTR };
+	//TileHandle tileAtlas = TileFactory::GetAtlasHandle(tiles, -1, -1, 1);
+	//const Atlas* atlas = dynamic_cast<const Atlas*>(TileFactory::GetConstTileRef(tileAtlas));
+	//if (!atlas)
+	//	ASSERT(false);
+	//if (!saveAtlas(atlas, "res/textures/atlas.png", "res/assets/atlas_asset.toml"))
+	//	ASSERT(false);
+
+	TileHandle tileAtlas;
+	if (loadAtlas("res/assets/atlas_asset.toml", tileAtlas) != LOAD_STATUS::OK)
+		ASSERT(false);
 	
-	
-	TileHandle tileAtlas = TileFactory::GetAtlasHandle(tiles, -1, -1, 1);
 	const Atlas* atlas = dynamic_cast<const Atlas*>(TileFactory::GetConstTileRef(tileAtlas));
 	if (!atlas)
 		ASSERT(false);
 
-	if (!saveAtlas(atlas, "res/textures/atlas.png", ""))
-		ASSERT(false);
 	
 	auto _atlasTessel1 = atlas->SampleSubtile(3);
 	ActorTesselation2D atlasTessel1(&_atlasTessel1);

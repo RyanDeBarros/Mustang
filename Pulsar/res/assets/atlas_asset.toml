@@ -1,0 +1,47 @@
+header = 'atlas'
+
+[atlas]
+border = 1
+path = 'res/textures/atlas.png'
+
+    [[atlas.placement]]
+    h = 19
+    r = 0
+    w = 19
+    x = 0
+    y = 0
+
+    [[atlas.placement]]
+    h = 19
+    r = 0
+    w = 19
+    x = 19
+    y = 0
+
+    [[atlas.placement]]
+    h = 19
+    r = 0
+    w = 19
+    x = 0
+    y = 19
+
+    [[atlas.placement]]
+    h = 19
+    r = 0
+    w = 19
+    x = 19
+    y = 19
+
+    [[atlas.placement]]
+    h = 19
+    r = 0
+    w = 19
+    x = 38
+    y = 0
+
+    [[atlas.placement]]
+    h = 19
+    r = 0
+    w = 19
+    x = 38
+    y = 19

@@ -5,6 +5,7 @@
 #include <stb/stb_image_write.h>
 
 #include <map>
+#include <fstream>
 
 #include "Logger.h"
 #include "RendererSettings.h"
@@ -478,8 +479,44 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, const b
 
 bool saveAtlas(const Atlas& atlas, const char* texture_filepath, const char* asset_filepath, const char* image_format, unsigned char jpg_quality)
 {
-	// TODO create asset file that encapsulates the subtextures of the atlas.
-	
+	try
+	{
+		std::ofstream f(asset_filepath);
+		if (!f.is_open())
+		{
+			Logger::LogErrorFatal("Cannot open atlas asset file \"" + std::string(asset_filepath) + "\".");
+			return false;
+		}
+
+		toml::table tbl;
+		tbl.insert_or_assign("header", "atlas");
+
+		toml::table atlas_;
+		atlas_.insert_or_assign("path", texture_filepath);
+		atlas_.insert_or_assign("border", atlas.GetBorder());
+
+		toml::array placements;
+		for (size_t i = 0; i < atlas.GetPlacements().size(); i++)
+		{
+			const Placement& p = atlas.GetPlacements()[i];
+			toml::table placement_table;
+			placement_table.insert_or_assign("x", static_cast<int64_t>(p.x));
+			placement_table.insert_or_assign("y", static_cast<int64_t>(p.y));
+			placement_table.insert_or_assign("w", static_cast<int64_t>(p.w));
+			placement_table.insert_or_assign("h", static_cast<int64_t>(p.h));
+			placement_table.insert_or_assign("r", static_cast<int64_t>(p.r));
+			placements.push_back(placement_table);
+		}
+		atlas_.insert_or_assign("placement", placements);
+
+		tbl.insert_or_assign("atlas", atlas_);
+		f << tbl;
+	}
+	catch (const toml::parse_error& err)
+	{
+		Logger::LogErrorFatal("Cannot parse atlas asset file \"" + std::string(asset_filepath) + "\": " + std::string(err.description()));
+		return false;
+	}
 	if (strcmp(image_format, "png"))
 		stbi_write_png(texture_filepath, atlas.GetWidth(), atlas.GetHeight(), Atlas::BPP, atlas.GetBuffer(), atlas.GetWidth() * Atlas::STRIDE_BYTES);
 	else if (strcmp(image_format, "bmp"))
@@ -490,12 +527,55 @@ bool saveAtlas(const Atlas& atlas, const char* texture_filepath, const char* ass
 		stbi_write_tga(texture_filepath, atlas.GetWidth(), atlas.GetHeight(), Atlas::BPP, atlas.GetBuffer());
 	else
 		return false;
-
 	return true;
 }
 
-Atlas loadAtlas(const char* asset_filepath)
+LOAD_STATUS loadAtlas(const char* asset_filepath, TileHandle& handle)
 {
-	// TODO load atlas
-	return Atlas({});
+	try
+	{
+		auto file = toml::parse_file(asset_filepath);
+		auto verif = verify_header(file, "atlas");
+		if (verif != LOAD_STATUS::OK)
+			return verif;
+
+		auto atlas = file["atlas"];
+		if (!atlas)
+			return LOAD_STATUS::SYNTAX_ERR;
+		auto path = atlas["path"].value<std::string>();
+		if (!path)
+			return LOAD_STATUS::SYNTAX_ERR;
+		auto _border = atlas["border"].value<int64_t>();
+		int border = _border ? static_cast<int>(_border.value()) : 0;
+
+		auto p_arr = atlas["placement"].as_array();
+		std::vector<Placement> placements;
+		size_t i = 0;
+		while (auto table = p_arr->get_as<toml::table>(i))
+		{
+			Placement placement{};
+			auto x = (*table)["x"].value<int64_t>();
+			auto y = (*table)["y"].value<int64_t>();
+			auto w = (*table)["w"].value<int64_t>();
+			auto h = (*table)["h"].value<int64_t>();
+			auto r = (*table)["r"].value<bool>();
+			if (!x || !y || !w || !h || !r)
+				return LOAD_STATUS::SYNTAX_ERR;
+			placement.x = static_cast<int>(x.value());
+			placement.y = static_cast<int>(y.value());
+			placement.w = static_cast<int>(w.value());
+			placement.h = static_cast<int>(h.value());
+			placement.r = r.value();
+			placements.push_back(placement);
+			i++;
+		}
+
+		handle = TileFactory::GetAtlasHandle(path.value().c_str(), placements, border);
+		return handle > 0 ? LOAD_STATUS::OK : LOAD_STATUS::ASSET_LOAD_ERR;
+	}
+	catch (const toml::parse_error& err)
+	{
+		Logger::LogErrorFatal("Cannot parse atlas asset file \"" + std::string(asset_filepath) + "\": " + std::string(err.description()));
+		return LOAD_STATUS::READ_ERR;
+	}
 }

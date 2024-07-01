@@ -1,8 +1,10 @@
 #include "Atlas.h"
 
 #include <queue>
+#include <vector>
 #include <unordered_map>
 
+#include "Macros.h"
 #include "TileFactory.h"
 #include "render/RectRender.h"
 #include "render/ActorTesselation.h"
@@ -10,7 +12,7 @@
 Atlas::Atlas(std::vector<TileHandle>& tiles, int width, int height, int border)
 	: m_Border(border)
 {
-	m_BPP = 4;
+	m_BPP = Atlas::BPP;
 	RectPack(tiles, width, height);
 	m_BufferSize = Atlas::BPP * m_Width * m_Height;
 	m_ImageBuffer = new unsigned char[m_BufferSize](0);
@@ -20,11 +22,20 @@ Atlas::Atlas(std::vector<TileHandle>& tiles, int width, int height, int border)
 Atlas::Atlas(std::vector<TileHandle>&& tiles, int width, int height, int border)
 	: m_Border(border)
 {
-	m_BPP = 4;
+	m_BPP = Atlas::BPP;
 	RectPack(tiles, width, height);
 	m_BufferSize = Atlas::BPP * m_Width * m_Height;
 	m_ImageBuffer = new unsigned char[m_BufferSize](0);
 	PlaceTiles();
+}
+
+Atlas::Atlas(const char* texture_filepath, const std::vector<Placement>& placements, int border)
+	: Tile(texture_filepath)
+{
+	ASSERT(m_BPP == Atlas::BPP);
+	m_BufferSize = Atlas::BPP * m_Width * m_Height;
+	m_Border = border;
+	m_Placements = placements;
 }
 
 Atlas::Atlas(Atlas&& atlas) noexcept
@@ -67,13 +78,6 @@ static int min_bound(const std::vector<TileHandle>& tiles, const int& border)
 		bound += std::max(TileFactory::GetWidth(tile), TileFactory::GetHeight(tile)) + border;
 	return bound;
 }
-
-struct Placement
-{
-	TileHandle tile;
-	int x, y, w, h;
-	bool r;
-};
 
 bool Atlas::Equivalent(std::vector<TileHandle>& tiles, int width, int height, int border) const
 {
@@ -127,6 +131,11 @@ bool Atlas::Equivalent(std::vector<TileHandle>&& tiles, int width, int height, i
 			occurences.erase(iter->tile);
 	}
 	return occurences.empty();
+}
+
+bool Atlas::Equivalent(const char* texture_filepath, const std::vector<Placement>& placements, int border) const
+{
+	return m_Filepath == texture_filepath && m_Border == border && m_Placements == placements;
 }
 
 struct Subsection

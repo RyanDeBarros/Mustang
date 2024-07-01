@@ -20,4 +20,4 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable, const bool& new_texture = false, const bool& temporary_buffer = false);
 
 bool saveAtlas(const class Atlas& atlas, const char* texture_filepath, const char* asset_filepath, const char* image_format = "png", unsigned char jpg_quality = 100);
-class Atlas loadAtlas(const char* asset_filepath);
+LOAD_STATUS loadAtlas(const char* asset_filepath, TileHandle& handle);
