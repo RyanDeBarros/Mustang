@@ -25,6 +25,7 @@ public:
 	static TileHandle GetAtlasHandle(std::vector<TileHandle>&& tiles, int width = -1, int height = -1, int border = 0);
 	static TileHandle GetAtlasHandle(const char* texture_filepath, const std::vector<struct Placement>& placements, int border);
 	static TileHandle GetAtlasHandle(const class Atlas* const atlas);
+	static TileHandle GetSubtileHandle(const TileHandle& full_handle, int x, int y, int w, int h);
 
 	static inline const Tile* GetConstTileRef(const TileHandle& tile) { return Get(tile); }
 	static const unsigned char* GetImageBuffer(const TileHandle& tile);

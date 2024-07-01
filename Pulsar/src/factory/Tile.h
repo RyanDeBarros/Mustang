@@ -26,4 +26,10 @@ public:
 	Tile(Tile&& tile) noexcept;
 	Tile(const Tile&) = delete;
 	virtual ~Tile();
+
+	const std::string& GetFilepath() const { return m_Filepath; }
+	unsigned char* const GetImageBuffer() const { return m_ImageBuffer; }
+	int GetWidth() const { return m_Width; }
+	int GetHeight() const { return m_Height; }
+	int GetBPP() const { return m_BPP; }
 };

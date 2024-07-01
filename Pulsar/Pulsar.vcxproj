@@ -193,6 +193,7 @@
   <ItemGroup>
     <ClInclude Include="src\AssetLoader.h" />
     <ClInclude Include="src\factory\Atlas.h" />
+    <ClInclude Include="src\factory\Subtile.h" />
     <ClInclude Include="src\factory\Tile.h" />
     <ClInclude Include="src\factory\TileFactory.h" />
     <ClInclude Include="src\factory\UniformLexicon.h" />

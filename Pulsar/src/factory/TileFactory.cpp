@@ -2,6 +2,7 @@
 
 #include "Logger.h"
 #include "Atlas.h"
+#include "Subtile.h"
 
 TileHandle TileFactory::handle_cap;
 std::unordered_map<TileHandle, Tile*> TileFactory::factory;
@@ -109,7 +110,7 @@ TileHandle TileFactory::GetAtlasHandle(const Atlas* const atlas)
 	for (const auto& [handle, tile] : factory)
 	{
 		auto at = dynamic_cast<Atlas* const>(tile);
-		if (at && at == atlas)
+		if (at && *at == *atlas)
 			return handle;
 	}
 	Atlas tile(atlas);
@@ -120,6 +121,24 @@ TileHandle TileFactory::GetAtlasHandle(const Atlas* const atlas)
 		return handle;
 	}
 	else return 0;
+}
+
+TileHandle TileFactory::GetSubtileHandle(const TileHandle& full_handle, int x, int y, int w, int h)
+{
+	Tile* t = Get(full_handle);
+	if (!t)
+		return 0;
+
+	for (const auto& [handle, tile] : factory)
+	{
+		auto sub = dynamic_cast<Subtile* const>(tile);
+		if (sub && sub->m_Filepath == t->m_Filepath && sub->x == x && sub->y == y && sub->w == w && sub->h == h)
+			return handle;
+	}
+
+	TileHandle handle = handle_cap++;
+	factory.emplace(handle, new Subtile(t, x, y, w, h));
+	return handle;
 }
 
 const unsigned char* TileFactory::GetImageBuffer(const TileHandle& tile)

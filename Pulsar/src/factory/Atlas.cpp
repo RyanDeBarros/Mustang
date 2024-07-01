@@ -60,7 +60,7 @@ Atlas::~Atlas()
 {
 	if (m_ImageBuffer)
 	{
-		delete m_ImageBuffer;
+		delete[] m_ImageBuffer;
 		m_ImageBuffer = nullptr;
 	}
 }

@@ -38,7 +38,6 @@ public:
 	static constexpr unsigned char BPP = 4;
 	static constexpr unsigned char STRIDE_BYTES = sizeof(unsigned char) * BPP;
 
-	// TODO insert subtiles, i.e. tile with (x,y,w,h)
 	Atlas(std::vector<TileHandle>& tiles, int width = -1, int height = -1, int border = 0);
 	Atlas(std::vector<TileHandle>&& tiles, int width = -1, int height = -1, int border = 0);
 	Atlas(const char* texture_filepath, const std::vector<Placement>& placements, int border);
