@@ -31,11 +31,9 @@ static char* read_file(const char* filepath)
 
 static GLuint compile_shader(GLenum type, const char* shader, const char*filepath)
 {
-	TRY(
-		GLuint id = glCreateShader(type);
-		glShaderSource(id, 1, &shader, nullptr);
-		glCompileShader(id);
-	)
+	TRY(GLuint id = glCreateShader(type));
+	TRY(glShaderSource(id, 1, &shader, nullptr));
+	TRY(glCompileShader(id));
 
 	int result;
 	TRY(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
