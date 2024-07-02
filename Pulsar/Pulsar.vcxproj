@@ -186,6 +186,7 @@
     <ClCompile Include="src\factory\TextureFactory.cpp" />
     <ClCompile Include="src\render\actors\TileMap.cpp" />
     <ClCompile Include="src\render\Transform.cpp" />
+    <ClCompile Include="src\Utils.cpp" />
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
     <ClCompile Include="vendor\stb\stb_image.cpp" />
@@ -219,6 +220,7 @@
     <ClInclude Include="src\render\Transform.h" />
     <ClInclude Include="src\Typedefs.h" />
     <ClInclude Include="src\Macros.h" />
+    <ClInclude Include="src\Utils.h" />
     <ClInclude Include="vendor\glm\common.hpp" />
     <ClInclude Include="vendor\glm\detail\compute_common.hpp" />
     <ClInclude Include="vendor\glm\detail\compute_vector_decl.hpp" />

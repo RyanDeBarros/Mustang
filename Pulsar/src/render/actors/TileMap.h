@@ -1,18 +1,30 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include <vector>
 
 #include "Typedefs.h"
+#include "Utils.h"
 #include "ActorSequencer.h"
 #include "ActorPrimitive.h"
 #include "ActorTesselation.h"
 #include "factory/Atlas.h"
 #include "RectRender.h"
 
+struct TMElement
+{
+	RectRender* rectRender;
+	ActorTesselation2D* tessel;
+};
+
 class TileMap : public ActorSequencer2D
 {
 	Atlas* m_Atlas;
-	std::vector<std::pair<RectRender*, ActorTesselation2D*>> m_Map;
+	std::vector<TMElement> m_Map;
+	Permutation m_Ordering;
+	ZIndex m_Z;
+	Transform2D m_Transform;
 
 public:
 	TileMap(const TileHandle& atlas_handle, const TextureSettings& texture_settings = Texture::nearest_settings, const ShaderHandle& shader = ShaderFactory::standard_shader, const ZIndex& z = 0, const bool& visible = true);
@@ -21,6 +33,12 @@ public:
 	ActorPrimitive2D* const operator[](const int& i) override;
 	virtual BufferCounter PrimitiveCount() const;
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
+	inline ZIndex GetZIndex() const override { return m_Z; }
+	inline void SetZIndex(const ZIndex& z) override { m_Z = z; }
 
-	ActorTesselation2D* const TesselationRef(const int& i) const;
+	bool SetOrdering(const Permutation& permutation);
+	inline void SetTransform(const Transform2D& tr) { m_Transform = tr; }
+	void Insert(const size_t& tessel, float posX, float posY);
+
+	ActorTesselation2D* const TesselationRef(const size_t& tessel) const;
 };
