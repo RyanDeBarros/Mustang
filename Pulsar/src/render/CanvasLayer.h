@@ -12,8 +12,6 @@
 #include "RendererSettings.h"
 #include "ActorRenderBase.h"
 #include "LayerView.h"
-#include "actors/ActorPrimitive.h"
-#include "actors/ActorSequencer.h"
 #include "Renderable.h"
 #include "factory/UniformLexicon.h"
 
@@ -60,8 +58,8 @@ public:
 	inline CanvasIndex GetZIndex() const { return m_Data.ci; }
 	inline CanvasLayerData& GetDataRef() { return m_Data; }
 
-	void DrawPrimitive(ActorPrimitive2D* const);
-	void DrawSequencer(ActorSequencer2D* const);
+	void DrawPrimitive(class ActorPrimitive2D* const);
+	void DrawSequencer(class ActorSequencer2D* const);
 
 private:
 	void SetBlending() const;

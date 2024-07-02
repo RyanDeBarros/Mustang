@@ -14,8 +14,7 @@ private:
 	std::vector<Transform2D> m_ActorOffsets;
 	Transform2D m_GlobalTransform;
 
-	inline BufferCounter RenderSeqCount() const { return m_Actor->PrimitiveCount(); }
-
+	BufferCounter RenderSeqCount() const;
 	void SetZIndex(const ZIndex& z) override;
 public:
 	ActorTesselation2D(ActorRenderBase2D* const actor);

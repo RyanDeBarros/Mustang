@@ -218,11 +218,7 @@ void run(GLFWwindow* window)
 	tilemap.Insert(5, 2, 0);
 
 	Renderer::GetCanvasLayer(0)->OnAttach(&tilemap);
-	Renderer::GetCanvasLayer(0)->OnDetach(&tesselDiagonal);
-	Renderer::GetCanvasLayer(0)->OnDetach(actor1);
-	Renderer::GetCanvasLayer(0)->OnDetach(actor2);
-	Renderer::GetCanvasLayer(0)->OnDetach(actor3);
-	Renderer::GetCanvasLayer(-1)->OnDetach(actor4);
+	Renderer::GetCanvasLayer(0)->OnSetZIndex(&tilemap, 10);
 
 	for (;;)
 	{

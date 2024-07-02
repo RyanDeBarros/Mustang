@@ -5,6 +5,8 @@
 #include "factory/ShaderFactory.h"
 #include "factory/TextureFactory.h"
 #include "factory/UniformLexiconFactory.h"
+#include "actors/ActorPrimitive.h"
+#include "actors/ActorSequencer.h"
 
 CanvasLayer::CanvasLayer(CanvasLayerData data)
 	: m_Data(data), m_LayerView((float)m_Data.pLeft, (float)m_Data.pRight, (float)m_Data.pBottom, (float)m_Data.pTop)

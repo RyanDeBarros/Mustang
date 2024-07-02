@@ -21,9 +21,24 @@ ActorPrimitive2D* const ActorTesselation2D::operator[](const int& i)
 {
 	if (i >= static_cast<int>(PrimitiveCount()))
 		return nullptr;
-	ActorPrimitive2D* const primitive = m_Actor->operator[](i % RenderSeqCount());
-	primitive->SetTransform(m_GlobalTransform ^ m_RectVector[i / RenderSeqCount()] ^ m_ActorOffsets[i % RenderSeqCount()]);
+	// TODO throughout ActorTesselation, optimize so that the dynamic_cast check only happens at construction, not every frame
+	ActorPrimitive2D* primitive = dynamic_cast<ActorPrimitive2D*>(m_Actor);
+	if (!primitive)
+	{
+		if (ActorSequencer2D* sequencer = dynamic_cast<ActorSequencer2D*>(m_Actor))
+			primitive = (*sequencer)[i% RenderSeqCount()];
+	}
+	if (primitive)
+		primitive->SetTransform(m_GlobalTransform ^ m_RectVector[i / RenderSeqCount()] ^ m_ActorOffsets[i % RenderSeqCount()]);
 	return primitive;
+}
+
+BufferCounter ActorTesselation2D::RenderSeqCount() const
+{
+	if (ActorPrimitive2D* primitive = dynamic_cast<ActorPrimitive2D*>(m_Actor))
+		return 1;
+	else if (ActorSequencer2D* sequencer = dynamic_cast<ActorSequencer2D*>(m_Actor))
+		return sequencer->PrimitiveCount();
 }
 
 void ActorTesselation2D::SetZIndex(const ZIndex& z)
@@ -43,14 +58,24 @@ BufferCounter ActorTesselation2D::PrimitiveCount() const
 
 void ActorTesselation2D::OnPreDraw()
 {
-	m_Actor->OnPreDraw();
-	for (int i = 0; i < m_ActorOffsets.size(); i++)
-		m_ActorOffsets[i] = m_Actor->operator[](i)->GetTransform();
+	if (ActorPrimitive2D* primitive = dynamic_cast<ActorPrimitive2D*>(m_Actor))
+		m_ActorOffsets[0] = primitive->GetTransform();
+	else if (ActorSequencer2D* sequencer = dynamic_cast<ActorSequencer2D*>(m_Actor))
+	{
+		sequencer->OnPreDraw();
+		for (int i = 0; i < m_ActorOffsets.size(); i++)
+			m_ActorOffsets[i] = (*sequencer)[i]->GetTransform();
+	}
 }
 
 void ActorTesselation2D::OnPostDraw()
 {
-	for (int i = 0; i < m_ActorOffsets.size(); i++)
-		m_Actor->operator[](i)->SetTransform(m_ActorOffsets[i]);
-	m_Actor->OnPostDraw();
+	if (ActorPrimitive2D* primitive = dynamic_cast<ActorPrimitive2D*>(m_Actor))
+		primitive->SetTransform(m_ActorOffsets[0]);
+	else if (ActorSequencer2D* sequencer = dynamic_cast<ActorSequencer2D*>(m_Actor))
+	{
+		for (int i = 0; i < m_ActorOffsets.size(); i++)
+			(*sequencer)[i]->SetTransform(m_ActorOffsets[i]);
+		sequencer->OnPostDraw();
+	}
 }
