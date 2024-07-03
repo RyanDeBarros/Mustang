@@ -84,11 +84,10 @@ void Pulsar::Terminate()
 
 void run(GLFWwindow* window)
 {
-	// Use typedef that can be defined as double or float, depending on precision macro.
-	double time = glfwGetTime();
-	double deltaTime = 0;
-	double prevTime = time;
-	double totalTime = 0;
+	real time = static_cast<real>(glfwGetTime());
+	real deltaTime = 0;
+	real prevTime = time;
+	real totalTime = 0;
 
 	// Load textures
 	TextureHandle textureSnowman, textureTux, textureFlag;
@@ -223,7 +222,7 @@ void run(GLFWwindow* window)
 
 	for (;;)
 	{
-		time = glfwGetTime();
+		time = static_cast<real>(glfwGetTime());
 		deltaTime = time - prevTime;
 		prevTime = time;
 		totalTime += deltaTime;

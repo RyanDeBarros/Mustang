@@ -16,7 +16,7 @@ typedef signed char CanvasIndex;
 
 typedef int AtlasPos;
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 typedef GLuint RID;
 typedef GLuint VAO;
 typedef GLint TextureSlot;
@@ -27,4 +27,11 @@ typedef signed int PointerOffset;
 #else
 typedef signed long long ActorPrimitiveCounter;
 typedef signed long long PointerOffset;
+#endif
+
+#include "Macros.h"
+#if PULSAR_DELTA_USE_DOUBLE_PRECISION == 1
+typedef double real;
+#else
+typedef float real;
 #endif
