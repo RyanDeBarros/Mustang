@@ -84,6 +84,7 @@ void Pulsar::Terminate()
 
 void run(GLFWwindow* window)
 {
+	// Use typedef that can be defined as double or float, depending on precision macro.
 	double time = glfwGetTime();
 	double deltaTime = 0;
 	double prevTime = time;
@@ -227,6 +228,8 @@ void run(GLFWwindow* window)
 		prevTime = time;
 		totalTime += deltaTime;
 		// OnUpdate here
+
+		actor1->OperatePosition([&deltaTime](glm::vec2& p) { p.x += 100.0f * deltaTime; p.y -= 0.5f * p.y * deltaTime; });
 
 		Renderer::OnDraw();
 		glfwPollEvents();
