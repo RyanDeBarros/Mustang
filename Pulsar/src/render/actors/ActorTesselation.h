@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <functional>
 
 #include "Typedefs.h"
 #include "ActorPrimitive.h"
@@ -13,6 +14,20 @@ private:
 	std::vector<Transform2D> m_RectVector;
 	std::vector<Transform2D> m_ActorOffsets;
 	Transform2D m_GlobalTransform;
+
+	std::function<ActorPrimitive2D* const(const int& i)> f_operator;
+	std::function<BufferCounter()> f_RenderSeqCount;
+	std::function<void()> f_OnPreDraw;
+	std::function<void()> f_OnPostDraw;
+
+	static ActorPrimitive2D* const f_prim_operator(ActorTesselation2D const* const, const int&);
+	static ActorPrimitive2D* const f_sequ_operator(ActorTesselation2D const* const, const int&);
+	static BufferCounter f_prim_RenderSeqCount(ActorTesselation2D const* const);
+	static BufferCounter f_sequ_RenderSeqCount(ActorTesselation2D const* const);
+	static void f_prim_OnPreDraw(ActorTesselation2D * const);
+	static void f_sequ_OnPreDraw(ActorTesselation2D * const);
+	static void f_prim_OnPostDraw(ActorTesselation2D * const);
+	static void f_sequ_OnPostDraw(ActorTesselation2D * const);
 
 	BufferCounter RenderSeqCount() const;
 	void SetZIndex(const ZIndex& z) override;

@@ -3,6 +3,27 @@
 ActorTesselation2D::ActorTesselation2D(ActorRenderBase2D* const actor)
 	: m_Actor(actor)
 {
+	if (dynamic_cast<ActorPrimitive2D*>(m_Actor))
+	{
+		f_operator = std::bind(&ActorTesselation2D::f_prim_operator, this, std::placeholders::_1);
+		f_RenderSeqCount = std::bind(&ActorTesselation2D::f_prim_RenderSeqCount, this);
+		f_OnPreDraw = std::bind(&ActorTesselation2D::f_prim_OnPreDraw, this);
+		f_OnPostDraw = std::bind(&ActorTesselation2D::f_prim_OnPostDraw, this);
+	}
+	else if (dynamic_cast<ActorSequencer2D*>(m_Actor))
+	{
+		f_operator = std::bind(&ActorTesselation2D::f_sequ_operator, this, std::placeholders::_1);
+		f_RenderSeqCount = std::bind(&ActorTesselation2D::f_sequ_RenderSeqCount, this);
+		f_OnPreDraw = std::bind(&ActorTesselation2D::f_sequ_OnPreDraw, this);
+		f_OnPostDraw = std::bind(&ActorTesselation2D::f_sequ_OnPostDraw, this);
+	}
+	else
+	{
+		f_operator = [](const int& i) { return nullptr; };
+		f_RenderSeqCount = []() { return 0; };
+		f_OnPreDraw = [](){};
+		f_OnPostDraw = [](){};
+	}
 	m_ActorOffsets.reserve(RenderSeqCount());
 	for (BufferCounter i = 0; i < RenderSeqCount(); i++)
 		m_ActorOffsets.push_back({});
@@ -21,26 +42,38 @@ ActorPrimitive2D* const ActorTesselation2D::operator[](const int& i)
 {
 	if (i >= static_cast<int>(PrimitiveCount()))
 		return nullptr;
-	// TODO throughout ActorTesselation, optimize so that the dynamic_cast check only happens at construction, not every frame
-	ActorPrimitive2D* primitive = dynamic_cast<ActorPrimitive2D*>(m_Actor);
-	if (!primitive)
-	{
-		if (ActorSequencer2D* sequencer = dynamic_cast<ActorSequencer2D*>(m_Actor))
-			primitive = (*sequencer)[i% RenderSeqCount()];
-	}
+	return f_operator(i);
+}
+
+ActorPrimitive2D* const ActorTesselation2D::f_prim_operator(ActorTesselation2D const* const tessel, const int& i)
+{
+	ActorPrimitive2D* const primitive = static_cast<ActorPrimitive2D* const>(tessel->m_Actor);
+	primitive->SetTransform(tessel->m_GlobalTransform ^ tessel->m_RectVector[i / tessel->RenderSeqCount()] ^ tessel->m_ActorOffsets[i % tessel->RenderSeqCount()]);
+	return primitive;
+}
+
+ActorPrimitive2D* const ActorTesselation2D::f_sequ_operator(ActorTesselation2D const* const tessel, const int& i)
+{
+	ActorSequencer2D* const sequencer = static_cast<ActorSequencer2D* const>(tessel->m_Actor);
+	ActorPrimitive2D* const primitive = (*sequencer)[i % tessel->RenderSeqCount()];
 	if (primitive)
-		primitive->SetTransform(m_GlobalTransform ^ m_RectVector[i / RenderSeqCount()] ^ m_ActorOffsets[i % RenderSeqCount()]);
+		primitive->SetTransform(tessel->m_GlobalTransform ^ tessel->m_RectVector[i / tessel->RenderSeqCount()] ^ tessel->m_ActorOffsets[i % tessel->RenderSeqCount()]);
 	return primitive;
 }
 
 BufferCounter ActorTesselation2D::RenderSeqCount() const
 {
-	if (ActorPrimitive2D* primitive = dynamic_cast<ActorPrimitive2D*>(m_Actor))
-		return 1;
-	else if (ActorSequencer2D* sequencer = dynamic_cast<ActorSequencer2D*>(m_Actor))
-		return sequencer->PrimitiveCount();
-	else
-		return 0;
+	return f_RenderSeqCount();
+}
+
+BufferCounter ActorTesselation2D::f_prim_RenderSeqCount(ActorTesselation2D const* const tessel)
+{
+	return 1;
+}
+
+BufferCounter ActorTesselation2D::f_sequ_RenderSeqCount(ActorTesselation2D const* const tessel)
+{
+	return static_cast<ActorSequencer2D* const>(tessel->m_Actor)->PrimitiveCount();
 }
 
 void ActorTesselation2D::SetZIndex(const ZIndex& z)
@@ -60,24 +93,36 @@ BufferCounter ActorTesselation2D::PrimitiveCount() const
 
 void ActorTesselation2D::OnPreDraw()
 {
-	if (ActorPrimitive2D* primitive = dynamic_cast<ActorPrimitive2D*>(m_Actor))
-		m_ActorOffsets[0] = primitive->GetTransform();
-	else if (ActorSequencer2D* sequencer = dynamic_cast<ActorSequencer2D*>(m_Actor))
-	{
-		sequencer->OnPreDraw();
-		for (int i = 0; i < m_ActorOffsets.size(); i++)
-			m_ActorOffsets[i] = (*sequencer)[i]->GetTransform();
-	}
+	f_OnPreDraw();
+}
+
+void ActorTesselation2D::f_prim_OnPreDraw(ActorTesselation2D* const tessel)
+{
+	tessel->m_ActorOffsets[0] = static_cast<ActorPrimitive2D* const>(tessel->m_Actor)->GetTransform();
+}
+
+void ActorTesselation2D::f_sequ_OnPreDraw(ActorTesselation2D* const tessel)
+{
+	ActorSequencer2D* const sequencer = static_cast<ActorSequencer2D* const>(tessel->m_Actor);
+	sequencer->OnPreDraw();
+	for (int i = 0; i < tessel->m_ActorOffsets.size(); i++)
+		tessel->m_ActorOffsets[i] = (*sequencer)[i]->GetTransform();
 }
 
 void ActorTesselation2D::OnPostDraw()
 {
-	if (ActorPrimitive2D* primitive = dynamic_cast<ActorPrimitive2D*>(m_Actor))
-		primitive->SetTransform(m_ActorOffsets[0]);
-	else if (ActorSequencer2D* sequencer = dynamic_cast<ActorSequencer2D*>(m_Actor))
-	{
-		for (int i = 0; i < m_ActorOffsets.size(); i++)
-			(*sequencer)[i]->SetTransform(m_ActorOffsets[i]);
-		sequencer->OnPostDraw();
-	}
+	f_OnPostDraw();
+}
+
+void ActorTesselation2D::f_prim_OnPostDraw(ActorTesselation2D* const tessel)
+{
+	static_cast<ActorPrimitive2D* const>(tessel->m_Actor)->SetTransform(tessel->m_ActorOffsets[0]);
+}
+
+void ActorTesselation2D::f_sequ_OnPostDraw(ActorTesselation2D* const tessel)
+{
+	ActorSequencer2D* const sequencer = static_cast<ActorSequencer2D* const>(tessel->m_Actor);
+	for (int i = 0; i < tessel->m_ActorOffsets.size(); i++)
+		(*sequencer)[i]->SetTransform(tessel->m_ActorOffsets[i]);
+	sequencer->OnPostDraw();
 }
