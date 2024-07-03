@@ -39,6 +39,8 @@ BufferCounter ActorTesselation2D::RenderSeqCount() const
 		return 1;
 	else if (ActorSequencer2D* sequencer = dynamic_cast<ActorSequencer2D*>(m_Actor))
 		return sequencer->PrimitiveCount();
+	else
+		return 0;
 }
 
 void ActorTesselation2D::SetZIndex(const ZIndex& z)

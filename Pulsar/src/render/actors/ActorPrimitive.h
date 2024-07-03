@@ -61,6 +61,7 @@ public:
 	void CropRelativePoints(const std::vector<glm::vec2>& atlas_points);
 
 	inline TextureHandle GetTextureHandle() const { return m_Render.textureHandle; }
+	inline const Renderable& GetRenderable() const { return m_Render; }
 
 protected:
 	void OnDraw(signed char texture_slot);
