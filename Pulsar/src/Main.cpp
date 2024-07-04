@@ -220,6 +220,8 @@ void run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(0)->OnAttach(&tilemap);
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(&tilemap, 10);
 
+	LocalTransformer2D flags(actor4->GetTransformRef(), actor1);
+
 	for (;;)
 	{
 		time = static_cast<real>(glfwGetTime());
@@ -228,8 +230,12 @@ void run(GLFWwindow* window)
 		totalTime += deltaTime;
 		// OnUpdate here
 
-		actor1->OperatePosition([&deltaTime](glm::vec2& p) { p.x += 100.0f * deltaTime; p.y -= 0.5f * p.y * deltaTime; });
-
+		actor4->OperatePosition([&deltaTime](glm::vec2& p) {p.x += 100.0f * deltaTime; });
+		actor4->OperateScale([&deltaTime](glm::vec2& sc) { sc += 50.0 * deltaTime; });
+		actor4->OperateRotation([&deltaTime](glm::float32& r) {r += deltaTime; });
+		flags.SyncGlobalWithLocal();
+		flags.OperateLocalRotation([&deltaTime](glm::float32& r) {r -= 1.2f * deltaTime; });
+		
 		Renderer::OnDraw();
 		glfwPollEvents();
 		if (glfwWindowShouldClose(window))

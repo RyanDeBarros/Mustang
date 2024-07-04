@@ -27,9 +27,122 @@ namespace Transform {
 		return { -tr.position, -tr.rotation, 1 / tr.scale };
 	}
 
+	glm::mat2 Rotation(const glm::float32& r)
+	{
+		return { glm::cos(r), glm::sin(r), -glm::sin(r), glm::cos(r) };
+	}
+
 }
 
 Transform2D Transform2D::operator^(const Transform2D& transform) const
 {
 	return { position + transform.position, rotation + transform.rotation, scale * transform.scale };
+}
+
+LocalTransformer2D::LocalTransformer2D(Transform2D* const parent, Transformable2D* const child)
+	: m_Parent(parent), m_Child(child)
+{
+	SyncLocalWithGlobal();
+}
+
+void LocalTransformer2D::SetLocalTransform(const Transform2D& tr)
+{
+	m_Local = tr;
+	SyncGlobalWithLocal();
+}
+
+void LocalTransformer2D::SetLocalPosition(const glm::vec2& pos)
+{
+	m_Local.position = pos;
+	m_Child->SetPosition(m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Local.position));
+}
+
+void LocalTransformer2D::OperateLocalPosition(const std::function<void(glm::vec2& position)>& op)
+{
+	op(m_Local.position);
+	m_Child->SetPosition(m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Local.position));
+}
+
+void LocalTransformer2D::SetLocalRotation(const glm::float32& rot)
+{
+	m_Local.rotation = rot;
+	m_Child->SetRotation(m_Parent->rotation + m_Local.rotation);
+}
+
+void LocalTransformer2D::OperateLocalRotation(const std::function<void(glm::float32& rotation)>& op)
+{
+	op(m_Local.rotation);
+	m_Child->SetRotation(m_Parent->rotation + m_Local.rotation);
+}
+
+void LocalTransformer2D::SetLocalScale(const glm::vec2& sc)
+{
+	m_Local.scale = sc;
+	m_Child->SetScale(m_Parent->scale * m_Local.scale);
+}
+
+void LocalTransformer2D::OperateLocalScale(const std::function<void(glm::vec2& scale)>& op)
+{
+	op(m_Local.scale);
+	m_Child->SetScale(m_Parent->scale * m_Local.scale);
+}
+
+void LocalTransformer2D::SyncGlobalWithLocal()
+{
+	m_Child->SetTransform({
+		m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Local.position),
+		m_Parent->rotation + m_Local.rotation,
+		m_Parent->scale * m_Local.scale
+	});
+}
+
+void LocalTransformer2D::SyncLocalWithGlobal()
+{
+	m_Local = {
+		(Transform::Rotation(-m_Parent->rotation) * (m_Child->GetPosition() - m_Parent->position)) / m_Parent->scale,
+		m_Child->GetRotation() - m_Parent->rotation,
+		m_Child->GetScale() / m_Parent->scale
+	};
+}
+
+void LocalTransformer2D::SetGlobalTransform(const Transform2D& tr)
+{
+	m_Child->SetTransform(tr);
+	SyncLocalWithGlobal();
+}
+
+void LocalTransformer2D::SetGlobalPosition(const glm::vec2& pos)
+{
+	m_Child->SetPosition(pos);
+	m_Local.position = (Transform::Rotation(-m_Parent->rotation) * (m_Child->GetPosition() - m_Parent->position)) / m_Parent->scale;
+}
+
+void LocalTransformer2D::OperateGlobalPosition(const std::function<void(glm::vec2& position)>& op)
+{
+	m_Child->OperatePosition(op);
+	m_Local.position = (Transform::Rotation(-m_Parent->rotation) * (m_Child->GetPosition() - m_Parent->position)) / m_Parent->scale;
+}
+
+void LocalTransformer2D::SetGlobalRotation(const glm::float32& rot)
+{
+	m_Child->SetRotation(rot);
+	m_Local.rotation = m_Child->GetRotation() - m_Parent->rotation;
+}
+
+void LocalTransformer2D::OperateGlobalRotation(const std::function<void(glm::float32& rotation)>& op)
+{
+	m_Child->OperateRotation(op);
+	m_Local.rotation = m_Child->GetRotation() - m_Parent->rotation;
+}
+
+void LocalTransformer2D::SetGlobalScale(const glm::vec2& sc)
+{
+	m_Child->SetScale(sc);
+	m_Local.scale = m_Child->GetScale() / m_Parent->scale;
+}
+
+void LocalTransformer2D::OperateGlobalScale(const std::function<void(glm::vec2& scale)>& op)
+{
+	m_Child->OperateScale(op);
+	m_Local.scale = m_Child->GetScale() / m_Parent->scale;
 }

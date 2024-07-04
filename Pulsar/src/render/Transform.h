@@ -14,10 +14,11 @@ struct Transform2D
 
 namespace Transform
 {
-	extern inline glm::mat3 ToMatrix(const Transform2D& tr);
-	extern inline glm::mat3 ToInverseMatrix(const Transform2D& tr);
-	extern inline glm::mat3x2 ToCondensedMatrix(const Transform2D& tr);
-	extern inline Transform2D Inverse(const Transform2D& tr);
+	extern glm::mat3 ToMatrix(const Transform2D& tr);
+	extern glm::mat3 ToInverseMatrix(const Transform2D& tr);
+	extern glm::mat3x2 ToCondensedMatrix(const Transform2D& tr);
+	extern Transform2D Inverse(const Transform2D& tr);
+	extern glm::mat2 Rotation(const glm::float32& r);
 }
 
 class Transformable2D
@@ -25,7 +26,54 @@ class Transformable2D
 public:
 	virtual Transform2D GetTransform() const = 0;
 	virtual void SetTransform(const Transform2D&) = 0;
+	virtual glm::vec2 GetPosition() const = 0;
 	virtual void OperatePosition(const std::function<void(glm::vec2& position)>&) = 0;
+	virtual glm::float32 GetRotation() const = 0;
 	virtual void OperateRotation(const std::function<void(glm::float32& rotation)>&) = 0;
+	virtual glm::vec2 GetScale() const = 0;
 	virtual void OperateScale(const std::function<void(glm::vec2& scale)>&) = 0;
+	
+	inline void SetPosition(const float& x, const float& y) { OperatePosition([&x, &y](glm::vec2& position) { position = { x, y }; }); }
+	inline void SetPosition(const glm::vec2& pos) { OperatePosition([&pos](glm::vec2& position) { position = pos; }); }
+	inline void SetRotation(float r) { OperateRotation([&r](glm::float32& rotation) { rotation = r; }); }
+	inline void SetScale(float sx, float sy) { OperateScale([&sx, &sy](glm::vec2& scale) { scale = { sx, sy }; }); }
+	inline void SetScale(const glm::vec2& sc) { OperateScale([&sc](glm::vec2& scale) { scale = sc; }); }
+};
+
+// TODO should LocalTransformer2D functions just be functions and not member methods?
+class LocalTransformer2D
+{
+	Transform2D* const m_Parent;
+	Transformable2D* const m_Child;
+	Transform2D m_Local;
+
+public:
+	LocalTransformer2D(Transform2D* const parent, Transformable2D* const child);
+
+	void SetLocalTransform(const Transform2D& tr);
+	inline Transform2D GetLocalTransform() const { return m_Local; }
+	void SetLocalPosition(const glm::vec2& pos);
+	void OperateLocalPosition(const std::function<void(glm::vec2& position)>&);
+	inline glm::vec2 GetLocalPosition() const { return m_Local.position; }
+	void SetLocalRotation(const glm::float32& rot);
+	void OperateLocalRotation(const std::function<void(glm::float32& rotation)>&);
+	inline glm::float32 GetLocalRotation() const { return m_Local.rotation; }
+	void SetLocalScale(const glm::vec2& sc);
+	void OperateLocalScale(const std::function<void(glm::vec2& scale)>&);
+	inline glm::vec2 GetLocalScale() const { return m_Local.scale; }
+
+	void SyncGlobalWithLocal();
+	void SyncLocalWithGlobal();
+
+	void SetGlobalTransform(const Transform2D& tr);
+	inline Transform2D GetGlobalTransform() const { return m_Child->GetTransform(); }
+	void SetGlobalPosition(const glm::vec2& pos);
+	void OperateGlobalPosition(const std::function<void(glm::vec2& position)>&);
+	inline glm::vec2 GetGlobalPosition() const { return m_Child->GetTransform().position; }
+	void SetGlobalRotation(const glm::float32& rot);
+	void OperateGlobalRotation(const std::function<void(glm::float32& rotation)>&);
+	inline glm::float32 GetGlobalRotation() const { return m_Child->GetTransform().rotation; }
+	void SetGlobalScale(const glm::vec2& sc);
+	void OperateGlobalScale(const std::function<void(glm::vec2& scale)>&);
+	inline glm::vec2 GetGlobalScale() const { return m_Child->GetTransform().scale; }
 };

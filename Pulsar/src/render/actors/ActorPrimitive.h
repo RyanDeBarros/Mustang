@@ -31,15 +31,14 @@ public:
 
 	inline Transform2D GetTransform() const override { return m_Transform; }
 	inline void SetTransform(const Transform2D& transform) override { m_Transform = transform; m_Status |= 0b110; }
+	inline glm::vec2 GetPosition() const override { return m_Transform.position; }
 	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); FlushPosition(); }
+	inline glm::float32 GetRotation() const override { return m_Transform.rotation; }
 	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform.rotation); FlushRotation(); }
+	inline glm::vec2 GetScale() const override { return m_Transform.scale; }
 	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); FlushScale(); }
 
-	inline void SetPosition(const float& x, const float& y) { OperatePosition([&x, &y](glm::vec2& position) { position = { x, y }; }); }
-	inline void SetPosition(const glm::vec2& pos) { OperatePosition([&pos](glm::vec2& position) { position = pos; }); }
-	inline void SetRotation(float r) { OperateRotation([&r](glm::float32& rotation) { rotation = r; }); }
-	inline void SetScale(float sx, float sy) { OperateScale([&sx, &sy](glm::vec2& scale) { scale = { sx, sy }; }); }
-	inline void SetScale(const glm::vec2& sc) { OperateScale([&sc](glm::vec2& scale) { scale = sc; }); }
+	inline Transform2D* const GetTransformRef() { return &m_Transform; }
 
 	inline void SetShaderHandle(const ShaderHandle& handle) { m_Render.model.shader = handle; }
 	inline void SetTextureHandle(const TextureHandle& handle) { m_Render.textureHandle = handle; }
