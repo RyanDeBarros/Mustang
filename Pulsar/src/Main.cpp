@@ -231,8 +231,11 @@ void run(GLFWwindow* window)
 		// OnUpdate here
 
 		actor4->OperatePosition([&deltaTime](glm::vec2& p) {p.x += 100.0f * deltaTime; });
+		//flags.SyncGlobalWithParentPosition();
 		actor4->OperateScale([&deltaTime](glm::vec2& sc) { sc += 50.0 * deltaTime; });
+		//flags.SyncGlobalWithParentScale();
 		actor4->OperateRotation([&deltaTime](glm::float32& r) {r += deltaTime; });
+		//flags.SyncGlobalWithParentRotation();
 		flags.SyncGlobalWithLocal();
 		flags.OperateLocalRotation([&deltaTime](glm::float32& r) {r -= 1.2f * deltaTime; });
 		

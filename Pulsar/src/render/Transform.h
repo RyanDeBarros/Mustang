@@ -40,6 +40,21 @@ public:
 	inline void SetScale(const glm::vec2& sc) { OperateScale([&sc](glm::vec2& scale) { scale = sc; }); }
 };
 
+class TransformProxy2D : public Transformable2D
+{
+	Transform2D m_Transform;
+public:
+	TransformProxy2D(const Transform2D& tr) : m_Transform(tr) {}
+	inline Transform2D GetTransform() const override { return m_Transform; }
+	inline void SetTransform(const Transform2D& tr) override { m_Transform = tr; }
+	inline glm::vec2 GetPosition() const override { return m_Transform.position; }
+	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); }
+	inline glm::float32 GetRotation() const override { return m_Transform.rotation; }
+	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform.rotation); }
+	inline glm::vec2 GetScale() const override { return m_Transform.scale; }
+	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); }
+};
+
 // TODO should LocalTransformer2D functions just be functions and not member methods?
 class LocalTransformer2D
 {
@@ -64,6 +79,12 @@ public:
 
 	void SyncGlobalWithLocal();
 	void SyncLocalWithGlobal();
+	void SyncGlobalWithParentPosition();
+	void SyncGlobalWithParentRotation();
+	void SyncGlobalWithParentScale();
+	void SyncLocalWithParentPosition();
+	void SyncLocalWithParentRotation();
+	void SyncLocalWithParentScale();
 
 	void SetGlobalTransform(const Transform2D& tr);
 	inline Transform2D GetGlobalTransform() const { return m_Child->GetTransform(); }

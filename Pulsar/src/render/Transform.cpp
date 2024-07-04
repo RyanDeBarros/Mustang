@@ -105,6 +105,40 @@ void LocalTransformer2D::SyncLocalWithGlobal()
 	};
 }
 
+void LocalTransformer2D::SyncGlobalWithParentPosition()
+{
+	m_Child->SetPosition(m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Local.position));
+}
+
+void LocalTransformer2D::SyncGlobalWithParentRotation()
+{
+	m_Child->SetPosition(m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Local.position));
+	m_Child->SetRotation(m_Parent->rotation + m_Local.rotation);
+}
+
+void LocalTransformer2D::SyncGlobalWithParentScale()
+{
+	m_Child->SetPosition(m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Local.position));
+	m_Child->SetScale(m_Parent->scale * m_Local.scale);
+}
+
+void LocalTransformer2D::SyncLocalWithParentPosition()
+{
+	m_Local.position = (Transform::Rotation(-m_Parent->rotation) * (m_Child->GetPosition() - m_Parent->position)) / m_Parent->scale;
+}
+
+void LocalTransformer2D::SyncLocalWithParentRotation()
+{
+	m_Local.position = (Transform::Rotation(-m_Parent->rotation) * (m_Child->GetPosition() - m_Parent->position)) / m_Parent->scale;
+	m_Local.rotation = m_Child->GetRotation() - m_Parent->rotation;
+}
+
+void LocalTransformer2D::SyncLocalWithParentScale()
+{
+	m_Local.position = (Transform::Rotation(-m_Parent->rotation) * (m_Child->GetPosition() - m_Parent->position)) / m_Parent->scale;
+	m_Local.scale = m_Child->GetScale() / m_Parent->scale;
+}
+
 void LocalTransformer2D::SetGlobalTransform(const Transform2D& tr)
 {
 	m_Child->SetTransform(tr);
