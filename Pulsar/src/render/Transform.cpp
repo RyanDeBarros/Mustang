@@ -39,6 +39,16 @@ Transform2D Transform2D::operator^(const Transform2D& transform) const
 	return { position + transform.position, rotation + transform.rotation, scale * transform.scale };
 }
 
+Transform2D Transform2D::RelTo(const Transform2D& global, const Transform2D& parent)
+{
+	return { (Transform::Rotation(-parent.rotation) * (global.position - parent.position)) / parent.scale, global.rotation - parent.rotation, global.scale / parent.scale };
+}
+
+Transform2D Transform2D::AbsTo(const Transform2D& local, const Transform2D& parent)
+{
+	return { parent.position + Transform::Rotation(parent.rotation) * (parent.scale * local.position), parent.rotation + local.rotation, parent.scale * local.scale };
+}
+
 LocalTransformer2D::LocalTransformer2D(Transform2D* const parent, Transformable2D* const child)
 	: m_Parent(parent), m_Child(child)
 {
@@ -89,20 +99,12 @@ void LocalTransformer2D::OperateLocalScale(const std::function<void(glm::vec2& s
 
 void LocalTransformer2D::SyncGlobalWithLocal()
 {
-	m_Child->SetTransform({
-		m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Local.position),
-		m_Parent->rotation + m_Local.rotation,
-		m_Parent->scale * m_Local.scale
-	});
+	m_Child->SetTransform(Transform2D::AbsTo(m_Local, *m_Parent));
 }
 
 void LocalTransformer2D::SyncLocalWithGlobal()
 {
-	m_Local = {
-		(Transform::Rotation(-m_Parent->rotation) * (m_Child->GetPosition() - m_Parent->position)) / m_Parent->scale,
-		m_Child->GetRotation() - m_Parent->rotation,
-		m_Child->GetScale() / m_Parent->scale
-	};
+	m_Local = Transform2D::RelTo(m_Child->GetTransform(), *m_Parent);
 }
 
 void LocalTransformer2D::SyncGlobalWithParentPosition()

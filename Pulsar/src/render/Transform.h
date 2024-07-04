@@ -10,6 +10,8 @@ struct Transform2D
 	glm::vec2 scale = glm::vec2(1.0f, 1.0f);
 
 	Transform2D operator^(const Transform2D& transform) const;
+	static Transform2D RelTo(const Transform2D& global, const Transform2D& parent);
+	static Transform2D AbsTo(const Transform2D& local, const Transform2D& parent);
 };
 
 namespace Transform
@@ -55,7 +57,6 @@ public:
 	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); }
 };
 
-// TODO should LocalTransformer2D functions just be functions and not member methods?
 class LocalTransformer2D
 {
 	Transform2D* const m_Parent;
@@ -85,7 +86,7 @@ public:
 	void SyncLocalWithParentPosition();
 	void SyncLocalWithParentRotation();
 	void SyncLocalWithParentScale();
-
+	
 	void SetGlobalTransform(const Transform2D& tr);
 	inline Transform2D GetGlobalTransform() const { return m_Child->GetTransform(); }
 	void SetGlobalPosition(const glm::vec2& pos);
