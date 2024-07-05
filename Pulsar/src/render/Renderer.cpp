@@ -70,7 +70,7 @@ void Renderer::ForceRefresh()
 	TRY(glClearColor(_RendererSettings::gl_clear_color[0], _RendererSettings::gl_clear_color[1], _RendererSettings::gl_clear_color[2], _RendererSettings::gl_clear_color[3]));
 }
 
-void Renderer::AddCanvasLayer(const CanvasLayerData data)
+void Renderer::AddCanvasLayer(const CanvasLayerData& data)
 {
 	CHECK_INITIALIZED
 	if (layers.find(data.ci) == layers.end())
@@ -79,16 +79,17 @@ void Renderer::AddCanvasLayer(const CanvasLayerData data)
 		Logger::LogErrorFatal(std::string("Tried to add new canvas layer to renderer canvas index (") + std::to_string(data.ci) + "), but a canvas layer under that canvas index already exists!");
 }
 
-void Renderer::RemoveCanvasLayer(const CanvasIndex ci)
+void Renderer::RemoveCanvasLayer(const CanvasIndex& ci)
 {
 	CHECK_INITIALIZED
-	if (layers.find(ci) != layers.end())
-		layers.erase(ci);
+	auto layer_it = layers.find(ci);
+	if (layer_it != layers.end())
+		layers.erase(layer_it);
 	else
 		Logger::LogErrorFatal(std::string("Tried to remove a canvas layer at renderer canvas index (") + std::to_string(ci) + "), but no canvas layer under that canvas index exists!");
 }
 
-CanvasLayer* Renderer::GetCanvasLayer(const CanvasIndex ci)
+CanvasLayer* Renderer::GetCanvasLayer(const CanvasIndex& ci)
 {
 	CHECK_INITIALIZED
 	auto layer = layers.find(ci);
@@ -98,5 +99,25 @@ CanvasLayer* Renderer::GetCanvasLayer(const CanvasIndex ci)
 	{
 		Logger::LogErrorFatal(std::string("Tried to get a canvas layer at renderer canvas index (") + std::to_string(ci) + "), but no canvas layer under that canvas index exists!");
 		return nullptr;
+	}
+}
+
+void Renderer::ChangeCanvasLayerIndex(const CanvasIndex& old_index, const CanvasIndex& new_index)
+{
+	auto layer_it = layers.find(old_index);
+	if (layer_it == layers.end())
+	{
+		Logger::LogErrorFatal(std::string("Tried to change canvas layer index from " + std::to_string(old_index) + " to " + std::to_string(new_index) + ", but the old index does not exist."));
+	}
+	else if (layers.find(new_index) != layers.end())
+	{
+		Logger::LogErrorFatal(std::string("Tried to change canvas layer index from " + std::to_string(old_index) + " to " + std::to_string(new_index) + ", but the new index already exists."));
+	}
+	else
+	{
+		auto pair = layers.extract(layer_it);
+		pair.mapped().m_Data.ci = new_index;
+		pair.key() = new_index;
+		layers.insert(std::move(pair));
 	}
 }

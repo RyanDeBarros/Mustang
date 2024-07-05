@@ -13,8 +13,9 @@ public:
 	static void Init();
 	static void FocusWindow(struct GLFWwindow*);
 	static void OnDraw();
-	static void AddCanvasLayer(const CanvasLayerData);
-	static void RemoveCanvasLayer(const CanvasIndex);
-	static CanvasLayer* GetCanvasLayer(const CanvasIndex);
+	static void AddCanvasLayer(const CanvasLayerData&);
+	static void RemoveCanvasLayer(const CanvasIndex&);
+	static CanvasLayer* GetCanvasLayer(const CanvasIndex&);
+	static void ChangeCanvasLayerIndex(const CanvasIndex& old_index, const CanvasIndex& new_index);
 	static void Terminate();
 };

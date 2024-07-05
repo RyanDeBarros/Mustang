@@ -32,6 +32,7 @@ struct CanvasLayerData
 
 class CanvasLayer
 {
+	friend class Renderer;
 	CanvasLayerData m_Data;
 	LayerView2D m_LayerView;
 	std::map<ZIndex, std::list<ActorRenderBase2D*>*> m_Batcher;
@@ -45,6 +46,7 @@ class CanvasLayer
 	UniformLexiconHandle currentLexiconHandle = 0;
 	std::vector<TextureHandle> m_TextureSlotBatch;
 	std::unordered_map<BatchModel, VAO> m_VAOs;
+
 public:
 	CanvasLayer(CanvasLayerData data);
 	~CanvasLayer();

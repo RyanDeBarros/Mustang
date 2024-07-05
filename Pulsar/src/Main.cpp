@@ -222,6 +222,8 @@ void run(GLFWwindow* window)
 
 	LocalTransformer2D flags(actor4->GetTransformRef(), actor1);
 
+	Renderer::ChangeCanvasLayerIndex(-1, 1);
+
 	for (;;)
 	{
 		time = static_cast<real>(glfwGetTime());
