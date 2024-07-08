@@ -1,0 +1,14 @@
+header = "renderable"
+
+[renderable.model]
+layout = 0b01111101
+mask = 0b1111
+shader = "config/SolidPolygonShader.toml"
+
+[renderable]
+# condensed P-transform (2) | condensed RS-transform (4) | RGBA color (4) | vertex position (2)
+vertices = [
+#	0.0, 0.0,					1.0, 0.0, 0.0, 1.0,		1.0, 1.0, 1.0, 1.0,		0.0, 0.0
+]
+num_vertices = 0
+indices = []

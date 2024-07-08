@@ -22,47 +22,47 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 {
 	if (!m_Render.vertexBufferData)
 		return;
-	const auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
+	Stride stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
 	// update TextureSlot
 	if (m_Render.vertexBufferData[0] != texture_slot)
 	{
 		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
-			m_Render.vertexBufferData[i * stride] = texture_slot;
+			m_Render.vertexBufferData[i * stride	] = static_cast<GLfloat>(texture_slot);
 	}
-	glm::mat3x2 condensed_matrix = Transform::ToCondensedMatrix(m_Transform);
 	// update TransformP
 	if ((m_Status & 0b10) == 0b10)
 	{
+		m_Status &= ~0b10;
 		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 		{
-			m_Render.vertexBufferData[i * stride + 1] = condensed_matrix[0][0];
-			m_Render.vertexBufferData[i * stride + 2] = condensed_matrix[0][1];
+			m_Render.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(m_Transform.position.x);
+			m_Render.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(m_Transform.position.y);
 		}
-		m_Status &= ~0b10;
 	}
 	// update TransformRS
 	if ((m_Status & 0b100) == 0b100)
 	{
+		m_Status &= ~0b100;
+		glm::mat2 condensed_rs_matrix = Transform::CondensedRS(m_Transform);
 		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 		{
-			m_Render.vertexBufferData[i * stride + 3] = condensed_matrix[1][0];
-			m_Render.vertexBufferData[i * stride + 4] = condensed_matrix[1][1];
-			m_Render.vertexBufferData[i * stride + 5] = condensed_matrix[2][0];
-			m_Render.vertexBufferData[i * stride + 6] = condensed_matrix[2][1];
+			m_Render.vertexBufferData[i * stride + 3] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);
+			m_Render.vertexBufferData[i * stride + 4] = static_cast<GLfloat>(condensed_rs_matrix[0][1]);
+			m_Render.vertexBufferData[i * stride + 5] = static_cast<GLfloat>(condensed_rs_matrix[1][0]);
+			m_Render.vertexBufferData[i * stride + 6] = static_cast<GLfloat>(condensed_rs_matrix[1][1]);
 		}
-		m_Status &= ~0b100;
 	}
 	// update ModulationColor
 	if ((m_Status & 0b1000) == 0b1000)
 	{
+		m_Status &= ~0b1000;
 		for (BufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
 		{
-			m_Render.vertexBufferData[i * stride + 7] = m_ModulationColors[i][0];
-			m_Render.vertexBufferData[i * stride + 8] = m_ModulationColors[i][1];
-			m_Render.vertexBufferData[i * stride + 9] = m_ModulationColors[i][2];
-			m_Render.vertexBufferData[i * stride + 10] = m_ModulationColors[i][3];
+			m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(m_ModulationColors[i][0]);
+			m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(m_ModulationColors[i][1]);
+			m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(m_ModulationColors[i][2]);
+			m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(m_ModulationColors[i][3]);
 		}
-		m_Status &= ~0b1000;
 	}
 }
 

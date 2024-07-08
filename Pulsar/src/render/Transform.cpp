@@ -7,22 +7,27 @@ static inline glm::vec2 operator/(const float& f, const glm::vec2& v)
 
 namespace Transform {
 	
-	inline glm::mat3 ToMatrix(const Transform2D& tr)
+	glm::mat3 ToMatrix(const Transform2D& tr)
 	{
 		return glm::mat3(tr.scale.x * cosf(tr.rotation), tr.scale.x * sinf(tr.rotation), 0, -tr.scale.y * sinf(tr.rotation), tr.scale.y * cosf(tr.rotation), 0, tr.position.x, tr.position.y, 1);
 	}
 
-	inline glm::mat3 ToInverseMatrix(const Transform2D& tr)
+	glm::mat3 ToInverseMatrix(const Transform2D& tr)
 	{
 		return glm::mat3(cosf(tr.rotation) / tr.scale.x, -sinf(tr.rotation) / tr.scale.x, 0, sinf(tr.rotation) / tr.scale.y, cosf(tr.rotation) / tr.scale.y, 0, -tr.position.x, -tr.position.y, 1);
 	}
 
-	inline glm::mat3x2 ToCondensedMatrix(const Transform2D& tr)
+	glm::mat3x2 ToCondensedMatrix(const Transform2D& tr)
 	{
 		return glm::mat3x2(tr.position.x, tr.position.y, tr.scale.x * cosf(tr.rotation), tr.scale.x * sinf(tr.rotation), -tr.scale.y * sinf(tr.rotation), tr.scale.y * cosf(tr.rotation));
 	}
+
+	glm::mat2 CondensedRS(const Transform2D& tr)
+	{
+		return glm::mat2(tr.scale.x * cosf(tr.rotation), tr.scale.x * sinf(tr.rotation), -tr.scale.y * sinf(tr.rotation), tr.scale.y * cosf(tr.rotation));
+	}
 	
-	inline Transform2D Inverse(const Transform2D& tr)
+	Transform2D Inverse(const Transform2D& tr)
 	{
 		return { -tr.position, -tr.rotation, 1 / tr.scale };
 	}

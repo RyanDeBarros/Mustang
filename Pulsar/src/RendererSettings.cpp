@@ -12,5 +12,7 @@ namespace _RendererSettings
 	VertexSize standard_index_pool_size = 1024;
 
 	std::string standard_shader_assetfile = "config/StandardShader32.toml";
+	std::string solid_polygon_shader = "config/SolidPolygonShader.toml";
 	std::string rect_renderable_filepath = "config/RectRenderable.toml";
+	std::string solid_polygon_filepath = "config/SolidPolygon.toml";
 }

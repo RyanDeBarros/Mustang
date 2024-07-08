@@ -62,8 +62,12 @@ bool _LoadRendererSettings()
 				_RendererSettings::standard_index_pool_size = (VertexSize)standard_index_pool_size.value();
 			if (auto standard_shader_filepath = rendering["standard_shader"].value<std::string>())
 				_RendererSettings::standard_shader_assetfile = standard_shader_filepath.value();
+			if (auto solid_polygon_shader = rendering["solid_polygon_shader"].value<std::string>())
+				_RendererSettings::solid_polygon_shader = solid_polygon_shader.value();
 			if (auto rect_renderable_filepath = rendering["rect_renderable"].value<std::string>())
 				_RendererSettings::rect_renderable_filepath = rect_renderable_filepath.value();
+			if (auto solid_polygon = rendering["solid_polygon"].value<std::string>())
+				_RendererSettings::solid_polygon_filepath = solid_polygon.value();
 		}
 		return true;
 	}

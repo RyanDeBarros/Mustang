@@ -17,6 +17,7 @@
 #include "factory/ShaderFactory.h"
 #include "factory/Atlas.h"
 #include "render/actors/TileMap.h"
+#include "render/actors/DebugPolygon.h"
 
 static void run(GLFWwindow*);
 
@@ -32,6 +33,7 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	// If _RendererSettings::resize_mode is set to SCALE_IGNORE_ASPECT_RATIO, don't add anything.
 	// If it is set to SCALE_KEEP_ASPECT_RATIO, call new Renderer function that will scale objects as usual without stretching their aspect ratios.
 	// If it is set to NO_SCALE_KEEP_SIZE, call new Renderer function that will not scale objects - only display more of the scene.
+	// TODO also update frame in callback. Currently, animation is paused when resizing.
 	TRY(glViewport(0, 0, width, height));
 	Renderer::OnDraw();
 }
@@ -224,6 +226,14 @@ void run(GLFWwindow* window)
 
 	Renderer::ChangeCanvasLayerIndex(-1, 1);
 
+	Renderer::AddCanvasLayer(10);
+	DebugPolygon poly({ {0.0f, 0.0f}, {100.0f, 0.0f}, {0.0f, 200.0f}, {100.0f, 200.0f}, {0.0f, 400.0f}, {100.0f, 400.0f} }, { 0.3f, 0.4f, 1.0f, 1.0f });
+	//poly.SetIndexingMode(GL_TRIANGLE_STRIP);
+	Renderer::GetCanvasLayer(10)->OnAttach(&poly);
+	//poly.visible = false;
+	Renderer::RemoveCanvasLayer(0);
+	Renderer::RemoveCanvasLayer(1);
+
 	for (;;)
 	{
 		time = static_cast<real>(glfwGetTime());
@@ -232,14 +242,16 @@ void run(GLFWwindow* window)
 		totalTime += deltaTime;
 		// OnUpdate here
 
-		actor4->OperatePosition([&deltaTime](glm::vec2& p) { p.x += 100.0f * deltaTime; });
+		poly.OperatePosition([&](glm::vec2& p) { p.x = 150.0f * glm::sin(totalTime); });
+
+		actor4->OperatePosition([&](glm::vec2& p) { p.x += 100.0f * deltaTime; });
 		//flags.SyncGlobalWithParentPosition();
-		actor4->OperateScale([&deltaTime](glm::vec2& sc) { sc += 50.0 * deltaTime; });
+		actor4->OperateScale([&](glm::vec2& sc) { sc += 50.0 * deltaTime; });
 		//flags.SyncGlobalWithParentScale();
-		actor4->OperateRotation([&deltaTime](glm::float32& r) { r += deltaTime; });
+		actor4->OperateRotation([&](glm::float32& r) { r += deltaTime; });
 		//flags.SyncGlobalWithParentRotation();
 		flags.SyncGlobalWithLocal();
-		flags.OperateLocalRotation([&deltaTime](glm::float32& r) { r -= 1.2f * deltaTime; });
+		flags.OperateLocalRotation([&](glm::float32& r) { r -= 1.2f * deltaTime; });
 		
 		Renderer::OnDraw();
 		glfwPollEvents();

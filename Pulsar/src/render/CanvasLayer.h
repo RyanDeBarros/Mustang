@@ -62,10 +62,14 @@ public:
 
 	void DrawPrimitive(class ActorPrimitive2D* const);
 	void DrawSequencer(class ActorSequencer2D* const);
+	void DrawArray(const Renderable& renderable, GLenum indexing_mode);
+	// TODO pool over multiple renderables and use glMultiDrawArrays
+	void DrawMultiArray(const Renderable* renderable, const size_t& count, GLenum indexing_mode);
 
 private:
 	void SetBlending() const;
 	void PoolOver(const Renderable&);
+	void PoolOverVerticesOnly(const Renderable&);
 	TextureSlot GetTextureSlot(const Renderable&);
 	void FlushAndReset();
 	void RegisterModel();

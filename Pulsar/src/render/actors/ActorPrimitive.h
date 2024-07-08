@@ -29,6 +29,8 @@ public:
 	inline virtual ZIndex GetZIndex() const override { return m_Z; }
 	inline virtual void SetZIndex(const ZIndex& z) override { m_Z = z; }
 
+	inline bool IsVisible() const { return (m_Status & 1) > 0; }
+
 	inline Transform2D GetTransform() const override { return m_Transform; }
 	inline void SetTransform(const Transform2D& transform) override { m_Transform = transform; m_Status |= 0b110; }
 	inline glm::vec2 GetPosition() const override { return m_Transform.position; }

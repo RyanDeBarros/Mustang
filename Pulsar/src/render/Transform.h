@@ -19,6 +19,7 @@ namespace Transform
 	extern glm::mat3 ToMatrix(const Transform2D& tr);
 	extern glm::mat3 ToInverseMatrix(const Transform2D& tr);
 	extern glm::mat3x2 ToCondensedMatrix(const Transform2D& tr);
+	extern glm::mat2 CondensedRS(const Transform2D& tr);
 	extern Transform2D Inverse(const Transform2D& tr);
 	extern glm::mat2 Rotation(const glm::float32& r);
 }

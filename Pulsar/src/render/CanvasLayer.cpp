@@ -102,7 +102,7 @@ void CanvasLayer::OnDraw()
 
 void CanvasLayer::DrawPrimitive(ActorPrimitive2D* const primitive)
 {
-	if ((primitive->m_Status & 1) > 0)
+	if (primitive->IsVisible())
 	{
 		const auto& render = primitive->m_Render;
 		if (render.model != currentModel)
@@ -135,6 +135,31 @@ void CanvasLayer::DrawSequencer(ActorSequencer2D* const sequencer)
 	sequencer->OnPostDraw();
 }
 
+void CanvasLayer::DrawArray(const Renderable& renderable, GLenum indexing_mode)
+{
+	FlushAndReset();
+	currentModel = renderable.model;
+	if (currentModel == BatchModel{})
+		return;
+	if (m_VAOs.find(currentModel) == m_VAOs.end())
+		RegisterModel();
+	PoolOverVerticesOnly(renderable);
+	TRY(glBindVertexArray(m_VAOs[currentModel]));
+	BindBuffers();
+	TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
+	ShaderFactory::Bind(currentModel.shader);
+	m_LayerView.PassVPUniform(currentModel.shader);
+	UniformLexiconFactory::OnApply(currentModel.uniformLexicon, currentModel.shader);
+	if (vertexPos - m_VertexPool > 0)
+	{
+		TRY(glDrawArrays(indexing_mode, 0, renderable.vertexCount));
+	}
+	ShaderFactory::Unbind();
+	UnbindBuffers();
+	TRY(glBindVertexArray(0));
+	currentModel = {};
+}
+
 void CanvasLayer::SetBlending() const
 {
 	if (m_Data.enableGLBlend)
@@ -159,6 +184,15 @@ void CanvasLayer::PoolOver(const Renderable& render)
 			*(indexPos + ic) += (GLuint)(vertexPos - m_VertexPool) / Render::StrideCountOf(render.model.layout, render.model.layoutMask);
 	vertexPos += Render::VertexBufferLayoutCount(render);
 	indexPos += render.indexCount;
+	if (render.model.uniformLexicon != currentLexiconHandle)
+		currentLexicon.MergeLexicon(render.model.uniformLexicon);
+}
+
+void CanvasLayer::PoolOverVerticesOnly(const Renderable& render)
+{
+	if (render.vertexBufferData)
+		memcpy_s(vertexPos, (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool)) * sizeof(VertexSize), render.vertexBufferData, Render::VertexBufferLayoutCount(render) * sizeof(GLfloat));
+	vertexPos += Render::VertexBufferLayoutCount(render);
 	if (render.model.uniformLexicon != currentLexiconHandle)
 		currentLexicon.MergeLexicon(render.model.uniformLexicon);
 }
@@ -200,7 +234,10 @@ void CanvasLayer::FlushAndReset()
 	ShaderFactory::Bind(currentModel.shader);
 	m_LayerView.PassVPUniform(currentModel.shader);
 	UniformLexiconFactory::OnApply(currentModel.uniformLexicon, currentModel.shader);
-	TRY(glDrawElements(GL_TRIANGLES, (GLsizei)(indexPos - m_IndexPool), GL_UNSIGNED_INT, nullptr));
+	if (indexPos - m_IndexPool > 0)
+	{
+		TRY(glDrawElements(GL_TRIANGLES, (GLsizei)(indexPos - m_IndexPool), GL_UNSIGNED_INT, nullptr));
+	}
 	ShaderFactory::Unbind();
 	UnbindBuffers();
 	TRY(glBindVertexArray(0));
