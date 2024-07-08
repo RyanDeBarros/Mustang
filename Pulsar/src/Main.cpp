@@ -228,9 +228,11 @@ void run(GLFWwindow* window)
 
 	Renderer::AddCanvasLayer(10);
 	DebugPolygon poly({ {0.0f, 0.0f}, {100.0f, 0.0f}, {0.0f, 200.0f}, {100.0f, 200.0f}, {0.0f, 400.0f}, {100.0f, 400.0f} }, { 0.3f, 0.4f, 1.0f, 1.0f });
-	//poly.SetIndexingMode(GL_TRIANGLE_STRIP);
+	poly.SetIndexingMode(GL_POINTS);
+	poly.SetPointSize(20.0f);
 	Renderer::GetCanvasLayer(10)->OnAttach(&poly);
 	//poly.visible = false;
+	TRY(glEnable(GL_PROGRAM_POINT_SIZE));
 	Renderer::RemoveCanvasLayer(0);
 	Renderer::RemoveCanvasLayer(1);
 

@@ -3,11 +3,12 @@
 #include "render/CanvasLayer.h"
 #include "AssetLoader.h"
 
-DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const glm::vec4& color, const GLenum& indexing_mode, const ZIndex& z)
+DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const glm::vec4& color, const GLenum& indexing_mode, const float& point_size, const ZIndex& z)
 	: m_Z(z), m_Color(color)
 {
 	loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
 	SetIndexingMode(indexing_mode);
+	SetPointSize(point_size);
 	PointsRef() = points;
 }
 
@@ -72,6 +73,15 @@ void DebugPolygon::RequestDraw(CanvasLayer* canvas_layer)
 			m_Renderable.vertexBufferData[i * stride + 3] = static_cast<GLfloat>(condensed_rs_matrix[0][1]);
 			m_Renderable.vertexBufferData[i * stride + 4] = static_cast<GLfloat>(condensed_rs_matrix[1][0]);
 			m_Renderable.vertexBufferData[i * stride + 5] = static_cast<GLfloat>(condensed_rs_matrix[1][1]);
+		}
+	}
+	if ((m_Status & 0b100000) == 0b100000)
+	{
+		m_Status &= ~0b100000;
+		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
+		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+		{
+			m_Renderable.vertexBufferData[i * stride + 12] = static_cast<GLfloat>(m_PointSize);
 		}
 	}
 	canvas_layer->DrawArray(m_Renderable, m_IndexingMode);

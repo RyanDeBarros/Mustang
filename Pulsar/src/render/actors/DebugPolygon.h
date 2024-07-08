@@ -15,13 +15,14 @@ class DebugPolygon : public ActorRenderBase2D, public Transformable2D
 	std::vector<glm::vec2> m_Points;
 	glm::vec4 m_Color;
 	GLenum m_IndexingMode;
+	float m_PointSize;
 
-	// 0b ... transform RS | transform P | point positions | color | indexing mode or points vector
-	unsigned char m_Status = 0b11111;
+	// 0b ... point size | transform RS | transform P | point positions | color | indexing mode or points vector
+	unsigned char m_Status = 0b111111;
 	Transform2D m_Transform;
 
 public:
-	DebugPolygon(const std::vector<glm::vec2>& points, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f }, const GLenum& indexing_mode = GL_LINE_STRIP, const ZIndex& z = 0);
+	DebugPolygon(const std::vector<glm::vec2>& points, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f }, const GLenum& indexing_mode = GL_LINE_STRIP, const float& point_size = 2.0f, const ZIndex& z = 0);
 
 	void RequestDraw(class CanvasLayer* canvas_layer);
 	ZIndex GetZIndex() const { return m_Z; }
@@ -34,6 +35,8 @@ public:
 	inline void SetIndexingMode(const GLenum& indexing_mode) { m_Status |= 0b1; m_IndexingMode = indexing_mode; }
 	inline glm::vec4 GetColor() const { return m_Color; }
 	inline void SetColor(const glm::vec4& color) { m_Status |= 0b10; m_Color = color; }
+	inline float GetPointSize() const { return m_PointSize; }
+	inline void SetPointSize(const float& point_size) { m_Status |= 0b100000; m_PointSize = point_size; }
 
 	inline Transform2D GetTransform() const override { return m_Transform; }
 	inline void SetTransform(const Transform2D& transform) override { m_Transform = transform; m_Status |= 0b11000; }
