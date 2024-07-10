@@ -1,6 +1,5 @@
 #include "Main.h"
 
-#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -18,7 +17,7 @@
 #include "factory/Atlas.h"
 #include "render/actors/TileMap.h"
 #include "render/actors/DebugPolygon.h"
-#include "render/actors/DebugCircle.h"
+#include "render/actors/DebugPoint.h"
 
 static void run(GLFWwindow*);
 
@@ -140,8 +139,8 @@ void run(GLFWwindow* window)
 		glm::vec4(0.5f, 1.0f, 0.5f, 1.0f),
 		glm::vec4(0.5f, 0.5f, 1.0f, 1.0f),
 		glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
-	});
-	
+		});
+
 	Logger::LogInfo(std::to_string(std::get<GLint>(*const_cast<Uniform*>(UniformLexiconFactory::GetValue(1, "u_inttest")))));
 	auto u = UniformLexiconFactory::GetValue(1, "u_float3test");
 	if (u)
@@ -176,7 +175,7 @@ void run(GLFWwindow* window)
 			{1.0f, 1.0f, 1.0f, 1.0f},
 			{0.0f, 0.0f, 0.0f, 0.0f},
 			{0.0f, 0.0f, 0.0f, 0.0f},
-		});
+			});
 	}
 
 	ActorTesselation2D tesselVertical(&tessel);
@@ -188,7 +187,7 @@ void run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(0)->OnDetach(&tesselVertical);
 	Renderer::GetCanvasLayer(0)->OnAttach(&tesselDiagonal);
 	tesselDiagonal.RectVectorRef() = { {{0.0f, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{-0.5f * w, 0.5 * h}, -0.8f, {0.75f, -0.75f}} };
-	
+
 	actor2->CropToRelativeRect({ 0.3f, 0.4f, 0.4f, 0.55f });
 
 	//TileHandle tile_dirtTL(TextureFactory::GetTileHandle(tex_dirtTL)), tile_dirtTR(TextureFactory::GetTileHandle(tex_dirtTR)), tile_grassSingle(TextureFactory::GetTileHandle(tex_grassSingle)), tile_grassTL(TextureFactory::GetTileHandle(tex_grassTL)), tile_grassTE(TextureFactory::GetTileHandle(tex_grassTE)), tile_grassTR(TextureFactory::GetTileHandle(tex_grassTR));
@@ -203,7 +202,7 @@ void run(GLFWwindow* window)
 	TileHandle tileAtlas;
 	if (loadAtlas("res/assets/atlas_asset.toml", tileAtlas) != LOAD_STATUS::OK)
 		ASSERT(false);
-	
+
 	Atlas* atlas = dynamic_cast<Atlas*>(TileFactory::GetTileRef(tileAtlas));
 	if (!atlas)
 		ASSERT(false);
@@ -235,14 +234,24 @@ void run(GLFWwindow* window)
 	Renderer::RemoveCanvasLayer(1);
 
 	float radius = 100.0f;
+	float border_width = 50.0f;
 
-	DebugCircle circ({}, { 1.0f, 0.0f, 0.0f, 1.0f }, DebugCircle::PointSizeFromRadius(radius), 0.25f, { 1.0f, 1.0f, 0.0f, 1.0f });
+	//DebugPoint circ({}, { 1.0f, 0.0f, 0.0f, 0.5f }, DebugPoint::PointSizeFromRadius(radius), DebugPoint::InnerRadiusFromBWR(border_width, radius));
+	DebugPoint circ({}, { 0.0f, 0.7f, 0.2f, 1.0f }, DebugPoint::PointSizeFromRadius(radius));
+	circ.SetInnerRadius(circ.InnerRadiusFromBorderWidth(border_width));
 	Renderer::GetCanvasLayer(10)->OnAttach(&circ);
+	// Can't scale point
+	circ.SetScale({ 2.0f, 5.0f });
+	circ.SetPosition({ radius, radius });
 
-	RectRender rect(*actor2);
-	Renderer::AddCanvasLayer(-3);
-	Renderer::GetCanvasLayer(-3)->OnAttach(&rect);
-	rect.SetTransform({ {}, 0.0f, {2 * radius / rect.GetUVWidth(), 2 * radius / rect.GetUVHeight()} });
+	DebugPoint origin({}, { 0.9f, 0.9f, 0.9f, 1.0f }, DebugPoint::PointSizeFromRadius(5.0f), 0.0f);
+	Renderer::AddCanvasLayer(11);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&origin);
+
+	//RectRender rect(*actor2);
+	//Renderer::AddCanvasLayer(-3);
+	//Renderer::GetCanvasLayer(-3)->OnAttach(&rect);
+	//rect.SetTransform({ {}, 0.0f, {2 * radius / rect.GetUVWidth(), 2 * radius / rect.GetUVHeight()} });
 
 	for (;;)
 	{

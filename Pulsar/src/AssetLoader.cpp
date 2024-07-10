@@ -68,8 +68,8 @@ bool _LoadRendererSettings()
 				_RendererSettings::rect_renderable_filepath = rect_renderable_filepath.value();
 			if (auto solid_polygon = rendering["solid_polygon"].value<std::string>())
 				_RendererSettings::solid_polygon_filepath = solid_polygon.value();
-			if (auto solid_circle= rendering["solid_circle"].value<std::string>())
-				_RendererSettings::solid_circle_filepath = solid_circle.value();
+			if (auto solid_point = rendering["solid_point"].value<std::string>())
+				_RendererSettings::solid_point_filepath = solid_point.value();
 		}
 		return true;
 	}

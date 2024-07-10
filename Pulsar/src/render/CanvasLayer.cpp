@@ -157,7 +157,9 @@ void CanvasLayer::DrawArray(const Renderable& renderable, GLenum indexing_mode)
 	ShaderFactory::Unbind();
 	UnbindBuffers();
 	TRY(glBindVertexArray(0));
-	currentModel = {};
+	vertexPos = m_VertexPool;
+	//indexPos = m_IndexPool;
+	//m_TextureSlotBatch.clear();
 }
 
 void CanvasLayer::SetBlending() const

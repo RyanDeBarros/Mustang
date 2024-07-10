@@ -64,7 +64,7 @@ public:
 	void DrawSequencer(class ActorSequencer2D&);
 	void DrawArray(const Renderable& renderable, GLenum indexing_mode);
 	// TODO pool over multiple renderables and use glMultiDrawArrays
-	void DrawMultiArray(const MultiRenderable& const);
+	//void DrawMultiArray(const MultiRenderable& const);
 
 private:
 	void SetBlending() const;

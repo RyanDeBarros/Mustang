@@ -1,27 +1,27 @@
-#include "DebugCircle.h"
+#include "DebugPoint.h"
 
 #include "RendererSettings.h"
 #include "AssetLoader.h"
 #include "render/CanvasLayer.h"
 
-DebugCircle::DebugCircle(const Transform2D& transform, const glm::vec4& outer_color, const float& point_size, const float& inner_radius, const glm::vec4& inner_color, const ZIndex& z)
+DebugPoint::DebugPoint(const Transform2D& transform, const glm::vec4& outer_color, const float& point_size, const float& inner_radius, const glm::vec4& inner_color, const ZIndex& z)
 	: DebugPolygon({{ 0.0f, 0.0f }}, outer_color, GL_POINTS, z), m_PointSize(point_size), m_InnerRadius(inner_radius), m_InnerColor(inner_color)
 {
 	SetTransform(transform);
-	loadRenderable(_RendererSettings::solid_circle_filepath.c_str(), m_Renderable);
+	loadRenderable(_RendererSettings::solid_point_filepath.c_str(), m_Renderable);
 }
 
-void DebugCircle::RequestDraw(CanvasLayer* canvas_layer)
+void DebugPoint::RequestDraw(CanvasLayer* canvas_layer)
 {
 	if (visible)
 	{
 		DebugPolygon::CheckStatus();
-		DebugCircle::CheckStatus();
+		DebugPoint::CheckStatus();
 		canvas_layer->DrawArray(m_Renderable, m_IndexingMode);
 	}
 }
 
-void DebugCircle::CheckStatus()
+void DebugPoint::CheckStatus()
 {
 	if ((m_CircleStatus & 0b1) == 0b1)
 	{
