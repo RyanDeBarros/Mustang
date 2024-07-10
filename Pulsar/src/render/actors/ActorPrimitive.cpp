@@ -15,7 +15,7 @@ ActorPrimitive2D::ActorPrimitive2D(const ActorPrimitive2D& primitive)
 
 void ActorPrimitive2D::RequestDraw(CanvasLayer* canvas_layer)
 {
-	canvas_layer->DrawPrimitive(this);
+	canvas_layer->DrawPrimitive(*this);
 }
 
 void ActorPrimitive2D::OnDraw(signed char texture_slot)

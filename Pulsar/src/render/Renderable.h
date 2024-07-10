@@ -57,6 +57,14 @@ private:
 	friend class ActorPrimitive2D;
 	friend class RectRender;
 	friend class DebugPolygon;
+	friend class DebugCircle;
 	friend enum class LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable, const bool& new_texture, const bool& temporary_buffer);
 	friend BufferCounter Render::VertexBufferLayoutCount(const Renderable& render);
+};
+
+struct MultiRenderable
+{
+	BatchModel model;
+	
+	// TODO array of all Renderable data except for model, since that's global to the MultiRenderable
 };

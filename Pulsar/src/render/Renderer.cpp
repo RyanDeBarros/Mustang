@@ -35,6 +35,7 @@ void Renderer::Init()
 	UniformLexiconFactory::Init();
 	TileFactory::Init();
 	RectRender::DefineRectRenderable();
+	TRY(glEnable(GL_PROGRAM_POINT_SIZE));
 }
 
 void Renderer::Terminate()

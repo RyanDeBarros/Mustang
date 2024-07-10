@@ -60,11 +60,11 @@ public:
 	inline CanvasIndex GetZIndex() const { return m_Data.ci; }
 	inline CanvasLayerData& GetDataRef() { return m_Data; }
 
-	void DrawPrimitive(class ActorPrimitive2D* const);
-	void DrawSequencer(class ActorSequencer2D* const);
+	void DrawPrimitive(class ActorPrimitive2D&);
+	void DrawSequencer(class ActorSequencer2D&);
 	void DrawArray(const Renderable& renderable, GLenum indexing_mode);
 	// TODO pool over multiple renderables and use glMultiDrawArrays
-	void DrawMultiArray(const Renderable* renderable, const size_t& count, GLenum indexing_mode);
+	void DrawMultiArray(const MultiRenderable& const);
 
 private:
 	void SetBlending() const;

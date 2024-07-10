@@ -100,11 +100,11 @@ void CanvasLayer::OnDraw()
 	FlushAndReset();
 }
 
-void CanvasLayer::DrawPrimitive(ActorPrimitive2D* const primitive)
+void CanvasLayer::DrawPrimitive(ActorPrimitive2D& primitive)
 {
-	if (primitive->IsVisible())
+	if (primitive.IsVisible())
 	{
-		const auto& render = primitive->m_Render;
+		const auto& render = primitive.m_Render;
 		if (render.model != currentModel)
 		{
 			FlushAndReset();
@@ -120,19 +120,19 @@ void CanvasLayer::DrawPrimitive(ActorPrimitive2D* const primitive)
 		{
 			FlushAndReset();
 		}
-		primitive->OnDraw(GetTextureSlot(render));
+		primitive.OnDraw(GetTextureSlot(render));
 		PoolOver(render);
 	}
 }
 
-void CanvasLayer::DrawSequencer(ActorSequencer2D* const sequencer)
+void CanvasLayer::DrawSequencer(ActorSequencer2D& sequencer)
 {
 	int prim_i = 0;
 	ActorPrimitive2D* primitive = nullptr;
-	sequencer->OnPreDraw();
-	while ((primitive = sequencer->operator[](prim_i++)) != nullptr)
-		DrawPrimitive(primitive);
-	sequencer->OnPostDraw();
+	sequencer.OnPreDraw();
+	while ((primitive = sequencer[prim_i++]) != nullptr)
+		DrawPrimitive(*primitive);
+	sequencer.OnPostDraw();
 }
 
 void CanvasLayer::DrawArray(const Renderable& renderable, GLenum indexing_mode)

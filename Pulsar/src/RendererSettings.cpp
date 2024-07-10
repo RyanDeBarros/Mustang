@@ -15,4 +15,5 @@ namespace _RendererSettings
 	std::string solid_polygon_shader = "config/SolidPolygonShader.toml";
 	std::string rect_renderable_filepath = "config/RectRenderable.toml";
 	std::string solid_polygon_filepath = "config/SolidPolygon.toml";
+	std::string solid_circle_filepath = "config/SolidCircle.toml";
 }

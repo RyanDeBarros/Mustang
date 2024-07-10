@@ -18,6 +18,7 @@
 #include "factory/Atlas.h"
 #include "render/actors/TileMap.h"
 #include "render/actors/DebugPolygon.h"
+#include "render/actors/DebugCircle.h"
 
 static void run(GLFWwindow*);
 
@@ -228,13 +229,20 @@ void run(GLFWwindow* window)
 
 	Renderer::AddCanvasLayer(10);
 	DebugPolygon poly({ {0.0f, 0.0f}, {100.0f, 0.0f}, {0.0f, 200.0f}, {100.0f, 200.0f}, {0.0f, 400.0f}, {100.0f, 400.0f} }, { 0.3f, 0.4f, 1.0f, 1.0f });
-	poly.SetIndexingMode(GL_POINTS);
-	poly.SetPointSize(20.0f);
-	Renderer::GetCanvasLayer(10)->OnAttach(&poly);
+	//Renderer::GetCanvasLayer(10)->OnAttach(&poly);
 	//poly.visible = false;
-	TRY(glEnable(GL_PROGRAM_POINT_SIZE));
 	Renderer::RemoveCanvasLayer(0);
 	Renderer::RemoveCanvasLayer(1);
+
+	float radius = 100.0f;
+
+	DebugCircle circ({}, { 1.0f, 0.0f, 0.0f, 1.0f }, DebugCircle::PointSizeFromRadius(radius), 0.25f, { 1.0f, 1.0f, 0.0f, 1.0f });
+	Renderer::GetCanvasLayer(10)->OnAttach(&circ);
+
+	RectRender rect(*actor2);
+	Renderer::AddCanvasLayer(-3);
+	Renderer::GetCanvasLayer(-3)->OnAttach(&rect);
+	rect.SetTransform({ {}, 0.0f, {2 * radius / rect.GetUVWidth(), 2 * radius / rect.GetUVHeight()} });
 
 	for (;;)
 	{
