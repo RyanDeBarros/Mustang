@@ -171,8 +171,9 @@
     <ClCompile Include="src\render\actors\ActorDirectory.cpp" />
     <ClCompile Include="src\render\actors\ActorSequencer.cpp" />
     <ClCompile Include="src\render\actors\BatchSlotter.cpp" />
-    <ClCompile Include="src\render\actors\DebugPoint.cpp" />
-    <ClCompile Include="src\render\actors\DebugPolygon.cpp" />
+    <ClCompile Include="src\render\actors\shapes\DebugCircle.cpp" />
+    <ClCompile Include="src\render\actors\shapes\DebugPoint.cpp" />
+    <ClCompile Include="src\render\actors\shapes\DebugPolygon.cpp" />
     <ClCompile Include="src\render\actors\RectRender.cpp" />
     <ClCompile Include="src\RendererSettings.cpp" />
     <ClCompile Include="src\Logger.cpp" />
@@ -206,8 +207,9 @@
     <ClInclude Include="src\render\ActorRenderBase.h" />
     <ClInclude Include="src\render\actors\ActorDirectory.h" />
     <ClInclude Include="src\render\actors\BatchSlotter.h" />
-    <ClInclude Include="src\render\actors\DebugPoint.h" />
-    <ClInclude Include="src\render\actors\DebugPolygon.h" />
+    <ClInclude Include="src\render\actors\shapes\DebugCircle.h" />
+    <ClInclude Include="src\render\actors\shapes\DebugPoint.h" />
+    <ClInclude Include="src\render\actors\shapes\DebugPolygon.h" />
     <ClInclude Include="src\render\actors\RectRender.h" />
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\Main.h" />

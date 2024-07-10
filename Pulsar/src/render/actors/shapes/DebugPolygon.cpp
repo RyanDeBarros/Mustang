@@ -3,12 +3,13 @@
 #include "render/CanvasLayer.h"
 #include "AssetLoader.h"
 
-DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const glm::vec4& color, const GLenum& indexing_mode, const ZIndex& z)
+DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform, const glm::vec4& color, const GLenum& indexing_mode, const ZIndex& z)
 	: m_Z(z), m_Color(color)
 {
 	loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
 	SetIndexingMode(indexing_mode);
 	PointsRef() = points;
+	SetTransform(transform);
 }
 
 void DebugPolygon::RequestDraw(CanvasLayer* canvas_layer)

@@ -16,8 +16,9 @@
 #include "factory/ShaderFactory.h"
 #include "factory/Atlas.h"
 #include "render/actors/TileMap.h"
-#include "render/actors/DebugPolygon.h"
-#include "render/actors/DebugPoint.h"
+#include "render/actors/shapes/DebugPolygon.h"
+#include "render/actors/shapes/DebugPoint.h"
+#include "render/actors/shapes/DebugCircle.h"
 
 static void run(GLFWwindow*);
 
@@ -227,31 +228,32 @@ void run(GLFWwindow* window)
 	Renderer::ChangeCanvasLayerIndex(-1, 1);
 
 	Renderer::AddCanvasLayer(10);
-	DebugPolygon poly({ {0.0f, 0.0f}, {100.0f, 0.0f}, {0.0f, 200.0f}, {100.0f, 200.0f}, {0.0f, 400.0f}, {100.0f, 400.0f} }, { 0.3f, 0.4f, 1.0f, 1.0f });
+	DebugPolygon poly({ {0.0f, 0.0f}, {100.0f, 0.0f}, {0.0f, 200.0f}, {100.0f, 200.0f}, {0.0f, 400.0f}, {100.0f, 400.0f} }, {}, { 0.3f, 0.4f, 1.0f, 1.0f });
 	//Renderer::GetCanvasLayer(10)->OnAttach(&poly);
 	//poly.visible = false;
 	Renderer::RemoveCanvasLayer(0);
 	Renderer::RemoveCanvasLayer(1);
 
-	float radius = 100.0f;
-	float border_width = 50.0f;
+	float side = _RendererSettings::initial_window_height;
 
-	//DebugPoint circ({}, { 1.0f, 0.0f, 0.0f, 0.5f }, DebugPoint::PointSizeFromRadius(radius), DebugPoint::InnerRadiusFromBWR(border_width, radius));
-	DebugPoint circ({}, { 0.0f, 0.7f, 0.2f, 1.0f }, DebugPoint::PointSizeFromRadius(radius));
-	circ.SetInnerRadius(circ.InnerRadiusFromBorderWidth(border_width));
+	DebugCircle circ(100.0f);
 	Renderer::GetCanvasLayer(10)->OnAttach(&circ);
-	// Can't scale point
-	circ.SetScale({ 2.0f, 5.0f });
-	circ.SetPosition({ radius, radius });
+	//circ.SetScale(2.0f, 5.0f);
+	//circ.SetRotation(0.3);
+	circ.SetRadius(_RendererSettings::initial_window_height * 0.5f);
+	circ.SetColor({ 0.8f, 0.8f, 0.8f, 0.4f });
 
-	DebugPoint origin({}, { 0.9f, 0.9f, 0.9f, 1.0f }, DebugPoint::PointSizeFromRadius(5.0f), 0.0f);
-	Renderer::AddCanvasLayer(11);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&origin);
+	RectRender rect(*actor2);
+	Renderer::AddCanvasLayer(-3);
+	Renderer::GetCanvasLayer(-3)->OnAttach(&rect);
+	// TODO doesn't work if rect is cropped. The width/height in the scale is not accurate.
+	rect.CropToRelativeRect({ 0.0f, 0.0f, 1.0f, 1.0f });
+	rect.SetTransform({ {}, 0.0f, {side / rect.GetUVWidth(), side / rect.GetUVHeight()} });
 
-	//RectRender rect(*actor2);
-	//Renderer::AddCanvasLayer(-3);
-	//Renderer::GetCanvasLayer(-3)->OnAttach(&rect);
-	//rect.SetTransform({ {}, 0.0f, {2 * radius / rect.GetUVWidth(), 2 * radius / rect.GetUVHeight()} });
+	DebugPoint pnt({}, { 0.0f, 0.8f, 0.4f, 1.0f }, side);
+	Renderer::GetCanvasLayer(10)->OnAttach(&pnt);
+	//pnt.SetInnerRadius(0.25f);
+	pnt.SetInnerRadius(pnt.InnerRadiusFromBorderWidth(side * 0.25f));
 
 	for (;;)
 	{
