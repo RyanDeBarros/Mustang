@@ -18,6 +18,7 @@ public:
 
 	inline int GetWidth() const { return TextureFactory::GetWidth(m_Render.textureHandle); }
 	inline int GetHeight() const { return TextureFactory::GetHeight(m_Render.textureHandle); }
+	// TODO when rect is cropped, width/height when setting scale is not accurate. Also, define SetWidth and SetHeight so that scale is not necessary.
 	inline float GetUVWidth() const { return m_UVWidth; }
 	inline float GetUVHeight() const { return m_UVHeight; }
 	void SetPivot(float pivotX, float pivotY);

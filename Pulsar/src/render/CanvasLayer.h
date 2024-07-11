@@ -63,8 +63,7 @@ public:
 	void DrawPrimitive(class ActorPrimitive2D&);
 	void DrawSequencer(class ActorSequencer2D&);
 	void DrawArray(const Renderable& renderable, GLenum indexing_mode);
-	// TODO pool over multiple renderables and use glMultiDrawArrays
-	//void DrawMultiArray(const MultiRenderable& const);
+	void DrawMultiArray(const class DebugMultiPolygon&);
 
 private:
 	void SetBlending() const;
@@ -75,4 +74,6 @@ private:
 	void RegisterModel();
 	void BindBuffers() const;
 	void UnbindBuffers() const;
+	void BindAllExceptIndexes();
+	void UnbindAll();
 };

@@ -32,7 +32,7 @@ TileMap::~TileMap()
 
 ActorPrimitive2D* const TileMap::operator[](const int& i)
 {
-	// TODO?
+	// TODO? make TileMap just an ActorRenderBase, not ActorSequencer?
 	return nullptr;
 }
 

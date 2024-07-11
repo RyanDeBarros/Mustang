@@ -7,6 +7,9 @@
 #include "factory/UniformLexiconFactory.h"
 #include "actors/ActorPrimitive.h"
 #include "actors/ActorSequencer.h"
+#include "actors/shapes/DebugMultiPolygon.h"
+
+// TODO in all drawing cases check if renderable vertex/index buffer data is too large to fit in pools
 
 CanvasLayer::CanvasLayer(CanvasLayerData data)
 	: m_Data(data), m_LayerView((float)m_Data.pLeft, (float)m_Data.pRight, (float)m_Data.pBottom, (float)m_Data.pTop)
@@ -110,7 +113,6 @@ void CanvasLayer::DrawPrimitive(ActorPrimitive2D& primitive)
 			FlushAndReset();
 			currentModel = render.model;
 			currentLexiconHandle = render.model.uniformLexicon;
-			currentLexicon.Clear();
 			currentLexicon.MergeLexicon(render.model.uniformLexicon);
 			if (m_VAOs.find(currentModel) == m_VAOs.end())
 				RegisterModel();
@@ -144,22 +146,38 @@ void CanvasLayer::DrawArray(const Renderable& renderable, GLenum indexing_mode)
 	if (m_VAOs.find(currentModel) == m_VAOs.end())
 		RegisterModel();
 	PoolOverVerticesOnly(renderable);
-	TRY(glBindVertexArray(m_VAOs[currentModel]));
-	BindBuffers();
-	TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
-	ShaderFactory::Bind(currentModel.shader);
-	m_LayerView.PassVPUniform(currentModel.shader);
-	UniformLexiconFactory::OnApply(currentModel.uniformLexicon, currentModel.shader);
+	BindAllExceptIndexes();
 	if (vertexPos - m_VertexPool > 0)
 	{
 		TRY(glDrawArrays(indexing_mode, 0, renderable.vertexCount));
 	}
-	ShaderFactory::Unbind();
-	UnbindBuffers();
-	TRY(glBindVertexArray(0));
-	vertexPos = m_VertexPool;
-	//indexPos = m_IndexPool;
-	//m_TextureSlotBatch.clear();
+	UnbindAll();
+}
+
+void CanvasLayer::DrawMultiArray(const DebugMultiPolygon& multi_polygon)
+{
+	FlushAndReset();
+	currentModel = multi_polygon.m_Model;
+	if (currentModel == BatchModel{})
+		return;
+	if (m_VAOs.find(currentModel) == m_VAOs.end())
+		RegisterModel();
+	BindAllExceptIndexes();
+	for (const auto& poly : multi_polygon.m_Polygons)
+	{
+		if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(poly->m_Renderable))
+		{
+			TRY(glMultiDrawArrays(multi_polygon.m_IndexMode, multi_polygon.indexes_ptr, multi_polygon.index_counts_ptr, multi_polygon.draw_count));
+			UnbindAll();
+			BindAllExceptIndexes();
+		}
+		PoolOverVerticesOnly(poly->m_Renderable);
+	}
+	if (vertexPos - m_VertexPool > 0)
+	{
+		TRY(glMultiDrawArrays(multi_polygon.m_IndexMode, multi_polygon.indexes_ptr, multi_polygon.index_counts_ptr, multi_polygon.draw_count));
+	}
+	UnbindAll();
 }
 
 void CanvasLayer::SetBlending() const
@@ -224,28 +242,18 @@ void CanvasLayer::FlushAndReset()
 {
 	if (currentModel == BatchModel{})
 		return;
-	TRY(glBindVertexArray(m_VAOs[currentModel]));
-	BindBuffers();
-	TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
-	TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
+	BindAllExceptIndexes();
 	for (auto it = m_TextureSlotBatch.begin(); it != m_TextureSlotBatch.end(); it++)
 	{
 		// Note: due to the abstraction of glDrawElements and glBufferSubData behind CanvasLayer, there is currently no need to actually call TextureFactory::Unbind on anything.
 		TextureFactory::Bind(*it, (TextureSlot)(it - m_TextureSlotBatch.begin()));
 	}
-	ShaderFactory::Bind(currentModel.shader);
-	m_LayerView.PassVPUniform(currentModel.shader);
-	UniformLexiconFactory::OnApply(currentModel.uniformLexicon, currentModel.shader);
+	TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
 	if (indexPos - m_IndexPool > 0)
 	{
 		TRY(glDrawElements(GL_TRIANGLES, (GLsizei)(indexPos - m_IndexPool), GL_UNSIGNED_INT, nullptr));
 	}
-	ShaderFactory::Unbind();
-	UnbindBuffers();
-	TRY(glBindVertexArray(0));
-	vertexPos = m_VertexPool;
-	indexPos = m_IndexPool;
-	m_TextureSlotBatch.clear();
+	UnbindAll();
 }
 
 void CanvasLayer::RegisterModel()
@@ -270,4 +278,25 @@ void CanvasLayer::UnbindBuffers() const
 {
 	TRY(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	TRY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+}
+
+void CanvasLayer::BindAllExceptIndexes()
+{
+	TRY(glBindVertexArray(m_VAOs[currentModel]));
+	BindBuffers();
+	ShaderFactory::Bind(currentModel.shader);
+	m_LayerView.PassVPUniform(currentModel.shader);
+	UniformLexiconFactory::OnApply(currentModel.uniformLexicon, currentModel.shader);
+	TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
+}
+
+void CanvasLayer::UnbindAll()
+{
+	ShaderFactory::Unbind();
+	UnbindBuffers();
+	TRY(glBindVertexArray(0));
+	vertexPos = m_VertexPool;
+	indexPos = m_IndexPool;
+	m_TextureSlotBatch.clear();
+	currentLexicon.Clear();
 }

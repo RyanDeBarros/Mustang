@@ -228,9 +228,10 @@ void run(GLFWwindow* window)
 	Renderer::ChangeCanvasLayerIndex(-1, 1);
 
 	Renderer::AddCanvasLayer(10);
-	DebugPolygon poly({ {0.0f, 0.0f}, {100.0f, 0.0f}, {0.0f, 200.0f}, {100.0f, 200.0f}, {0.0f, 400.0f}, {100.0f, 400.0f} }, {}, { 0.3f, 0.4f, 1.0f, 1.0f });
-	//Renderer::GetCanvasLayer(10)->OnAttach(&poly);
+	DebugPolygon poly({ {0.0f, 0.0f}, {100.0f, 0.0f}, {50.0f, 200.0f}, {150.0f, 200.0f}, {0.0f, 400.0f}, {100.0f, 400.0f} }, {}, { 0.1f, 0.2f, 1.0f, 1.0f }, GL_TRIANGLE_STRIP);
+	Renderer::GetCanvasLayer(10)->OnAttach(&poly);
 	//poly.visible = false;
+	Renderer::GetCanvasLayer(10)->OnSetZIndex(&poly, 5);
 	Renderer::RemoveCanvasLayer(0);
 	Renderer::RemoveCanvasLayer(1);
 
@@ -246,11 +247,10 @@ void run(GLFWwindow* window)
 	RectRender rect(*actor2);
 	Renderer::AddCanvasLayer(-3);
 	Renderer::GetCanvasLayer(-3)->OnAttach(&rect);
-	// TODO doesn't work if rect is cropped. The width/height in the scale is not accurate.
 	rect.CropToRelativeRect({ 0.0f, 0.0f, 1.0f, 1.0f });
 	rect.SetTransform({ {}, 0.0f, {side / rect.GetUVWidth(), side / rect.GetUVHeight()} });
 
-	DebugPoint pnt({}, { 0.0f, 0.8f, 0.4f, 1.0f }, side);
+	DebugPoint pnt({}, { 0.0f, 0.4f, 0.1f, 0.7f }, side);
 	Renderer::GetCanvasLayer(10)->OnAttach(&pnt);
 	//pnt.SetInnerRadius(0.25f);
 	pnt.SetInnerRadius(pnt.InnerRadiusFromBorderWidth(side * 0.25f));
