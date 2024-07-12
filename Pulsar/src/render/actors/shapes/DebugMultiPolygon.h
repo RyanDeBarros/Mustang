@@ -11,6 +11,7 @@
 class DebugMultiPolygon
 {
 	friend class CanvasLayer;
+	friend class DebugBatcher;
 
 	std::vector<std::shared_ptr<DebugPolygon>> m_Polygons;
 	BatchModel m_Model;
@@ -24,15 +25,18 @@ class DebugMultiPolygon
 	void Sort();
 
 public:
+	DebugMultiPolygon();
 	DebugMultiPolygon(const std::pair<GLenum, BatchModel>& pair);
 	DebugMultiPolygon(const DebugMultiPolygon&) = delete;
-	DebugMultiPolygon(DebugMultiPolygon&&) = delete;
+	DebugMultiPolygon(DebugMultiPolygon&&) noexcept;
 	~DebugMultiPolygon();
 
 	void ChangeZIndex(const std::vector<std::shared_ptr<DebugPolygon>>::iterator& where, const ZIndex& z);
 	void ChangeZIndex(const size_t& i, const ZIndex& z);
 	void PushBack(const std::shared_ptr<DebugPolygon>& poly);
 	void PushBackAll(const std::vector<std::shared_ptr<DebugPolygon>>& polys);
+	void BufferPush(const std::shared_ptr<DebugPolygon>& poly);
+	void FlushPush();
 	void Erase(const std::vector<std::shared_ptr<DebugPolygon>>::iterator& where);
 	void Erase(const size_t& i);
 	void EraseAll(const std::vector<size_t>& is);

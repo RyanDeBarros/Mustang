@@ -2,9 +2,21 @@
 
 #include <algorithm>
 
+DebugMultiPolygon::DebugMultiPolygon()
+	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(0), m_IndexMode(0), m_Model({})
+{
+}
+
 DebugMultiPolygon::DebugMultiPolygon(const std::pair<GLenum, BatchModel>& pair)
 	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(0), m_IndexMode(pair.first), m_Model(pair.second)
 {
+}
+
+DebugMultiPolygon::DebugMultiPolygon(DebugMultiPolygon&& other) noexcept
+	: indexes_ptr(other.indexes_ptr), index_counts_ptr(other.index_counts_ptr), draw_count(other.draw_count), m_IndexMode(other.m_IndexMode), m_Model(other.m_Model), m_Polygons(other.m_Polygons)
+{
+	other.indexes_ptr = nullptr;
+	other.index_counts_ptr = nullptr;
 }
 
 DebugMultiPolygon::~DebugMultiPolygon()
@@ -49,6 +61,17 @@ void DebugMultiPolygon::PushBackAll(const std::vector<std::shared_ptr<DebugPolyg
 {
 	for (auto& poly : polys)
 		m_Polygons.push_back(poly);
+	Sort();
+	UpdatePtrs();
+}
+
+void DebugMultiPolygon::BufferPush(const std::shared_ptr<DebugPolygon>& poly)
+{
+	m_Polygons.push_back(poly);
+}
+
+void DebugMultiPolygon::FlushPush()
+{
 	Sort();
 	UpdatePtrs();
 }

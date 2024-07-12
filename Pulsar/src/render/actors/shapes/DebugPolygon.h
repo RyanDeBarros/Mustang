@@ -11,6 +11,7 @@ class DebugPolygon : public ActorRenderBase2D, public Transformable2D
 {
 protected:
 	friend class DebugMultiPolygon;
+	friend class DebugBatcher;
 
 	ZIndex m_Z;
 	friend class CanvasLayer;
