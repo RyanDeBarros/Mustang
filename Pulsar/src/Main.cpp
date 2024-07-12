@@ -19,6 +19,7 @@
 #include "render/actors/shapes/DebugPolygon.h"
 #include "render/actors/shapes/DebugPoint.h"
 #include "render/actors/shapes/DebugCircle.h"
+#include "render/actors/shapes/DebugBatcher.h"
 
 static void run(GLFWwindow*);
 
@@ -255,6 +256,16 @@ void run(GLFWwindow* window)
 	//pnt.SetInnerRadius(0.25f);
 	pnt.SetInnerRadius(pnt.InnerRadiusFromBorderWidth(side * 0.25f));
 
+	DebugBatcher debug_batcher;
+	auto p_circ = std::make_shared<DebugCircle>(circ);
+	auto p_pnt = std::make_shared<DebugPoint>(pnt);
+	auto p_poly = std::make_shared<DebugPolygon>(poly);
+	debug_batcher.PushBackAll({ p_circ, p_pnt, p_poly });
+	Renderer::RemoveCanvasLayer(10);
+	Renderer::AddCanvasLayer(10);
+	Renderer::GetCanvasLayer(10)->OnAttach(&debug_batcher);
+	debug_batcher.ChangeZIndex(p_circ->GetDebugModel(), -1);
+
 	for (;;)
 	{
 		time = static_cast<real>(glfwGetTime());
@@ -263,7 +274,7 @@ void run(GLFWwindow* window)
 		totalTime += deltaTime;
 		// OnUpdate here
 
-		poly.OperatePosition([&](glm::vec2& p) { p.x = 150.0f * glm::sin(totalTime); });
+		p_poly->OperatePosition([&](glm::vec2& p) { p.x = 150.0f * glm::sin(totalTime); });
 
 		actor4->OperatePosition([&](glm::vec2& p) { p.x += 100.0f * deltaTime; });
 		//flags.SyncGlobalWithParentPosition();

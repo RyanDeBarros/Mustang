@@ -146,12 +146,12 @@ void CanvasLayer::DrawArray(const Renderable& renderable, GLenum indexing_mode)
 	if (m_VAOs.find(currentModel) == m_VAOs.end())
 		RegisterModel();
 	PoolOverVerticesOnly(renderable);
-	BindAllExceptIndexes();
 	if (vertexPos - m_VertexPool > 0)
 	{
+ 		BindAllExceptIndexes();
 		TRY(glDrawArrays(indexing_mode, 0, renderable.vertexCount));
+		UnbindAll();
 	}
-	UnbindAll();
 }
 
 void CanvasLayer::DrawMultiArray(const DebugMultiPolygon& multi_polygon)
@@ -162,22 +162,24 @@ void CanvasLayer::DrawMultiArray(const DebugMultiPolygon& multi_polygon)
 		return;
 	if (m_VAOs.find(currentModel) == m_VAOs.end())
 		RegisterModel();
-	BindAllExceptIndexes();
 	for (const auto& poly : multi_polygon.m_Polygons)
 	{
-		if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(poly->m_Renderable))
+		if (!poly->DrawPrep())
+			continue;
+		if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(poly->m_Renderable) && vertexPos - m_VertexPool > 0)
 		{
+			BindAllExceptIndexes();
 			TRY(glMultiDrawArrays(multi_polygon.m_IndexMode, multi_polygon.indexes_ptr, multi_polygon.index_counts_ptr, multi_polygon.draw_count));
 			UnbindAll();
-			BindAllExceptIndexes();
 		}
 		PoolOverVerticesOnly(poly->m_Renderable);
 	}
 	if (vertexPos - m_VertexPool > 0)
 	{
+		BindAllExceptIndexes();
 		TRY(glMultiDrawArrays(multi_polygon.m_IndexMode, multi_polygon.indexes_ptr, multi_polygon.index_counts_ptr, multi_polygon.draw_count));
+		UnbindAll();
 	}
-	UnbindAll();
 }
 
 void CanvasLayer::SetBlending() const

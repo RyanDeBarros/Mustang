@@ -2,18 +2,20 @@
 
 #include <algorithm>
 
+#include "render/CanvasLayer.h"
+
 DebugMultiPolygon::DebugMultiPolygon()
-	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(0), m_IndexMode(0), m_Model({})
+	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(0), m_IndexMode(0), m_Model({}), m_Z(0)
 {
 }
 
-DebugMultiPolygon::DebugMultiPolygon(const std::pair<GLenum, BatchModel>& pair)
-	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(0), m_IndexMode(pair.first), m_Model(pair.second)
+DebugMultiPolygon::DebugMultiPolygon(const std::pair<GLenum, BatchModel>& pair, const ZIndex& z)
+	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(0), m_IndexMode(pair.first), m_Model(pair.second), m_Z(z)
 {
 }
 
 DebugMultiPolygon::DebugMultiPolygon(DebugMultiPolygon&& other) noexcept
-	: indexes_ptr(other.indexes_ptr), index_counts_ptr(other.index_counts_ptr), draw_count(other.draw_count), m_IndexMode(other.m_IndexMode), m_Model(other.m_Model), m_Polygons(other.m_Polygons)
+	: indexes_ptr(other.indexes_ptr), index_counts_ptr(other.index_counts_ptr), draw_count(other.draw_count), m_IndexMode(other.m_IndexMode), m_Model(other.m_Model), m_Polygons(other.m_Polygons), m_Z(other.m_Z)
 {
 	other.indexes_ptr = nullptr;
 	other.index_counts_ptr = nullptr;
@@ -27,6 +29,11 @@ DebugMultiPolygon::~DebugMultiPolygon()
 		delete[] index_counts_ptr;
 }
 
+void DebugMultiPolygon::RequestDraw(CanvasLayer* canvas_layer)
+{
+	canvas_layer->DrawMultiArray(*this);
+}
+
 void DebugMultiPolygon::Sort()
 {
 	std::sort(m_Polygons.begin(), m_Polygons.end(),
@@ -36,7 +43,7 @@ void DebugMultiPolygon::Sort()
 		});
 }
 
-void DebugMultiPolygon::ChangeZIndex(const std::vector<std::shared_ptr<DebugPolygon>>::iterator& where, const ZIndex& z)
+void DebugMultiPolygon::ChangeZIndex(const iterator& where, const ZIndex& z)
 {
 	(*where)->SetZIndex(z);
 	Sort();
@@ -76,7 +83,7 @@ void DebugMultiPolygon::FlushPush()
 	UpdatePtrs();
 }
 
-void DebugMultiPolygon::Erase(const std::vector<std::shared_ptr<DebugPolygon>>::iterator& where)
+void DebugMultiPolygon::Erase(const iterator& where)
 {
 	m_Polygons.erase(where);
 	UpdatePtrs();
@@ -95,12 +102,12 @@ void DebugMultiPolygon::EraseAll(const std::vector<size_t>& is)
 	UpdatePtrs();
 }
 
-std::vector<std::shared_ptr<DebugPolygon>>::iterator DebugMultiPolygon::Find(const std::shared_ptr<DebugPolygon>& poly)
+DebugMultiPolygon::iterator DebugMultiPolygon::Find(const std::shared_ptr<DebugPolygon>& poly)
 {
 	return std::find(m_Polygons.begin(), m_Polygons.end(), poly);
 }
 
-std::vector<std::shared_ptr<DebugPolygon>>::const_iterator DebugMultiPolygon::PolyBegin()
+DebugMultiPolygon::const_iterator DebugMultiPolygon::PolyBegin()
 {
 	return m_Polygons.begin();
 }
@@ -114,14 +121,12 @@ void DebugMultiPolygon::UpdatePtrs() const
 	draw_count = m_Polygons.size();
 	indexes_ptr = new GLint[draw_count];
 	index_counts_ptr = new GLsizei[draw_count];
-	auto iter = m_Polygons.begin();
 	for (size_t i = 0; i < draw_count; i++)
 	{
-		index_counts_ptr[i] = static_cast<GLsizei>((*iter)->m_Points.size());
+		index_counts_ptr[i] = static_cast<GLsizei>(m_Polygons[i]->m_Points.size());
 		if (i == 0)
 			indexes_ptr[i] = 0;
 		else
 			indexes_ptr[i] = static_cast<GLint>(indexes_ptr[i - 1] + index_counts_ptr[i - 1]);
-		iter++;
 	}
 }

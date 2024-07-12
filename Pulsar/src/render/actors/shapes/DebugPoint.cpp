@@ -10,14 +10,25 @@ DebugPoint::DebugPoint(const glm::vec2& position, const glm::vec4& outer_color, 
 	loadRenderable(_RendererSettings::solid_point_filepath.c_str(), m_Renderable);
 }
 
-void DebugPoint::RequestDraw(CanvasLayer* canvas_layer)
+DebugPoint::DebugPoint(const DebugPoint& other)
+	: DebugPolygon(other), m_Diameter(other.m_Diameter), m_InnerRadius(other.m_InnerRadius), m_InnerColor(other.m_InnerColor), m_PointStatus(other.m_PointStatus)
+{
+}
+
+DebugPoint::DebugPoint(DebugPoint&& other) noexcept
+	: DebugPolygon(other), m_Diameter(other.m_Diameter), m_InnerRadius(other.m_InnerRadius), m_InnerColor(other.m_InnerColor), m_PointStatus(other.m_PointStatus)
+{
+}
+
+bool DebugPoint::DrawPrep()
 {
 	if (visible)
 	{
 		DebugPolygon::CheckStatus();
 		DebugPoint::CheckStatus();
-		canvas_layer->DrawArray(m_Renderable, m_IndexingMode);
+		return true;
 	}
+	return false;
 }
 
 void DebugPoint::CheckStatus()

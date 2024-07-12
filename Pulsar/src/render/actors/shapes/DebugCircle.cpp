@@ -12,6 +12,16 @@ DebugCircle::DebugCircle(const float& radius, const Transform2D& transform, cons
 	m_Status &= ~0b1;
 }
 
+DebugCircle::DebugCircle(const DebugCircle& other)
+	: DebugPolygon(other), m_Radius(other.m_Radius)
+{
+}
+
+DebugCircle::DebugCircle(DebugCircle&& other) noexcept
+	: DebugPolygon(other), m_Radius(other.m_Radius)
+{
+}
+
 void DebugCircle::SetRadius(const float& radius)
 {
 	m_Radius = 2 * radius;

@@ -12,13 +12,30 @@ DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const Transform
 	SetTransform(transform);
 }
 
+DebugPolygon::DebugPolygon(const DebugPolygon& other)
+	: m_Z(other.m_Z), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Transform(other.m_Transform), m_Status(other.m_Status)
+{
+}
+
+DebugPolygon::DebugPolygon(DebugPolygon&& other) noexcept
+	: m_Z(other.m_Z), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Transform(other.m_Transform), m_Status(other.m_Status)
+{
+}
+
 void DebugPolygon::RequestDraw(CanvasLayer* canvas_layer)
+{
+	if (DrawPrep())
+		canvas_layer->DrawArray(m_Renderable, m_IndexingMode);
+}
+
+bool DebugPolygon::DrawPrep()
 {
 	if (visible)
 	{
 		CheckStatus();
-		canvas_layer->DrawArray(m_Renderable, m_IndexingMode);
+		return true;
 	}
+	return false;
 }
 
 void DebugPolygon::CheckStatus()

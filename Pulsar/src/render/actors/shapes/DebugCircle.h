@@ -8,6 +8,8 @@ class DebugCircle : public DebugPolygon
 
 public:
 	DebugCircle(const float& radius = 1.0f, const Transform2D& transform = {}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, const ZIndex& z = 0);
+	DebugCircle(const DebugCircle&);
+	DebugCircle(DebugCircle&&) noexcept;
 
 	inline float GetRadius() const { return m_Radius; }
 	void SetRadius(const float& radius);

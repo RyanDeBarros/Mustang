@@ -7,6 +7,19 @@
 #include "render/ActorRenderBase.h"
 #include "render/Transform.h"
 
+typedef std::pair<GLenum, BatchModel> DebugModel;
+
+template<>
+struct std::hash<DebugModel>
+{
+	inline size_t operator()(const DebugModel& model) const
+	{
+		auto hash1 = hash<GLenum>{}(model.first);
+		auto hash2 = hash<BatchModel>{}(model.second);
+		return hash1 ^ (hash2 << 1);
+	}
+};
+
 class DebugPolygon : public ActorRenderBase2D, public Transformable2D
 {
 protected:
@@ -28,10 +41,15 @@ protected:
 
 public:
 	DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform = {}, const glm::vec4 & color = { 1.0f, 1.0f, 1.0f, 1.0f }, const GLenum & indexing_mode = GL_LINE_STRIP, const ZIndex & z = 0);
+	DebugPolygon(const DebugPolygon&);
+	DebugPolygon(DebugPolygon&&) noexcept;
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 	virtual ZIndex GetZIndex() const override { return m_Z; }
 	virtual void SetZIndex(const ZIndex& z) override { m_Z = z; }
+
+	virtual bool DrawPrep();
+	inline DebugModel GetDebugModel() const { return { m_IndexingMode, m_Renderable.model }; }
 
 	inline std::vector<glm::vec2>& PointsRef() { m_Status |= 0b1; return m_Points; }
 	inline void SetPointPosition(const size_t& i, const glm::vec2& point) { if (i >= 0 && i < m_Points.size()) { m_Points[i] = point; m_Status |= 0b100; } }

@@ -13,8 +13,10 @@ class DebugPoint : public DebugPolygon
 
 public:
 	DebugPoint(const glm::vec2& position = {0.0f, 0.0f}, const glm::vec4& outer_color = { 1.0f, 1.0f, 1.0f, 1.0f }, const float& diameter = 2.0f, const float& inner_radius = 0.0f, const glm::vec4& inner_color = { 0.0f, 0.0f, 0.0f, 0.0f }, const ZIndex& z = 0);
+	DebugPoint(const DebugPoint&);
+	DebugPoint(DebugPoint&&) noexcept;
 
-	void RequestDraw(class CanvasLayer* canvas_layer) override;
+	virtual bool DrawPrep() override;
 
 	inline float GetDiameter() const { return m_Diameter; }
 	inline void SetDiameter(const float& point_size) { m_Diameter = point_size; m_PointStatus |= 0b1; }
