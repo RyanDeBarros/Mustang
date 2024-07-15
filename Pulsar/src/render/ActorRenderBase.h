@@ -4,8 +4,13 @@
 
 class ActorRenderBase2D
 {
+protected:
+	ZIndex m_Z;
+
 public:
+	ActorRenderBase2D(const ZIndex& z) { SetZIndex(z); }
+
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) = 0;
-	virtual ZIndex GetZIndex() const { return 0; }
-	virtual void SetZIndex(const ZIndex& z) {}
+	inline virtual ZIndex GetZIndex() const { return m_Z; }
+	inline virtual void SetZIndex(const ZIndex& z) { m_Z = z; }
 };

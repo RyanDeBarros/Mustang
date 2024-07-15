@@ -23,7 +23,6 @@ class TileMap : public ActorSequencer2D
 	Atlas* m_Atlas;
 	std::vector<TMElement> m_Map;
 	Permutation m_Ordering;
-	ZIndex m_Z;
 	Transform2D m_Transform;
 
 public:
@@ -33,8 +32,6 @@ public:
 	ActorPrimitive2D* const operator[](const int& i) override;
 	virtual BufferCounter PrimitiveCount() const;
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
-	inline ZIndex GetZIndex() const override { return m_Z; }
-	inline void SetZIndex(const ZIndex& z) override { m_Z = z; }
 
 	bool SetOrdering(const Permutation& permutation);
 	inline void SetTransform(const Transform2D& tr) { m_Transform = tr; }

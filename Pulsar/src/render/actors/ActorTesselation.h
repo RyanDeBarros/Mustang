@@ -31,6 +31,7 @@ private:
 
 	BufferCounter RenderSeqCount() const;
 	void SetZIndex(const ZIndex& z) override;
+
 public:
 	ActorTesselation2D(ActorRenderBase2D* const actor);
 	~ActorTesselation2D();

@@ -54,7 +54,7 @@ Transform2D Transform2D::AbsTo(const Transform2D& local, const Transform2D& pare
 	return { parent.position + Transform::Rotation(parent.rotation) * (parent.scale * local.position), parent.rotation + local.rotation, parent.scale * local.scale };
 }
 
-LocalTransformer2D::LocalTransformer2D(Transform2D* const parent, Transformable2D* const child)
+LocalTransformer2D::LocalTransformer2D(Transform2D const* const parent, Transformable2D* const child)
 	: m_Parent(parent), m_Child(child)
 {
 	SyncLocalWithGlobal();

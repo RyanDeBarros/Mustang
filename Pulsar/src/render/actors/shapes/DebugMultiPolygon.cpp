@@ -5,17 +5,17 @@
 #include "render/CanvasLayer.h"
 
 DebugMultiPolygon::DebugMultiPolygon()
-	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(0), m_IndexMode(0), m_Model({}), m_Z(0)
+	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(0), m_IndexMode(0), m_Model({}), ActorRenderBase2D(0)
 {
 }
 
 DebugMultiPolygon::DebugMultiPolygon(const std::pair<GLenum, BatchModel>& pair, const ZIndex& z)
-	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(0), m_IndexMode(pair.first), m_Model(pair.second), m_Z(z)
+	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(0), m_IndexMode(pair.first), m_Model(pair.second), ActorRenderBase2D(z)
 {
 }
 
 DebugMultiPolygon::DebugMultiPolygon(DebugMultiPolygon&& other) noexcept
-	: indexes_ptr(other.indexes_ptr), index_counts_ptr(other.index_counts_ptr), draw_count(other.draw_count), m_IndexMode(other.m_IndexMode), m_Model(other.m_Model), m_Polygons(other.m_Polygons), m_Z(other.m_Z)
+	: indexes_ptr(other.indexes_ptr), index_counts_ptr(other.index_counts_ptr), draw_count(other.draw_count), m_IndexMode(other.m_IndexMode), m_Model(other.m_Model), m_Polygons(other.m_Polygons), ActorRenderBase2D(other.m_Z)
 {
 	other.indexes_ptr = nullptr;
 	other.index_counts_ptr = nullptr;

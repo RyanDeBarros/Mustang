@@ -4,12 +4,12 @@
 #include "render/CanvasLayer.h"
 
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, const ZIndex& z, const bool& visible)
-	: m_Render(render), m_Transform(transform), m_Z(z), m_Status(visible ? 0b111 : 0b110)
+	: m_Render(render), Transformable2D(transform), ActorRenderBase2D(z), m_Status(visible ? 0b111 : 0b110)
 {
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const ActorPrimitive2D& primitive)
-	: m_Render(primitive.m_Render), m_Transform(primitive.m_Transform), m_Z(primitive.m_Z), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
+	: m_Render(primitive.m_Render), Transformable2D(primitive.m_Transform), ActorRenderBase2D(primitive.m_Z), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
 {
 }
 

@@ -19,13 +19,12 @@ class ActorComposite2D : virtual public ActorSequencer2D
 	ActorPrimitive2D** tail;
 	ActorPrimitive2D** head;
 	ActorPrimitive2D** cap;
-	ZIndex m_CompositeZ;
+
 public:
 	ActorComposite2D(CompositeMode mode, ActorPrimitiveCounter initial_size = 1, ZIndex z = 0);
 	~ActorComposite2D();
 
 	ActorPrimitive2D* const operator[](const int& i) override;
-	inline ZIndex GetZIndex() const override { return m_CompositeZ; }
 	BufferCounter PrimitiveCount() const override { return static_cast<BufferCounter>(head - tail); }
 
 	void Push(ActorPrimitive2D* primitive);
@@ -37,7 +36,6 @@ public:
 	bool Erase(ActorPrimitive2D* primitive);
 
 private:
-	inline void SetZIndex(const ZIndex& z) override { m_CompositeZ = z; }
 	void _assert_valid_index(ActorPrimitiveCounter index);
 	void _try_increase_alloc();
 	void _try_decrease_alloc();

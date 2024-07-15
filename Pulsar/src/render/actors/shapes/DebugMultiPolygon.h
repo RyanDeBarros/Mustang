@@ -13,8 +13,6 @@ class DebugMultiPolygon : public ActorRenderBase2D
 	friend class CanvasLayer;
 	friend class DebugBatcher;
 
-	ZIndex m_Z;
-
 	std::vector<std::shared_ptr<DebugPolygon>> m_Polygons;
 	BatchModel m_Model;
 	GLenum m_IndexMode;
@@ -37,8 +35,6 @@ public:
 	~DebugMultiPolygon();
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
-	inline virtual ZIndex GetZIndex() const override { return m_Z; }
-	inline virtual void SetZIndex(const ZIndex& z) override { m_Z = z; }
 
 	void ChangeZIndex(const iterator& where, const ZIndex& z);
 	void ChangeZIndex(const size_t& i, const ZIndex& z);

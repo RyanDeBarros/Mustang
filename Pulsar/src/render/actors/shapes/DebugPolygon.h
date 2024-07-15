@@ -26,13 +26,11 @@ protected:
 	friend class DebugMultiPolygon;
 	friend class DebugBatcher;
 
-	ZIndex m_Z;
 	friend class CanvasLayer;
 	Renderable m_Renderable;
 	std::vector<glm::vec2> m_Points;
 	glm::vec4 m_Color;
 	GLenum m_IndexingMode;
-	Transform2D m_Transform;
 
 	// 0b ... transform RS | transform P | point positions | color | indexing mode or points vector
 	unsigned char m_Status = 0b11111;
@@ -45,8 +43,6 @@ public:
 	DebugPolygon(DebugPolygon&&) noexcept;
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
-	virtual ZIndex GetZIndex() const override { return m_Z; }
-	virtual void SetZIndex(const ZIndex& z) override { m_Z = z; }
 
 	virtual bool DrawPrep();
 	inline DebugModel GetDebugModel() const { return { m_IndexingMode, m_Renderable.model }; }
@@ -59,14 +55,10 @@ public:
 	inline glm::vec4 GetColor() const { return m_Color; }
 	inline void SetColor(const glm::vec4& color) { m_Status |= 0b10; m_Color = color; }
 
-	inline Transform2D GetTransform() const override { return m_Transform; }
-	inline void SetTransform(const Transform2D& transform) override { m_Transform = transform; m_Status |= 0b11000; }
-	inline glm::vec2 GetPosition() const override { return m_Transform.position; }
-	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); m_Status |= 0b1000; }
-	inline glm::float32 GetRotation() const override { return m_Transform.rotation; }
-	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform.rotation); m_Status |= 0b10000; }
-	inline glm::vec2 GetScale() const override { return m_Transform.scale; }
-	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); m_Status |= 0b10000; }
+	inline virtual void OperateTransform(const std::function<void(Transform2D& transform)>& op) override { op(m_Transform); m_Status |= 0b11000; }
+	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); m_Status |= 0b1000; }
+	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform.rotation); m_Status |= 0b10000; }
+	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); m_Status |= 0b10000; }
 
 	bool visible = true;
 };

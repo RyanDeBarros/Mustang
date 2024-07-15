@@ -3,7 +3,7 @@
 #include <algorithm>
 
 TileMap::TileMap(const TileHandle& atlas_handle, const TextureSettings& texture_settings, const ShaderHandle& shader, const ZIndex& z, const bool& visible)
-	: m_Z(z)
+	: ActorSequencer2D(z)
 {
 	Tile* t = TileFactory::GetTileRef(atlas_handle);
 	m_Atlas = dynamic_cast<Atlas*>(t);

@@ -1,7 +1,7 @@
 #include "ActorTesselation.h"
 
 ActorTesselation2D::ActorTesselation2D(ActorRenderBase2D* const actor)
-	: m_Actor(actor)
+	: m_Actor(actor), ActorSequencer2D(0)
 {
 	if (dynamic_cast<ActorPrimitive2D*>(m_Actor))
 	{

@@ -11,18 +11,15 @@
 
 class DebugBatcher : public ActorRenderBase2D
 {
-	ZIndex m_Z;
 	std::unordered_map<DebugModel, DebugMultiPolygon> m_Slots;
 	std::vector<DebugMultiPolygon*> m_OrderedTraversal;
 
 public:
-	DebugBatcher(const ZIndex& z = 0) : m_Z(z) {}
+	DebugBatcher(const ZIndex& z = 0) : ActorRenderBase2D(z) {}
 	DebugBatcher(const DebugBatcher&) = delete;
 	DebugBatcher(DebugBatcher&&) = delete;
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
-	virtual ZIndex GetZIndex() const override { return m_Z; }
-	virtual void SetZIndex(const ZIndex& z) override { m_Z = z; }
 
 	bool ChangeZIndex(const DebugModel& model, const ZIndex& z);
 	bool ChangeZIndex(const DebugMultiPolygon::iterator& where, const ZIndex& z);

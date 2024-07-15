@@ -4,21 +4,20 @@
 #include "AssetLoader.h"
 
 DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform, const glm::vec4& color, const GLenum& indexing_mode, const ZIndex& z)
-	: m_Z(z), m_Color(color)
+	: ActorRenderBase2D(z), m_Color(color), Transformable2D(transform)
 {
 	loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
 	SetIndexingMode(indexing_mode);
 	PointsRef() = points;
-	SetTransform(transform);
 }
 
 DebugPolygon::DebugPolygon(const DebugPolygon& other)
-	: m_Z(other.m_Z), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Transform(other.m_Transform), m_Status(other.m_Status)
+	: ActorRenderBase2D(other.m_Z), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), Transformable2D(other.m_Transform), m_Status(other.m_Status)
 {
 }
 
 DebugPolygon::DebugPolygon(DebugPolygon&& other) noexcept
-	: m_Z(other.m_Z), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Transform(other.m_Transform), m_Status(other.m_Status)
+	: ActorRenderBase2D(other.m_Z), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), Transformable2D(other.m_Transform), m_Status(other.m_Status)
 {
 }
 
