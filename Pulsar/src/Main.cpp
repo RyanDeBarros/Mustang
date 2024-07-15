@@ -266,6 +266,14 @@ void run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(10)->OnAttach(&debug_batcher);
 	debug_batcher.ChangeZIndex(p_circ->GetDebugModel(), -1);
 
+	DebugBatcher triangle_batcher;
+	auto tri1 = std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {100, 0}, {100, 100} }, {}, {1, 0.5f, 0.5f, 1}, GL_TRIANGLE_FAN));
+	auto tri2 = std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, -200}, {100, -200}, {50, -100} }, {}, {1, 0.5f, 0.5f, 1}, GL_TRIANGLE_FAN));
+	auto tri3 = std::shared_ptr<DebugPolygon>(new DebugPolygon({ {-400, -100}, {-300, -100}, {-240, -50} }, {}, {1, 0.5f, 0.5f, 1}, GL_TRIANGLE_FAN));
+	triangle_batcher.PushBackAll({ tri1, tri2, tri3 });
+	Renderer::AddCanvasLayer(11);
+	Renderer::GetCanvasLayer(11)->OnAttach(&triangle_batcher);
+
 	for (;;)
 	{
 		time = static_cast<real>(glfwGetTime());
