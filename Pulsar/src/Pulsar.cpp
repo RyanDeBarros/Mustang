@@ -1,7 +1,4 @@
-#include "Main.h"
-
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "Pulsar.h"
 
 #include "Typedefs.h"
 #include "RendererSettings.h"
@@ -21,7 +18,12 @@
 #include "render/actors/shapes/DebugCircle.h"
 #include "render/actors/shapes/DebugBatcher.h"
 
-static void run(GLFWwindow*);
+using namespace Pulsar;
+
+real Pulsar::drawTime;
+real Pulsar::deltaDrawTime;
+real Pulsar::prevDrawTime;
+real Pulsar::totalDrawTime;
 
 static void window_refresh_callback(GLFWwindow* window)
 {
@@ -76,7 +78,7 @@ int Pulsar::StartUp()
 	TRY(Logger::LogInfo(glGetString(GL_VERSION)));
 	Renderer::Init();
 	Renderer::FocusWindow(window);
-	run(window);
+	Run(window);
 	return 0;
 }
 
@@ -86,12 +88,10 @@ void Pulsar::Terminate()
 	glfwTerminate();
 }
 
-void run(GLFWwindow* window)
+void Pulsar::Run(GLFWwindow* window)
 {
-	real time = static_cast<real>(glfwGetTime());
-	real deltaTime = 0;
-	real prevTime = time;
-	real totalTime = 0;
+	prevDrawTime = drawTime = static_cast<real>(glfwGetTime());
+	deltaDrawTime = totalDrawTime = 0;
 
 	// Load textures
 	TextureHandle textureSnowman, textureTux, textureFlag;
@@ -276,22 +276,22 @@ void run(GLFWwindow* window)
 
 	for (;;)
 	{
-		time = static_cast<real>(glfwGetTime());
-		deltaTime = time - prevTime;
-		prevTime = time;
-		totalTime += deltaTime;
+		drawTime = static_cast<real>(glfwGetTime());
+		deltaDrawTime = drawTime - prevDrawTime;
+		prevDrawTime = drawTime;
+		totalDrawTime += deltaDrawTime;
 		// OnUpdate here
 
-		p_poly->OperatePosition([&](glm::vec2& p) { p.x = 150.0f * glm::sin(totalTime); });
+		p_poly->OperatePosition([&](glm::vec2& p) { p.x = 150.0f * glm::sin(totalDrawTime); });
 
-		actor4->OperatePosition([&](glm::vec2& p) { p.x += 100.0f * deltaTime; });
+		actor4->OperatePosition([&](glm::vec2& p) { p.x += 100.0f * deltaDrawTime; });
 		//flags.SyncGlobalWithParentPosition();
-		actor4->OperateScale([&](glm::vec2& sc) { sc += 50.0 * deltaTime; });
+		actor4->OperateScale([&](glm::vec2& sc) { sc += 50.0 * deltaDrawTime; });
 		//flags.SyncGlobalWithParentScale();
-		actor4->OperateRotation([&](glm::float32& r) { r += deltaTime; });
+		actor4->OperateRotation([&](glm::float32& r) { r += deltaDrawTime; });
 		//flags.SyncGlobalWithParentRotation();
 		flags.SyncGlobalWithLocal();
-		flags.OperateLocalRotation([&](glm::float32& r) { r -= 1.2f * deltaTime; });
+		flags.OperateLocalRotation([&](glm::float32& r) { r -= 1.2f * deltaDrawTime; });
 		
 		Renderer::OnDraw();
 		glfwPollEvents();

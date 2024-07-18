@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <unordered_set>
 
 #include "DebugPolygon.h"
 #include "render/Renderable.h"
@@ -45,6 +46,7 @@ public:
 	void Erase(const iterator& where);
 	void Erase(const size_t& i);
 	void EraseAll(const std::vector<size_t>& is);
+	void EraseAll(const std::unordered_set<std::shared_ptr<DebugPolygon>>& polys);
 	iterator Find(const std::shared_ptr<DebugPolygon>& poly);
 	const_iterator PolyBegin();
 };

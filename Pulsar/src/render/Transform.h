@@ -52,12 +52,13 @@ public:
 
 class LocalTransformer2D
 {
-	Transform2D const* const m_Parent;
-	Transformable2D* const m_Child;
+	Transform2D const* m_Parent;
+	Transformable2D* m_Child;
 	Transform2D m_Local;
 
 public:
 	LocalTransformer2D(Transform2D const* const parent, Transformable2D* const child);
+	LocalTransformer2D& operator=(const LocalTransformer2D&);
 
 	void SetLocalTransform(const Transform2D& tr);
 	inline Transform2D GetLocalTransform() const { return m_Local; }

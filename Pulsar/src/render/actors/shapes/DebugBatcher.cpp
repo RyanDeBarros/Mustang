@@ -35,15 +35,15 @@ bool DebugBatcher::ChangeZIndex(const DebugMultiPolygon::iterator& where, const 
 
 void DebugBatcher::PushBack(const std::shared_ptr<DebugPolygon>& poly)
 {
-	DebugModel pair = poly->GetDebugModel();
-	const auto& multi_polygon = m_Slots.find(pair);
+	DebugModel model = poly->GetDebugModel();
+	const auto& multi_polygon = m_Slots.find(model);
 	if (multi_polygon != m_Slots.end())
 		multi_polygon->second.PushBack(poly);
 	else
 	{
-		DebugMultiPolygon multi(pair);
+		DebugMultiPolygon multi(model);
 		multi.PushBack(poly);
-		m_Slots.emplace(pair, std::move(multi));
+		m_Slots.emplace(model, std::move(multi));
 		Sort();
 	}
 }
@@ -51,19 +51,19 @@ void DebugBatcher::PushBack(const std::shared_ptr<DebugPolygon>& poly)
 void DebugBatcher::PushBackAll(const std::vector<std::shared_ptr<DebugPolygon>>& polys)
 {
 	std::unordered_set<std::pair<GLenum, BatchModel>> pushed;
-	DebugModel pair;
+	DebugModel model;
 	for (const auto& poly : polys)
 	{
-		pair = poly->GetDebugModel();
-		pushed.insert(pair);
-		const auto& multi_polygon = m_Slots.find(pair);
+		model = poly->GetDebugModel();
+		pushed.insert(model);
+		const auto& multi_polygon = m_Slots.find(model);
 		if (multi_polygon != m_Slots.end())
 			multi_polygon->second.BufferPush(poly);
 		else
 		{
-			DebugMultiPolygon multi(pair);
+			DebugMultiPolygon multi(model);
 			multi.BufferPush(poly);
-			m_Slots.emplace(pair, std::move(multi));
+			m_Slots.emplace(model, std::move(multi));
 		}
 	}
 	for (auto iter = pushed.begin(); iter != pushed.end(); iter++)
@@ -73,19 +73,36 @@ void DebugBatcher::PushBackAll(const std::vector<std::shared_ptr<DebugPolygon>>&
 
 bool DebugBatcher::Erase(const std::vector<std::shared_ptr<DebugPolygon>>::iterator& where)
 {
-	DebugModel pair = (*where)->GetDebugModel();
-	const auto& multi_polygon = m_Slots.find(pair);
+	DebugModel model = (*where)->GetDebugModel();
+	const auto& multi_polygon = m_Slots.find(model);
 	if (multi_polygon != m_Slots.end())
 	{
 		multi_polygon->second.Erase(where);
 		if (multi_polygon->second.draw_count == 0)
 		{
-			m_Slots.erase(pair);
+			m_Slots.erase(model);
 			Sort();
 		}
 		return true;
 	}
 	return false;
+}
+
+void DebugBatcher::EraseAll(const std::unordered_map<DebugModel, std::unordered_set<std::shared_ptr<DebugPolygon>>>& polys)
+{
+	for (auto iter = polys.begin(); iter != polys.end(); iter++)
+	{
+		auto multi_polygon = m_Slots.find(iter->first);
+		if (multi_polygon != m_Slots.end())
+		{
+			multi_polygon->second.EraseAll(iter->second);
+			if (multi_polygon->second.draw_count == 0)
+			{
+				m_Slots.erase(iter->first);
+			}
+		}
+	}
+	Sort();
 }
 
 bool DebugBatcher::Find(const std::shared_ptr<DebugPolygon>& poly, DebugMultiPolygon::iterator& where)

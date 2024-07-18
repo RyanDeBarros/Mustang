@@ -3,6 +3,7 @@
 #include "render/ActorRenderBase.h"
 
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <memory>
 
@@ -26,6 +27,7 @@ public:
 	void PushBack(const std::shared_ptr<DebugPolygon>& poly);
 	void PushBackAll(const std::vector<std::shared_ptr<DebugPolygon>>& polys);
 	bool Erase(const std::vector<std::shared_ptr<DebugPolygon>>::iterator& where);
+	void EraseAll(const std::unordered_map<DebugModel, std::unordered_set<std::shared_ptr<DebugPolygon>>>& polys);
 	bool Find(const std::shared_ptr<DebugPolygon>& poly, DebugMultiPolygon::iterator& where);
 
 private:

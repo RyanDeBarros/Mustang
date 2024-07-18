@@ -61,4 +61,9 @@ public:
 	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); m_Status |= 0b10000; }
 
 	bool visible = true;
+
+private:
+	template<std::unsigned_integral ParticleCount>
+	friend class ParticleWave;
+	inline Transform2D* const TransformRef() { return &m_Transform; }
 };

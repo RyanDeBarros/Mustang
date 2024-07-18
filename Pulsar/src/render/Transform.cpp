@@ -60,6 +60,14 @@ LocalTransformer2D::LocalTransformer2D(Transform2D const* const parent, Transfor
 	SyncLocalWithGlobal();
 }
 
+LocalTransformer2D& LocalTransformer2D::operator=(const LocalTransformer2D& other)
+{
+	m_Parent = other.m_Parent;
+	m_Child = other.m_Child;
+	m_Local = other.m_Local;
+	return *this;
+}
+
 void LocalTransformer2D::SetLocalTransform(const Transform2D& tr)
 {
 	m_Local = tr;

@@ -48,3 +48,8 @@ Permutation Permutation::inverse() const
 		inverse[nums_vector[i]] = i;
 	return inverse;
 }
+
+std::function<float(float)> LinearFunc(float slope, float intercept)
+{
+	return [=](float t) { return slope * t + intercept; };
+}

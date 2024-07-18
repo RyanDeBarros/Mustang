@@ -102,6 +102,11 @@ void DebugMultiPolygon::EraseAll(const std::vector<size_t>& is)
 	UpdatePtrs();
 }
 
+void DebugMultiPolygon::EraseAll(const std::unordered_set<std::shared_ptr<DebugPolygon>>& polys)
+{
+	std::erase_if(m_Polygons, [&](const std::shared_ptr<DebugPolygon>& poly) { return polys.find(poly) != polys.end(); });
+}
+
 DebugMultiPolygon::iterator DebugMultiPolygon::Find(const std::shared_ptr<DebugPolygon>& poly)
 {
 	return std::find(m_Polygons.begin(), m_Polygons.end(), poly);
