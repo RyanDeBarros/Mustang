@@ -268,10 +268,10 @@ void Pulsar::Run(GLFWwindow* window)
 	ParticleWaveData<> wave1(
 		1.0f,
 		std::shared_ptr<DebugPolygon>(new DebugCircle(3.0f)),
-		CumulativeFunc<>(PowerFunc(2000.0f, 2.0f)),
-		[](float t, float seed) { return 0.5f - t * 0.05f; },
+		CumulativeFunc<>(PowerFunc(2000.0f, 0.5f)),
+		[](float t, float seed) { return 0.4f - t * 0.05f; },
 		[](float t, float seed) { return std::vector<ParticleProfileFunc>{
-			{[](Particle& p) {
+			{ [](Particle& p) {
 				static float mt = 0.5f;
 				if (p.t() < mt)
 					p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f });
@@ -281,19 +281,25 @@ void Pulsar::Run(GLFWwindow* window)
 			ParticleProfileFunc3rdSeed{ [seed, t](float seed2, float seed3) {
 				float x = seed * 2.0f - 1.0f;
 				float y = seed2 * 2.0f - 1.0f;
-				glm::vec2 vel = glm::vec2{ 2.0f * x, y } * 200.0f * (1.0f + seed3 * 0.25f) * glm::pow(t, 1.0f + seed3 * 0.25f) * glm::inversesqrt<float>(glm::pow(x, 2) + glm::pow(y, 2));
+				glm::vec2 vel = glm::vec2{ 2.0f * x, y } * 200.0f * (1.0f + seed3 * 0.25f) * (1.0f - glm::pow(t, 0.2f + seed3 * 0.25f)) * glm::inversesqrt<float>(glm::pow(x, 2) + glm::pow(y, 2));
 				return [vel](Particle& p)
 				{
-					p.m_Transformer.SetLocalPosition(vel * p.t());
+					p.m_Transformer.OperateLocalPosition([&](glm::vec2& pos) { pos += vel * p.dt(); });
 				};
 			}}
 		}; },
 		[](float t, float seed) { return std::vector<ParticleProfileFunc>{
-			{[](Particle& p) { p.m_Shape->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f }); }}
+			{ [](Particle& p) { p.m_Shape->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f }); } },
+				ParticleProfileFunc3rdSeed{ [seed, t](float seed2, float seed3) {
+				return [=](Particle& p)
+				{
+					p.m_Transformer.SetLocalPosition(glm::vec2{glm::cos(seed2 * 2 * glm::pi<float>()), glm::sin(seed2 * 2 * glm::pi<float>())} * 20.0f * seed3);
+				};
+			}}
 		}; }
 	);
 	ParticleSystem<> psys({ wave1 });
-	psys.PlayFor(1.0f * wave1.wavePeriod);
+	psys.PlayFor(3.0f * wave1.wavePeriod);
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
 	Logger::NewLine();
@@ -305,6 +311,15 @@ void Pulsar::Run(GLFWwindow* window)
 		prevDrawTime = drawTime;
 		totalDrawTime += deltaDrawTime;
 		// OnUpdate here
+
+		if (totalDrawTime >= 1.0f && totalDrawTime <= 3.0f)
+		{
+			psys.Pause();
+		}
+		else
+		{
+			psys.Resume();
+		}
 
 		Renderer::OnDraw();
 		glfwPollEvents();

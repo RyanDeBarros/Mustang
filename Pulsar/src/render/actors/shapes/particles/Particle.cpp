@@ -18,12 +18,14 @@ Particle& Particle::operator=(const Particle& other)
 	m_LifespanInv = other.m_LifespanInv;
 	m_Invalid = other.m_Invalid;
 	m_T = other.m_T;
+	m_DT = other.m_DT;
 	return *this;
 }
 
 void Particle::OnDraw()
 {
-	if ((m_T += Pulsar::deltaDrawTime * m_LifespanInv) > 1.0f)
+	m_DT = Pulsar::deltaDrawTime * m_LifespanInv;
+	if ((m_T += m_DT) > 1.0f)
 		m_Invalid = true;
 	else
 	{

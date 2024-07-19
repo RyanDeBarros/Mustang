@@ -36,15 +36,17 @@ struct Particle
 private:
 	template<std::unsigned_integral ParticleCount>
 	friend class ParticleSystem;
-	float m_LifespanInv;
-	float m_T = 0.0f;
+	real m_LifespanInv;
+	real m_T = 0.0f;
+	real m_DT = 0.0f;
 	bool m_Invalid = false;
 
 public:
 	Particle(const std::shared_ptr<DebugPolygon>& shape, const LocalTransformer2D& transformer, const float& lifespan, const std::vector<ParticleProfileFunc>& profile_funcs, const std::vector<ParticleProfileFunc>& initial_funcs = {});
 	Particle& operator=(const Particle&);
 	
-	inline float t() const { return m_T; }
+	inline real t() const { return m_T; }
+	inline real dt() const { return m_DT; }
 
 private:
 	void OnDraw();

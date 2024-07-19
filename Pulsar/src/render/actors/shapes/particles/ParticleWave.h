@@ -9,8 +9,8 @@
 #include "Particle.h"
 
 namespace Particles {
-	typedef std::function<float(float t, float seed)> FloatFunc;
-	typedef std::function<std::vector<ParticleProfileFunc>(float t, float seed)> ProfileFuncVectorFunc;
+	typedef std::function<float(real t, float seed)> FloatFunc;
+	typedef std::function<std::vector<ParticleProfileFunc>(real t, float seed)> ProfileFuncVectorFunc;
 }
 
 template<std::unsigned_integral ParticleCount = unsigned short>

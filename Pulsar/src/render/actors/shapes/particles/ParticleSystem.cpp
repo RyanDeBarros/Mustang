@@ -66,6 +66,28 @@ void ParticleSystem<ParticleCount>::OnParticlesUpdate()
 }
 
 template<std::unsigned_integral ParticleCount>
+void ParticleSystem<ParticleCount>::Pause()
+{
+	if (enabled || spawning)
+	{
+		m_PausedAt = Pulsar::totalDrawTime;
+		enabled = false;
+		spawning = false;
+	}
+}
+
+template<std::unsigned_integral ParticleCount>
+void ParticleSystem<ParticleCount>::Resume()
+{
+	if (!enabled || !spawning)
+	{
+		m_LifetimeStart += Pulsar::totalDrawTime - m_PausedAt;
+		enabled = true;
+		spawning = true;
+	}
+}
+
+template<std::unsigned_integral ParticleCount>
 void ParticleSystem<ParticleCount>::PlayFor(real n)
 {
 	m_PlayTime = n;
