@@ -123,7 +123,7 @@ void DebugMultiPolygon::UpdatePtrs() const
 		delete[] indexes_ptr;
 	if (index_counts_ptr)
 		delete[] index_counts_ptr;
-	draw_count = m_Polygons.size();
+	draw_count = static_cast<GLsizei>(m_Polygons.size());
 	indexes_ptr = new GLint[draw_count];
 	index_counts_ptr = new GLsizei[draw_count];
 	for (size_t i = 0; i < draw_count; i++)

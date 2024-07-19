@@ -1,7 +1,10 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include <vector>
 #include <functional>
+#include <sstream>
 
 class bad_permutation_error : public std::exception
 {
@@ -26,6 +29,24 @@ extern std::function<float(float)> LinearFunc(float slope = 0, float intercept =
 template<std::floating_point Float = float>
 inline Float rng() { return std::rand() / static_cast<Float>(RAND_MAX); }
 
+inline std::string STR(const glm::vec3& vec3)
+{
+	return "<" + std::to_string(vec3[0]) + ", " + std::to_string(vec3[1]) + ", " + std::to_string(vec3[2]) + ">";
+}
+
+inline std::string Concat(const std::string& delim)
+{
+	return "";
+}
+
+template<typename T, typename... Args>
+inline std::string Concat(const std::string& delim, const T& first, const Args&... args)
+{
+	std::stringstream ss;
+	ss << first << delim;
+	return ss.str() + Concat(delim, args...);
+}
+
 /// cfunc is assumed to be cumulative on the interval [0, 1). For example, consider cfunc to be f(t) = 5t. Then consider updates with the t-values that increment by 0.1:
 /// 
 /// t	| f(t) | prev | num = round(f(t)) - prev
@@ -44,15 +65,15 @@ inline Float rng() { return std::rand() / static_cast<Float>(RAND_MAX); }
 template<std::unsigned_integral Int = unsigned short>
 struct CumulativeFunc
 {
-	std::function<Int(float)> cfunc;
+	std::function<float(float)> cfunc;
 	Int prev = 0;
 
-	CumulativeFunc(const std::function<Int(float)>& cf, Int initial = 0) : cfunc(cf), prev(initial) {}
+	CumulativeFunc(const std::function<float(float)>& cf, Int initial = 0) : cfunc(cf), prev(initial) {}
 	CumulativeFunc(const CumulativeFunc& func) : cfunc(func.cfunc), prev(func.prev) {}
 
 	inline Int operator()(float t)
 	{
-		Int res = static_cast<Int>(std::lroundf(t));
+		Int res = static_cast<Int>(std::lroundf(cfunc(t)));
 		if (res >= prev)
 		{
 			Int num = res - prev;

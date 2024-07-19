@@ -1,5 +1,7 @@
 #include "Pulsar.h"
 
+#include <glm/ext/scalar_constants.hpp>
+
 #include "Typedefs.h"
 #include "RendererSettings.h"
 #include "Logger.h"
@@ -17,6 +19,9 @@
 #include "render/actors/shapes/DebugPoint.h"
 #include "render/actors/shapes/DebugCircle.h"
 #include "render/actors/shapes/DebugBatcher.h"
+#include "render/actors/shapes/particles/ParticleSystem.h"
+#include "render/actors/shapes/particles/ParticleWave.h"
+#include "render/actors/shapes/particles/Particle.h"
 
 using namespace Pulsar;
 
@@ -143,17 +148,6 @@ void Pulsar::Run(GLFWwindow* window)
 		glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
 		});
 
-	Logger::LogInfo(std::to_string(std::get<GLint>(*const_cast<Uniform*>(UniformLexiconFactory::GetValue(1, "u_inttest")))));
-	auto u = UniformLexiconFactory::GetValue(1, "u_float3test");
-	if (u)
-		Logger::LogInfo(STR(std::get<glm::vec3>(*u)));
-	UniformLexiconFactory::SetValue(1, "u_float3test", glm::vec3(0.3, 0.6, 0.2));
-	UniformLexiconFactory::DefineNewValue(1, "u_float3test", glm::vec3(1.0, 0.0, 1.0));
-	UniformLexiconFactory::SetValue(1, "u_float3test", glm::vec3(0.3, 0.6, 0.2));
-	u = UniformLexiconFactory::GetValue(1, "u_float3test");
-	if (u)
-		Logger::LogInfo(STR(std::get<glm::vec3>(*u)));
-
 	TextureFactory::SetSettings(actor1->GetTextureHandle(), Texture::linear_settings);
 
 	actor3->SetPivot(0.5f, 0.5f);
@@ -214,6 +208,7 @@ void Pulsar::Run(GLFWwindow* window)
 	if (!tilemap.SetOrdering(std::vector<size_t>{0, 1, 2, 3, 4, 5}))
 		ASSERT(false);
 
+	// TODO tilemap asset file that saves these:
 	tilemap.SetTransform({ {100.0f, 200.0f}, -0.5f, { 5.0f, 8.0f } });
 	tilemap.Insert(3, -2, 0);
 	tilemap.Insert(4, -1, 0);
@@ -236,7 +231,7 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::RemoveCanvasLayer(0);
 	Renderer::RemoveCanvasLayer(1);
 
-	float side = _RendererSettings::initial_window_height;
+	float side = static_cast<float>(_RendererSettings::initial_window_height);
 
 	DebugCircle circ(100.0f);
 	Renderer::GetCanvasLayer(10)->OnAttach(&circ);
@@ -266,13 +261,34 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(10)->OnAttach(&debug_batcher);
 	debug_batcher.ChangeZIndex(p_circ->GetDebugModel(), -1);
 
-	DebugBatcher triangle_batcher;
-	auto tri1 = std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {100, 0}, {100, 100} }, {}, {1, 0.5f, 0.5f, 1}, GL_TRIANGLE_FAN));
-	auto tri2 = std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, -200}, {100, -200}, {50, -100} }, {}, {1, 0.5f, 0.5f, 1}, GL_TRIANGLE_FAN));
-	auto tri3 = std::shared_ptr<DebugPolygon>(new DebugPolygon({ {-400, -100}, {-300, -100}, {-240, -50} }, {}, {1, 0.5f, 0.5f, 1}, GL_TRIANGLE_FAN));
-	triangle_batcher.PushBackAll({ tri1, tri2, tri3 });
+	Renderer::RemoveCanvasLayer(10);
+	Renderer::RemoveCanvasLayer(-3);
+
+	ParticleWaveData<> wave1(
+		5.0f,
+		std::shared_ptr<DebugPolygon>(new DebugCircle(5.0f)),
+		CumulativeFunc<>(LinearFunc(50.0f)),
+		[](float t, float seed) { return 1.0f; },
+		[](float t, float seed) { return std::vector<ParticleProfileFunc>{
+			{[](Particle& p) { p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f }); }},
+			ParticleProfileFunc2ndSeed{ [seed](float seed2) {
+				float x = seed * 2.0f - 1.0f;
+				float y = seed2 * 2.0f - 1.0f;
+				glm::vec2 vel = glm::vec2{ x, y } * 100.0f * glm::inversesqrt<float>(glm::pow(x, 2) + glm::pow(y, 2));
+				return [vel](Particle& p)
+				{
+					p.m_Transformer.SetLocalPosition(vel * p.t());
+				};
+			}}
+		}; },
+		[](float t, float seed) { return std::vector<ParticleProfileFunc>{
+			{[](Particle& p) { p.m_Shape->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f }); }}
+		}; }
+	);
+	ParticleSystem<> psys({ wave1 });
 	Renderer::AddCanvasLayer(11);
-	Renderer::GetCanvasLayer(11)->OnAttach(&triangle_batcher);
+	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
+	Logger::NewLine();
 
 	for (;;)
 	{
@@ -282,17 +298,6 @@ void Pulsar::Run(GLFWwindow* window)
 		totalDrawTime += deltaDrawTime;
 		// OnUpdate here
 
-		p_poly->OperatePosition([&](glm::vec2& p) { p.x = 150.0f * glm::sin(totalDrawTime); });
-
-		actor4->OperatePosition([&](glm::vec2& p) { p.x += 100.0f * deltaDrawTime; });
-		//flags.SyncGlobalWithParentPosition();
-		actor4->OperateScale([&](glm::vec2& sc) { sc += 50.0 * deltaDrawTime; });
-		//flags.SyncGlobalWithParentScale();
-		actor4->OperateRotation([&](glm::float32& r) { r += deltaDrawTime; });
-		//flags.SyncGlobalWithParentRotation();
-		flags.SyncGlobalWithLocal();
-		flags.OperateLocalRotation([&](glm::float32& r) { r -= 1.2f * deltaDrawTime; });
-		
 		Renderer::OnDraw();
 		glfwPollEvents();
 		if (glfwWindowShouldClose(window))

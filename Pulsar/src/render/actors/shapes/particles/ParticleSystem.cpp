@@ -2,10 +2,16 @@
 
 #include <unordered_set>
 
+#include "ParticleWave.h"
+
+template class ParticleSystem<unsigned short>;
+
 template<std::unsigned_integral ParticleCount>
-ParticleSystem<ParticleCount>::ParticleSystem(const Transform2D& transform, ZIndex z)
-	: m_Batcher(z), ActorRenderBase2D(z), Transformable2D(transform)
+ParticleSystem<ParticleCount>::ParticleSystem(const std::vector<ParticleWaveData<ParticleCount>>& wave_data, const Transform2D& transform, ZIndex z, bool visible, bool enabled)
+	: m_Batcher(z), ActorRenderBase2D(z), Transformable2D(transform), visible(visible), enabled(enabled)
 {
+	for (const auto& wave : wave_data)
+		m_Waves.emplace_back(wave);
 	Reset();
 }
 
@@ -23,11 +29,9 @@ template<std::unsigned_integral ParticleCount>
 void ParticleSystem<ParticleCount>::OnUpdate()
 {
 	// update waves
-	
+	real dt = static_cast<real>(glfwGetTime()) - m_LifetimeStart;
 	for (auto& wave : m_Waves)
-	{
-		wave.OnUpdate(glfwGetTime() - m_LifetimeStart, m_Particles);
-	}
+		wave.OnUpdate(dt, *this);
 
 	// update particles
 	std::unordered_map<DebugModel, std::unordered_set<std::shared_ptr<DebugPolygon>>> to_delete;

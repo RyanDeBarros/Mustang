@@ -39,8 +39,8 @@ public:
 	
 	inline virtual void OperateTransform(const std::function<void(Transform2D& position)>& op) { op(m_Transform); }
 	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) { op(m_Transform.position); }
-	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>&) = 0;
-	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>&) = 0;
+	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) { op(m_Transform.rotation); }
+	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) { op(m_Transform.scale); }
 	
 	inline void SetTransform(const Transform2D& tr) { OperateTransform([&tr](Transform2D& transform) { transform = tr; }); }
 	inline void SetPosition(const float& x, const float& y) { OperatePosition([&x, &y](glm::vec2& position) { position = { x, y }; }); }
@@ -57,7 +57,7 @@ class LocalTransformer2D
 	Transform2D m_Local;
 
 public:
-	LocalTransformer2D(Transform2D const* const parent, Transformable2D* const child);
+	LocalTransformer2D(Transform2D const* const parent, Transformable2D* const child, bool discard_old_transform = true);
 	LocalTransformer2D& operator=(const LocalTransformer2D&);
 
 	void SetLocalTransform(const Transform2D& tr);

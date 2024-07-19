@@ -30,6 +30,7 @@ typedef signed long long PointerOffset;
 #endif
 
 #include "Macros.h"
+// TODO rename real to something more intuitive. Currently, it is used for time and delta time values.
 #if PULSAR_DELTA_USE_DOUBLE_PRECISION == 1
 typedef double real;
 #else

@@ -1,8 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include <functional>
 
+#include "Typedefs.h"
 #include "Utils.h"
 #include "Particle.h"
 
@@ -12,6 +14,20 @@ namespace Particles {
 }
 
 template<std::unsigned_integral ParticleCount = unsigned short>
+struct ParticleWaveData
+{
+	real wavePeriod;
+	std::shared_ptr<DebugPolygon> prototypeShape;
+	CumulativeFunc<ParticleCount> spawnFunc;
+	Particles::FloatFunc lifespanFunc;
+	Particles::ProfileFuncVectorFunc profileFuncs;
+	Particles::ProfileFuncVectorFunc initFuncs;
+};
+
+template<std::unsigned_integral ParticleCount>
+class ParticleSystem;
+
+template<std::unsigned_integral ParticleCount = unsigned short>
 class ParticleWave
 {
 	CumulativeFunc<ParticleCount> m_SpawnFunc;
@@ -19,17 +35,17 @@ class ParticleWave
 	Particles::FloatFunc m_LifespanFunc;
 	Particles::ProfileFuncVectorFunc m_ProfileFuncs;
 	Particles::ProfileFuncVectorFunc m_InitFuncs;
-	float m_WavePeriod;
-	float m_WavePeriodInv;
-	DebugPolygon m_Shape;
+	real m_WavePeriod;
+	real m_WavePeriodInv;
+	std::shared_ptr<DebugPolygon> m_Shape;
 
 public:
-	ParticleWave(float wave_period, const DebugPolygon& prototype_shape, const CumulativeFunc<ParticleCount>& spawn_func, const Particles::FloatFunc& lifespan_func, const Particles::ProfileFuncVectorFunc& profile_funcs, const Particles::ProfileFuncVectorFunc& init_funcs);
+	ParticleWave(const ParticleWaveData<ParticleCount>& wave_data);
 
-	void OnUpdate(float deltaTime, Transform2D const* const parent_transform, std::vector<Particle>& particles);
-	
-	inline void SetWavePeriod(float wave_period) { m_WavePeriod = wave_period; m_WavePeriodInv = 1.0f / m_WavePeriod; }
+	inline void SetWavePeriod(real wave_period) { m_WavePeriod = wave_period; m_WavePeriodInv = 1.0f / m_WavePeriod; }
 
 private:
-	void OnSpawn(float t, Transform2D const* const parent_transform, std::vector<Particle>& particles);
+	friend class ParticleSystem<ParticleCount>;
+	void OnUpdate(float delta_time, ParticleSystem<ParticleCount>& psys);
+	void OnSpawn(float t, ParticleSystem<ParticleCount>& psys);
 };
