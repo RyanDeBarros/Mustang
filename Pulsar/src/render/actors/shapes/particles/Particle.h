@@ -22,6 +22,11 @@ struct ParticleProfileFunc2ndSeed : ParticleProfileFunc
 	ParticleProfileFunc2ndSeed(std::function<std::function<void(Particle&)>(float)> fgen) : ParticleProfileFunc{ fgen(rng()) } {}
 };
 
+struct ParticleProfileFunc3rdSeed : ParticleProfileFunc
+{
+	ParticleProfileFunc3rdSeed(std::function<std::function<void(Particle&)>(float, float)> fgen) : ParticleProfileFunc{ fgen(rng(), rng()) } {}
+};
+
 struct Particle
 {
 	LocalTransformer2D m_Transformer;

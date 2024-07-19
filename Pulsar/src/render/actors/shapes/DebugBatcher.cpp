@@ -80,7 +80,7 @@ bool DebugBatcher::Erase(const std::vector<std::shared_ptr<DebugPolygon>>::itera
 		multi_polygon->second.Erase(where);
 		if (multi_polygon->second.draw_count == 0)
 		{
-			m_Slots.erase(model);
+			m_Slots.erase(multi_polygon);
 			Sort();
 		}
 		return true;
@@ -98,7 +98,7 @@ void DebugBatcher::EraseAll(const std::unordered_map<DebugModel, std::unordered_
 			multi_polygon->second.EraseAll(iter->second);
 			if (multi_polygon->second.draw_count == 0)
 			{
-				m_Slots.erase(iter->first);
+				m_Slots.erase(multi_polygon);
 			}
 		}
 	}
@@ -118,6 +118,7 @@ bool DebugBatcher::Find(const std::shared_ptr<DebugPolygon>& poly, DebugMultiPol
 
 void DebugBatcher::Sort()
 {
+	m_OrderedTraversal.clear();
 	for (auto& pair : m_Slots)
 		m_OrderedTraversal.push_back(&pair.second);
 	std::sort(m_OrderedTraversal.begin(), m_OrderedTraversal.end(),

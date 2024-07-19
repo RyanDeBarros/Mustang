@@ -19,20 +19,31 @@ ParticleSystem<ParticleCount>::ParticleSystem(const std::vector<ParticleWaveData
 template<std::unsigned_integral ParticleCount>
 void ParticleSystem<ParticleCount>::RequestDraw(CanvasLayer* canvas_layer)
 {
+	if (spawning)
+		OnWavesUpdate();
 	if (enabled)
-		OnUpdate();
+		OnParticlesUpdate();
 	if (visible)
 		m_Batcher.RequestDraw(canvas_layer);
 }
 
 template<std::unsigned_integral ParticleCount>
-void ParticleSystem<ParticleCount>::OnUpdate()
+void ParticleSystem<ParticleCount>::OnWavesUpdate()
 {
-	// update waves
-	real dt = static_cast<real>(glfwGetTime()) - m_LifetimeStart;
-	for (auto& wave : m_Waves)
+	real dt = Pulsar::totalDrawTime - m_LifetimeStart;
+	if (m_PlayTime > 0.0f && dt > m_PlayTime)
+	{
+		spawning = false;
+		Reset();
+		return;
+	}
+	for (ParticleWave<ParticleCount>& wave : m_Waves)
 		wave.OnUpdate(dt, *this);
+}
 
+template<std::unsigned_integral ParticleCount>
+void ParticleSystem<ParticleCount>::OnParticlesUpdate()
+{
 	// update particles
 	std::unordered_map<DebugModel, std::unordered_set<std::shared_ptr<DebugPolygon>>> to_delete;
 	for (auto& part : m_Particles)
@@ -47,7 +58,16 @@ void ParticleSystem<ParticleCount>::OnUpdate()
 				iter->second.insert(part.m_Shape);
 		}
 	}
+	if (to_delete.size() > 0)
+	{
+		m_Batcher.EraseAll(to_delete);
+		std::erase_if(m_Particles, [](const Particle& part) { return part.m_Invalid; });
+	}
+}
 
-	m_Batcher.EraseAll(to_delete);
-	std::erase_if(m_Particles, [](const Particle& part) { return part.m_Invalid; });
+template<std::unsigned_integral ParticleCount>
+void ParticleSystem<ParticleCount>::PlayFor(real n)
+{
+	m_PlayTime = n;
+	spawning = true;
 }

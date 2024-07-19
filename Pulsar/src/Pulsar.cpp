@@ -81,6 +81,7 @@ int Pulsar::StartUp()
 	}
 	Logger::LogInfo("Welcome to Pulsar Renderer! GL_VERSION:");
 	TRY(Logger::LogInfo(glGetString(GL_VERSION)));
+	std::srand(time(0));
 	Renderer::Init();
 	Renderer::FocusWindow(window);
 	Run(window);
@@ -265,16 +266,22 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::RemoveCanvasLayer(-3);
 
 	ParticleWaveData<> wave1(
-		5.0f,
-		std::shared_ptr<DebugPolygon>(new DebugCircle(5.0f)),
-		CumulativeFunc<>(LinearFunc(50.0f)),
-		[](float t, float seed) { return 1.0f; },
+		1.0f,
+		std::shared_ptr<DebugPolygon>(new DebugCircle(3.0f)),
+		CumulativeFunc<>(PowerFunc(2000.0f, 2.0f)),
+		[](float t, float seed) { return 0.5f - t * 0.05f; },
 		[](float t, float seed) { return std::vector<ParticleProfileFunc>{
-			{[](Particle& p) { p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f }); }},
-			ParticleProfileFunc2ndSeed{ [seed](float seed2) {
+			{[](Particle& p) {
+				static float mt = 0.5f;
+				if (p.t() < mt)
+					p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f });
+				else
+					p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f - (p.t() - mt) / (1.0f - mt)});
+			}},
+			ParticleProfileFunc3rdSeed{ [seed, t](float seed2, float seed3) {
 				float x = seed * 2.0f - 1.0f;
 				float y = seed2 * 2.0f - 1.0f;
-				glm::vec2 vel = glm::vec2{ x, y } * 100.0f * glm::inversesqrt<float>(glm::pow(x, 2) + glm::pow(y, 2));
+				glm::vec2 vel = glm::vec2{ 2.0f * x, y } * 200.0f * (1.0f + seed3 * 0.25f) * glm::pow(t, 1.0f + seed3 * 0.25f) * glm::inversesqrt<float>(glm::pow(x, 2) + glm::pow(y, 2));
 				return [vel](Particle& p)
 				{
 					p.m_Transformer.SetLocalPosition(vel * p.t());
@@ -286,6 +293,7 @@ void Pulsar::Run(GLFWwindow* window)
 		}; }
 	);
 	ParticleSystem<> psys({ wave1 });
+	psys.PlayFor(1.0f * wave1.wavePeriod);
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
 	Logger::NewLine();

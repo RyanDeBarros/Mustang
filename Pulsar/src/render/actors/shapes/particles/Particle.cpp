@@ -17,6 +17,7 @@ Particle& Particle::operator=(const Particle& other)
 	m_ProfileFuncs = other.m_ProfileFuncs;
 	m_LifespanInv = other.m_LifespanInv;
 	m_Invalid = other.m_Invalid;
+	m_T = other.m_T;
 	return *this;
 }
 

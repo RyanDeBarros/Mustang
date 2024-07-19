@@ -24,19 +24,27 @@ public:
 	Permutation inverse() const;
 };
 
+extern std::function<float(float)> ConstantFunc(float c);
 extern std::function<float(float)> LinearFunc(float slope = 0, float intercept = 0);
+extern std::function<float(float)> QuadraticFunc(float a, float x_intercept, float y_intercept);
+extern std::function<float(float)> PowerFunc(float a, float exp);
+extern std::function<float(float)> FuncSum(const std::function<float(float)>& f1, const std::function<float(float)>& f2);
+extern std::function<float(float)> FuncMul(const std::function<float(float)>& f1, const std::function<float(float)>& f2);
 
 template<std::floating_point Float = float>
 inline Float rng() { return std::rand() / static_cast<Float>(RAND_MAX); }
 
-inline std::string STR(const glm::vec3& vec3)
-{
-	return "<" + std::to_string(vec3[0]) + ", " + std::to_string(vec3[1]) + ", " + std::to_string(vec3[2]) + ">";
-}
-
 inline std::string Concat(const std::string& delim)
 {
 	return "";
+}
+
+template<typename T>
+inline std::string Concat(const std::string& delta, const T& last)
+{
+	std::stringstream ss;
+	ss << last;
+	return ss.str();
 }
 
 template<typename T, typename... Args>
@@ -45,6 +53,19 @@ inline std::string Concat(const std::string& delim, const T& first, const Args&.
 	std::stringstream ss;
 	ss << first << delim;
 	return ss.str() + Concat(delim, args...);
+}
+
+inline std::string STR(const glm::vec2& vec2)
+{
+	return Concat("", "<", vec2[0], ", ", vec2[1], ">");
+}
+inline std::string STR(const glm::vec3& vec3)
+{
+	return Concat("", "<", vec3[0], ", ", vec3[1], ", ", vec3[2], ">");
+}
+inline std::string STR(const glm::vec4& vec4)
+{
+	return Concat("", "<", vec4[0], ", ", vec4[1], ", ", vec4[2], ", ", vec4[3], ">");
 }
 
 /// cfunc is assumed to be cumulative on the interval [0, 1). For example, consider cfunc to be f(t) = 5t. Then consider updates with the t-values that increment by 0.1:
