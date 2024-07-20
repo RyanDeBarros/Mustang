@@ -19,6 +19,7 @@ ParticleSystem<ParticleCount>::ParticleSystem(const std::vector<ParticleWaveData
 template<std::unsigned_integral ParticleCount>
 void ParticleSystem<ParticleCount>::RequestDraw(CanvasLayer* canvas_layer)
 {
+	// TODO perhaps spawning and enabled should be moved to particle wave?
 	if (spawning)
 		OnWavesUpdate();
 	if (enabled)

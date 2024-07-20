@@ -25,6 +25,7 @@ public:
 };
 
 extern std::function<float(float)> ConstantFunc(float c);
+extern std::function<float(float)> StepFunc(float at, float height = 1.0f, bool dirLR = true, bool incl = true, float lower = 0.0f);
 extern std::function<float(float)> LinearFunc(float slope = 0, float intercept = 0);
 extern std::function<float(float)> QuadraticFunc(float a, float x_intercept, float y_intercept);
 extern std::function<float(float)> PowerFunc(float a, float exp);

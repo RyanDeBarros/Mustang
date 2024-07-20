@@ -12,7 +12,7 @@
 #include "ParticleWave.h"
 
 template<std::unsigned_integral ParticleCount = unsigned short>
-class ParticleSystem : public ActorRenderBase2D, Transformable2D
+class ParticleSystem : public ActorRenderBase2D, public Transformable2D
 {
 	friend class ParticleWave<ParticleCount>;
 	DebugBatcher m_Batcher;

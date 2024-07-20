@@ -51,30 +51,38 @@ Permutation Permutation::inverse() const
 
 std::function<float(float)> ConstantFunc(float c)
 {
-	return [=](float t) { return c; };
+	return [=](float t) -> float { return c; };
+}
+
+std::function<float(float)> StepFunc(float at, float height, bool dirLR, bool incl, float lower)
+{
+	if (dirLR)
+		return [=](float t) -> float { return (t < at) || (!incl && t == at) ? lower : height; };
+	else
+		return [=](float t) -> float { return (t > at) || (!incl && t == at) ? lower : height; };
 }
 
 std::function<float(float)> LinearFunc(float slope, float intercept)
 {
-	return [=](float t) { return slope * t + intercept; };
+	return [=](float t) -> float { return slope * t + intercept; };
 }
 
 std::function<float(float)> QuadraticFunc(float a, float x_intercept, float y_intercept)
 {
-	return [=](float t) { return a * glm::pow(t - x_intercept, 2) + y_intercept; };
+	return [=](float t) -> float { return a * glm::pow(t - x_intercept, 2) + y_intercept; };
 }
 
 std::function<float(float)> PowerFunc(float a, float exp)
 {
-	return [=](float t) { return a * glm::pow(t, exp); };
+	return [=](float t) -> float { return a * glm::pow(t, exp); };
 }
 
 std::function<float(float)> FuncSum(const std::function<float(float)>& f1, const std::function<float(float)>& f2)
 {
-	return [&](float t) { return f1(t) + f2(t); };
+	return [&](float t) -> float { return f1(t) + f2(t); };
 }
 
 std::function<float(float)> FuncMul(const std::function<float(float)>& f1, const std::function<float(float)>& f2)
 {
-	return [&](float t) { return f1(t) * f2(t); };
+	return [&](float t) -> float { return f1(t) * f2(t); };
 }

@@ -1,5 +1,7 @@
 #include "Pulsar.h"
 
+#include <cmath>
+
 #include <glm/ext/scalar_constants.hpp>
 
 #include "Typedefs.h"
@@ -265,44 +267,85 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::RemoveCanvasLayer(10);
 	Renderer::RemoveCanvasLayer(-3);
 
-	ParticleWaveData<> wave1(
-		1.0f,
+	ParticleWaveData<> wave1{
+		1.5f,
 		std::shared_ptr<DebugPolygon>(new DebugCircle(3.0f)),
-		CumulativeFunc<>(PowerFunc(2000.0f, 0.5f)),
-		[](float t, float seed) { return 0.4f - t * 0.05f; },
-		[](float t, float seed) { return std::vector<ParticleProfileFunc>{
+		CumulativeFunc<>([](float t) { return t < 0.6f ? PowerFunc(2000.0f, 0.5f)(t) : PowerFunc(2000.0f, 0.5f)(0.6f); }),
+		[](float t) { return 0.4f - t * 0.05f; },
+		[](float t, unsigned short i, unsigned int ti) { return std::vector<Particles::Characteristic>{
 			{ [](Particle& p) {
 				static float mt = 0.5f;
+				static float imt = 1.0f / (1.0f - mt);
 				if (p.t() < mt)
 					p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f });
 				else
-					p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f - (p.t() - mt) / (1.0f - mt)});
+					p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f - (p.t() - mt) * imt });
 			}},
-			ParticleProfileFunc3rdSeed{ [seed, t](float seed2, float seed3) {
-				float x = seed * 2.0f - 1.0f;
-				float y = seed2 * 2.0f - 1.0f;
-				glm::vec2 vel = glm::vec2{ 2.0f * x, y } * 200.0f * (1.0f + seed3 * 0.25f) * (1.0f - glm::pow(t, 0.2f + seed3 * 0.25f)) * glm::inversesqrt<float>(glm::pow(x, 2) + glm::pow(y, 2));
-				return [vel](Particle& p)
+			{ [t](Particle& p, const std::shared_ptr<Particles::CHRSeedData>& data) {
+				if (p.t() == 0.0f)
 				{
-					p.m_Transformer.OperateLocalPosition([&](glm::vec2& pos) { pos += vel * p.dt(); });
-				};
-			}}
-		}; },
-		[](float t, float seed) { return std::vector<ParticleProfileFunc>{
-			{ [](Particle& p) { p.m_Shape->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f }); } },
-				ParticleProfileFunc3rdSeed{ [seed, t](float seed2, float seed3) {
-				return [=](Particle& p)
+					p.m_Transformer.SetLocalPosition(glm::vec2{ glm::cos(data->s[0] * 2 * glm::pi<float>()), glm::sin(data->s[0] * 2 * glm::pi<float>()) } *20.0f * data->s[1]);
+					glm::vec2 vel = glm::normalize(glm::vec2{ rng() * 2.0f - 1.0f, rng() * 2.0f - 1.0f }) * glm::vec2{ 200.0f, 100.0f };
+					data->s[0] = rng();
+					vel *= (1.0f + data->s[0] * 0.25f) * (1.0f - 0.4f * glm::pow(t, 0.2f + data->s[0] * 0.25f));
+					data->s[0] = vel.x;
+					data->s[1] = vel.y;
+				}
+				else
 				{
-					p.m_Transformer.SetLocalPosition(glm::vec2{glm::cos(seed2 * 2 * glm::pi<float>()), glm::sin(seed2 * 2 * glm::pi<float>())} * 20.0f * seed3);
-				};
-			}}
+					p.m_Transformer.OperateLocalPosition([&](glm::vec2& pos) { pos += glm::vec2{ data->s[0], data->s[1] } *p.dt(); });
+				}
+			}, 2}
 		}; }
-	);
-	ParticleSystem<> psys({ wave1 });
-	psys.PlayFor(3.0f * wave1.wavePeriod);
+	};
+	float p2width = 400.0f;
+	float p2height = 400.0f;
+	ParticleWaveData<> wave2{
+		1.5f,
+		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 1}, {1, 1}, {1, 0} }, {}, {}, GL_TRIANGLE_FAN)),
+		CumulativeFunc<>(LinearFunc(p2height * 0.5f)),
+		[](float t) { return 1.5f; },
+		[=](real t, unsigned short i, unsigned int ti) { return std::vector<Particles::Characteristic>{
+			{ [=](Particle& p, const std::shared_ptr<Particles::CHRSeedData>& data) {
+				if (p.t() == 0.0f)
+				{
+					data->s[1] = static_cast<float>(std::rand() % ti);
+					data->s[2] = std::rand() % 2 == 0 ? 1 : -1;
+				}
+				real mt = std::fmod(p.t() + data->s[0], 1.0f);
+				if (mt < 0.5f)
+					p.m_Shape->SetColor({ 2.0f * mt, 2.0f * mt, 1.0f, 1.0f });
+				else
+					p.m_Shape->SetColor({ 2.0f * (1.0f - mt), 2.0f * (1.0f - mt), 1.0f, 1.0f });
+				if (mt < 0.5f)
+					p.m_Transformer.SetLocalScale({ 1.0f + 2.0f * mt * p2width, 1.0f });
+				else
+					p.m_Transformer.SetLocalScale({ 1.0f + 2.0f * (1.0f - mt) * p2width, 1.0f});
+				if (data->s[2] > 0)
+				{
+					if (mt < 0.5f)
+						p.m_Transformer.SetLocalPosition({ -0.5f * p2width, 2.0f * static_cast<unsigned int>(data->s[1]) - 0.5f * p2height });
+					else
+						p.m_Transformer.SetLocalPosition({ (p2width + 1.0f) * (mt - 0.5f) * 2.0f - 0.5f * p2width, 2.0f * static_cast<unsigned int>(data->s[1]) - 0.5f * p2height });
+				}
+				else
+				{
+					if (mt < 0.5f)
+						p.m_Transformer.SetLocalPosition({ -(p2width - 1.0f) * (mt - 0.5f) * 2.0f - 0.5f * p2width, 2.0f * static_cast<unsigned int>(data->s[1]) - 0.5f * p2height });
+					else
+						p.m_Transformer.SetLocalPosition({ -0.5f * p2width, 2.0f * static_cast<unsigned int>(data->s[1]) - 0.5f * p2height});
+				}
+				p.m_Transformer.SyncGlobalWithLocal();
+			}, 3}
+		}; }
+	};
+
+	ParticleSystem<> psys({ wave1, wave2 });
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
 	Logger::NewLine();
+
+	psys.Pause();
 
 	for (;;)
 	{
@@ -310,15 +353,13 @@ void Pulsar::Run(GLFWwindow* window)
 		deltaDrawTime = drawTime - prevDrawTime;
 		prevDrawTime = drawTime;
 		totalDrawTime += deltaDrawTime;
-		// OnUpdate here
-
-		if (totalDrawTime >= 1.0f && totalDrawTime <= 3.0f)
+		// small delay for smoother window init
+		if (totalDrawTime > 0.3f)
 		{
-			psys.Pause();
-		}
-		else
-		{
+			// OnUpdate here
 			psys.Resume();
+			psys.SetRotation(totalDrawTime * 0.25f);
+			psys.SetScale(1.0f - 0.2f * glm::sin(totalDrawTime), 1.0f + 0.2f * glm::sin(totalDrawTime));
 		}
 
 		Renderer::OnDraw();

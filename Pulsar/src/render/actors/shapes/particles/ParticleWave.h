@@ -8,20 +8,14 @@
 #include "Utils.h"
 #include "Particle.h"
 
-namespace Particles {
-	typedef std::function<float(real t, float seed)> FloatFunc;
-	typedef std::function<std::vector<ParticleProfileFunc>(real t, float seed)> ProfileFuncVectorFunc;
-}
-
 template<std::unsigned_integral ParticleCount = unsigned short>
 struct ParticleWaveData
 {
 	real wavePeriod;
 	std::shared_ptr<DebugPolygon> prototypeShape;
 	CumulativeFunc<ParticleCount> spawnFunc;
-	Particles::FloatFunc lifespanFunc;
-	Particles::ProfileFuncVectorFunc profileFuncs;
-	Particles::ProfileFuncVectorFunc initFuncs;
+	Particles::TimeFunc lifespanFunc;
+	Particles::CharacteristicVecGen m_CharacteristicsVecGen;
 };
 
 template<std::unsigned_integral ParticleCount>
@@ -31,13 +25,14 @@ template<std::unsigned_integral ParticleCount = unsigned short>
 class ParticleWave
 {
 	CumulativeFunc<ParticleCount> m_SpawnFunc;
-	ParticleCount num_spawned;
-	Particles::FloatFunc m_LifespanFunc;
-	Particles::ProfileFuncVectorFunc m_ProfileFuncs;
-	Particles::ProfileFuncVectorFunc m_InitFuncs;
+	Particles::TimeFunc m_LifespanFunc;
+	Particles::CharacteristicVecGen m_CharacteristicsVecGen;
 	real m_WavePeriod;
 	real m_WavePeriodInv;
 	std::shared_ptr<DebugPolygon> m_Shape;
+	ParticleCount m_NumSpawned = 0;
+	unsigned int m_TotalSpawn;
+	unsigned int m_WaveNum = 0;
 
 public:
 	ParticleWave(const ParticleWaveData<ParticleCount>& wave_data);
@@ -47,5 +42,5 @@ public:
 private:
 	friend class ParticleSystem<ParticleCount>;
 	void OnUpdate(float delta_time, ParticleSystem<ParticleCount>& psys);
-	void OnSpawn(float t, ParticleSystem<ParticleCount>& psys);
+	void OnSpawn(float t, ParticleSystem<ParticleCount>& psys, unsigned int spawn_index);
 };
