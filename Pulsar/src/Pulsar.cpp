@@ -302,7 +302,7 @@ void Pulsar::Run(GLFWwindow* window)
 	float p2height = 400.0f;
 	ParticleWaveData<> wave2{
 		1.5f,
-		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 1}, {1, 1}, {1, 0} }, {}, {}, GL_TRIANGLE_FAN)),
+		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 3}, {1, 3}, {1, 0} }, {}, {}, GL_TRIANGLE_FAN)),
 		CumulativeFunc<>(LinearFunc(p2height * 0.5f)),
 		[](float t) { return 1.5f; },
 		[=](real t, unsigned short i, unsigned int ti) { return std::vector<Particles::Characteristic>{
@@ -346,6 +346,8 @@ void Pulsar::Run(GLFWwindow* window)
 	Logger::NewLine();
 
 	psys.Pause();
+
+	Renderer::GetCanvasLayer(11)->OnAttach(&tilemap);
 
 	for (;;)
 	{
