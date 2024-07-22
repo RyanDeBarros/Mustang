@@ -15,6 +15,13 @@
 #include "factory/UniformLexicon.h"
 #include "factory/Atlas.h"
 #include "render/Renderable.h"
+#include "render/actors/TileMap.h"
+
+// TODO rename all macros to have PULSAR prefix
+#define VERIFY(loadFunc) \
+	auto verif = loadFunc;\
+	if (verif != LOAD_STATUS::OK)\
+		return verif;
 
 // TODO instead of simply returning invalid LOAD_STATUS, also print reason for the invalidity
 
@@ -87,9 +94,7 @@ LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
 	try
 	{
 		auto file = toml::parse_file(filepath);
-		auto verif = verify_header(file, "shader");
-		if (verif != LOAD_STATUS::OK)
-			return verif;
+		VERIFY(verify_header(file, "shader"));
 
 		auto shader = file["shader"];
 		if (!shader)
@@ -110,14 +115,43 @@ LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
 	}
 }
 
+static LOAD_STATUS readTextureSettings(const toml::v3::node_view<toml::v3::node>& settings, TextureSettings& texture_settings)
+{
+	if (auto min_filter = settings["min_filter"].value<int64_t>())
+	{
+		if (min_filter.value() < 0 || min_filter.value() >= MinFilterLookupLength)
+			return LOAD_STATUS::SYNTAX_ERR;
+		texture_settings.min_filter = MinFilterLookup[min_filter.value()];
+	}
+	if (auto mag_filter = settings["mag_filter"].value<int64_t>())
+	{
+		if (mag_filter.value() < 0 || mag_filter.value() >= MagFilterLookupLength)
+			return LOAD_STATUS::SYNTAX_ERR;
+		texture_settings.mag_filter = MagFilterLookup[mag_filter.value()];
+	}
+	if (auto wrap_s = settings["wrap_s"].value<int64_t>())
+	{
+		if (wrap_s.value() < 0 || wrap_s.value() >= TextureWrapLookupLength)
+			return LOAD_STATUS::SYNTAX_ERR;
+		texture_settings.wrap_s = TextureWrapLookup[wrap_s.value()];
+	}
+	if (auto wrap_t = settings["wrap_t"].value<int64_t>())
+	{
+		if (wrap_t.value() < 0 || wrap_t.value() >= TextureWrapLookupLength)
+			return LOAD_STATUS::SYNTAX_ERR;
+		texture_settings.wrap_t = TextureWrapLookup[wrap_t.value()];
+	}
+	if (auto lod_level = settings["lod_level"].value<int64_t>())
+		texture_settings.lod_level = static_cast<GLint>(lod_level.value());
+	return LOAD_STATUS::OK;
+}
+
 LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, const bool& new_texture, const bool& temporary_buffer)
 {
 	try
 	{
 		auto file = toml::parse_file(filepath);
-		auto verif = verify_header(file, "texture");
-		if (verif != LOAD_STATUS::OK)
-			return verif;
+		VERIFY(verify_header(file, "texture"));
 
 		auto texture = file["texture"];
 		if (!texture)
@@ -129,32 +163,7 @@ LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, const bool&
 		TextureSettings texture_settings;
 		if (auto settings = texture["settings"])
 		{
-			if (auto min_filter = settings["min_filter"].value<int64_t>())
-			{
-				if (min_filter.value() < 0 || min_filter.value() >= MinFilterLookupLength)
-					return LOAD_STATUS::SYNTAX_ERR;
-				texture_settings.min_filter = MinFilterLookup[min_filter.value()];
-			}
-			if (auto mag_filter = settings["mag_filter"].value<int64_t>())
-			{
-				if (mag_filter.value() < 0 || mag_filter.value() >= MagFilterLookupLength)
-					return LOAD_STATUS::SYNTAX_ERR;
-				texture_settings.mag_filter = MagFilterLookup[mag_filter.value()];
-			}
-			if (auto wrap_s = settings["wrap_s"].value<int64_t>())
-			{
-				if (wrap_s.value() < 0 || wrap_s.value() >= TextureWrapLookupLength)
-					return LOAD_STATUS::SYNTAX_ERR;
-				texture_settings.wrap_s = TextureWrapLookup[wrap_s.value()];
-			}
-			if (auto wrap_t = settings["wrap_t"].value<int64_t>())
-			{
-				if (wrap_t.value() < 0 || wrap_t.value() >= TextureWrapLookupLength)
-					return LOAD_STATUS::SYNTAX_ERR;
-				texture_settings.wrap_t = TextureWrapLookup[wrap_t.value()];
-			}
-			if (auto lod_level = settings["lod_level"].value<int64_t>())
-				texture_settings.lod_level = static_cast<GLint>(lod_level.value());
+			VERIFY(readTextureSettings(settings, texture_settings));
 		}
 		handle = TextureFactory::GetHandle(path.value().c_str(), texture_settings, new_texture, temporary_buffer);
 		return handle > 0 ? LOAD_STATUS::OK : LOAD_STATUS::ASSET_LOAD_ERR;
@@ -171,9 +180,7 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 	try
 	{
 		auto file = toml::parse_file(filepath);
-		auto verif = verify_header(file, "uniform_lexicon");
-		if (verif != LOAD_STATUS::OK)
-			return verif;
+		VERIFY(verify_header(file, "uniform_lexicon"));
 
 		auto array = file["uniform"].as_array();
 		if (!array)
@@ -418,9 +425,7 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, const b
 	try
 	{
 		auto file = toml::parse_file(filepath);
-		auto verif = verify_header(file, "renderable");
-		if (verif != LOAD_STATUS::OK)
-			return verif;
+		VERIFY(verify_header(file, "renderable"));
 
 		auto render = file["renderable"];
 		if (!render)
@@ -584,6 +589,92 @@ LOAD_STATUS loadAtlas(const char* asset_filepath, TileHandle& handle)
 	catch (const toml::parse_error& err)
 	{
 		Logger::LogErrorFatal("Cannot parse atlas asset file \"" + std::string(asset_filepath) + "\": " + std::string(err.description()));
+		return LOAD_STATUS::READ_ERR;
+	}
+}
+
+LOAD_STATUS loadTileMap(const char* asset_filepath, std::shared_ptr<TileMap>& tilemap)
+{
+	try
+	{
+		auto file = toml::parse_file(asset_filepath);
+		VERIFY(verify_header(file, "tilemap"));
+
+		auto tm = file["tilemap"];
+		if (!tm)
+			return LOAD_STATUS::SYNTAX_ERR;
+
+		TileHandle atlas_handle;
+		auto atlas_filepath = tm["atlas"].value<std::string>();
+		if (!atlas_filepath)
+			return LOAD_STATUS::SYNTAX_ERR;
+		if (loadAtlas(atlas_filepath.value().c_str(), atlas_handle) != LOAD_STATUS::OK)
+			return LOAD_STATUS::REFERENCE_ERROR;
+
+		TextureSettings texture_settings = Texture::nearest_settings;
+		if (auto settings = tm["texture_settings"])
+		{
+			VERIFY(readTextureSettings(settings, texture_settings));
+		}
+
+		ShaderHandle shader = ShaderFactory::Standard();
+		if (auto sh = tm["shader"].value<std::string>())
+		{
+			if (loadShader(sh.value().c_str(), shader) != LOAD_STATUS::OK)
+				return LOAD_STATUS::REFERENCE_ERROR;
+		}
+
+		ZIndex z = 0;
+		if (auto zin = tm["z"].value<int64_t>())
+			z = static_cast<ZIndex>(zin.value());
+
+		bool visible = true;
+		if (auto vis = tm["visible"].value<bool>())
+			visible = vis.value();
+
+		tilemap = std::shared_ptr<TileMap>(new TileMap(atlas_handle, texture_settings, shader, z, visible));
+
+		std::vector<size_t> ordering;
+		if (auto order = tm["ordering"].as_array())
+		{
+			for (auto i = 0; i < order->size(); i++)
+				ordering.push_back(static_cast<size_t>(order->get_as<int64_t>(i)->get()));
+		}
+		if (!ordering.empty())
+		{
+			try
+			{
+				if (!tilemap->SetOrdering(ordering))
+					return LOAD_STATUS::ASSET_LOAD_ERR;
+			}
+			catch (bad_permutation_error)
+			{
+				return LOAD_STATUS::ASSET_LOAD_ERR;
+			}
+		}
+
+		//tilemap->SetTransform({ {100.0f, 200.0f}, -0.5f, { 5.0f, 8.0f } });
+
+		if (auto tiles = tm["tiles"].as_array())
+		{
+			for (auto i = 0; i < tiles->size(); i++)
+			{
+				if (auto tile = tiles->get_as<toml::array>(i))
+				{
+					tilemap->Insert(
+						static_cast<size_t>(tile->get_as<int64_t>(0)->get()),
+						static_cast<float>(tile->get_as<double>(1) ? tile->get_as<double>(1)->get() : tile->get_as<int64_t>(1)->get()),
+						static_cast<float>(tile->get_as<double>(2) ? tile->get_as<double>(2)->get() : tile->get_as<int64_t>(2)->get())
+					);
+				}
+			}
+		}
+
+		return LOAD_STATUS::OK;
+	}
+	catch (const toml::parse_error& err)
+	{
+		Logger::LogErrorFatal("Cannot parse tilemap asset file \"" + std::string(asset_filepath) + "\": " + std::string(err.description()));
 		return LOAD_STATUS::READ_ERR;
 	}
 }

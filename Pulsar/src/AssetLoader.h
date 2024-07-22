@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "Typedefs.h"
 
 enum class LOAD_STATUS
@@ -21,3 +23,4 @@ LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable, 
 
 bool saveAtlas(const class Atlas& atlas, const char* texture_filepath, const char* asset_filepath, const char* image_format = "png", unsigned char jpg_quality = 100);
 LOAD_STATUS loadAtlas(const char* asset_filepath, TileHandle& handle);
+LOAD_STATUS loadTileMap(const char* asset_filepath, std::shared_ptr<class TileMap>& tilemap);

@@ -121,24 +121,24 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::AddCanvasLayer(0);
 
 	// Create actors
-	RectRender* actor1 = new RectRender(textureFlag, { {-500.0f, 300.0f}, -1.0f, {0.8f, 1.2f} });
-	RectRender* actor2 = new RectRender(textureSnowman, { {400.0f, -200.0f}, 0.25f, {0.7f, 0.7f} });
-	RectRender* actor3 = new RectRender(textureTux, { {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} });
+	std::shared_ptr<RectRender> actor1(new RectRender(textureFlag, { {-500.0f, 300.0f}, -1.0f, {0.8f, 1.2f} }));
+	std::shared_ptr<RectRender> actor2(new RectRender(textureSnowman, { {400.0f, -200.0f}, 0.25f, {0.7f, 0.7f} }));
+	std::shared_ptr<RectRender> actor3(new RectRender(textureTux, { {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} }));
 
-	Renderer::GetCanvasLayer(0)->OnAttach(actor1);
-	Renderer::GetCanvasLayer(0)->OnAttach(actor2);
-	Renderer::GetCanvasLayer(0)->OnSetZIndex(actor1, 1);
-	Renderer::GetCanvasLayer(0)->OnAttach(actor3);
+	Renderer::GetCanvasLayer(0)->OnAttach(actor1.get());
+	Renderer::GetCanvasLayer(0)->OnAttach(actor2.get());
+	Renderer::GetCanvasLayer(0)->OnSetZIndex(actor1.get(), 1);
+	Renderer::GetCanvasLayer(0)->OnAttach(actor3.get());
 	Renderer::AddCanvasLayer(-1);
 
 	Renderable renderable;
 	if (loadRenderable("res/assets/renderable.toml", renderable, true) != LOAD_STATUS::OK)
 		ASSERT(false);
-	ActorPrimitive2D* actor4 = new ActorPrimitive2D(renderable, { {-200.0f, 0.0f}, 0.0f, {800.0f, 800.0f} });
-	Renderer::GetCanvasLayer(-1)->OnAttach(actor4);
+	std::shared_ptr<ActorPrimitive2D> actor4(new ActorPrimitive2D(renderable, { {-200.0f, 0.0f}, 0.0f, {800.0f, 800.0f} }));
+	Renderer::GetCanvasLayer(-1)->OnAttach(actor4.get());
 
 	actor1->SetScale(16.0f, 16.0f);
-	Renderer::GetCanvasLayer(0)->OnSetZIndex(actor3, -1);
+	Renderer::GetCanvasLayer(0)->OnSetZIndex(actor3.get(), -1);
 
 	actor3->SetPivot(0.0f, 0.0f);
 	actor3->SetPosition(_RendererSettings::initial_window_rel_pos(-0.5f, 0.5f));
@@ -156,17 +156,21 @@ void Pulsar::Run(GLFWwindow* window)
 	actor3->SetPivot(0.5f, 0.5f);
 	actor3->SetPosition(0.0f, 0.0f);
 	actor3->SetScale(0.1f, 0.1f);
-	Renderer::GetCanvasLayer(0)->OnDetach(actor3);
+	Renderer::GetCanvasLayer(0)->OnDetach(actor3.get());
 
-	ActorTesselation2D tessel(actor3);
-	Renderer::GetCanvasLayer(0)->OnAttach(&tessel);
+	std::shared_ptr<ActorTesselation2D> tessel(std::make_shared<ActorTesselation2D>(std::static_pointer_cast<ActorRenderBase2D>(actor3)));
+	Renderer::GetCanvasLayer(0)->OnAttach(tessel.get());
 
-	float w = actor3->GetWidth() * actor3->GetTransform().scale.x;
-	float h = actor3->GetHeight() * actor3->GetTransform().scale.y;
-	tessel.RectVectorRef() = { {{0.0f, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{w, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{2 * w, 0.0f}, 0.5f, {1.0f, 1.0f}} };
-	Renderer::GetCanvasLayer(0)->OnSetZIndex(&tessel, 10);
+	float w = actor3->GetWidth() * actor3->GetScale().x;
+	float h = actor3->GetHeight() * actor3->GetScale().y;
+	tessel->PushBack({
+		std::make_shared<Transformable2D>(Transformable2D({ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} })),
+		std::make_shared<Transformable2D>(Transformable2D({ {w, 0.0f}, 0.0f, {1.0f, 1.0f} })),
+		std::make_shared<Transformable2D>(Transformable2D({ {2.0f * w, 0.0f}, 0.5f, {1.0f, 1.0f} }))
+	});
+	Renderer::GetCanvasLayer(0)->OnSetZIndex(tessel.get(), 10);
 
-	ActorPrimitive2D* const actor_ref = dynamic_cast<ActorPrimitive2D* const>(tessel.ActorRef());
+	ActorPrimitive2D* const actor_ref = dynamic_cast<ActorPrimitive2D* const>(tessel->ActorRef().get());
 	if (actor_ref)
 	{
 		actor_ref->SetModulationPerPoint({
@@ -177,93 +181,27 @@ void Pulsar::Run(GLFWwindow* window)
 			});
 	}
 
-	ActorTesselation2D tesselVertical(&tessel);
-	Renderer::GetCanvasLayer(0)->OnDetach(&tessel);
-	Renderer::GetCanvasLayer(0)->OnAttach(&tesselVertical);
-	tesselVertical.RectVectorRef() = { {{0.0f, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{0.0f, -h}, 0.0f, {1.0f, 1.0f}}, {{0.0f, -2 * h}, 0.5f, {1.0f, 1.0f}} };
-
-	ActorTesselation2D tesselDiagonal(&tesselVertical);
-	Renderer::GetCanvasLayer(0)->OnDetach(&tesselVertical);
-	Renderer::GetCanvasLayer(0)->OnAttach(&tesselDiagonal);
-	tesselDiagonal.RectVectorRef() = { {{0.0f, 0.0f}, 0.0f, {1.0f, 1.0f}}, {{-0.5f * w, 0.5 * h}, -0.8f, {0.75f, -0.75f}} };
+	std::shared_ptr<ActorTesselation2D> tesselVertical(std::make_shared<ActorTesselation2D>(ActorTesselation2D(tessel)));
+	Renderer::GetCanvasLayer(0)->OnDetach(tessel.get());
+	Renderer::GetCanvasLayer(0)->OnAttach(tesselVertical.get());
+	tesselVertical->PushBack({
+		std::shared_ptr<Transformable2D>(new Transformable2D({ {0.0f, 0}, 0.0f, {1.0f, 1.0f} })),
+		std::shared_ptr<Transformable2D>(new Transformable2D({ {0.0f, -h}, 0.0f, {1.0f, 1.0f} })),
+		std::shared_ptr<Transformable2D>(new Transformable2D({ {0.0f, -2 * h}, 0.5f, {1.0f, 1.0f}}))
+	});
+	
+	std::shared_ptr<ActorTesselation2D> tesselDiagonal(std::make_shared<ActorTesselation2D>(ActorTesselation2D(tesselVertical)));
+	Renderer::GetCanvasLayer(0)->OnDetach(tesselVertical.get());
+	Renderer::GetCanvasLayer(0)->OnAttach(tesselDiagonal.get());
+	tesselDiagonal->PushBack({
+		std::shared_ptr<Transformable2D>(new Transformable2D({ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} })),
+		std::shared_ptr<Transformable2D>(new Transformable2D({ {-0.5f * w, 0.5f * h}, -0.8f, {0.75f, -0.75f} })),
+	});
 
 	actor2->CropToRelativeRect({ 0.3f, 0.4f, 0.4f, 0.55f });
 
-	//TileHandle tile_dirtTL(TextureFactory::GetTileHandle(tex_dirtTL)), tile_dirtTR(TextureFactory::GetTileHandle(tex_dirtTR)), tile_grassSingle(TextureFactory::GetTileHandle(tex_grassSingle)), tile_grassTL(TextureFactory::GetTileHandle(tex_grassTL)), tile_grassTE(TextureFactory::GetTileHandle(tex_grassTE)), tile_grassTR(TextureFactory::GetTileHandle(tex_grassTR));
-	//std::vector<TileHandle> tiles = { tile_dirtTL, tile_dirtTR, tile_grassSingle, tile_grassTL, tile_grassTE, tile_grassTR };
-	//TileHandle tileAtlas = TileFactory::GetAtlasHandle(tiles, -1, -1, 1);
-	//const Atlas* atlas = dynamic_cast<const Atlas*>(TileFactory::GetConstTileRef(tileAtlas));
-	//if (!atlas)
-	//	ASSERT(false);
-	//if (!saveAtlas(atlas, "res/textures/atlas.png", "res/assets/atlas_asset.toml"))
-	//	ASSERT(false);
-
-	TileHandle tileAtlas;
-	if (loadAtlas("res/assets/atlas_asset.toml", tileAtlas) != LOAD_STATUS::OK)
-		ASSERT(false);
-
-	Atlas* atlas = dynamic_cast<Atlas*>(TileFactory::GetTileRef(tileAtlas));
-	if (!atlas)
-		ASSERT(false);
-
-	TileMap tilemap(tileAtlas);
-
-	if (!tilemap.SetOrdering(std::vector<size_t>{0, 1, 2, 3, 4, 5}))
-		ASSERT(false);
-
-	// TODO tilemap asset file that saves these:
-	tilemap.SetTransform({ {100.0f, 200.0f}, -0.5f, { 5.0f, 8.0f } });
-	tilemap.Insert(3, -2, 0);
-	tilemap.Insert(4, -1, 0);
-	tilemap.Insert(4, 0, -1);
-	tilemap.Insert(4, 1, 0);
-	tilemap.Insert(5, 2, 0);
-
-	Renderer::GetCanvasLayer(0)->OnAttach(&tilemap);
-	Renderer::GetCanvasLayer(0)->OnSetZIndex(&tilemap, 10);
-
-	LocalTransformer2D flags(actor4->GetTransformRef(), actor1);
-
-	Renderer::ChangeCanvasLayerIndex(-1, 1);
-
-	Renderer::AddCanvasLayer(10);
-	DebugPolygon poly({ {0.0f, 0.0f}, {100.0f, 0.0f}, {50.0f, 200.0f}, {150.0f, 200.0f}, {0.0f, 400.0f}, {100.0f, 400.0f} }, {}, { 0.1f, 0.2f, 1.0f, 1.0f }, GL_TRIANGLE_STRIP);
-	Renderer::GetCanvasLayer(10)->OnAttach(&poly);
-	//poly.visible = false;
-	Renderer::GetCanvasLayer(10)->OnSetZIndex(&poly, 5);
 	Renderer::RemoveCanvasLayer(0);
-	Renderer::RemoveCanvasLayer(1);
-
-	float side = static_cast<float>(_RendererSettings::initial_window_height);
-
-	DebugCircle circ(100.0f);
-	Renderer::GetCanvasLayer(10)->OnAttach(&circ);
-	//circ.SetScale(2.0f, 5.0f);
-	//circ.SetRotation(0.3);
-	circ.SetRadius(_RendererSettings::initial_window_height * 0.5f);
-	circ.SetColor({ 0.8f, 0.8f, 0.8f, 0.4f });
-
-	RectRender rect(*actor2);
-	Renderer::AddCanvasLayer(-3);
-	Renderer::GetCanvasLayer(-3)->OnAttach(&rect);
-	rect.CropToRelativeRect({ 0.0f, 0.0f, 1.0f, 1.0f });
-	rect.SetTransform({ {}, 0.0f, {side / rect.GetUVWidth(), side / rect.GetUVHeight()} });
-
-	DebugPoint pnt({}, { 0.0f, 0.4f, 0.1f, 0.7f }, side);
-	Renderer::GetCanvasLayer(10)->OnAttach(&pnt);
-	//pnt.SetInnerRadius(0.25f);
-	pnt.SetInnerRadius(pnt.InnerRadiusFromBorderWidth(side * 0.25f));
-
-	DebugBatcher debug_batcher;
-	auto p_circ = std::make_shared<DebugCircle>(circ);
-	auto p_pnt = std::make_shared<DebugPoint>(pnt);
-	auto p_poly = std::make_shared<DebugPolygon>(poly);
-	debug_batcher.PushBackAll({ p_circ, p_pnt, p_poly });
-	Renderer::RemoveCanvasLayer(10);
-	Renderer::AddCanvasLayer(10);
-	Renderer::GetCanvasLayer(10)->OnAttach(&debug_batcher);
-	debug_batcher.ChangeZIndex(p_circ->GetDebugModel(), -1);
-
+	Renderer::RemoveCanvasLayer(-1);
 	Renderer::RemoveCanvasLayer(10);
 	Renderer::RemoveCanvasLayer(-3);
 
@@ -342,12 +280,31 @@ void Pulsar::Run(GLFWwindow* window)
 
 	ParticleSystem<> psys({ wave1, wave2 });
 	Renderer::AddCanvasLayer(11);
-	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&psys);
 	Logger::NewLine();
 
 	psys.Pause();
 
-	Renderer::GetCanvasLayer(11)->OnAttach(&tilemap);
+	//TileHandle tile_dirtTL(TextureFactory::GetTileHandle(tex_dirtTL)), tile_dirtTR(TextureFactory::GetTileHandle(tex_dirtTR)), tile_grassSingle(TextureFactory::GetTileHandle(tex_grassSingle)), tile_grassTL(TextureFactory::GetTileHandle(tex_grassTL)), tile_grassTE(TextureFactory::GetTileHandle(tex_grassTE)), tile_grassTR(TextureFactory::GetTileHandle(tex_grassTR));
+	//std::vector<TileHandle> tiles = { tile_dirtTL, tile_dirtTR, tile_grassSingle, tile_grassTL, tile_grassTE, tile_grassTR };
+	//TileHandle tileAtlas = TileFactory::GetAtlasHandle(tiles, -1, -1, 1);
+	//const Atlas* atlas = dynamic_cast<const Atlas*>(TileFactory::GetConstTileRef(tileAtlas));
+	//if (!atlas)
+	//	ASSERT(false);
+	//if (!saveAtlas(atlas, "res/textures/atlas.png", "res/assets/atlas_asset.toml"))
+	//	ASSERT(false);
+
+	std::shared_ptr<TileMap> tilemap;
+	if (loadTileMap("res/assets/tilemap.toml", tilemap) != LOAD_STATUS::OK)
+		ASSERT(false);
+
+	tilemap->SetTransform({ {100.0f, 200.0f}, -0.5f, { 5.0f, 8.0f } });
+	tilemap->FlushTransform();
+
+	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
+	Renderer::GetCanvasLayer(11)->OnAttach(tesselDiagonal.get());
+	tesselDiagonal->SetPosition(-400, 300);
+	tessel->SetScale(0.6, 0.6);
 
 	for (;;)
 	{
@@ -369,6 +326,4 @@ void Pulsar::Run(GLFWwindow* window)
 		if (glfwWindowShouldClose(window))
 			break;
 	}
-
-	delete actor1, actor2, actor3, actor4;
 }

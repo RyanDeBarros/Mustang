@@ -5,7 +5,7 @@
 #include "factory/ShaderFactory.h"
 
 LayerView2D::LayerView2D(float pLeft, float pRight, float pBottom, float pTop)
-	: Transformable2D({}), m_ProjectionMatrix(glm::ortho<float>(pLeft, pRight, pBottom, pTop)), m_VP()
+	: Transformable2D(Transform2D{}), m_ProjectionMatrix(glm::ortho<float>(pLeft, pRight, pBottom, pTop)), m_VP()
 {
 	UpdateVP();
 }
@@ -21,6 +21,6 @@ void LayerView2D::PassVPUniform(const ShaderHandle& handle) const
 
 void LayerView2D::UpdateVP()
 {
-	m_VP = m_ProjectionMatrix * Transform::ToInverseMatrix(m_Transform);
+	m_VP = m_ProjectionMatrix * Transform::ToInverseMatrix(*m_Transform);
 	shaderCache.clear();
 }

@@ -1,0 +1,11 @@
+header = "tilemap"
+
+[tilemap]
+atlas = "res/assets/atlas_asset.toml"
+tiles = [
+	[3, -2, 0],
+	[4, -1, 0],
+	[4, 0, -1],
+	[4, 1, 0],
+	[5, 2, 0]
+]
