@@ -16,13 +16,13 @@ struct TMElement
 {
 	std::shared_ptr<RectRender> rectRender;
 	std::shared_ptr<ActorTesselation2D> tessel;
+	LocalTransformer2D transformer;
 };
 
-class TileMap : public ActorSequencer2D
+class TileMap : public ActorRenderBase2D
 {
 	Atlas* m_Atlas;
 	std::vector<TMElement> m_Map;
-	std::vector<LocalTransformer2D> m_Transformers;
 	Permutation m_Ordering;
 	std::shared_ptr<Transform2D> m_Transform;
 
@@ -31,13 +31,11 @@ public:
 	TileMap(const TileMap&) = delete;
 	TileMap(TileMap&&) = delete;
 
-	ActorPrimitive2D* const operator[](const int& i) override;
 	virtual BufferCounter PrimitiveCount() const;
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
 	bool SetOrdering(const Permutation& permutation);
-	inline void SetTransform(const Transform2D& tr) { *m_Transform = tr; }
-	void FlushTransform();
+	void SetTransform(const Transform2D& tr);
 	void Insert(const size_t& tessel, float posX, float posY);
 
 	ActorTesselation2D* const TesselationRef(const size_t& tessel) const;

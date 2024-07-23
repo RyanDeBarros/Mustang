@@ -1,7 +1,7 @@
 #include "ActorTesselation.h"
 
 ActorTesselation2D::ActorTesselation2D(const std::shared_ptr<ActorRenderBase2D>& actor)
-	: m_Actor(actor), ActorSequencer2D(0), Transformable2D(Transform2D{}), m_Transformer(m_Transform, {})
+	: m_Actor(actor), ActorSequencer2D(0), Transformable2D(Transform2D{}), m_Transformer(m_Transform, std::vector<std::shared_ptr<Transformable2D>>{})
 {
 	BindFunctions();
 }
@@ -48,16 +48,6 @@ ActorTesselation2D::~ActorTesselation2D()
 {
 }
 
-void ActorTesselation2D::PushBack(const std::shared_ptr<Transformable2D>& child)
-{
-	m_Transformer.PushBack(child, false);
-}
-
-void ActorTesselation2D::PushBack(const std::vector<std::shared_ptr<Transformable2D>>& children)
-{
-	m_Transformer.PushBack(children, false);
-}
-
 ActorPrimitive2D* const ActorTesselation2D::operator[](const int& i)
 {
 	if (i >= static_cast<int>(PrimitiveCount()) || i < 0)
@@ -68,7 +58,7 @@ ActorPrimitive2D* const ActorTesselation2D::operator[](const int& i)
 ActorPrimitive2D* const ActorTesselation2D::f_prim_operator(ActorTesselation2D* const tessel, const int& i)
 {
 	ActorPrimitive2D* const primitive = static_cast<ActorPrimitive2D* const>(tessel->m_Actor.get());
-	primitive->SetTransform(*tessel->m_Transform ^ tessel->m_Transformer.GetLocalTransform(i) ^ tessel->m_ActorPreDrawTransforms[0]);
+	primitive->SetTransform(Transform::AbsTo(Transform::AbsTo(tessel->m_ActorPreDrawTransforms[0], tessel->m_Transformer.GetLocalTransform(i)), *tessel->m_Transform));
 	return primitive;
 }
 
@@ -77,7 +67,7 @@ ActorPrimitive2D* const ActorTesselation2D::f_sequ_operator(ActorTesselation2D* 
 	ActorSequencer2D* const sequencer = static_cast<ActorSequencer2D* const>(tessel->m_Actor.get());
 	ActorPrimitive2D* const primitive = (*sequencer)[i % tessel->RenderSeqCount()];
 	if (primitive)
-		primitive->SetTransform(*tessel->m_Transform ^ tessel->m_Transformer.GetLocalTransform(i / tessel->RenderSeqCount()) ^ tessel->m_ActorPreDrawTransforms[i % tessel->m_ActorPreDrawTransforms.size()]);
+		primitive->SetTransform(Transform::AbsTo(Transform::AbsTo(tessel->m_ActorPreDrawTransforms[i % tessel->m_ActorPreDrawTransforms.size()], tessel->m_Transformer.GetLocalTransform(i / tessel->RenderSeqCount())), *tessel->m_Transform));
 	return primitive;
 }
 

@@ -653,8 +653,6 @@ LOAD_STATUS loadTileMap(const char* asset_filepath, std::shared_ptr<TileMap>& ti
 			}
 		}
 
-		//tilemap->SetTransform({ {100.0f, 200.0f}, -0.5f, { 5.0f, 8.0f } });
-
 		if (auto tiles = tm["tiles"].as_array())
 		{
 			for (auto i = 0; i < tiles->size(); i++)

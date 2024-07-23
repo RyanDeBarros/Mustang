@@ -40,8 +40,10 @@ public:
 
 	inline std::shared_ptr<ActorRenderBase2D> ActorRef() const { return m_Actor; }
 	inline MultiLocalTransformer2D* const TransformerRef() { return &m_Transformer; }
-	void PushBack(const std::shared_ptr<Transformable2D>& child);
-	void PushBack(const std::vector<std::shared_ptr<Transformable2D>>& children);
+	inline void PushBackGlobal(const std::shared_ptr<Transformable2D>& child) { m_Transformer.PushBackGlobal(child, false); }
+	inline void PushBackGlobals(const std::vector<std::shared_ptr<Transformable2D>>& children) { m_Transformer.PushBackGlobals(children, false); }
+	inline void PushBackLocal(const Transform2D& local) { m_Transformer.PushBackLocal(local, false); }
+	inline void PushBackLocals(const std::vector<Transform2D>& locals) { m_Transformer.PushBackLocals(locals, false); }
 	
 	ActorPrimitive2D* const operator[](const int& i) override;
 	ZIndex GetZIndex() const override;

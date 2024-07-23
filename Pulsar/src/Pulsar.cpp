@@ -163,7 +163,7 @@ void Pulsar::Run(GLFWwindow* window)
 
 	float w = actor3->GetWidth() * actor3->GetScale().x;
 	float h = actor3->GetHeight() * actor3->GetScale().y;
-	tessel->PushBack({
+	tessel->PushBackGlobals({
 		std::make_shared<Transformable2D>(Transformable2D({ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} })),
 		std::make_shared<Transformable2D>(Transformable2D({ {w, 0.0f}, 0.0f, {1.0f, 1.0f} })),
 		std::make_shared<Transformable2D>(Transformable2D({ {2.0f * w, 0.0f}, 0.5f, {1.0f, 1.0f} }))
@@ -184,7 +184,7 @@ void Pulsar::Run(GLFWwindow* window)
 	std::shared_ptr<ActorTesselation2D> tesselVertical(std::make_shared<ActorTesselation2D>(ActorTesselation2D(tessel)));
 	Renderer::GetCanvasLayer(0)->OnDetach(tessel.get());
 	Renderer::GetCanvasLayer(0)->OnAttach(tesselVertical.get());
-	tesselVertical->PushBack({
+	tesselVertical->PushBackGlobals({
 		std::shared_ptr<Transformable2D>(new Transformable2D({ {0.0f, 0}, 0.0f, {1.0f, 1.0f} })),
 		std::shared_ptr<Transformable2D>(new Transformable2D({ {0.0f, -h}, 0.0f, {1.0f, 1.0f} })),
 		std::shared_ptr<Transformable2D>(new Transformable2D({ {0.0f, -2 * h}, 0.5f, {1.0f, 1.0f}}))
@@ -193,7 +193,7 @@ void Pulsar::Run(GLFWwindow* window)
 	std::shared_ptr<ActorTesselation2D> tesselDiagonal(std::make_shared<ActorTesselation2D>(ActorTesselation2D(tesselVertical)));
 	Renderer::GetCanvasLayer(0)->OnDetach(tesselVertical.get());
 	Renderer::GetCanvasLayer(0)->OnAttach(tesselDiagonal.get());
-	tesselDiagonal->PushBack({
+	tesselDiagonal->PushBackGlobals({
 		std::shared_ptr<Transformable2D>(new Transformable2D({ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} })),
 		std::shared_ptr<Transformable2D>(new Transformable2D({ {-0.5f * w, 0.5f * h}, -0.8f, {0.75f, -0.75f} })),
 	});
@@ -202,8 +202,6 @@ void Pulsar::Run(GLFWwindow* window)
 
 	Renderer::RemoveCanvasLayer(0);
 	Renderer::RemoveCanvasLayer(-1);
-	Renderer::RemoveCanvasLayer(10);
-	Renderer::RemoveCanvasLayer(-3);
 
 	ParticleWaveData<> wave1{
 		1.5f,
@@ -285,26 +283,18 @@ void Pulsar::Run(GLFWwindow* window)
 
 	psys.Pause();
 
-	//TileHandle tile_dirtTL(TextureFactory::GetTileHandle(tex_dirtTL)), tile_dirtTR(TextureFactory::GetTileHandle(tex_dirtTR)), tile_grassSingle(TextureFactory::GetTileHandle(tex_grassSingle)), tile_grassTL(TextureFactory::GetTileHandle(tex_grassTL)), tile_grassTE(TextureFactory::GetTileHandle(tex_grassTE)), tile_grassTR(TextureFactory::GetTileHandle(tex_grassTR));
-	//std::vector<TileHandle> tiles = { tile_dirtTL, tile_dirtTR, tile_grassSingle, tile_grassTL, tile_grassTE, tile_grassTR };
-	//TileHandle tileAtlas = TileFactory::GetAtlasHandle(tiles, -1, -1, 1);
-	//const Atlas* atlas = dynamic_cast<const Atlas*>(TileFactory::GetConstTileRef(tileAtlas));
-	//if (!atlas)
-	//	ASSERT(false);
-	//if (!saveAtlas(atlas, "res/textures/atlas.png", "res/assets/atlas_asset.toml"))
-	//	ASSERT(false);
-
 	std::shared_ptr<TileMap> tilemap;
 	if (loadTileMap("res/assets/tilemap.toml", tilemap) != LOAD_STATUS::OK)
 		ASSERT(false);
 
-	tilemap->SetTransform({ {100.0f, 200.0f}, -0.5f, { 5.0f, 8.0f } });
-	tilemap->FlushTransform();
+	tilemap->SetTransform({ {100.0f, 200.0f}, 0.3f, { 5.0f, 8.0f } });
+	tilemap->Insert(4, 0, 1);
 
 	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
-	Renderer::GetCanvasLayer(11)->OnAttach(tesselDiagonal.get());
+	//Renderer::GetCanvasLayer(11)->OnAttach(tesselDiagonal.get());
 	tesselDiagonal->SetPosition(-400, 300);
 	tessel->SetScale(0.6, 0.6);
+	actor3->OperateScale([](glm::vec2& scale) { scale *= 2.0f; });
 
 	for (;;)
 	{

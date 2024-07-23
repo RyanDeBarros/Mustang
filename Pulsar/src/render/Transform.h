@@ -11,8 +11,6 @@ struct Transform2D
 	glm::vec2 scale = glm::vec2(1.0f, 1.0f);
 
 	Transform2D operator^(const Transform2D& transform) const;
-	static Transform2D RelTo(const Transform2D& global, const Transform2D& parent);
-	static Transform2D AbsTo(const Transform2D& local, const Transform2D& parent);
 
 	inline bool operator==(const Transform2D& other) const { return position == other.position && rotation == other.rotation && scale == other.scale; }
 };
@@ -25,6 +23,8 @@ namespace Transform
 	extern glm::mat2 CondensedRS(const Transform2D& tr);
 	extern Transform2D Inverse(const Transform2D& tr);
 	extern glm::mat2 Rotation(const glm::float32& r);
+	extern Transform2D RelTo(const Transform2D& global, const Transform2D& parent);
+	extern Transform2D AbsTo(const Transform2D& local, const Transform2D& parent);
 }
 
 class Transformable2D
@@ -66,6 +66,7 @@ class LocalTransformer2D
 
 public:
 	LocalTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::shared_ptr<Transformable2D>& child, bool discard_old_transform = true);
+	LocalTransformer2D(const std::shared_ptr<Transform2D>& parent, const Transform2D& local, bool discard_old_transform = true);
 	LocalTransformer2D(const LocalTransformer2D&);
 	LocalTransformer2D(LocalTransformer2D&&) noexcept;
 	LocalTransformer2D& operator=(const LocalTransformer2D&);
@@ -84,9 +85,11 @@ public:
 
 	void SyncGlobalWithLocal();
 	void SyncLocalWithGlobal();
+	void SyncGlobalWithParent();
 	void SyncGlobalWithParentPosition();
 	void SyncGlobalWithParentRotation();
 	void SyncGlobalWithParentScale();
+	void SyncLocalWithParent();
 	void SyncLocalWithParentPosition();
 	void SyncLocalWithParentRotation();
 	void SyncLocalWithParentScale();
@@ -112,6 +115,7 @@ class MultiLocalTransformer2D
 
 public:
 	MultiLocalTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transforms = true);
+	MultiLocalTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms = true);
 	MultiLocalTransformer2D(const MultiLocalTransformer2D&);
 	MultiLocalTransformer2D(MultiLocalTransformer2D&&) noexcept;
 	MultiLocalTransformer2D& operator=(const MultiLocalTransformer2D&);
@@ -142,18 +146,22 @@ public:
 
 	inline void SyncGlobalWithLocals() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithLocal(i); }
 	inline void SyncLocalWithGlobals() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithGlobal(i); }
+	inline void SyncGlobalWithParent() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithParent(i); }
 	inline void SyncGlobalWithParentPositions() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithParentPosition(i); }
 	inline void SyncGlobalWithParentRotations() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithParentRotation(i); }
 	inline void SyncGlobalWithParentScales() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithParentScale(i); }
+	inline void SyncLocalWithParent() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithParent(i); }
 	inline void SyncLocalWithParentPositions() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithParentPosition(i); }
 	inline void SyncLocalWithParentRotations() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithParentRotation(i); }
 	inline void SyncLocalWithParentScales() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithParentScale(i); }
 
 	void SyncGlobalWithLocal(size_t i);
 	void SyncLocalWithGlobal(size_t i);
+	void SyncGlobalWithParent(size_t i);
 	void SyncGlobalWithParentPosition(size_t i);
 	void SyncGlobalWithParentRotation(size_t i);
 	void SyncGlobalWithParentScale(size_t i);
+	void SyncLocalWithParent(size_t i);
 	void SyncLocalWithParentPosition(size_t i);
 	void SyncLocalWithParentRotation(size_t i);
 	void SyncLocalWithParentScale(size_t i);
@@ -182,8 +190,10 @@ public:
 	void OperateGlobalScale(size_t i, const std::function<void(glm::vec2& scale)>&);
 	inline glm::vec2 GetGlobalScale(size_t i) const { return m_Children[i]->GetTransform().scale; }
 
-	void PushBack(const std::shared_ptr<Transformable2D>& child, bool discard_old_transform = true);
-	void PushBack(const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transform = true);
+	void PushBackGlobal(const std::shared_ptr<Transformable2D>& child, bool discard_old_transform = true);
+	void PushBackLocal(const Transform2D& local, bool discard_old_transform = true);
+	void PushBackGlobals(const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transform = true);
+	void PushBackLocals(const std::vector<Transform2D>& locals, bool discard_old_transform = true);
 	void Remove(size_t i);
 	void Remove(const std::vector<std::shared_ptr<Transformable2D>>::iterator& where);
 	std::vector<std::shared_ptr<Transformable2D>>::iterator Find(const std::shared_ptr<Transformable2D>& child);
