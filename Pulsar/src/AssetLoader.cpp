@@ -79,6 +79,8 @@ bool _LoadRendererSettings()
 				_RendererSettings::solid_point_filepath = solid_point.value();
 			if (auto solid_circle = rendering["solid_circle"].value<std::string>())
 				_RendererSettings::solid_circle_filepath = solid_circle.value();
+			if (auto particle_frame_length = rendering["particle_frame_length"].value<double>())
+				_RendererSettings::particle_frame_length = static_cast<real>(particle_frame_length.value());
 		}
 		return true;
 	}

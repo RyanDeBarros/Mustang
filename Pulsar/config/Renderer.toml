@@ -16,3 +16,5 @@ rect_renderable = "config/RectRenderable.toml"
 solid_polygon = "config/SolidPolygon.toml"
 solid_point = "config/SolidPoint.toml"
 solid_circle = "config/SolidCircle.toml"
+
+particle_frame_length = 0.0167

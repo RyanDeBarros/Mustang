@@ -59,6 +59,6 @@ public:
 	inline real dt() const { return m_DT; }
 
 private:
-	void OnDraw();
+	void OnDraw(real delta_time);
 
 };

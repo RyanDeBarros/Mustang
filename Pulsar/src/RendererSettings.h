@@ -23,5 +23,7 @@ namespace _RendererSettings
 	extern std::string solid_point_filepath;
 	extern std::string solid_circle_filepath;
 
+	extern real particle_frame_length;
+
 	inline glm::vec2 initial_window_rel_pos(const float& x, const float& y) { return {x * initial_window_width, y * initial_window_height}; }
 }

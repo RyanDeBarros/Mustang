@@ -13,10 +13,10 @@ ParticleWave<ParticleCount>::ParticleWave(const ParticleWaveData<ParticleCount>&
 }
 
 template<std::unsigned_integral ParticleCount>
-void ParticleWave<ParticleCount>::OnUpdate(float delta_time, ParticleSystem<ParticleCount>& psys)
+void ParticleWave<ParticleCount>::OnUpdate(ParticleSystem<ParticleCount>& psys)
 {
-	unsigned int wave_num = static_cast<unsigned int>(delta_time * m_WavePeriodInv);
-	real t = (delta_time - wave_num * m_WavePeriod) * m_WavePeriodInv;
+	unsigned int wave_num = static_cast<unsigned int>(psys.m_TotalPlayed * m_WavePeriodInv);
+	real t = (psys.m_TotalPlayed - wave_num * m_WavePeriod) * m_WavePeriodInv;
 	ParticleCount num_to_spawn = 0;
 	if (wave_num > m_WaveNum)
 	{

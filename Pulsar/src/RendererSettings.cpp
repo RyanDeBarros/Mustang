@@ -17,4 +17,6 @@ namespace _RendererSettings
 	std::string solid_polygon_filepath = "config/SolidPolygon.toml";
 	std::string solid_point_filepath = "config/SolidPoint.toml";
 	std::string solid_circle_filepath = "config/SolidCircle.toml";
+
+	real particle_frame_length = 0.0167f;
 }

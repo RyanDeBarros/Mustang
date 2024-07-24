@@ -47,9 +47,9 @@ Particle& Particle::operator=(const Particle& other)
 	return *this;
 }
 
-void Particle::OnDraw()
+void Particle::OnDraw(real delta_time)
 {
-	m_DT = Pulsar::deltaDrawTime * m_LifespanInv;
+	m_DT = delta_time * m_LifespanInv;
 	if ((m_T += m_DT) > 1.0f)
 		m_Invalid = true;
 	else

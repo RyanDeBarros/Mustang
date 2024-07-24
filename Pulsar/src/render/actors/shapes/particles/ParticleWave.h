@@ -41,6 +41,6 @@ public:
 
 private:
 	friend class ParticleSystem<ParticleCount>;
-	void OnUpdate(float delta_time, ParticleSystem<ParticleCount>& psys);
+	void OnUpdate(ParticleSystem<ParticleCount>& psys);
 	void OnSpawn(ParticleSystem<ParticleCount>& psys, const Particles::CHRSeed& seed);
 };

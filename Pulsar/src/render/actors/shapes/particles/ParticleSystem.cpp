@@ -2,6 +2,7 @@
 
 #include <unordered_set>
 
+#include "RendererSettings.h"
 #include "ParticleWave.h"
 
 template class ParticleSystem<unsigned short>;
@@ -20,6 +21,21 @@ template<std::unsigned_integral ParticleCount>
 void ParticleSystem<ParticleCount>::RequestDraw(CanvasLayer* canvas_layer)
 {
 	// TODO perhaps spawning and enabled should be moved to particle wave?
+	if (!paused)
+	{
+		m_LeftoverDT += Pulsar::deltaDrawTime;
+		if (m_LeftoverDT >= _RendererSettings::particle_frame_length)
+		{
+			m_DeltaTime = _RendererSettings::particle_frame_length;
+			m_LeftoverDT -= _RendererSettings::particle_frame_length;
+		}
+		else
+		{
+			m_DeltaTime = m_LeftoverDT;
+			m_LeftoverDT = 0.0f;
+		}
+		m_TotalPlayed += m_DeltaTime;
+	}
 	if (spawning)
 		OnWavesUpdate();
 	if (enabled)
@@ -31,15 +47,14 @@ void ParticleSystem<ParticleCount>::RequestDraw(CanvasLayer* canvas_layer)
 template<std::unsigned_integral ParticleCount>
 void ParticleSystem<ParticleCount>::OnWavesUpdate()
 {
-	real dt = Pulsar::totalDrawTime - m_LifetimeStart;
-	if (m_PlayTime > 0.0f && dt > m_PlayTime)
+	if (m_PlayTime > 0.0f && m_TotalPlayed > m_PlayTime)
 	{
 		spawning = false;
 		Reset();
 		return;
 	}
 	for (ParticleWave<ParticleCount>& wave : m_Waves)
-		wave.OnUpdate(dt, *this);
+		wave.OnUpdate(*this);
 }
 
 template<std::unsigned_integral ParticleCount>
@@ -49,7 +64,7 @@ void ParticleSystem<ParticleCount>::OnParticlesUpdate()
 	std::unordered_map<DebugModel, std::unordered_set<std::shared_ptr<DebugPolygon>>> to_delete;
 	for (auto& part : m_Particles)
 	{
-		part.OnDraw();
+		part.OnDraw(m_DeltaTime);
 		if (part.m_Invalid)
 		{
 			auto iter = to_delete.find(part.m_Shape->GetDebugModel());
@@ -71,9 +86,10 @@ void ParticleSystem<ParticleCount>::Pause()
 {
 	if (enabled || spawning)
 	{
-		m_PausedAt = Pulsar::totalDrawTime;
+		//m_PausedAt = Pulsar::totalDrawTime;
 		enabled = false;
 		spawning = false;
+		paused = true;
 	}
 }
 
@@ -82,9 +98,10 @@ void ParticleSystem<ParticleCount>::Resume()
 {
 	if (!enabled || !spawning)
 	{
-		m_LifetimeStart += Pulsar::totalDrawTime - m_PausedAt;
+		//m_LifetimeStart += Pulsar::totalDrawTime - m_PausedAt;
 		enabled = true;
 		spawning = true;
+		paused = false;
 	}
 }
 
