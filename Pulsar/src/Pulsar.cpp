@@ -210,7 +210,8 @@ void Pulsar::Run(GLFWwindow* window)
 		std::shared_ptr<DebugPolygon>(new DebugCircle(4.0f)),
 		CumulativeFunc<>([](float t) { return t < 0.6f ? PowerFunc(2000.0f, 0.5f)(t) : PowerFunc(2000.0f, 0.5f)(0.6f); }),
 		[](const Particles::CHRSeed& seed) { return 0.4f - seed.waveT * 0.05f; },
-		Particles::CombineSequential({
+		Particles::CombineSequential(
+			false, {
 			[mt, imt](const Particles::CHRSeed& seed)
 			{
 				return Particles::CHRBind{
@@ -223,6 +224,7 @@ void Pulsar::Run(GLFWwindow* window)
 				};
 			},
 			Particles::CombineInitialOverTime(
+				true,
 				[](const Particles::CHRSeed& seed)
 				{
 					return Particles::CHRBind{
@@ -257,47 +259,93 @@ void Pulsar::Run(GLFWwindow* window)
 		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 3}, {1, 3}, {1, 0} }, {}, {}, GL_TRIANGLE_FAN)),
 		CumulativeFunc<>(LinearFunc(p2height * 0.5f)),
 		[](const Particles::CHRSeed& seed) { return 1.5f; },
-		[p2width, p2height](const Particles::CHRSeed& seed)
-		{
-			return Particles::CHRBind{
-				[p2width, p2height, &seed](Particle& p) {
-					if (p.t() == 0.0f)
+		Particles::CombineSequential(
+			true,
+			{
+			[](const Particles::CHRSeed& seed)
+			{
+				return Particles::CHRBind{
+					[&seed](Particle& p)
 					{
-						p[0] = rng();
-						p[1] = static_cast<float>(std::rand() % seed.totalSpawn);
-						p[2] = std::rand() % 2 == 0 ? 1 : -1;
-					}
-					real mt = std::fmod(p.t() + p[0], 1.0f);
-					if (mt < 0.5f)
-						p.m_Shape->SetColor({ 2.0f * mt, 2.0f * mt, 1.0f, 0.4f });
-					else
-						p.m_Shape->SetColor({ 2.0f * (1.0f - mt), 2.0f * (1.0f - mt), 1.0f, 0.4f });
-					if (mt < 0.5f)
-						p.m_Transformer.SetLocalScale({ 1.0f + 2.0f * mt * p2width, 1.0f });
-					else
-						p.m_Transformer.SetLocalScale({ 1.0f + 2.0f * (1.0f - mt) * p2width, 1.0f});
-					if (p[2] > 0)
+						if (p.t() == 0.0f)
+						{
+							p[0] = rng();
+							p[1] = static_cast<float>(std::rand() % seed.totalSpawn);
+							p[2] = std::rand() % 2 == 0 ? 1 : -1;
+						}
+					}, 3
+				};
+			},
+			[](const Particles::CHRSeed& seed)
+			{
+				return Particles::CHRBind{
+					[](Particle& p)
 					{
-						if (mt < 0.5f)
-							p.m_Transformer.SetLocalPosition({ -0.5f * p2width, 2.0f * static_cast<unsigned int>(p[1]) - 0.5f * p2height });
+						p[3] = std::fmod(p.t() + p[0], 1.0f);
+					}, 4
+				};
+			},
+			[](const Particles::CHRSeed& seed)
+			{
+				return Particles::CHRBind{
+					[](Particle& p)
+					{
+						if (p[3] < 0.5f)
+							p.m_Shape->SetColor({ 2.0f * p[3], 2.0f * p[3], 1.0f, 0.4f });
 						else
-							p.m_Transformer.SetLocalPosition({ (p2width + 1.0f) * (mt - 0.5f) * 2.0f - 0.5f * p2width, 2.0f * static_cast<unsigned int>(p[1]) - 0.5f * p2height });
-					}
-					else
+							p.m_Shape->SetColor({ 2.0f * (1.0f - p[3]), 2.0f * (1.0f - p[3]), 1.0f, 0.4f });
+					}, 4
+				};
+			},
+			[p2width, p2height](const Particles::CHRSeed& seed)
+			{
+				return Particles::CHRBind{
+					[p2width, p2height](Particle& p)
 					{
-						if (mt < 0.5f)
-							p.m_Transformer.SetLocalPosition({ -(p2width - 1.0f) * (mt - 0.5f) * 2.0f - 0.5f * p2width, 2.0f * static_cast<unsigned int>(p[1]) - 0.5f * p2height });
+						if (p[3] < 0.5f)
+							p.m_Transformer.SetLocalScale({ 1.0f + 2.0f * p[3] * p2width, 1.0f });
 						else
-							p.m_Transformer.SetLocalPosition({ -0.5f * p2width, 2.0f * static_cast<unsigned int>(p[1]) - 0.5f * p2height});
-					}
-					p.m_Transformer.SyncGlobalWithLocal();
-				}, 3
-			};
-		}
+							p.m_Transformer.SetLocalScale({ 1.0f + 2.0f * (1.0f - p[3]) * p2width, 1.0f});
+					}, 4
+				};
+			},
+			[p2width, p2height](const Particles::CHRSeed& seed)
+			{
+				return Particles::CHRBind{
+					[p2width, p2height](Particle& p)
+					{
+						if (p[2] > 0)
+						{
+							if (p[3] < 0.5f)
+								p.m_Transformer.SetLocalPosition({ -0.5f * p2width, 2.0f * static_cast<unsigned int>(p[1]) - 0.5f * p2height });
+							else
+								p.m_Transformer.SetLocalPosition({ (p2width + 1.0f) * (p[3] - 0.5f) * 2.0f - 0.5f * p2width, 2.0f * static_cast<unsigned int>(p[1]) - 0.5f * p2height });
+						}
+						else
+						{
+							if (p[3] < 0.5f)
+								p.m_Transformer.SetLocalPosition({ -(p2width - 1.0f) * (p[3] - 0.5f) * 2.0f - 0.5f * p2width, 2.0f * static_cast<unsigned int>(p[1]) - 0.5f * p2height });
+							else
+								p.m_Transformer.SetLocalPosition({ -0.5f * p2width, 2.0f * static_cast<unsigned int>(p[1]) - 0.5f * p2height});
+						}
+					}, 4
+				};
+			},
+			[](const Particles::CHRSeed& seed)
+			{
+				return Particles::CHRBind{
+					[](Particle& p)
+					{
+						p.m_Transformer.SyncGlobalWithLocal();
+					}, 0
+				};
+			}
+		})
 	};
 
-	ParticleSystem<> psys({ wave1, wave2 });
+	//ParticleSystem<> psys({ wave1, wave2 });
 	//ParticleSystem<> psys({ wave1 });
+	ParticleSystem<> psys({ wave2 });
 
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(&psys);

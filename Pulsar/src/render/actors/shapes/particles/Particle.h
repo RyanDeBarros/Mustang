@@ -25,8 +25,9 @@ namespace Particles {
 
 	typedef std::function<CHRBind(const CHRSeed&)> CharacteristicGen;
 
-	extern CharacteristicGen CombineSequential(const std::vector<CharacteristicGen>& characteristics); 
-	extern CharacteristicGen CombineInitialOverTime(const CharacteristicGen& initial, const CharacteristicGen& over_time);
+	extern CharacteristicGen CombineSequential(bool combine_data, const std::vector<CharacteristicGen>& characteristics); 
+	extern CharacteristicGen CombineInitialOverTime(bool combine_data, const CharacteristicGen& initial, const CharacteristicGen& over_time);
+	extern CharacteristicGen CombineIntervals(bool combine_data, const CharacteristicGen& first, const CharacteristicGen& second, float divider, bool or_equal = false);
 }
 
 struct Particle
