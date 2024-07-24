@@ -29,43 +29,13 @@ namespace Particles {
 	extern CharacteristicGen CombineInitialOverTime(const CharacteristicGen& initial, const CharacteristicGen& over_time);
 }
 
-struct CHRData
-{
-	float* s = nullptr;
-	unsigned char n;
-	CHRData(unsigned char n) : n(n) { if (n > 0) { s = new float[n]; } }
-	CHRData(const CHRData& data) : n(data.n)
-	{
-		if (n > 0)
-		{
-			s = new float[n];
-			memcpy_s(s, n, data.s, n);
-		}
-	}
-	CHRData(CHRData&& data) noexcept : n(data.n), s(data.s) { data.s = nullptr; }
-	~CHRData() { if (s) delete[] s; }
-	CHRData& operator=(const CHRData& other)
-	{
-		n = other.n;
-		if (n > 0)
-		{
-			s = new float[n];
-			memcpy_s(s, n, other.s, n);
-		}
-		else
-		{
-			s = nullptr;
-		}
-		return *this;
-	}
-};
-
 struct Particle
 {
 	LocalTransformer2D m_Transformer;
 	std::shared_ptr<DebugPolygon> m_Shape;
 	Particles::CHRFunc m_Characteristic;
-	CHRData m_Data;
+	float* m_Data = nullptr;
+	unsigned char m_DataSize;
 
 private:
 	template<std::unsigned_integral ParticleCount>
@@ -79,11 +49,13 @@ public:
 	Particle(const std::shared_ptr<DebugPolygon>& shape, const LocalTransformer2D& transformer, const float& lifespan, const Particles::CHRBind& characteristic);
 	Particle(const Particle&) = delete;
 	Particle(Particle&&) noexcept;
+	~Particle();
 	Particle& operator=(const Particle&);
+
+	inline float& operator[](unsigned char i) { return m_Data[i]; }
 	
 	inline real t() const { return m_T; }
 	inline real dt() const { return m_DT; }
-	inline CHRData& data() { return m_Data; }
 
 private:
 	void OnDraw();
