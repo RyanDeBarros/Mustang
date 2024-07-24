@@ -7,7 +7,7 @@ template class ParticleWave<unsigned short>;
 
 template<std::unsigned_integral ParticleCount>
 ParticleWave<ParticleCount>::ParticleWave(const ParticleWaveData<ParticleCount>& wave_data)
-	: m_Shape(wave_data.prototypeShape), m_SpawnFunc(wave_data.spawnFunc), m_LifespanFunc(wave_data.lifespanFunc), m_CharacteristicsVecGen(wave_data.m_CharacteristicsVecGen), m_TotalSpawn(m_SpawnFunc(1.0f))
+	: m_Shape(wave_data.prototypeShape), m_SpawnFunc(wave_data.spawnFunc), m_LifespanFunc(wave_data.lifespanFunc), m_CharacteristicGen(wave_data.characteristicGen), m_TotalSpawn(m_SpawnFunc(1.0f))
 {
 	SetWavePeriod(wave_data.wavePeriod);
 }
@@ -21,21 +21,28 @@ void ParticleWave<ParticleCount>::OnUpdate(float delta_time, ParticleSystem<Part
 	if (wave_num > m_WaveNum)
 	{
 		num_to_spawn = m_SpawnFunc(1.0f);
-		for (auto _ = 0; _ < num_to_spawn; _++)
-			OnSpawn(t, psys, m_NumSpawned++);
+		while (num_to_spawn-- > 0)
+			OnSpawn(psys, { t, m_NumSpawned++, m_TotalSpawn });
 		m_NumSpawned = 0;
 		num_to_spawn = m_SpawnFunc(0.0f);
 		m_WaveNum = wave_num;
 	}
 	num_to_spawn += m_SpawnFunc(t);
-	for (auto _ = 0; _ < num_to_spawn; _++)
-		OnSpawn(t, psys, m_NumSpawned++);
+	if (num_to_spawn > 0)
+	{
+		Particles::CHRSeed seed{ t, m_NumSpawned, m_TotalSpawn };
+		while (num_to_spawn-- > 0)
+		{
+			seed.spawnIndex = m_NumSpawned++;
+			OnSpawn(psys, seed);
+		}
+	}
 }
 
 template<std::unsigned_integral ParticleCount>
-void ParticleWave<ParticleCount>::OnSpawn(float t, ParticleSystem<ParticleCount>& psys, unsigned int spawn_index)
+void ParticleWave<ParticleCount>::OnSpawn(ParticleSystem<ParticleCount>& psys, const Particles::CHRSeed& seed)
 {
 	std::shared_ptr<DebugPolygon> shape(new DebugPolygon(*m_Shape));
-	psys.m_Particles.push_back(Particle(shape, LocalTransformer2D(psys.m_Transform, shape), m_LifespanFunc(t), m_CharacteristicsVecGen(t, spawn_index, m_TotalSpawn)));
+	psys.m_Particles.emplace_back(shape, LocalTransformer2D(psys.m_Transform, shape), m_LifespanFunc(seed), m_CharacteristicGen(seed));
 	psys.m_Batcher.PushBack(shape);
 }

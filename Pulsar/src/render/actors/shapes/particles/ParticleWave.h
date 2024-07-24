@@ -14,8 +14,8 @@ struct ParticleWaveData
 	real wavePeriod;
 	std::shared_ptr<DebugPolygon> prototypeShape;
 	CumulativeFunc<ParticleCount> spawnFunc;
-	Particles::TimeFunc lifespanFunc;
-	Particles::CharacteristicVecGen m_CharacteristicsVecGen;
+	std::function<real(const Particles::CHRSeed&)> lifespanFunc;
+	Particles::CharacteristicGen characteristicGen;
 };
 
 template<std::unsigned_integral ParticleCount>
@@ -25,8 +25,8 @@ template<std::unsigned_integral ParticleCount = unsigned short>
 class ParticleWave
 {
 	CumulativeFunc<ParticleCount> m_SpawnFunc;
-	Particles::TimeFunc m_LifespanFunc;
-	Particles::CharacteristicVecGen m_CharacteristicsVecGen;
+	std::function<real(const Particles::CHRSeed&)> m_LifespanFunc;
+	Particles::CharacteristicGen m_CharacteristicGen;
 	real m_WavePeriod;
 	real m_WavePeriodInv;
 	std::shared_ptr<DebugPolygon> m_Shape;
@@ -42,5 +42,5 @@ public:
 private:
 	friend class ParticleSystem<ParticleCount>;
 	void OnUpdate(float delta_time, ParticleSystem<ParticleCount>& psys);
-	void OnSpawn(float t, ParticleSystem<ParticleCount>& psys, unsigned int spawn_index);
+	void OnSpawn(ParticleSystem<ParticleCount>& psys, const Particles::CHRSeed& seed);
 };

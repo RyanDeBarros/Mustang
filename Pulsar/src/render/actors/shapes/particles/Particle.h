@@ -13,50 +13,59 @@
 struct Particle;
 namespace Particles {
 
-	struct CHRSeedData
+	typedef std::function<void(Particle& p)> CHRFunc;
+	typedef std::pair<CHRFunc, unsigned char> CHRBind;
+	
+	struct CHRSeed
 	{
-		float* s = nullptr;
-		unsigned char n;
-		CHRSeedData(unsigned char n)
-			: n(n)
+		real waveT;
+		unsigned int spawnIndex;
+		unsigned int totalSpawn;
+	};
+
+	typedef std::function<CHRBind(const CHRSeed&)> CharacteristicGen;
+
+	extern CharacteristicGen CombineSequential(const std::vector<CharacteristicGen>& characteristics); 
+	extern CharacteristicGen CombineInitialOverTime(const CharacteristicGen& initial, const CharacteristicGen& over_time);
+}
+
+struct CHRData
+{
+	float* s = nullptr;
+	unsigned char n;
+	CHRData(unsigned char n) : n(n) { if (n > 0) { s = new float[n]; } }
+	CHRData(const CHRData& data) : n(data.n)
+	{
+		if (n > 0)
 		{
 			s = new float[n];
-			for (unsigned char i = 0; i < n; i++)
-				s[i] = rng();
-		}
-		CHRSeedData(const CHRSeedData& data)
-			: n(data.n)
-		{
 			memcpy_s(s, n, data.s, n);
 		}
-		CHRSeedData(CHRSeedData&& data) noexcept
-			: n(data.n), s(data.s)
-		{
-			data.s = nullptr;
-		}
-		~CHRSeedData()
-		{
-			if (s)
-				delete[] s;
-		}
-	};
-
-	struct Characteristic : public std::function<void(Particle&)>
+	}
+	CHRData(CHRData&& data) noexcept : n(data.n), s(data.s) { data.s = nullptr; }
+	~CHRData() { if (s) delete[] s; }
+	CHRData& operator=(const CHRData& other)
 	{
-		Characteristic(const std::function<void(Particle&, const std::shared_ptr<CHRSeedData>&)>& f, unsigned char num_seeds)
-			: std::function<void(Particle&)>(std::bind(f, std::placeholders::_1, std::shared_ptr<CHRSeedData>(new CHRSeedData(num_seeds)))) {}
-		Characteristic(const std::function<void(Particle&)>& f) : std::function<void(Particle&)>(f) {}
-	};
-
-	typedef std::function<std::vector<Characteristic>(real, unsigned short, unsigned int)> CharacteristicVecGen;
-	typedef std::function<real(real)> TimeFunc;
-}
+		n = other.n;
+		if (n > 0)
+		{
+			s = new float[n];
+			memcpy_s(s, n, other.s, n);
+		}
+		else
+		{
+			s = nullptr;
+		}
+		return *this;
+	}
+};
 
 struct Particle
 {
 	LocalTransformer2D m_Transformer;
 	std::shared_ptr<DebugPolygon> m_Shape;
-	std::vector<Particles::Characteristic> m_Characteristics;
+	Particles::CHRFunc m_Characteristic;
+	CHRData m_Data;
 
 private:
 	template<std::unsigned_integral ParticleCount>
@@ -67,12 +76,14 @@ private:
 	bool m_Invalid = false;
 
 public:
-	Particle(const std::shared_ptr<DebugPolygon>& shape, const LocalTransformer2D& transformer, const float& lifespan,
-		const std::vector<Particles::Characteristic>& characteristics);
+	Particle(const std::shared_ptr<DebugPolygon>& shape, const LocalTransformer2D& transformer, const float& lifespan, const Particles::CHRBind& characteristic);
+	Particle(const Particle&) = delete;
+	Particle(Particle&&) noexcept;
 	Particle& operator=(const Particle&);
 	
 	inline real t() const { return m_T; }
 	inline real dt() const { return m_DT; }
+	inline CHRData& data() { return m_Data; }
 
 private:
 	void OnDraw();

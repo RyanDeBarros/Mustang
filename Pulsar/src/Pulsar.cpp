@@ -203,36 +203,52 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::RemoveCanvasLayer(0);
 	Renderer::RemoveCanvasLayer(-1);
 
+	const float mt = 0.5f;
+	const float imt = 1.0f / (1.0f - mt);
 	ParticleWaveData<> wave1{
 		1.5f,
-		std::shared_ptr<DebugPolygon>(new DebugCircle(3.0f)),
+		std::shared_ptr<DebugPolygon>(new DebugCircle(4.0f)),
 		CumulativeFunc<>([](float t) { return t < 0.6f ? PowerFunc(2000.0f, 0.5f)(t) : PowerFunc(2000.0f, 0.5f)(0.6f); }),
-		[](float t) { return 0.4f - t * 0.05f; },
-		[](float t, unsigned short i, unsigned int ti) { return std::vector<Particles::Characteristic>{
-			{ [](Particle& p) {
-				static float mt = 0.5f;
-				static float imt = 1.0f / (1.0f - mt);
-				if (p.t() < mt)
-					p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f });
-				else
-					p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f - (p.t() - mt) * imt });
-			}},
-			{ [t](Particle& p, const std::shared_ptr<Particles::CHRSeedData>& data) {
-				if (p.t() == 0.0f)
+		[](const Particles::CHRSeed& seed) { return 0.4f - seed.waveT * 0.05f; },
+		Particles::CombineSequential({
+			[mt, imt](const Particles::CHRSeed& seed)
+			{
+				return Particles::CHRBind{
+					[mt, imt](Particle& p) {
+						if (p.t() < mt)
+							p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f });
+						else
+							p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f - (p.t() - mt) * imt });
+					}, 0
+				};
+			},
+			Particles::CombineInitialOverTime(
+				[](const Particles::CHRSeed& seed)
 				{
-					p.m_Transformer.SetLocalPosition(glm::vec2{ glm::cos(data->s[0] * 2 * glm::pi<float>()), glm::sin(data->s[0] * 2 * glm::pi<float>()) } *20.0f * data->s[1]);
-					glm::vec2 vel = glm::normalize(glm::vec2{ rng() * 2.0f - 1.0f, rng() * 2.0f - 1.0f }) * glm::vec2{ 200.0f, 100.0f };
-					data->s[0] = rng();
-					vel *= (1.0f + data->s[0] * 0.25f) * (1.0f - 0.4f * glm::pow(t, 0.2f + data->s[0] * 0.25f));
-					data->s[0] = vel.x;
-					data->s[1] = vel.y;
-				}
-				else
+					return Particles::CHRBind{
+						[&seed](Particle& p)
+						{
+							p.data().s[0] = rng();
+							p.m_Transformer.SetLocalPosition(glm::vec2{ glm::cos(p.data().s[0] * 2 * glm::pi<float>()), glm::sin(p.data().s[0] * 2 * glm::pi<float>()) } * 20.0f * rng());
+							glm::vec2 vel = glm::normalize(glm::vec2{ rng() * 2.0f - 1.0f, rng() * 2.0f - 1.0f }) * glm::vec2{ 200.0f, 100.0f };
+							p.data().s[0] = rng();
+							vel *= (1.0f + p.data().s[0] * 0.25f) * (1.0f - 0.4f * glm::pow(seed.waveT, 0.2f + p.data().s[0] * 0.25f));
+							p.data().s[0] = vel.x;
+							p.data().s[1] = vel.y;
+						}, 2
+					};
+				},
+				[](const Particles::CHRSeed& seed)
 				{
-					p.m_Transformer.OperateLocalPosition([&](glm::vec2& pos) { pos += glm::vec2{ data->s[0], data->s[1] } *p.dt(); });
+					return Particles::CHRBind{
+						[](Particle& p)
+						{
+							p.m_Transformer.OperateLocalPosition([&](glm::vec2& pos) { pos += glm::vec2{ p.data().s[0], p.data().s[1] } * p.dt(); });
+						}, 2
+					};
 				}
-			}, 2}
-		}; }
+			)
+		})
 	};
 	float p2width = 400.0f;
 	float p2height = 400.0f;
@@ -240,45 +256,51 @@ void Pulsar::Run(GLFWwindow* window)
 		1.5f,
 		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 3}, {1, 3}, {1, 0} }, {}, {}, GL_TRIANGLE_FAN)),
 		CumulativeFunc<>(LinearFunc(p2height * 0.5f)),
-		[](float t) { return 1.5f; },
-		[=](real t, unsigned short i, unsigned int ti) { return std::vector<Particles::Characteristic>{
-			{ [=](Particle& p, const std::shared_ptr<Particles::CHRSeedData>& data) {
-				if (p.t() == 0.0f)
-				{
-					data->s[1] = static_cast<float>(std::rand() % ti);
-					data->s[2] = std::rand() % 2 == 0 ? 1 : -1;
-				}
-				real mt = std::fmod(p.t() + data->s[0], 1.0f);
-				if (mt < 0.5f)
-					p.m_Shape->SetColor({ 2.0f * mt, 2.0f * mt, 1.0f, 1.0f });
-				else
-					p.m_Shape->SetColor({ 2.0f * (1.0f - mt), 2.0f * (1.0f - mt), 1.0f, 1.0f });
-				if (mt < 0.5f)
-					p.m_Transformer.SetLocalScale({ 1.0f + 2.0f * mt * p2width, 1.0f });
-				else
-					p.m_Transformer.SetLocalScale({ 1.0f + 2.0f * (1.0f - mt) * p2width, 1.0f});
-				if (data->s[2] > 0)
-				{
+		[](const Particles::CHRSeed& seed) { return 1.5f; },
+		[p2width, p2height](const Particles::CHRSeed& seed)
+		{
+			return Particles::CHRBind{
+				[p2width, p2height, &seed](Particle& p) {
+					if (p.t() == 0.0f)
+					{
+						p.data().s[0] = rng();
+						p.data().s[1] = static_cast<float>(std::rand() % seed.totalSpawn);
+						p.data().s[2] = std::rand() % 2 == 0 ? 1 : -1;
+					}
+					real mt = std::fmod(p.t() + p.data().s[0], 1.0f);
 					if (mt < 0.5f)
-						p.m_Transformer.SetLocalPosition({ -0.5f * p2width, 2.0f * static_cast<unsigned int>(data->s[1]) - 0.5f * p2height });
+						p.m_Shape->SetColor({ 2.0f * mt, 2.0f * mt, 1.0f, 0.4f });
 					else
-						p.m_Transformer.SetLocalPosition({ (p2width + 1.0f) * (mt - 0.5f) * 2.0f - 0.5f * p2width, 2.0f * static_cast<unsigned int>(data->s[1]) - 0.5f * p2height });
-				}
-				else
-				{
+						p.m_Shape->SetColor({ 2.0f * (1.0f - mt), 2.0f * (1.0f - mt), 1.0f, 0.4f });
 					if (mt < 0.5f)
-						p.m_Transformer.SetLocalPosition({ -(p2width - 1.0f) * (mt - 0.5f) * 2.0f - 0.5f * p2width, 2.0f * static_cast<unsigned int>(data->s[1]) - 0.5f * p2height });
+						p.m_Transformer.SetLocalScale({ 1.0f + 2.0f * mt * p2width, 1.0f });
 					else
-						p.m_Transformer.SetLocalPosition({ -0.5f * p2width, 2.0f * static_cast<unsigned int>(data->s[1]) - 0.5f * p2height});
-				}
-				p.m_Transformer.SyncGlobalWithLocal();
-			}, 3}
-		}; }
+						p.m_Transformer.SetLocalScale({ 1.0f + 2.0f * (1.0f - mt) * p2width, 1.0f});
+					if (p.data().s[2] > 0)
+					{
+						if (mt < 0.5f)
+							p.m_Transformer.SetLocalPosition({ -0.5f * p2width, 2.0f * static_cast<unsigned int>(p.data().s[1]) - 0.5f * p2height });
+						else
+							p.m_Transformer.SetLocalPosition({ (p2width + 1.0f) * (mt - 0.5f) * 2.0f - 0.5f * p2width, 2.0f * static_cast<unsigned int>(p.data().s[1]) - 0.5f * p2height });
+					}
+					else
+					{
+						if (mt < 0.5f)
+							p.m_Transformer.SetLocalPosition({ -(p2width - 1.0f) * (mt - 0.5f) * 2.0f - 0.5f * p2width, 2.0f * static_cast<unsigned int>(p.data().s[1]) - 0.5f * p2height });
+						else
+							p.m_Transformer.SetLocalPosition({ -0.5f * p2width, 2.0f * static_cast<unsigned int>(p.data().s[1]) - 0.5f * p2height});
+					}
+					p.m_Transformer.SyncGlobalWithLocal();
+				}, 3
+			};
+		}
 	};
 
-	ParticleSystem<> psys({ wave1, wave2 });
+	//ParticleSystem<> psys({ wave1, wave2 });
+	ParticleSystem<> psys({ wave1 });
+
 	Renderer::AddCanvasLayer(11);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&psys);
+	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
 	Logger::NewLine();
 
 	psys.Pause();
@@ -290,7 +312,7 @@ void Pulsar::Run(GLFWwindow* window)
 	tilemap->SetTransform({ {100.0f, 200.0f}, 0.3f, { 5.0f, 8.0f } });
 	tilemap->Insert(4, 0, 1);
 
-	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
+	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 	//Renderer::GetCanvasLayer(11)->OnAttach(tesselDiagonal.get());
 	tesselDiagonal->SetPosition(-400, 300);
 	tessel->SetScale(0.6, 0.6);
