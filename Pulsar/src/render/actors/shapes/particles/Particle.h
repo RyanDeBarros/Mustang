@@ -13,8 +13,10 @@
 struct Particle;
 namespace Particles {
 
+	typedef unsigned char DataIndex;
+
 	typedef std::function<void(Particle& p)> CHRFunc;
-	typedef std::pair<CHRFunc, unsigned char> CHRBind;
+	typedef std::pair<CHRFunc, DataIndex> CHRBind;
 	
 	struct CHRSeed
 	{
@@ -24,10 +26,6 @@ namespace Particles {
 	};
 
 	typedef std::function<CHRBind(const CHRSeed&)> CharacteristicGen;
-
-	extern CharacteristicGen CombineSequential(bool combine_data, const std::vector<CharacteristicGen>& characteristics); 
-	extern CharacteristicGen CombineInitialOverTime(bool combine_data, const CharacteristicGen& initial, const CharacteristicGen& over_time);
-	extern CharacteristicGen CombineIntervals(bool combine_data, const CharacteristicGen& first, const CharacteristicGen& second, float divider, bool or_equal = false);
 }
 
 struct Particle
@@ -36,7 +34,7 @@ struct Particle
 	std::shared_ptr<DebugPolygon> m_Shape;
 	Particles::CHRFunc m_Characteristic;
 	float* m_Data = nullptr;
-	unsigned char m_DataSize;
+	Particles::DataIndex m_DataSize;
 
 private:
 	template<std::unsigned_integral ParticleCount>
@@ -53,7 +51,7 @@ public:
 	~Particle();
 	Particle& operator=(const Particle&);
 
-	inline float& operator[](unsigned char i) { return m_Data[i]; }
+	inline float& operator[](Particles::DataIndex i) { return m_Data[i]; }
 	
 	inline real t() const { return m_T; }
 	inline real dt() const { return m_DT; }

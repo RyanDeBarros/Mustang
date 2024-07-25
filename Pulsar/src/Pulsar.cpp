@@ -24,6 +24,7 @@
 #include "render/actors/shapes/particles/ParticleSystem.h"
 #include "render/actors/shapes/particles/ParticleWave.h"
 #include "render/actors/shapes/particles/Particle.h"
+#include "render/actors/shapes/particles/Characteristics.h"
 
 using namespace Pulsar;
 
@@ -204,51 +205,58 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::RemoveCanvasLayer(-1);
 
 	const float mt = 0.5f;
-	const float imt = 1.0f / (1.0f - mt);
 	ParticleWaveData<> wave1{
 		1.5f,
 		std::shared_ptr<DebugPolygon>(new DebugCircle(4.0f)),
 		CumulativeFunc<>([](float t) { return t < 0.6f ? PowerFunc(2000.0f, 0.5f)(t) : PowerFunc(2000.0f, 0.5f)(0.6f); }),
 		[](const Particles::CHRSeed& seed) { return 0.4f - seed.waveT * 0.05f; },
-		Particles::CombineSequential(
-			false, {
-			[mt, imt](const Particles::CHRSeed& seed)
-			{
-				return Particles::CHRBind{
-					[mt, imt](Particle& p) {
-						if (p.t() < mt)
-							p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f });
-						else
-							p.m_Shape->SetColor({ 1.0f, p.t(), 0.0f, 1.0f - (p.t() - mt) * imt });
-					}, 0
-				};
-			},
+		Particles::CombineSequential({
+			Particles::CombineConditionalTimeLessThan(
+				mt,
+				Particles::CHR::SetColorUsingTime(LinearCombo4x1({ 1.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 0.0f })),
+				Particles::CHR::SetColorUsingTime(LinearCombo4x1({ 1.0f, 0.0f, 0.0f, 1.0f + mt / (1.0f - mt) }, { 0.0f, 1.0f, 0.0f, -1.0f / (1.0f - mt)}))
+			),
 			Particles::CombineInitialOverTime(
-				true,
-				[](const Particles::CHRSeed& seed)
-				{
-					return Particles::CHRBind{
-						[&seed](Particle& p)
-						{
-							p[0] = rng();
-							p.m_Transformer.SetLocalPosition(glm::vec2{ glm::cos(p[0] * 2 * glm::pi<float>()), glm::sin(p[0] * 2 * glm::pi<float>()) } * 20.0f * rng());
-							glm::vec2 vel = glm::normalize(glm::vec2{ rng() * 2.0f - 1.0f, rng() * 2.0f - 1.0f }) * glm::vec2{ 200.0f, 100.0f };
-							p[0] = rng();
-							vel *= (1.0f + p[0] * 0.25f) * (1.0f - 0.4f * glm::pow(seed.waveT, 0.2f + p[0] * 0.25f));
-							p[0] = vel.x;
-							p[1] = vel.y;
-						}, 2
-					};
-				},
-				[](const Particles::CHRSeed& seed)
-				{
-					return Particles::CHRBind{
-						[](Particle& p)
-						{
-							p.m_Transformer.OperateLocalPosition([&](glm::vec2& pos) { pos += glm::vec2{ p[0], p[1] } * p.dt(); });
-						}, 2
-					};
-				}
+				Particles::CombineSequential({
+					Particles::CHR::FeedDataRNG(0),
+					Particles::CHR::FeedDataRNG(1),
+					[](const Particles::CHRSeed& seed)
+					{
+						return Particles::CHRBind{
+							[](Particle& p)
+							{
+								p.m_Transformer.SetLocalPosition(glm::vec2{ glm::cos(p[0] * 2 * glm::pi<float>()), glm::sin(p[0] * 2 * glm::pi<float>()) } * 20.0f * p[1]);
+							}, 1
+						};
+					},
+					Particles::CHR::FeedDataRNG(0),
+					Particles::CHR::FeedDataRNG(1),
+					[](const Particles::CHRSeed& seed)
+					{
+						return Particles::CHRBind{
+							[](Particle& p)
+							{
+								glm::vec2 vel = LinearCombo2x2({ -1.0f, -1.0f }, { 2.0f, 0.0f }, { 0.0f, 2.0f })({p[0], p[1]});
+								vel = glm::normalize(vel);
+								vel *= glm::vec2{ 200.0f, 100.0f };
+								p[0] = vel.x;
+								p[1] = vel.y;
+							}, 2
+						};
+					},
+					Particles::CHR::FeedDataRNG(2),
+					[](const Particles::CHRSeed& seed)
+					{
+						return Particles::CHRBind{
+							[&seed](Particle& p)
+							{
+								p[2] = (1.0f + p[2] * 0.25f) * (1.0f - 0.4f * glm::pow(seed.waveT, 0.2f + p[2] * 0.25f));
+							}, 3
+						};
+					},
+					Particles::CHR::OperateData(0, OperateFloatMultWrap, 2, 1, OperateFloatMultWrap, 2)
+				}),
+				Particles::CHR::OperateLocalPositionFromVelocityData(0, 1)
 			)
 		})
 	};
@@ -259,93 +267,43 @@ void Pulsar::Run(GLFWwindow* window)
 		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 3}, {1, 3}, {1, 0} }, {}, {}, GL_TRIANGLE_FAN)),
 		CumulativeFunc<>(LinearFunc(p2height * 0.5f)),
 		[](const Particles::CHRSeed& seed) { return 1.5f; },
-		Particles::CombineSequential(
-			true,
-			{
-			[](const Particles::CHRSeed& seed)
-			{
-				return Particles::CHRBind{
-					[&seed](Particle& p)
-					{
-						if (p.t() == 0.0f)
-						{
-							p[0] = rng();
-							p[1] = static_cast<float>(std::rand() % seed.totalSpawn);
-							p[2] = std::rand() % 2 == 0 ? 1 : -1;
-						}
-					}, 3
-				};
-			},
-			[](const Particles::CHRSeed& seed)
-			{
-				return Particles::CHRBind{
-					[](Particle& p)
-					{
-						p[3] = std::fmod(p.t() + p[0], 1.0f);
-					}, 4
-				};
-			},
-			[](const Particles::CHRSeed& seed)
-			{
-				return Particles::CHRBind{
-					[](Particle& p)
-					{
-						if (p[3] < 0.5f)
-							p.m_Shape->SetColor({ 2.0f * p[3], 2.0f * p[3], 1.0f, 0.4f });
-						else
-							p.m_Shape->SetColor({ 2.0f * (1.0f - p[3]), 2.0f * (1.0f - p[3]), 1.0f, 0.4f });
-					}, 4
-				};
-			},
-			[p2width, p2height](const Particles::CHRSeed& seed)
-			{
-				return Particles::CHRBind{
-					[p2width, p2height](Particle& p)
-					{
-						if (p[3] < 0.5f)
-							p.m_Transformer.SetLocalScale({ 1.0f + 2.0f * p[3] * p2width, 1.0f });
-						else
-							p.m_Transformer.SetLocalScale({ 1.0f + 2.0f * (1.0f - p[3]) * p2width, 1.0f});
-					}, 4
-				};
-			},
-			[p2width, p2height](const Particles::CHRSeed& seed)
-			{
-				return Particles::CHRBind{
-					[p2width, p2height](Particle& p)
-					{
-						if (p[2] > 0)
-						{
-							if (p[3] < 0.5f)
-								p.m_Transformer.SetLocalPosition({ -0.5f * p2width, 2.0f * static_cast<unsigned int>(p[1]) - 0.5f * p2height });
-							else
-								p.m_Transformer.SetLocalPosition({ (p2width + 1.0f) * (p[3] - 0.5f) * 2.0f - 0.5f * p2width, 2.0f * static_cast<unsigned int>(p[1]) - 0.5f * p2height });
-						}
-						else
-						{
-							if (p[3] < 0.5f)
-								p.m_Transformer.SetLocalPosition({ -(p2width - 1.0f) * (p[3] - 0.5f) * 2.0f - 0.5f * p2width, 2.0f * static_cast<unsigned int>(p[1]) - 0.5f * p2height });
-							else
-								p.m_Transformer.SetLocalPosition({ -0.5f * p2width, 2.0f * static_cast<unsigned int>(p[1]) - 0.5f * p2height});
-						}
-					}, 4
-				};
-			},
-			[](const Particles::CHRSeed& seed)
-			{
-				return Particles::CHRBind{
-					[](Particle& p)
-					{
-						p.m_Transformer.SyncGlobalWithLocal();
-					}, 0
-				};
-			}
+		Particles::CombineSequential({
+			Particles::GenSetup(
+				Particles::CombineSequential({
+					Particles::CHR::FeedDataRNG(0),
+					Particles::CHR::FeedDataRandSpawnIndex(1),
+					Particles::CHR::FeedDataRandBinChoice(2, 1, -1)
+				})
+			),
+			Particles::CHR::FeedDataShiftMod(3, 0, 1.0f),
+			Particles::CombineConditionalDataLessThan(
+				3, 0.5f,
+				Particles::CombineSequential({
+					Particles::CHR::SetColorUsingData(LinearCombo4x1({ 0.0f, 0.0f, 1.0f, 0.4f }, { 2.0f, 2.0f, 0.0f, 0.0f }), 3),
+					Particles::CHR::SetLocalScaleUsingData(LinearCombo2x1({ 1.0f, 1.0f }, { 2.0f * p2width, 0.0f }), 3),
+					Particles::CombineConditionalDataLessThan(
+						2, 0.0f,
+						Particles::CHR::SetLocalPositionUsingData(Composition(LinearCombo2x1({ -0.5f * p2width, -0.5f * p2height}, { 0.0f, 2.0f }), CastFloatToUInt), 1),
+						Particles::CHR::SetLocalPositionUsingData(Composition(LinearCombo2x2({ 0.5f * p2width - 1.0f, -0.5f * p2height }, { -2.0f * (p2width - 1.0f), 0.0f }, { 0.0f, 2.0f }), Vec2Wrap(Identity, CastFloatToUInt)), 3, 1)
+					)
+				}),
+				Particles::CombineSequential({
+					Particles::CHR::SetColorUsingData(LinearCombo4x1({ 2.0f, 2.0f, 1.0f, 0.4f }, { -2.0f, -2.0f, 0.0f, 0.0f }), 3),
+					Particles::CHR::SetLocalScaleUsingData(LinearCombo2x1({ 1.0f + 2.0f * p2width, 1.0f }, { -2.0f * p2width, 0.0f }), 3),
+					Particles::CombineConditionalDataLessThan(
+						2, 0.0f,
+						Particles::CHR::SetLocalPositionUsingData(Composition(LinearCombo2x2({ -1.5f * p2width - 1.0f, -0.5f * p2height }, { 2.0f * (p2width + 1.0f), 0.0f }, { 0.0f, 2.0f }), Vec2Wrap(Identity, CastFloatToUInt)), 3, 1),
+						Particles::CHR::SetLocalPositionUsingData(Composition(LinearCombo2x1({ -0.5f * p2width, -0.5f * p2height}, { 0.0f, 2.0f }), CastFloatToUInt), 1)
+					)
+				})
+			),
+			Particles::CHR::SyncGlobalWithLocal
 		})
 	};
 
-	//ParticleSystem<> psys({ wave1, wave2 });
+	ParticleSystem<> psys({ wave1, wave2 });
 	//ParticleSystem<> psys({ wave1 });
-	ParticleSystem<> psys({ wave2 });
+	//ParticleSystem<> psys({ wave2 });
 
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
