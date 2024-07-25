@@ -43,5 +43,5 @@ template<std::unsigned_integral ParticleCount>
 void ParticleSubsystem<ParticleCount>::OnSpawn(ParticleEffect<ParticleCount>& psys, const Particles::CHRSeed& seed)
 {
 	std::shared_ptr<DebugPolygon> shape(new DebugPolygon(*m_Shape));
-	psys.AddParticle(m_SubsystemIndex, Particle(shape, LocalTransformer2D(psys.m_Transform, shape), m_LifespanFunc(seed), m_CharacteristicGen(seed)));
+	psys.AddParticle(m_SubsystemIndex, Particle(shape, LocalTransformer2D(m_Transform, shape), m_LifespanFunc(seed), m_CharacteristicGen(seed)));
 }

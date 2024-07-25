@@ -30,8 +30,12 @@ public:
 	inline void Reset() { m_TotalPlayed = 0.0f; m_DeltaTime = 0.0f; m_PlayTime = 0.0f; }
 	void PlayFor(real n);
 
+	inline MultiLocalTransformer2D& TransformerRef() { return m_Transformer; }
+	inline ParticleSubsystem<ParticleCount>& SubsystemRef(unsigned int i) { return *m_Subsystems[i]; }
+
 protected:
-	std::vector<ParticleSubsystem<ParticleCount>> m_Subsystems;
+	std::vector<std::shared_ptr<ParticleSubsystem<ParticleCount>>> m_Subsystems;
+	MultiLocalTransformer2D m_Transformer;
 
 	void OnUpdate();
 	virtual void DespawnInvalidParticles();

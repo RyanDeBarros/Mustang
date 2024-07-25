@@ -300,18 +300,30 @@ void Pulsar::Run(GLFWwindow* window)
 		})
 	};
 
-	ParticleSystem<> psys({ wave1, wave2 });
-	ParticleSubsystemArray<> parr({ wave1, wave2 });
+	ParticleSystem<> psys({ wave2, wave2 });
+	//psys.SubsystemRef(1).SetRotation(1.57f);
+	psys.TransformerRef().SetLocalRotation(1, 1.57f);
+	// TODO this local scale set shouldn't be necessary. the parent scale set below should take care of it
+	psys.TransformerRef().SetLocalScale(1, { 1, _RendererSettings::initial_window_width / static_cast<float>(_RendererSettings::initial_window_height) });
+	
+	// TODO add transform parent functions to transformer structs
+	psys.SetScale(_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height);
+	psys.TransformerRef().SyncGlobalWithParentScales();
+	//ParticleSubsystemArray<> parr({ wave1, wave2 });
 
-	psys.SetPosition(-400, 0);
-	parr.SetPosition(400, 0);
+	//psys.SetPosition(-400, 0);
+	//psys.TransformerRef().SyncGlobalWithParentPositions();
+	//parr.SetPosition(400, 0);
+	//parr.TransformerRef().SyncGlobalWithParentPositions();
+
+	//parr.SubsystemRef(0).SetRotation(1.57f);
 	
 	psys.Pause();
-	parr.Pause();
+	//parr.Pause();
 
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
-	Renderer::GetCanvasLayer(11)->OnAttach(&parr);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&parr);
 
 	std::shared_ptr<TileMap> tilemap;
 	if (loadTileMap("res/assets/tilemap.toml", tilemap) != LOAD_STATUS::OK)
@@ -339,7 +351,7 @@ void Pulsar::Run(GLFWwindow* window)
 			psys.Resume();
 			//psys.SetRotation(totalDrawTime * 0.25f);
 			//psys.SetScale(1.0f - 0.2f * glm::sin(totalDrawTime), 1.0f + 0.2f * glm::sin(totalDrawTime));
-			parr.Resume();
+			//parr.Resume();
 		}
 
 		Renderer::OnDraw();

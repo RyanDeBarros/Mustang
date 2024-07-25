@@ -73,6 +73,11 @@ LocalTransformer2D::LocalTransformer2D(const std::shared_ptr<Transform2D>& paren
 		SyncGlobalWithLocal();
 }
 
+Transformable2D::Transformable2D()
+	: m_Transform(std::make_shared<Transform2D>(Transform2D{}))
+{
+}
+
 Transformable2D::Transformable2D(const Transform2D& transform)
 	: m_Transform(std::make_shared<Transform2D>(transform))
 {
@@ -251,6 +256,11 @@ void LocalTransformer2D::OperateGlobalScale(const std::function<void(glm::vec2& 
 {
 	m_Child->OperateScale(op);
 	m_Local.scale = m_Child->GetScale() / m_Parent->scale;
+}
+
+MultiLocalTransformer2D::MultiLocalTransformer2D(const std::shared_ptr<Transform2D>& parent)
+	: m_Parent(parent)
+{
 }
 
 MultiLocalTransformer2D::MultiLocalTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transforms)

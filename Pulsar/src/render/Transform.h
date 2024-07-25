@@ -4,6 +4,8 @@
 #include <functional>
 #include <memory>
 
+// TODO move transformable and transformers to separate files so that re-compilation of every Transform.h include isn't always necessary.
+
 struct Transform2D
 {
 	glm::vec2 position = glm::vec2(0.0f, 0.0f);
@@ -33,6 +35,7 @@ protected:
 	std::shared_ptr<Transform2D> m_Transform;
 
 public:
+	Transformable2D();
 	Transformable2D(const Transform2D& transform);
 	Transformable2D(const std::shared_ptr<Transform2D>& transform);
 	Transformable2D(const Transformable2D&);
@@ -114,6 +117,7 @@ class MultiLocalTransformer2D
 	std::vector<Transform2D> m_Locals;
 
 public:
+	MultiLocalTransformer2D(const std::shared_ptr<Transform2D>& parent);
 	MultiLocalTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transforms = true);
 	MultiLocalTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms = true);
 	MultiLocalTransformer2D(const MultiLocalTransformer2D&);

@@ -7,12 +7,14 @@ template class ParticleEffect<unsigned short>;
 
 template<std::unsigned_integral ParticleCount>
 ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform, bool enabled)
-	: Transformable2D(transform), enabled(enabled)
+	: Transformable2D(transform), enabled(enabled), m_Transformer(m_Transform)
 {
 	ParticleSubsystemIndex i = 0;
-	for (const auto& subsystem : subsystem_data)
+	for (const auto& subsys : subsystem_data)
 	{
-		m_Subsystems.emplace_back(subsystem, i++);
+		std::shared_ptr<ParticleSubsystem<ParticleCount>> subsystem = std::make_shared<ParticleSubsystem<ParticleCount>>(ParticleSubsystem<ParticleCount>(subsys, i));
+		m_Subsystems.push_back(subsystem);
+		m_Transformer.PushBackGlobal(subsystem);
 		m_Particles.push_back({});
 	}
 	Reset();
@@ -53,8 +55,8 @@ void ParticleEffect<ParticleCount>::OnSubsystemsUpdate()
 		Reset();
 		return;
 	}
-	for (ParticleSubsystem<ParticleCount>& wave : m_Subsystems)
-		wave.OnUpdate(*this);
+	for (auto& subsystem : m_Subsystems)
+		subsystem->OnUpdate(*this);
 }
 
 template<std::unsigned_integral ParticleCount>
