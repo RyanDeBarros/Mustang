@@ -22,8 +22,7 @@
 #include "render/actors/shapes/DebugCircle.h"
 #include "render/actors/shapes/DebugBatcher.h"
 #include "render/actors/shapes/particles/ParticleSystem.h"
-#include "render/actors/shapes/particles/ParticleWave.h"
-#include "render/actors/shapes/particles/Particle.h"
+#include "render/actors/shapes/particles/ParticleSubsystemArray.h"
 #include "render/actors/shapes/particles/Characteristics.h"
 
 using namespace Pulsar;
@@ -205,7 +204,7 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::RemoveCanvasLayer(-1);
 
 	const float mt = 0.5f;
-	ParticleWaveData<> wave1{
+	ParticleSubsystemData<> wave1{
 		1.5f,
 		std::shared_ptr<DebugPolygon>(new DebugCircle(4.0f)),
 		CumulativeFunc<>([](float t) { return t < 0.6f ? PowerFunc(2000.0f, 0.5f)(t) : PowerFunc(2000.0f, 0.5f)(0.6f); }),
@@ -262,7 +261,7 @@ void Pulsar::Run(GLFWwindow* window)
 	};
 	float p2width = 400.0f;
 	float p2height = 400.0f;
-	ParticleWaveData<> wave2{
+	ParticleSubsystemData<> wave2{
 		1.5f,
 		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 3}, {1, 3}, {1, 0} }, {}, {}, GL_TRIANGLE_FAN)),
 		CumulativeFunc<>(LinearFunc(p2height * 0.5f)),
@@ -279,7 +278,7 @@ void Pulsar::Run(GLFWwindow* window)
 			Particles::CombineConditionalDataLessThan(
 				3, 0.5f,
 				Particles::CombineSequential({
-					Particles::CHR::SetColorUsingData(LinearCombo4x1({ 0.0f, 0.0f, 1.0f, 0.4f }, { 2.0f, 2.0f, 0.0f, 0.0f }), 3),
+					Particles::CHR::SetColorUsingData(LinearCombo4x1({ 0.0f, 0.0f, 1.0f, 1.0f }, { 2.0f, 2.0f, 0.0f, 0.0f }), 3),
 					Particles::CHR::SetLocalScaleUsingData(LinearCombo2x1({ 1.0f, 1.0f }, { 2.0f * p2width, 0.0f }), 3),
 					Particles::CombineConditionalDataLessThan(
 						2, 0.0f,
@@ -288,7 +287,7 @@ void Pulsar::Run(GLFWwindow* window)
 					)
 				}),
 				Particles::CombineSequential({
-					Particles::CHR::SetColorUsingData(LinearCombo4x1({ 2.0f, 2.0f, 1.0f, 0.4f }, { -2.0f, -2.0f, 0.0f, 0.0f }), 3),
+					Particles::CHR::SetColorUsingData(LinearCombo4x1({ 2.0f, 2.0f, 1.0f, 1.0f }, { -2.0f, -2.0f, 0.0f, 0.0f }), 3),
 					Particles::CHR::SetLocalScaleUsingData(LinearCombo2x1({ 1.0f + 2.0f * p2width, 1.0f }, { -2.0f * p2width, 0.0f }), 3),
 					Particles::CombineConditionalDataLessThan(
 						2, 0.0f,
@@ -302,14 +301,17 @@ void Pulsar::Run(GLFWwindow* window)
 	};
 
 	ParticleSystem<> psys({ wave1, wave2 });
-	//ParticleSystem<> psys({ wave1 });
-	//ParticleSystem<> psys({ wave2 });
+	ParticleSubsystemArray<> parr({ wave1, wave2 });
+
+	psys.SetPosition(-400, 0);
+	parr.SetPosition(400, 0);
+	
+	psys.Pause();
+	parr.Pause();
 
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
-	Logger::NewLine();
-
-	psys.Pause();
+	Renderer::GetCanvasLayer(11)->OnAttach(&parr);
 
 	std::shared_ptr<TileMap> tilemap;
 	if (loadTileMap("res/assets/tilemap.toml", tilemap) != LOAD_STATUS::OK)
@@ -335,8 +337,9 @@ void Pulsar::Run(GLFWwindow* window)
 		{
 			// OnUpdate here
 			psys.Resume();
-			psys.SetRotation(totalDrawTime * 0.25f);
-			psys.SetScale(1.0f - 0.2f * glm::sin(totalDrawTime), 1.0f + 0.2f * glm::sin(totalDrawTime));
+			//psys.SetRotation(totalDrawTime * 0.25f);
+			//psys.SetScale(1.0f - 0.2f * glm::sin(totalDrawTime), 1.0f + 0.2f * glm::sin(totalDrawTime));
+			parr.Resume();
 		}
 
 		Renderer::OnDraw();

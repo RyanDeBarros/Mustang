@@ -7,13 +7,13 @@
 #include "ParticleEffect.h"
 
 template<std::unsigned_integral ParticleCount = unsigned short>
-class ParticleSystem : public ActorRenderBase2D, public ParticleEffect<ParticleCount>
+class ParticleSubsystemArray: public ActorRenderBase2D, public ParticleEffect<ParticleCount>
 {
-	DebugBatcher m_Batcher;
-	std::unordered_map<DebugModel, std::unordered_set<std::shared_ptr<DebugPolygon>>> m_WaitingForDespawn;
+	std::vector<DebugBatcher> m_Batchers;
+	std::vector<std::unordered_map<DebugModel, std::unordered_set<std::shared_ptr<DebugPolygon>>>> m_WaitingForDespawn;
 
 public:
-	ParticleSystem(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform = {}, ZIndex z = 0, bool visible = true, bool enabled = true);
+	ParticleSubsystemArray(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform = {}, ZIndex z = 0, bool visible = true, bool enabled = true);
 
 	/// Whether the particle system should be drawn. This does not affect whether the system is updated every update frame.
 	bool visible;

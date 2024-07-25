@@ -64,6 +64,6 @@ public:
 
 private:
 	template<std::unsigned_integral ParticleCount>
-	friend class ParticleWave;
+	friend class ParticleSubsystem;
 	inline std::shared_ptr<Transform2D> TransformRef() { return m_Transform; }
 };

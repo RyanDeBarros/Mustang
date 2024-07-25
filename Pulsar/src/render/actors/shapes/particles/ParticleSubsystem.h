@@ -8,8 +8,10 @@
 #include "Utils.h"
 #include "Particle.h"
 
+typedef unsigned char ParticleSubsystemIndex;
+
 template<std::unsigned_integral ParticleCount = unsigned short>
-struct ParticleWaveData
+struct ParticleSubsystemData
 {
 	real wavePeriod;
 	std::shared_ptr<DebugPolygon> prototypeShape;
@@ -19,28 +21,29 @@ struct ParticleWaveData
 };
 
 template<std::unsigned_integral ParticleCount>
-class ParticleSystem;
+class ParticleEffect;
 
 template<std::unsigned_integral ParticleCount = unsigned short>
-class ParticleWave
+class ParticleSubsystem
 {
 	CumulativeFunc<ParticleCount> m_SpawnFunc;
 	std::function<real(const Particles::CHRSeed&)> m_LifespanFunc;
 	Particles::CharacteristicGen m_CharacteristicGen;
-	real m_WavePeriod;
-	real m_WavePeriodInv;
+	real m_Period;
+	real m_PeriodInv;
 	std::shared_ptr<DebugPolygon> m_Shape;
 	ParticleCount m_NumSpawned = 0;
 	unsigned int m_TotalSpawn;
 	unsigned int m_WaveNum = 0;
+	ParticleSubsystemIndex m_SubsystemIndex;
 
 public:
-	ParticleWave(const ParticleWaveData<ParticleCount>& wave_data);
+	ParticleSubsystem(const ParticleSubsystemData<ParticleCount>& wave_data, ParticleSubsystemIndex subsystem_index);
 
-	inline void SetWavePeriod(real wave_period) { m_WavePeriod = wave_period; m_WavePeriodInv = 1.0f / m_WavePeriod; }
+	inline void SetWavePeriod(real wave_period) { m_Period = wave_period; m_PeriodInv = 1.0f / m_Period; }
 
 private:
-	friend class ParticleSystem<ParticleCount>;
-	void OnUpdate(ParticleSystem<ParticleCount>& psys);
-	void OnSpawn(ParticleSystem<ParticleCount>& psys, const Particles::CHRSeed& seed);
+	friend class ParticleEffect<ParticleCount>;
+	void OnUpdate(ParticleEffect<ParticleCount>& psys);
+	void OnSpawn(ParticleEffect<ParticleCount>& psys, const Particles::CHRSeed& seed);
 };

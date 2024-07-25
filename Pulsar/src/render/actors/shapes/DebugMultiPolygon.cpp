@@ -14,8 +14,25 @@ DebugMultiPolygon::DebugMultiPolygon(const std::pair<GLenum, BatchModel>& pair, 
 {
 }
 
+DebugMultiPolygon::DebugMultiPolygon(const DebugMultiPolygon& other)
+	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(other.draw_count), m_IndexMode(other.m_IndexMode),
+	m_Model(other.m_Model), m_Polygons(other.m_Polygons), ActorRenderBase2D(other.GetZIndex())
+{
+	if (other.indexes_ptr)
+	{
+		indexes_ptr = new GLint[draw_count];
+		memcpy_s(indexes_ptr, draw_count, other.indexes_ptr, draw_count);
+	}
+	if (other.index_counts_ptr)
+	{
+		index_counts_ptr = new GLsizei[draw_count];
+		memcpy_s(index_counts_ptr, draw_count, other.index_counts_ptr, draw_count);
+	}
+}
+
 DebugMultiPolygon::DebugMultiPolygon(DebugMultiPolygon&& other) noexcept
-	: indexes_ptr(other.indexes_ptr), index_counts_ptr(other.index_counts_ptr), draw_count(other.draw_count), m_IndexMode(other.m_IndexMode), m_Model(other.m_Model), m_Polygons(other.m_Polygons), ActorRenderBase2D(other.m_Z)
+	: indexes_ptr(other.indexes_ptr), index_counts_ptr(other.index_counts_ptr), draw_count(other.draw_count), m_IndexMode(other.m_IndexMode),
+	m_Model(other.m_Model), m_Polygons(std::move(other.m_Polygons)), ActorRenderBase2D(other.GetZIndex())
 {
 	other.indexes_ptr = nullptr;
 	other.index_counts_ptr = nullptr;

@@ -31,7 +31,7 @@ public:
 
 	DebugMultiPolygon();
 	DebugMultiPolygon(const std::pair<GLenum, BatchModel>& pair, const ZIndex& z = 0);
-	DebugMultiPolygon(const DebugMultiPolygon&) = delete;
+	DebugMultiPolygon(const DebugMultiPolygon&);
 	DebugMultiPolygon(DebugMultiPolygon&&) noexcept;
 	~DebugMultiPolygon();
 

@@ -4,12 +4,22 @@
 
 #include "render/CanvasLayer.h"
 
+// TODO in all ActorRenderBase2D subclasses, use SetZIndex and GetZIndex in copy/move constructor/assignments. Similar for Transformable2D.
+DebugBatcher::DebugBatcher(const DebugBatcher& other)
+	: ActorRenderBase2D(other.GetZIndex()), m_Slots(other.m_Slots), m_OrderedTraversal(other.m_OrderedTraversal)
+{
+}
+
+// TODO USE STD::MOVE FOR ALL MOVE CONSTRUCTOR/ASSIGNMENTS
+DebugBatcher::DebugBatcher(DebugBatcher&& other) noexcept
+	: ActorRenderBase2D(other.GetZIndex()), m_Slots(std::move(other.m_Slots)), m_OrderedTraversal(std::move(other.m_OrderedTraversal))
+{
+}
+
 void DebugBatcher::RequestDraw(CanvasLayer* canvas_layer)
 {
 	for (auto multi_polygon : m_OrderedTraversal)
-	{
 		multi_polygon->RequestDraw(canvas_layer);
-	}
 }
 
 bool DebugBatcher::ChangeZIndex(const DebugModel& model, const ZIndex& z)

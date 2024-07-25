@@ -185,8 +185,10 @@
     <ClCompile Include="src\render\actors\ActorTesselation.cpp" />
     <ClCompile Include="src\render\actors\shapes\particles\Characteristics.cpp" />
     <ClCompile Include="src\render\actors\shapes\particles\Particle.cpp" />
+    <ClCompile Include="src\render\actors\shapes\particles\ParticleEffect.cpp" />
+    <ClCompile Include="src\render\actors\shapes\particles\ParticleSubsystemArray.cpp" />
     <ClCompile Include="src\render\actors\shapes\particles\ParticleSystem.cpp" />
-    <ClCompile Include="src\render\actors\shapes\particles\ParticleWave.cpp" />
+    <ClCompile Include="src\render\actors\shapes\particles\ParticleSubsystem.cpp" />
     <ClCompile Include="src\render\CanvasLayer.cpp" />
     <ClCompile Include="src\render\LayerView.cpp" />
     <ClCompile Include="src\render\Renderable.cpp" />
@@ -227,8 +229,10 @@
     <ClInclude Include="src\render\actors\ActorTesselation.h" />
     <ClInclude Include="src\render\actors\shapes\particles\Characteristics.h" />
     <ClInclude Include="src\render\actors\shapes\particles\Particle.h" />
+    <ClInclude Include="src\render\actors\shapes\particles\ParticleEffect.h" />
+    <ClInclude Include="src\render\actors\shapes\particles\ParticleSubsystemArray.h" />
     <ClInclude Include="src\render\actors\shapes\particles\ParticleSystem.h" />
-    <ClInclude Include="src\render\actors\shapes\particles\ParticleWave.h" />
+    <ClInclude Include="src\render\actors\shapes\particles\ParticleSubsystem.h" />
     <ClInclude Include="src\render\CanvasLayer.h" />
     <ClInclude Include="src\render\LayerView.h" />
     <ClInclude Include="src\render\Renderable.h" />

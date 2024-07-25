@@ -17,8 +17,8 @@ class DebugBatcher : public ActorRenderBase2D
 
 public:
 	DebugBatcher(const ZIndex& z = 0) : ActorRenderBase2D(z) {}
-	DebugBatcher(const DebugBatcher&) = delete;
-	DebugBatcher(DebugBatcher&&) = delete;
+	DebugBatcher(const DebugBatcher&);
+	DebugBatcher(DebugBatcher&&) noexcept;
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
