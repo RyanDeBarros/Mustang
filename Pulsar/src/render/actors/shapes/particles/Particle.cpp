@@ -11,6 +11,18 @@ Particle::Particle(const std::shared_ptr<DebugPolygon>& shape, const LocalTransf
 	m_Characteristic(*this);
 }
 
+Particle::Particle(const Particle& other)
+	: m_Shape(other.m_Shape), m_Transformer(other.m_Transformer), m_Characteristic(other.m_Characteristic), m_LifespanInv(other.m_LifespanInv),
+	m_DataSize(other.m_DataSize), m_Invalid(other.m_Invalid), m_T(other.m_T), m_DT(other.m_DT)
+{
+	if (m_DataSize > 0)
+	{
+		m_Data = new float[m_DataSize];
+		memcpy_s(m_Data, m_DataSize, other.m_Data, m_DataSize);
+	}
+	m_Characteristic(*this);
+}
+
 Particle::Particle(Particle&& other) noexcept
 	: m_Shape(other.m_Shape), m_Transformer(other.m_Transformer), m_Characteristic(other.m_Characteristic), m_LifespanInv(other.m_LifespanInv),
 	m_Data(other.m_Data), m_DataSize(other.m_DataSize), m_Invalid(other.m_Invalid), m_T(other.m_T), m_DT(other.m_DT)
@@ -41,9 +53,22 @@ Particle& Particle::operator=(const Particle& other)
 		memcpy_s(m_Data, m_DataSize, other.m_Data, m_DataSize);
 	}
 	else
-	{
 		m_Data = nullptr;
-	}
+	return *this;
+}
+
+Particle& Particle::operator=(Particle&& other) noexcept
+{
+	m_Shape = other.m_Shape;
+	m_Transformer = other.m_Transformer;
+	m_Characteristic = other.m_Characteristic;
+	m_LifespanInv = other.m_LifespanInv;
+	m_Invalid = other.m_Invalid;
+	m_T = other.m_T;
+	m_DT = other.m_DT;
+	m_DataSize = other.m_DataSize;
+	m_Data = other.m_Data;
+	other.m_Data = nullptr;
 	return *this;
 }
 

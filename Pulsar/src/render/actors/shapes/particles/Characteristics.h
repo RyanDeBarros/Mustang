@@ -14,9 +14,12 @@ namespace Particles {
 	namespace CHR {
 
 		extern CharacteristicGen FeedDataRNG(DataIndex si);
+		extern CharacteristicGen FeedData(DataIndex si, float v);
 		extern CharacteristicGen FeedDataRandSpawnIndex(DataIndex si);
 		extern CharacteristicGen FeedDataRandBinChoice(DataIndex si, float option1, float option2);
 		extern CharacteristicGen FeedDataShiftMod(DataIndex si, DataIndex shiftI, float mod);
+		extern CharacteristicGen FeedDataTime(DataIndex si);
+
 		extern CharacteristicGen OperateData(DataIndex si, const std::function<void(float&)>& func);
 		extern CharacteristicGen OperateData(DataIndex si, const std::function<std::function<void(float&)>(float)>& func, DataIndex di);
 		extern CharacteristicGen OperateData(DataIndex si1, const std::function<void(float&)>& func1, DataIndex si2, const std::function<void(float&)>& func2);

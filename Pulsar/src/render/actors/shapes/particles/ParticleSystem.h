@@ -41,6 +41,6 @@ public:
 
 	void Pause();
 	void Resume();
-	inline void Reset() { /*m_LifetimeStart = Pulsar::totalDrawTime;*/ m_TotalPlayed = 0.0f; m_DeltaTime = 0.0f; m_PlayTime = 0.0f; }
+	inline void Reset() { m_TotalPlayed = 0.0f; m_DeltaTime = 0.0f; m_PlayTime = 0.0f; }
 	void PlayFor(real n);
 };

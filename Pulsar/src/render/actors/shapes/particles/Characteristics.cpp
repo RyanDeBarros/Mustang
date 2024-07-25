@@ -108,6 +108,19 @@ namespace Particles {
 			};
 		}
 
+		CharacteristicGen FeedData(DataIndex si, float v)
+		{
+			return [si, v](const Particles::CHRSeed& seed)
+				{
+					return Particles::CHRBind{
+						[si, v](Particle& p)
+						{
+							p[si] = v;
+						}, si + 1
+					};
+				};
+		}
+
 		CharacteristicGen FeedDataRandSpawnIndex(DataIndex si)
 		{
 			return [si](const Particles::CHRSeed& seed)
@@ -143,6 +156,19 @@ namespace Particles {
 					{
 						p[si] = std::fmod(p.t() + shiftI, mod);
 					}, std::max(si, shiftI) + 1
+				};
+			};
+		}
+
+		CharacteristicGen FeedDataTime(DataIndex si)
+		{
+			return [si](const Particles::CHRSeed& seed)
+			{
+				return Particles::CHRBind{
+					[si](Particle& p)
+					{
+						p[si] = p.t();
+					}, si + 1
 				};
 			};
 		}

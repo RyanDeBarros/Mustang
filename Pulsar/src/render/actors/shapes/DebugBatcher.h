@@ -29,6 +29,7 @@ public:
 	bool Erase(const std::vector<std::shared_ptr<DebugPolygon>>::iterator& where);
 	void EraseAll(const std::unordered_map<DebugModel, std::unordered_set<std::shared_ptr<DebugPolygon>>>& polys);
 	bool Find(const std::shared_ptr<DebugPolygon>& poly, DebugMultiPolygon::iterator& where);
+	size_t Size() const;
 
 private:
 	void Sort();

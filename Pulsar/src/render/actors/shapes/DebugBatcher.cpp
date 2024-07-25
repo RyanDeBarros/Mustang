@@ -116,6 +116,14 @@ bool DebugBatcher::Find(const std::shared_ptr<DebugPolygon>& poly, DebugMultiPol
 	return false;
 }
 
+size_t DebugBatcher::Size() const
+{
+	size_t size = 0;
+	for (const auto& slot : m_Slots)
+		size += slot.second.m_Polygons.size();
+	return size;
+}
+
 void DebugBatcher::Sort()
 {
 	m_OrderedTraversal.clear();

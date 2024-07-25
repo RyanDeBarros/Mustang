@@ -46,10 +46,12 @@ private:
 
 public:
 	Particle(const std::shared_ptr<DebugPolygon>& shape, const LocalTransformer2D& transformer, const float& lifespan, const Particles::CHRBind& characteristic);
-	Particle(const Particle&) = delete;
+	Particle(const Particle&);
 	Particle(Particle&&) noexcept;
 	~Particle();
+	// TODO for all classes with assignment operator, implement both copy and move overloads.
 	Particle& operator=(const Particle&);
+	Particle& operator=(Particle&&) noexcept;
 
 	inline float& operator[](Particles::DataIndex i) { return m_Data[i]; }
 	
