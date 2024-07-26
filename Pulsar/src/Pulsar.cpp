@@ -21,9 +21,9 @@
 #include "render/actors/shapes/DebugPoint.h"
 #include "render/actors/shapes/DebugCircle.h"
 #include "render/actors/shapes/DebugBatcher.h"
-#include "render/actors/shapes/particles/ParticleSystem.h"
-#include "render/actors/shapes/particles/ParticleSubsystemArray.h"
-#include "render/actors/shapes/particles/Characteristics.h"
+#include "render/actors/particles/ParticleSystem.h"
+#include "render/actors/particles/ParticleSubsystemArray.h"
+#include "render/actors/particles/Characteristics.h"
 
 using namespace Pulsar;
 

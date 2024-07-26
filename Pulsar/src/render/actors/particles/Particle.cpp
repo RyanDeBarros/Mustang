@@ -1,9 +1,8 @@
 #include "Particle.h"
 
 #include "Pulsar.h"
-#include "Utils.h"
 
-Particle::Particle(const std::shared_ptr<DebugPolygon>& shape, const LocalTransformer2D& transformer, const float& lifespan, const Particles::CHRBind& characteristic)
+Particle::Particle(const std::shared_ptr<DebugPolygon>& shape, const Transformer2D& transformer, const float& lifespan, const Particles::CHRBind& characteristic)
 	: m_Shape(shape), m_Transformer(transformer), m_Characteristic(characteristic.first), m_LifespanInv(1.0f / lifespan), m_DataSize(characteristic.second)
 {
 	if (m_DataSize > 0)

@@ -3,9 +3,9 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-#include "render/Renderable.h"
-#include "render/ActorRenderBase.h"
-#include "render/Transform.h"
+#include "../../Renderable.h"
+#include "../../ActorRenderBase.h"
+#include "../../transform/Transformable.h"
 
 typedef std::pair<GLenum, BatchModel> DebugModel;
 

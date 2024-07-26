@@ -6,8 +6,8 @@
 #include <glm/glm.hpp>
 
 #include "Utils.h"
-#include "render/actors/shapes/DebugPolygon.h"
-#include "render/Transform.h"
+#include "../shapes/DebugPolygon.h"
+#include "../../transform/Transformer.h"
 
 // TODO throughout project, pass by value for built-in types instead of const&.
 struct Particle;
@@ -30,7 +30,7 @@ namespace Particles {
 
 struct Particle
 {
-	LocalTransformer2D m_Transformer;
+	Transformer2D m_Transformer;
 	std::shared_ptr<DebugPolygon> m_Shape;
 	Particles::CHRFunc m_Characteristic;
 	float* m_Data = nullptr;
@@ -45,7 +45,7 @@ private:
 	bool m_Invalid = false;
 
 public:
-	Particle(const std::shared_ptr<DebugPolygon>& shape, const LocalTransformer2D& transformer, const float& lifespan, const Particles::CHRBind& characteristic);
+	Particle(const std::shared_ptr<DebugPolygon>& shape, const Transformer2D& transformer, const float& lifespan, const Particles::CHRBind& characteristic);
 	Particle(const Particle&);
 	Particle(Particle&&) noexcept;
 	~Particle();

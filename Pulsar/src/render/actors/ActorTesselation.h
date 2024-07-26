@@ -7,12 +7,13 @@
 #include "Typedefs.h"
 #include "ActorPrimitive.h"
 #include "ActorSequencer.h"
+#include "../transform/MultiTransformer.h"
 
 class ActorTesselation2D : virtual public ActorSequencer2D, public Transformable2D
 {
 private:
 	std::shared_ptr<ActorRenderBase2D> m_Actor;
-	MultiLocalTransformer2D m_Transformer;
+	MultiTransformer2D m_Transformer;
 	std::vector<Transform2D> m_ActorPreDrawTransforms;
 
 	std::function<ActorPrimitive2D* const(const int& i)> f_operator;
@@ -39,7 +40,7 @@ public:
 	~ActorTesselation2D();
 
 	inline std::shared_ptr<ActorRenderBase2D> ActorRef() const { return m_Actor; }
-	inline MultiLocalTransformer2D* const TransformerRef() { return &m_Transformer; }
+	inline MultiTransformer2D* const TransformerRef() { return &m_Transformer; }
 	inline void PushBackGlobal(const std::shared_ptr<Transformable2D>& child) { m_Transformer.PushBackGlobal(child, false); }
 	inline void PushBackGlobals(const std::vector<std::shared_ptr<Transformable2D>>& children) { m_Transformer.PushBackGlobals(children, false); }
 	inline void PushBackLocal(const Transform2D& local) { m_Transformer.PushBackLocal(local, false); }

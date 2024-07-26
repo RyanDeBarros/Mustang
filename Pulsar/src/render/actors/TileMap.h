@@ -11,12 +11,13 @@
 #include "ActorTesselation.h"
 #include "factory/Atlas.h"
 #include "RectRender.h"
+#include "../transform/Transformer.h"
 
 struct TMElement
 {
 	std::shared_ptr<RectRender> rectRender;
 	std::shared_ptr<ActorTesselation2D> tessel;
-	LocalTransformer2D transformer;
+	Transformer2D transformer;
 };
 
 class TileMap : public ActorRenderBase2D

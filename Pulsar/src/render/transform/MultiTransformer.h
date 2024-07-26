@@ -1,128 +1,21 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <functional>
-#include <memory>
+#include "Transform.h"
+#include "Transformable.h"
 
-// TODO move transformable and transformers to separate files so that re-compilation of every Transform.h include isn't always necessary.
-
-struct Transform2D
-{
-	glm::vec2 position = glm::vec2(0.0f, 0.0f);
-	glm::float32 rotation = 0.0f;
-	glm::vec2 scale = glm::vec2(1.0f, 1.0f);
-
-	Transform2D operator^(const Transform2D& transform) const;
-
-	inline bool operator==(const Transform2D& other) const { return position == other.position && rotation == other.rotation && scale == other.scale; }
-};
-
-namespace Transform
-{
-	extern glm::mat3 ToMatrix(const Transform2D& tr);
-	extern glm::mat3 ToInverseMatrix(const Transform2D& tr);
-	extern glm::mat3x2 ToCondensedMatrix(const Transform2D& tr);
-	extern glm::mat2 CondensedRS(const Transform2D& tr);
-	extern Transform2D Inverse(const Transform2D& tr);
-	extern glm::mat2 Rotation(const glm::float32& r);
-	extern Transform2D RelTo(const Transform2D& global, const Transform2D& parent);
-	extern Transform2D AbsTo(const Transform2D& local, const Transform2D& parent);
-}
-
-class Transformable2D
-{
-protected:
-	std::shared_ptr<Transform2D> m_Transform;
-
-public:
-	Transformable2D();
-	Transformable2D(const Transform2D& transform);
-	Transformable2D(const std::shared_ptr<Transform2D>& transform);
-	Transformable2D(const Transformable2D&);
-	Transformable2D(Transformable2D&&) noexcept;
-
-	inline Transform2D GetTransform() const { return *m_Transform; };
-	inline glm::vec2 GetPosition() const { return m_Transform->position; }
-	inline glm::float32 GetRotation() const { return m_Transform->rotation; }
-	inline glm::vec2 GetScale() const { return m_Transform->scale; }
-	
-	inline virtual void OperateTransform(const std::function<void(Transform2D& position)>& op) { op(*m_Transform); }
-	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) { op(m_Transform->position); }
-	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) { op(m_Transform->rotation); }
-	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) { op(m_Transform->scale); }
-	
-	inline void SetTransform(const Transform2D& tr) { OperateTransform([&tr](Transform2D& transform) { transform = tr; }); }
-	inline void SetPosition(const float& x, const float& y) { OperatePosition([&x, &y](glm::vec2& position) { position = { x, y }; }); }
-	inline void SetPosition(const glm::vec2& pos) { OperatePosition([&pos](glm::vec2& position) { position = pos; }); }
-	inline void SetRotation(float r) { OperateRotation([&r](glm::float32& rotation) { rotation = r; }); }
-	inline void SetScale(float sx, float sy) { OperateScale([&sx, &sy](glm::vec2& scale) { scale = { sx, sy }; }); }
-	inline void SetScale(const glm::vec2& sc) { OperateScale([&sc](glm::vec2& scale) { scale = sc; }); }
-
-	inline virtual bool operator==(const Transformable2D& other) const { return *m_Transform == *other.m_Transform; }
-};
-
-class LocalTransformer2D
-{
-	std::shared_ptr<Transform2D> m_Parent;
-	std::shared_ptr<Transformable2D> m_Child;
-	Transform2D m_Local;
-
-public:
-	LocalTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::shared_ptr<Transformable2D>& child, bool discard_old_transform = true);
-	LocalTransformer2D(const std::shared_ptr<Transform2D>& parent, const Transform2D& local, bool discard_old_transform = true);
-	LocalTransformer2D(const LocalTransformer2D&);
-	LocalTransformer2D(LocalTransformer2D&&) noexcept;
-	LocalTransformer2D& operator=(const LocalTransformer2D&);
-
-	void SetLocalTransform(const Transform2D& tr);
-	inline Transform2D GetLocalTransform() const { return m_Local; }
-	void SetLocalPosition(const glm::vec2& pos);
-	void OperateLocalPosition(const std::function<void(glm::vec2& position)>&);
-	inline glm::vec2 GetLocalPosition() const { return m_Local.position; }
-	void SetLocalRotation(const glm::float32& rot);
-	void OperateLocalRotation(const std::function<void(glm::float32& rotation)>&);
-	inline glm::float32 GetLocalRotation() const { return m_Local.rotation; }
-	void SetLocalScale(const glm::vec2& sc);
-	void OperateLocalScale(const std::function<void(glm::vec2& scale)>&);
-	inline glm::vec2 GetLocalScale() const { return m_Local.scale; }
-
-	void SyncGlobalWithLocal();
-	void SyncLocalWithGlobal();
-	void SyncGlobalWithParent();
-	void SyncGlobalWithParentPosition();
-	void SyncGlobalWithParentRotation();
-	void SyncGlobalWithParentScale();
-	void SyncLocalWithParent();
-	void SyncLocalWithParentPosition();
-	void SyncLocalWithParentRotation();
-	void SyncLocalWithParentScale();
-	
-	void SetGlobalTransform(const Transform2D& tr);
-	inline Transform2D GetGlobalTransform() const { return m_Child->GetTransform(); }
-	void SetGlobalPosition(const glm::vec2& pos);
-	void OperateGlobalPosition(const std::function<void(glm::vec2& position)>&);
-	inline glm::vec2 GetGlobalPosition() const { return m_Child->GetTransform().position; }
-	void SetGlobalRotation(const glm::float32& rot);
-	void OperateGlobalRotation(const std::function<void(glm::float32& rotation)>&);
-	inline glm::float32 GetGlobalRotation() const { return m_Child->GetTransform().rotation; }
-	void SetGlobalScale(const glm::vec2& sc);
-	void OperateGlobalScale(const std::function<void(glm::vec2& scale)>&);
-	inline glm::vec2 GetGlobalScale() const { return m_Child->GetTransform().scale; }
-};
-
-class MultiLocalTransformer2D
+class MultiTransformer2D
 {
 	std::shared_ptr<Transform2D> m_Parent;
 	std::vector<std::shared_ptr<Transformable2D>> m_Children;
 	std::vector<Transform2D> m_Locals;
 
 public:
-	MultiLocalTransformer2D(const std::shared_ptr<Transform2D>& parent);
-	MultiLocalTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transforms = true);
-	MultiLocalTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms = true);
-	MultiLocalTransformer2D(const MultiLocalTransformer2D&);
-	MultiLocalTransformer2D(MultiLocalTransformer2D&&) noexcept;
-	MultiLocalTransformer2D& operator=(const MultiLocalTransformer2D&);
+	MultiTransformer2D(const std::shared_ptr<Transform2D>& parent);
+	MultiTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transforms = true);
+	MultiTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms = true);
+	MultiTransformer2D(const MultiTransformer2D&);
+	MultiTransformer2D(MultiTransformer2D&&) noexcept;
+	MultiTransformer2D& operator=(const MultiTransformer2D&);
 
 	void SetLocalTransforms(const Transform2D& tr) { for (size_t i = 0; i < m_Locals.size(); i++) SetLocalTransform(i, tr); }
 	inline std::vector<Transform2D> GetLocalTransforms() const { return m_Locals; }

@@ -3,9 +3,9 @@
 #include <vector>
 
 #include "Typedefs.h"
-#include "render/ActorRenderBase.h"
-#include "render/Renderable.h"
-#include "render/Transform.h"
+#include "../ActorRenderBase.h"
+#include "../Renderable.h"
+#include "../transform/Transformable.h"
 
 class ActorPrimitive2D : public ActorRenderBase2D, public Transformable2D
 {
