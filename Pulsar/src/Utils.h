@@ -100,6 +100,7 @@ inline std::string STR(const glm::vec4& vec4)
 {
 	return Concat("", "<", vec4[0], ", ", vec4[1], ", ", vec4[2], ", ", vec4[3], ">");
 }
+std::string STR(const struct Transform2D& tr);
 
 /// cfunc is assumed to be cumulative on the interval [0, 1). For example, consider cfunc to be f(t) = 5t. Then consider updates with the t-values that increment by 0.1:
 /// 

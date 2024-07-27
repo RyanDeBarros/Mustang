@@ -11,13 +11,12 @@
 #include "ActorTesselation.h"
 #include "factory/Atlas.h"
 #include "RectRender.h"
-#include "../transform/Transformer.h"
+#include "../transform/MultiTransformer.h"
 
 struct TMElement
 {
 	std::shared_ptr<RectRender> rectRender;
 	std::shared_ptr<ActorTesselation2D> tessel;
-	Transformer2D transformer;
 };
 
 class TileMap : public ActorRenderBase2D
@@ -26,6 +25,7 @@ class TileMap : public ActorRenderBase2D
 	std::vector<TMElement> m_Map;
 	Permutation m_Ordering;
 	std::shared_ptr<Transform2D> m_Transform;
+	MultiTransformer2D m_Transformer;
 
 public:
 	TileMap(TileHandle atlas_handle, const TextureSettings& texture_settings = Texture::nearest_settings, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, bool visible = true);

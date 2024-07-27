@@ -5,14 +5,14 @@
 
 // TODO make Transformer and MultiTransformer a Transformable, so they can be chained. The parent will be the transformer.
 
-class Transformer2D
+class Transformer2D : public Transformable2D
 {
-	std::shared_ptr<Transform2D> m_Parent;
 	std::shared_ptr<Transformable2D> m_Child;
 	Transform2D m_Local;
 
 public:
 	Transformer2D(const std::shared_ptr<Transform2D>& parent, const std::shared_ptr<Transformable2D>& child, bool discard_old_transform = true);
+	Transformer2D(const std::shared_ptr<Transform2D>& parent, std::shared_ptr<Transformable2D>&& child, bool discard_old_transform = true);
 	Transformer2D(std::shared_ptr<Transform2D>&& parent, std::shared_ptr<Transformable2D>&& child, bool discard_old_transform = true);
 	Transformer2D(const std::shared_ptr<Transform2D>& parent, const Transform2D& local, bool discard_old_transform = true);
 	Transformer2D(std::shared_ptr<Transform2D>&& parent, const Transform2D& local, bool discard_old_transform = true);
@@ -20,6 +20,11 @@ public:
 	Transformer2D(Transformer2D&&) noexcept;
 	Transformer2D& operator=(const Transformer2D&);
 	Transformer2D& operator=(Transformer2D&&) noexcept;
+
+	inline virtual void OperateTransform(const std::function<void(Transform2D& position)>& op) { op(*m_Transform); SyncGlobalWithParent(); }
+	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) { op(m_Transform->position); SyncGlobalWithParentPosition(); }
+	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) { op(m_Transform->rotation); SyncGlobalWithParentRotation(); }
+	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) { op(m_Transform->scale); SyncGlobalWithParentScale(); }
 
 	void SetLocalTransform(const Transform2D& tr);
 	inline Transform2D GetLocalTransform() const { return m_Local; }
@@ -35,14 +40,6 @@ public:
 
 	void SyncGlobalWithLocal();
 	void SyncLocalWithGlobal();
-	void SyncGlobalWithParent();
-	void SyncGlobalWithParentPosition();
-	void SyncGlobalWithParentRotation();
-	void SyncGlobalWithParentScale();
-	void SyncLocalWithParent();
-	void SyncLocalWithParentPosition();
-	void SyncLocalWithParentRotation();
-	void SyncLocalWithParentScale();
 
 	void SetGlobalTransform(const Transform2D& tr);
 	inline Transform2D GetGlobalTransform() const { return m_Child->GetTransform(); }
@@ -55,4 +52,15 @@ public:
 	void SetGlobalScale(const glm::vec2& sc);
 	void OperateGlobalScale(const std::function<void(glm::vec2& scale)>&);
 	inline glm::vec2 GetGlobalScale() const { return m_Child->GetTransform().scale; }
+
+private:
+	void SyncGlobalWithParent();
+	void SyncGlobalWithParentPosition();
+	void SyncGlobalWithParentRotation();
+	void SyncGlobalWithParentScale();
+	void SyncLocalWithParent();
+	void SyncLocalWithParentPosition();
+	void SyncLocalWithParentRotation();
+	void SyncLocalWithParentScale();
+
 };

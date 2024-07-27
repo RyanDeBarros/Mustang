@@ -39,13 +39,13 @@ void ParticleSystem<ParticleCount>::DespawnInvalidParticles()
 template<std::unsigned_integral ParticleCount>
 void ParticleSystem<ParticleCount>::AddParticle(ParticleSubsystemIndex i, const Particle& part)
 {
-	m_Batcher.PushBack(std::move(part.m_Shape));
+	m_Batcher.PushBack(part.m_Shape);
 	ParticleEffect<ParticleCount>::AddParticle(i, part);
 }
 
 template<std::unsigned_integral ParticleCount>
 void ParticleSystem<ParticleCount>::AddParticle(ParticleSubsystemIndex i, Particle&& part)
 {
-	m_Batcher.PushBack(std::move(part.m_Shape));
+	m_Batcher.PushBack(part.m_Shape);
 	ParticleEffect<ParticleCount>::AddParticle(i, std::move(part));
 }

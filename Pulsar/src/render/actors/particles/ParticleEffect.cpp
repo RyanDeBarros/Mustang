@@ -5,6 +5,8 @@
 
 template class ParticleEffect<unsigned short>;
 
+// TODO eventually, create factory for particle effects?
+
 template<std::unsigned_integral ParticleCount>
 ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform, bool enabled)
 	: Transformable2D(transform), enabled(enabled), m_Transformer(m_Transform)

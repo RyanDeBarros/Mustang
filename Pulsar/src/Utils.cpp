@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "render/transform/Transform.h"
+
 Permutation::Permutation(size_t n)
 	: n(n)
 {
@@ -150,6 +152,11 @@ std::function<glm::vec2(const glm::vec4&)> LinearCombo2x4(const glm::vec2& const
 std::function<void(float&)> OperateFloatMult(float mult)
 {
 	return [mult](float& t) -> void { t *= mult; };
+}
+
+std::string STR(const Transform2D& tr)
+{
+	return Concat("", "[P", STR(tr.position), " R<", tr.rotation, "> S", STR(tr.scale), "]");
 }
 
 std::function<std::function<void(float&)>(float)> OperateFloatMultWrap = [](float t) -> std::function<void(float&)> { return OperateFloatMult(t); };

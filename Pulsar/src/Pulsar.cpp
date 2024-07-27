@@ -207,7 +207,8 @@ void Pulsar::Run(GLFWwindow* window)
 	ParticleSubsystemData<> wave1{
 		1.5f,
 		std::shared_ptr<DebugPolygon>(new DebugCircle(4.0f)),
-		CumulativeFunc<>([](float t) { return t < 0.6f ? PowerFunc(2000.0f, 0.5f)(t) : PowerFunc(2000.0f, 0.5f)(0.6f); }),
+		//CumulativeFunc<>([](float t) { return t < 0.6f ? PowerFunc(2000.0f, 0.5f)(t) : PowerFunc(2000.0f, 0.5f)(0.6f); }),
+		CumulativeFunc<>(LinearFunc(100)),
 		[](const Particles::CHRSeed& seed) { return 0.4f - seed.waveT * 0.05f; },
 		Particles::CombineSequential({
 			Particles::CombineConditionalTimeLessThan(
@@ -263,7 +264,7 @@ void Pulsar::Run(GLFWwindow* window)
 	float p2height = 400.0f;
 	ParticleSubsystemData<> wave2{
 		1.5f,
-		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 3}, {1, 3}, {1, 0} }, {}, {}, GL_TRIANGLE_FAN)),
+		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 2}, {1, 2}, {1, 0} }, {}, {}, GL_TRIANGLE_FAN)),
 		CumulativeFunc<>(LinearFunc(p2height * 0.5f)),
 		[](const Particles::CHRSeed& seed) { return 1.5f; },
 		Particles::CombineSequential({
@@ -301,12 +302,11 @@ void Pulsar::Run(GLFWwindow* window)
 	};
 
 	ParticleSystem<> psys({ wave2, wave2 });
-	//psys.SubsystemRef(1).SetRotation(1.57f);
-	psys.TransformerRef().SetLocalRotation(1, 1.57f);
+	//psys.SubsystemRef(1).SetRotation(0.5f * glm::pi<float>());
+	psys.TransformerRef().SetLocalRotation(1, 0.5f * glm::pi<float>());
 	// TODO this local scale set shouldn't be necessary. the parent scale set below should take care of it
 	psys.TransformerRef().SetLocalScale(1, { 1, _RendererSettings::initial_window_width / static_cast<float>(_RendererSettings::initial_window_height) });
 	
-	// TODO add transform parent functions to transformer structs
 	psys.SetScale(_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height);
 	psys.TransformerRef().SyncGlobalWithParentScales();
 	//ParticleSubsystemArray<> parr({ wave1, wave2 });
@@ -345,14 +345,14 @@ void Pulsar::Run(GLFWwindow* window)
 		prevDrawTime = drawTime;
 		totalDrawTime += deltaDrawTime;
 		// small delay for smoother window init
-		if (totalDrawTime > 0.3f)
-		{
+		//if (totalDrawTime > 0.3f)
+		//{
 			// OnUpdate here
 			psys.Resume();
 			//psys.SetRotation(totalDrawTime * 0.25f);
 			//psys.SetScale(1.0f - 0.2f * glm::sin(totalDrawTime), 1.0f + 0.2f * glm::sin(totalDrawTime));
 			//parr.Resume();
-		}
+		//}
 
 		Renderer::OnDraw();
 		glfwPollEvents();
