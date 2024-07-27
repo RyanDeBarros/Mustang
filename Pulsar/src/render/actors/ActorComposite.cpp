@@ -15,6 +15,47 @@ ActorComposite2D::ActorComposite2D(CompositeMode mode, ActorPrimitiveCounter ini
 	cap = tail + initial_size;
 }
 
+ActorComposite2D::ActorComposite2D(const ActorComposite2D& other)
+	: m_Mode(other.m_Mode), ActorSequencer2D(other.GetZIndex())
+{
+	auto initial_size = other.cap - other.tail;
+	tail = new ActorPrimitive2D*[initial_size];
+	head = tail;
+	cap = tail + initial_size;
+}
+
+ActorComposite2D::ActorComposite2D(ActorComposite2D&& other) noexcept
+	: m_Mode(other.m_Mode), ActorSequencer2D(other.GetZIndex()), tail(other.tail), head(other.head), cap(other.cap)
+{
+	other.tail = nullptr;
+}
+
+ActorComposite2D& ActorComposite2D::operator=(const ActorComposite2D& other)
+{
+	m_Mode = other.m_Mode;
+	SetZIndex(other.GetZIndex());
+	if (tail)
+		delete[] tail;
+	auto initial_size = other.cap - other.tail;
+	tail = new ActorPrimitive2D*[initial_size];
+	head = tail;
+	cap = tail + initial_size;
+	return *this;
+}
+
+ActorComposite2D& ActorComposite2D::operator=(ActorComposite2D&& other) noexcept
+{
+	m_Mode = other.m_Mode;
+	SetZIndex(other.GetZIndex());
+	if (tail)
+		delete[] tail;
+	tail = other.tail;
+	head = other.head;
+	cap = other.cap;
+	other.tail = nullptr;
+	return *this;
+}
+
 ActorComposite2D::~ActorComposite2D()
 {
 	if (tail)
@@ -22,7 +63,7 @@ ActorComposite2D::~ActorComposite2D()
 	cap = head = tail = nullptr;
 }
 
-ActorPrimitive2D* const ActorComposite2D::operator[](const int& i)
+ActorPrimitive2D* const ActorComposite2D::operator[](int i)
 {
 	if (head - tail > i)
 		return nullptr;

@@ -3,14 +3,35 @@
 #include "Logger.h"
 #include "render/CanvasLayer.h"
 
-ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, const ZIndex& z, const bool& visible)
+ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, ZIndex z, bool visible)
 	: m_Render(render), Transformable2D(transform), ActorRenderBase2D(z), m_Status(visible ? 0b111 : 0b110)
 {
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const ActorPrimitive2D& primitive)
-	: m_Render(primitive.m_Render), Transformable2D(*primitive.m_Transform), ActorRenderBase2D(primitive.m_Z), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
+	: m_Render(primitive.m_Render), Transformable2D(primitive), ActorRenderBase2D(primitive), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
 {
+}
+
+ActorPrimitive2D::ActorPrimitive2D(ActorPrimitive2D&& primitive) noexcept
+	: m_Render(std::move(primitive.m_Render)), Transformable2D(std::move(primitive)), ActorRenderBase2D(std::move(primitive)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors))
+{
+}
+
+ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
+{
+	m_Render = primitive.m_Render;
+	m_Status = primitive.m_Status;
+	m_ModulationColors = primitive.m_ModulationColors;
+	return *this;
+}
+
+ActorPrimitive2D& ActorPrimitive2D::operator=(ActorPrimitive2D&& primitive) noexcept
+{
+	m_Render = std::move(primitive.m_Render);
+	m_Status = primitive.m_Status;
+	m_ModulationColors = std::move(primitive.m_ModulationColors);
+	return *this;
 }
 
 void ActorPrimitive2D::RequestDraw(CanvasLayer* canvas_layer)
@@ -68,11 +89,12 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 
 void ActorPrimitive2D::CropPoints(const std::vector<glm::vec2>& points, int atlas_width, int atlas_height)
 {
+	// TODO I added i * stride + to each line, as well as for CropRelativePoints. See that it still works, or that it works better.
 	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
 	for (size_t i = 0; i < points.size() && i < m_Render.vertexCount; i++)
 	{
-		m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2] = points[i][0] / atlas_width;
-		m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3] = points[i][1] / atlas_height;
+		m_Render.vertexBufferData[i * stride + ActorPrimitive2D::end_attrib_pos + 2] = points[i][0] / atlas_width;
+		m_Render.vertexBufferData[i * stride + ActorPrimitive2D::end_attrib_pos + 3] = points[i][1] / atlas_height;
 	}
 }
 
@@ -81,7 +103,7 @@ void ActorPrimitive2D::CropRelativePoints(const std::vector<glm::vec2>& atlas_po
 	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
 	for (size_t i = 0; i < atlas_points.size() && i < m_Render.vertexCount; i++)
 	{
-		m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2] = atlas_points[i][0];
-		m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3] = atlas_points[i][1];
+		m_Render.vertexBufferData[i * stride + ActorPrimitive2D::end_attrib_pos + 2] = atlas_points[i][0];
+		m_Render.vertexBufferData[i * stride + ActorPrimitive2D::end_attrib_pos + 3] = atlas_points[i][1];
 	}
 }

@@ -52,7 +52,7 @@ UniformLexiconHandle UniformLexiconFactory::GetHandle(const std::map<std::string
 	return handle;
 }
 
-void UniformLexiconFactory::OnApply(const UniformLexiconHandle& uniformLexicon, const ShaderHandle& shader)
+void UniformLexiconFactory::OnApply(UniformLexiconHandle uniformLexicon, ShaderHandle shader)
 {
 	if (uniformLexicon == 0 || shader == 0)
 		return;
@@ -128,7 +128,7 @@ void UniformLexiconFactory::OnApply(const UniformLexiconHandle& uniformLexicon, 
 	}
 }
 
-bool UniformLexiconFactory::Shares(const UniformLexiconHandle& lexicon1, const UniformLexiconHandle& lexicon2)
+bool UniformLexiconFactory::Shares(UniformLexiconHandle lexicon1, UniformLexiconHandle lexicon2)
 {
 	if (lexicon1 == lexicon2)
 		return true;
@@ -164,7 +164,7 @@ bool UniformLexiconFactory::Shares(const UniformLexiconHandle& lexicon1, const U
 	}
 }
 
-const Uniform* UniformLexiconFactory::GetValue(const UniformLexiconHandle& lexicon, const std::string& name)
+const Uniform* UniformLexiconFactory::GetValue(UniformLexiconHandle lexicon, const std::string& name)
 {
 	UniformLexicon* lex = Get(lexicon);
 	if (lex)
@@ -174,14 +174,14 @@ const Uniform* UniformLexiconFactory::GetValue(const UniformLexiconHandle& lexic
 	else return nullptr;
 }
 
-void UniformLexiconFactory::SetValue(const UniformLexiconHandle& lexicon, const std::string& name, const Uniform& value)
+void UniformLexiconFactory::SetValue(UniformLexiconHandle lexicon, const std::string& name, const Uniform& value)
 {
 	UniformLexicon* lex = Get(lexicon);
 	if (lex && lex->SetValue(name, value))
 		shaderCache.erase(lexicon);
 }
 
-bool UniformLexiconFactory::DefineNewValue(const UniformLexiconHandle& lexicon, const std::string& name, const Uniform& value)
+bool UniformLexiconFactory::DefineNewValue(UniformLexiconHandle lexicon, const std::string& name, const Uniform& value)
 {
 	UniformLexicon* lex = Get(lexicon);
 	if (lex && lex->DefineNewValue(name, value))
@@ -192,12 +192,12 @@ bool UniformLexiconFactory::DefineNewValue(const UniformLexiconHandle& lexicon, 
 	else return false;
 }
 
-void UniformLexiconFactory::MarkStatic(const UniformLexiconHandle& lexicon)
+void UniformLexiconFactory::MarkStatic(UniformLexiconHandle lexicon)
 {
 	dynamicLexicons.insert(lexicon);
 }
 
-void UniformLexiconFactory::MarkDynamic(const UniformLexiconHandle& lexicon)
+void UniformLexiconFactory::MarkDynamic(UniformLexiconHandle lexicon)
 {
 	dynamicLexicons.erase(lexicon);
 }

@@ -80,7 +80,7 @@ void Renderer::AddCanvasLayer(const CanvasLayerData& data)
 		Logger::LogErrorFatal(std::string("Tried to add new canvas layer to renderer canvas index (") + std::to_string(data.ci) + "), but a canvas layer under that canvas index already exists!");
 }
 
-void Renderer::RemoveCanvasLayer(const CanvasIndex& ci)
+void Renderer::RemoveCanvasLayer(CanvasIndex ci)
 {
 	CHECK_INITIALIZED
 	auto layer_it = layers.find(ci);
@@ -90,7 +90,7 @@ void Renderer::RemoveCanvasLayer(const CanvasIndex& ci)
 		Logger::LogErrorFatal(std::string("Tried to remove a canvas layer at renderer canvas index (") + std::to_string(ci) + "), but no canvas layer under that canvas index exists!");
 }
 
-CanvasLayer* Renderer::GetCanvasLayer(const CanvasIndex& ci)
+CanvasLayer* Renderer::GetCanvasLayer(CanvasIndex ci)
 {
 	CHECK_INITIALIZED
 	auto layer = layers.find(ci);
@@ -103,7 +103,7 @@ CanvasLayer* Renderer::GetCanvasLayer(const CanvasIndex& ci)
 	}
 }
 
-void Renderer::ChangeCanvasLayerIndex(const CanvasIndex& old_index, const CanvasIndex& new_index)
+void Renderer::ChangeCanvasLayerIndex(CanvasIndex old_index, CanvasIndex new_index)
 {
 	auto layer_it = layers.find(old_index);
 	if (layer_it == layers.end())

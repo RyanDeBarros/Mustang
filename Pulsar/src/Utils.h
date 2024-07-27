@@ -24,6 +24,8 @@ public:
 	Permutation inverse() const;
 };
 
+// TODO instead of Utils.h file, create utils folder with different utility files. so one for these function definitions, another for the concatenation functions, etc.
+
 extern std::function<float(float)> ConstantFunc(float c);
 extern std::function<float(float)> StepFunc(float at, float height = 1.0f, bool dirLR = true, bool incl = true, float lower = 0.0f);
 extern std::function<float(float)> LinearFunc(float slope = 0, float intercept = 0);
@@ -122,6 +124,9 @@ struct CumulativeFunc
 
 	CumulativeFunc(const std::function<float(float)>& cf, Int initial = 0) : cfunc(cf), prev(initial) {}
 	CumulativeFunc(const CumulativeFunc& func) : cfunc(func.cfunc), prev(func.prev) {}
+	CumulativeFunc(CumulativeFunc&& func) noexcept : cfunc(std::move(func.cfunc)), prev(func.prev) {}
+	CumulativeFunc& operator=(const CumulativeFunc& func) { cfunc = func.cfunc; prev = func.prev; return *this; }
+	CumulativeFunc& operator=(CumulativeFunc&& func) noexcept { cfunc = std::move(func.cfunc); prev = func.prev; return *this; }
 
 	inline Int operator()(float t)
 	{

@@ -32,7 +32,7 @@ namespace Transform {
 		return { -tr.position, -tr.rotation, 1 / tr.scale };
 	}
 
-	glm::mat2 Rotation(const glm::float32& r)
+	glm::mat2 Rotation(glm::float32 r)
 	{
 		return { glm::cos(r), glm::sin(r), -glm::sin(r), glm::cos(r) };
 	}

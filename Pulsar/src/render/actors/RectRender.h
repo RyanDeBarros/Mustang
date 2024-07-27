@@ -10,9 +10,15 @@ protected:
 	static constexpr Stride end_attrib_pos = ActorPrimitive2D::end_attrib_pos + 4;
 
 	float m_UVWidth, m_UVHeight;
+	glm::vec2 m_Pivot;
 
 public:
-	RectRender(const TextureHandle& texture = 0, const Transform2D & transform = Transform2D(), const ShaderHandle& shader = ShaderFactory::standard_shader, const ZIndex& z = 0, const bool& visible = true);
+	RectRender(TextureHandle texture = 0, const Transform2D& transform = {}, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, bool visible = true);
+	RectRender(const RectRender&);
+	RectRender(RectRender&&) noexcept;
+	RectRender& operator=(const RectRender&);
+	RectRender& operator=(RectRender&&) noexcept;
+
 	static void DefineRectRenderable();
 
 	inline int GetWidth() const { return TextureFactory::GetWidth(m_Render.textureHandle); }
@@ -20,6 +26,7 @@ public:
 	// TODO when rect is cropped, width/height when setting scale is not accurate. Also, define SetWidth and SetHeight so that scale is not necessary.
 	inline float GetUVWidth() const { return m_UVWidth; }
 	inline float GetUVHeight() const { return m_UVHeight; }
+	inline glm::vec2 GetPivot() const { return m_Pivot; }
 	void SetPivot(float pivotX, float pivotY);
 
 	void CropToRect(glm::vec4 rect, int atlas_width, int atlas_height);

@@ -17,7 +17,7 @@
 #include "render/Renderable.h"
 #include "render/actors/TileMap.h"
 
-// TODO rename all macros to have PULSAR prefix
+// TODO rename all macros to have PULSAR_ prefix
 #define VERIFY(loadFunc) \
 	auto verif = loadFunc;\
 	if (verif != LOAD_STATUS::OK)\
@@ -148,7 +148,7 @@ static LOAD_STATUS readTextureSettings(const toml::v3::node_view<toml::v3::node>
 	return LOAD_STATUS::OK;
 }
 
-LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, const bool& new_texture, const bool& temporary_buffer)
+LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, bool new_texture, bool temporary_buffer)
 {
 	try
 	{
@@ -422,7 +422,7 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 	}
 }
 
-LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, const bool& new_texture, const bool& temporary_buffer)
+LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, bool new_texture, bool temporary_buffer)
 {
 	try
 	{

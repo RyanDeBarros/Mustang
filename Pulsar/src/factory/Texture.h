@@ -82,14 +82,15 @@ class Texture
 
 	friend class TextureFactory;
 	inline bool Equivalent(const char* filepath, const TextureSettings& settings) const { return TileFactory::GetFilepath(m_Tile) == filepath && m_Settings == settings; }
-	inline bool Equivalent(const TileHandle& tile, const TextureSettings& settings) const { return m_Tile == tile && m_Settings == settings; }
+	inline bool Equivalent(TileHandle tile, const TextureSettings& settings) const { return m_Tile == tile && m_Settings == settings; }
 	inline bool IsValid() const { return m_RID > 0; }
 
 public:
 	Texture(const char* filepath, TextureSettings settings = {}, bool temporary_buffer = false);
-	Texture(const TileHandle& tile, TextureSettings settings = {});
-	Texture(Texture&& texture) noexcept;
+	Texture(TileHandle tile, TextureSettings settings = {});
 	Texture(const Texture& texture) = delete;
+	Texture(Texture&& texture) noexcept;
+	Texture& operator=(Texture&& texture) noexcept;
 	~Texture();
 
 	void Bind(TextureSlot slot = 0) const;

@@ -6,6 +6,28 @@ UniformLexicon::UniformLexicon()
 {
 }
 
+UniformLexicon::UniformLexicon(const UniformLexicon& other)
+	: m_Uniforms(other.m_Uniforms)
+{
+}
+
+UniformLexicon::UniformLexicon(UniformLexicon&& other) noexcept
+	: m_Uniforms(std::move(other.m_Uniforms))
+{
+}
+
+UniformLexicon& UniformLexicon::operator=(const UniformLexicon& other)
+{
+	m_Uniforms = other.m_Uniforms;
+	return *this;
+}
+
+UniformLexicon& UniformLexicon::operator=(UniformLexicon&& other) noexcept
+{
+	m_Uniforms = std::move(other.m_Uniforms);
+	return *this;
+}
+
 UniformLexicon::UniformLexicon(const std::map<std::string, Uniform>& uniform_set)
 	: m_Uniforms(uniform_set)
 {

@@ -16,7 +16,7 @@ DebugMultiPolygon::DebugMultiPolygon(const std::pair<GLenum, BatchModel>& pair, 
 
 DebugMultiPolygon::DebugMultiPolygon(const DebugMultiPolygon& other)
 	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(other.draw_count), m_IndexMode(other.m_IndexMode),
-	m_Model(other.m_Model), m_Polygons(other.m_Polygons), ActorRenderBase2D(other.GetZIndex())
+	m_Model(other.m_Model), m_Polygons(other.m_Polygons), ActorRenderBase2D(other)
 {
 	if (other.indexes_ptr)
 	{
@@ -32,10 +32,59 @@ DebugMultiPolygon::DebugMultiPolygon(const DebugMultiPolygon& other)
 
 DebugMultiPolygon::DebugMultiPolygon(DebugMultiPolygon&& other) noexcept
 	: indexes_ptr(other.indexes_ptr), index_counts_ptr(other.index_counts_ptr), draw_count(other.draw_count), m_IndexMode(other.m_IndexMode),
-	m_Model(other.m_Model), m_Polygons(std::move(other.m_Polygons)), ActorRenderBase2D(other.GetZIndex())
+	m_Model(other.m_Model), m_Polygons(std::move(other.m_Polygons)), ActorRenderBase2D(std::move(other))
 {
 	other.indexes_ptr = nullptr;
 	other.index_counts_ptr = nullptr;
+}
+
+DebugMultiPolygon& DebugMultiPolygon::operator=(const DebugMultiPolygon& other)
+{
+	draw_count = other.draw_count;
+	m_IndexMode = other.m_IndexMode;
+	m_Model = other.m_Model;
+	m_Polygons = other.m_Polygons;
+
+	if (indexes_ptr)
+		delete[] indexes_ptr;
+	if (other.indexes_ptr)
+	{
+		indexes_ptr = new GLint[draw_count];
+		memcpy_s(indexes_ptr, draw_count, other.indexes_ptr, draw_count);
+	}
+	else
+		indexes_ptr = nullptr;
+
+	if (index_counts_ptr)
+		delete[] index_counts_ptr;
+	if (other.index_counts_ptr)
+	{
+		index_counts_ptr = new GLsizei[draw_count];
+		memcpy_s(index_counts_ptr, draw_count, other.index_counts_ptr, draw_count);
+	}
+	else
+		index_counts_ptr = nullptr;
+	return *this;
+}
+
+DebugMultiPolygon& DebugMultiPolygon::operator=(DebugMultiPolygon&& other) noexcept
+{
+	draw_count = other.draw_count;
+	m_IndexMode = other.m_IndexMode;
+	m_Model = other.m_Model;
+	m_Polygons = std::move(other.m_Polygons);
+
+	if (indexes_ptr)
+		delete[] indexes_ptr;
+	indexes_ptr = other.indexes_ptr;
+	other.indexes_ptr = nullptr;
+
+	if (index_counts_ptr)
+		delete[] index_counts_ptr;
+	index_counts_ptr = other.index_counts_ptr;
+	other.index_counts_ptr = nullptr;
+
+	return *this;
 }
 
 DebugMultiPolygon::~DebugMultiPolygon()
@@ -60,14 +109,14 @@ void DebugMultiPolygon::Sort()
 		});
 }
 
-void DebugMultiPolygon::ChangeZIndex(const iterator& where, const ZIndex& z)
+void DebugMultiPolygon::ChangeZIndex(const iterator& where, ZIndex z)
 {
 	(*where)->SetZIndex(z);
 	Sort();
 	UpdatePtrs();
 }
 
-void DebugMultiPolygon::ChangeZIndex(const size_t& i, const ZIndex& z)
+void DebugMultiPolygon::ChangeZIndex(size_t i, ZIndex z)
 {
 	m_Polygons[i]->SetZIndex(z);
 	Sort();
@@ -81,6 +130,13 @@ void DebugMultiPolygon::PushBack(const std::shared_ptr<DebugPolygon>& poly)
 	UpdatePtrs();
 }
 
+void DebugMultiPolygon::PushBack(std::shared_ptr<DebugPolygon>&& poly)
+{
+	m_Polygons.push_back(std::move(poly));
+	Sort();
+	UpdatePtrs();
+}
+
 void DebugMultiPolygon::PushBackAll(const std::vector<std::shared_ptr<DebugPolygon>>& polys)
 {
 	for (auto& poly : polys)
@@ -89,9 +145,23 @@ void DebugMultiPolygon::PushBackAll(const std::vector<std::shared_ptr<DebugPolyg
 	UpdatePtrs();
 }
 
+// TODO might be an issue if the shared_ptr elements in vectors continued to be used after PushBackAll, even though vector isn't.
+void DebugMultiPolygon::PushBackAll(std::vector<std::shared_ptr<DebugPolygon>>&& polys)
+{
+	for (auto&& poly : polys)
+		m_Polygons.push_back(std::move(poly));
+	Sort();
+	UpdatePtrs();
+}
+
 void DebugMultiPolygon::BufferPush(const std::shared_ptr<DebugPolygon>& poly)
 {
 	m_Polygons.push_back(poly);
+}
+
+void DebugMultiPolygon::BufferPush(std::shared_ptr<DebugPolygon>&& poly)
+{
+	m_Polygons.push_back(std::move(poly));
 }
 
 void DebugMultiPolygon::FlushPush()
@@ -106,7 +176,7 @@ void DebugMultiPolygon::Erase(const iterator& where)
 	UpdatePtrs();
 }
 
-void DebugMultiPolygon::Erase(const size_t& i)
+void DebugMultiPolygon::Erase(size_t i)
 {
 	m_Polygons.erase(m_Polygons.begin() + i);
 	UpdatePtrs();

@@ -11,7 +11,7 @@
 
 // TODO in all drawing cases check if renderable vertex/index buffer data is too large to fit in pools
 
-CanvasLayer::CanvasLayer(CanvasLayerData data)
+CanvasLayer::CanvasLayer(const CanvasLayerData& data)
 	: m_Data(data), m_LayerView((float)m_Data.pLeft, (float)m_Data.pRight, (float)m_Data.pBottom, (float)m_Data.pTop)
 {
 	m_VertexPool = new GLfloat[m_Data.maxVertexPoolSize];
@@ -29,12 +29,6 @@ CanvasLayer::CanvasLayer(CanvasLayerData data)
 
 CanvasLayer::~CanvasLayer()
 {
-	for (const auto& list : m_Batcher)
-	{
-		if (list.second)
-			delete list.second;
-	}
-	m_Batcher.clear();
 	if (m_VertexPool)
 	{
 		delete m_VertexPool;
@@ -62,13 +56,13 @@ void CanvasLayer::OnAttach(ActorRenderBase2D* const actor)
 	auto entry = m_Batcher.find(actor->GetZIndex());
 	if (entry == m_Batcher.end())
 	{
-		m_Batcher.emplace(actor->GetZIndex(), new std::list<ActorRenderBase2D*>());
+		m_Batcher.emplace(actor->GetZIndex(), std::list<ActorRenderBase2D*>());
 		entry = m_Batcher.find(actor->GetZIndex());
 	}
-	entry->second->push_back(actor);
+	entry->second.push_back(actor);
 }
 
-bool CanvasLayer::OnSetZIndex(ActorRenderBase2D* const actor, const ZIndex new_val)
+bool CanvasLayer::OnSetZIndex(ActorRenderBase2D* const actor, ZIndex new_val)
 {
 	if (!OnDetach(actor))
 		return false;
@@ -82,7 +76,7 @@ bool CanvasLayer::OnDetach(ActorRenderBase2D* const actor)
 	auto entry = m_Batcher.find(actor->GetZIndex());
 	if (entry == m_Batcher.end())
 		return false;
-	entry->second->remove(actor);
+	entry->second.remove(actor);
 	return true;
 }
 
@@ -94,12 +88,8 @@ void CanvasLayer::OnDraw()
 	indexPos = m_IndexPool;
 	currentLexicon.Clear();
 	for (const auto& list : m_Batcher)
-	{
-		for (const auto& element : *list.second)
-		{
+		for (const auto& element : list.second)
 			element->RequestDraw(this);
-		}
-	}
 	FlushAndReset();
 }
 
@@ -242,6 +232,7 @@ TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 
 void CanvasLayer::FlushAndReset()
 {
+	// TODO this only applies for regular glDrawElements with GL_TRIANGLES calls, but not all the different CanvasLayer draw functions. Define an enum that holds the different 'modes' (primitive, array+debug_model, etc.). Then based on that, FlushAndReset calls the necessary draw function.
 	if (currentModel == BatchModel{})
 		return;
 	BindAllExceptIndexes();

@@ -40,8 +40,9 @@ struct Renderable
 
 	Renderable(BatchModel model = BatchModel(), TextureHandle texture_handle = 0);
 	Renderable(Renderable&& other) noexcept;
-	Renderable(const Renderable& other) noexcept;
-	void operator=(const Renderable& other) noexcept;
+	Renderable(const Renderable& other);
+	Renderable& operator=(const Renderable& other);
+	Renderable& operator=(Renderable&& other) noexcept;
 	~Renderable();
 
 private:
@@ -59,6 +60,6 @@ private:
 	friend class DebugPolygon;
 	friend class DebugPoint;
 	friend class DebugPoint;
-	friend enum class LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable, const bool& new_texture, const bool& temporary_buffer);
+	friend enum class LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable, bool new_texture, bool temporary_buffer);
 	friend BufferCounter Render::VertexBufferLayoutCount(const Renderable& render);
 };

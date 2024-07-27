@@ -26,7 +26,7 @@ void TileFactory::Terminate()
 	factory.clear();
 }
 
-Tile* TileFactory::Get(const TileHandle& handle)
+Tile* TileFactory::Get(TileHandle handle)
 {
 	auto iter = factory.find(handle);
 	if (iter != factory.end())
@@ -75,24 +75,6 @@ TileHandle TileFactory::GetAtlasHandle(std::vector<TileHandle>& tiles, int width
 	else return 0;
 }
 
-TileHandle TileFactory::GetAtlasHandle(std::vector<TileHandle>&& tiles, int width, int height, int border)
-{
-	for (const auto& [handle, tile] : factory)
-	{
-		auto at = dynamic_cast<Atlas* const>(tile);
-		if (at && at->Equivalent(tiles, width, height, border))
-			return handle;
-	}
-	Atlas tile(tiles, width, height, border);
-	if (tile.IsValid())
-	{
-		TileHandle handle = handle_cap++;
-		factory.emplace(handle, new Atlas(std::move(tile)));
-		return handle;
-	}
-	else return 0;
-}
-
 TileHandle TileFactory::GetAtlasHandle(const char* texture_filepath, const std::vector<Placement>& placements, int border)
 {
 	for (const auto& [handle, tile] : factory)
@@ -102,6 +84,24 @@ TileHandle TileFactory::GetAtlasHandle(const char* texture_filepath, const std::
 			return handle;
 	}
 	Atlas tile(texture_filepath, placements, border);
+	if (tile.IsValid())
+	{
+		TileHandle handle = handle_cap++;
+		factory.emplace(handle, new Atlas(std::move(tile)));
+		return handle;
+	}
+	else return 0;
+}
+
+TileHandle TileFactory::GetAtlasHandle(const char* texture_filepath, std::vector<struct Placement>&& placements, int border)
+{
+	for (const auto& [handle, tile] : factory)
+	{
+		auto at = dynamic_cast<Atlas* const>(tile);
+		if (at && at->Equivalent(texture_filepath, placements, border))
+			return handle;
+	}
+	Atlas tile(texture_filepath, std::move(placements), border);
 	if (tile.IsValid())
 	{
 		TileHandle handle = handle_cap++;
@@ -129,7 +129,7 @@ TileHandle TileFactory::GetAtlasHandle(const Atlas* const atlas)
 	else return 0;
 }
 
-TileHandle TileFactory::GetSubtileHandle(const TileHandle& full_handle, int x, int y, int w, int h)
+TileHandle TileFactory::GetSubtileHandle(TileHandle full_handle, int x, int y, int w, int h)
 {
 	Tile* t = Get(full_handle);
 	if (!t)
@@ -147,31 +147,31 @@ TileHandle TileFactory::GetSubtileHandle(const TileHandle& full_handle, int x, i
 	return handle;
 }
 
-const unsigned char* TileFactory::GetImageBuffer(const TileHandle& tile)
+const unsigned char* TileFactory::GetImageBuffer(TileHandle tile)
 {
 	Tile* t = Get(tile);
 	return t ? t->m_ImageBuffer : nullptr;
 }
 
-int TileFactory::GetWidth(const TileHandle& tile)
+int TileFactory::GetWidth(TileHandle tile)
 {
 	Tile* t = Get(tile);
 	return t ? t->m_Width : 0;
 }
 
-int TileFactory::GetHeight(const TileHandle& tile)
+int TileFactory::GetHeight(TileHandle tile)
 {
 	Tile* t = Get(tile);
 	return t ? t->m_Height : 0;
 }
 
-int TileFactory::GetBPP(const TileHandle& tile)
+int TileFactory::GetBPP(TileHandle tile)
 {
 	Tile* t = Get(tile);
 	return t ? t->m_BPP : 0;
 }
 
-std::string TileFactory::GetFilepath(const TileHandle& tile)
+std::string TileFactory::GetFilepath(TileHandle tile)
 {
 	Tile* t = Get(tile);
 	return t ? t->m_Filepath : "";

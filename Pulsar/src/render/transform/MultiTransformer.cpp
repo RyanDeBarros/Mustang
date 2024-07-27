@@ -5,8 +5,24 @@ MultiTransformer2D::MultiTransformer2D(const std::shared_ptr<Transform2D>& paren
 {
 }
 
+MultiTransformer2D::MultiTransformer2D(std::shared_ptr<Transform2D>&& parent)
+	: m_Parent(std::move(parent))
+{
+}
+
 MultiTransformer2D::MultiTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transforms)
 	: m_Parent(parent), m_Children(children)
+{
+	for (size_t i = 0; i < m_Children.size(); i++)
+		m_Locals.push_back({});
+	if (discard_old_transforms)
+		SyncGlobalWithLocals();
+	else
+		SyncLocalWithGlobals();
+}
+
+MultiTransformer2D::MultiTransformer2D(std::shared_ptr<Transform2D>&& parent, std::vector<std::shared_ptr<Transformable2D>>&& children, bool discard_old_transforms)
+	: m_Parent(std::move(parent)), m_Children(std::move(children))
 {
 	for (size_t i = 0; i < m_Children.size(); i++)
 		m_Locals.push_back({});
@@ -20,7 +36,7 @@ MultiTransformer2D::MultiTransformer2D(const std::shared_ptr<Transform2D>& paren
 	: m_Parent(parent), m_Locals(locals)
 {
 	for (size_t i = 0; i < m_Children.size(); i++)
-		m_Children.push_back(std::make_shared<Transformable2D>(Transformable2D(Transform2D{})));
+		m_Children.push_back(std::make_shared<Transformable2D>());
 	if (discard_old_transforms)
 		SyncLocalWithGlobals();
 	else
@@ -33,7 +49,7 @@ MultiTransformer2D::MultiTransformer2D(const MultiTransformer2D& other)
 }
 
 MultiTransformer2D::MultiTransformer2D(MultiTransformer2D&& other) noexcept
-	: m_Parent(other.m_Parent), m_Children(other.m_Children), m_Locals(other.m_Locals)
+	: m_Parent(std::move(other.m_Parent)), m_Children(std::move(other.m_Children)), m_Locals(std::move(other.m_Locals))
 {
 }
 
@@ -42,6 +58,14 @@ MultiTransformer2D& MultiTransformer2D::operator=(const MultiTransformer2D& othe
 	m_Parent = other.m_Parent;
 	m_Children = other.m_Children;
 	m_Locals = other.m_Locals;
+	return *this;
+}
+
+MultiTransformer2D& MultiTransformer2D::operator=(MultiTransformer2D&& other) noexcept
+{
+	m_Parent = std::move(other.m_Parent);
+	m_Children = std::move(other.m_Children);
+	m_Locals = std::move(other.m_Locals);
 	return *this;
 }
 
@@ -253,9 +277,19 @@ void MultiTransformer2D::PushBackGlobal(const std::shared_ptr<Transformable2D>& 
 		SyncLocalWithGlobals();
 }
 
+void MultiTransformer2D::PushBackGlobal(std::shared_ptr<Transformable2D>&& child, bool discard_old_transform)
+{
+	m_Children.push_back(std::move(child));
+	m_Locals.push_back({});
+	if (discard_old_transform)
+		SyncGlobalWithLocals();
+	else
+		SyncLocalWithGlobals();
+}
+
 void MultiTransformer2D::PushBackLocal(const Transform2D& local, bool discard_old_transform)
 {
-	m_Children.push_back(std::make_shared<Transformable2D>(Transformable2D(Transform2D{})));
+	m_Children.push_back(std::make_shared<Transformable2D>());
 	m_Locals.push_back(local);
 	if (discard_old_transform)
 		SyncLocalWithGlobals();
@@ -267,6 +301,12 @@ void MultiTransformer2D::PushBackGlobals(const std::vector<std::shared_ptr<Trans
 {
 	for (const auto& child : children)
 		PushBackGlobal(child, discard_old_transform);
+}
+
+void MultiTransformer2D::PushBackGlobals(std::vector<std::shared_ptr<Transformable2D>>&& children, bool discard_old_transform)
+{
+	for (auto&& child : children)
+		PushBackGlobal(std::move(child), discard_old_transform);
 }
 
 void MultiTransformer2D::PushBackLocals(const std::vector<Transform2D>& locals, bool discard_old_transform)

@@ -4,7 +4,7 @@
 #include "AssetLoader.h"
 #include "render/CanvasLayer.h"
 
-DebugPoint::DebugPoint(const glm::vec2& position, const glm::vec4& outer_color, const float& diameter, const float& inner_radius, const glm::vec4& inner_color, const ZIndex& z)
+DebugPoint::DebugPoint(const glm::vec2& position, const glm::vec4& outer_color, float diameter, float inner_radius, const glm::vec4& inner_color, ZIndex z)
 	: DebugPolygon({{ 0.0f, 0.0f }}, {position}, outer_color, GL_POINTS, z), m_Diameter(diameter), m_InnerRadius(inner_radius), m_InnerColor(inner_color)
 {
 	loadRenderable(_RendererSettings::solid_point_filepath.c_str(), m_Renderable);
@@ -16,8 +16,26 @@ DebugPoint::DebugPoint(const DebugPoint& other)
 }
 
 DebugPoint::DebugPoint(DebugPoint&& other) noexcept
-	: DebugPolygon(other), m_Diameter(other.m_Diameter), m_InnerRadius(other.m_InnerRadius), m_InnerColor(other.m_InnerColor), m_PointStatus(other.m_PointStatus)
+	: DebugPolygon(std::move(other)), m_Diameter(other.m_Diameter), m_InnerRadius(other.m_InnerRadius), m_InnerColor(other.m_InnerColor), m_PointStatus(other.m_PointStatus)
 {
+}
+
+DebugPoint& DebugPoint::operator=(const DebugPoint& other)
+{
+	m_Diameter = other.m_Diameter;
+	m_InnerRadius = other.m_InnerRadius;
+	m_InnerColor = other.m_InnerColor;
+	m_PointStatus = other.m_PointStatus;
+	return *this;
+}
+
+DebugPoint& DebugPoint::operator=(DebugPoint&& other) noexcept
+{
+	m_Diameter = other.m_Diameter;
+	m_InnerRadius = other.m_InnerRadius;
+	m_InnerColor = other.m_InnerColor;
+	m_PointStatus = other.m_PointStatus;
+	return *this;
 }
 
 bool DebugPoint::DrawPrep()

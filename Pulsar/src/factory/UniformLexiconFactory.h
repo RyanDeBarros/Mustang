@@ -16,6 +16,8 @@ class UniformLexiconFactory
 	static std::unordered_set<UniformLexiconHandle> dynamicLexicons;
 
 	UniformLexiconFactory() = delete;
+	UniformLexiconFactory(const UniformLexiconFactory&) = delete;
+	UniformLexiconFactory(UniformLexiconFactory&&) = delete;
 	~UniformLexiconFactory() = delete;
 
 	friend class Renderer;
@@ -24,12 +26,12 @@ class UniformLexiconFactory
 
 public:
 	static UniformLexiconHandle GetHandle(const std::map<std::string, Uniform>& uniforms);
-	static void OnApply(const UniformLexiconHandle& uniformLexicon, const ShaderHandle& shader);
-	static bool Shares(const UniformLexiconHandle& lexicon1, const UniformLexiconHandle& lexicon2);
-	inline static const UniformLexicon* GetConstRef(const UniformLexiconHandle& lexicon) { return Get(lexicon); }
-	static const Uniform* GetValue(const UniformLexiconHandle& lexicon, const std::string& name);
-	static void SetValue(const UniformLexiconHandle& lexicon, const std::string& name, const Uniform& value);
-	static bool DefineNewValue(const UniformLexiconHandle& lexicon, const std::string& name, const Uniform& value);
-	static void MarkStatic(const UniformLexiconHandle& lexicon);
-	static void MarkDynamic(const UniformLexiconHandle& lexicon);
+	static void OnApply(UniformLexiconHandle uniformLexicon, ShaderHandle shader);
+	static bool Shares(UniformLexiconHandle lexicon1, UniformLexiconHandle lexicon2);
+	inline static const UniformLexicon* GetConstRef(UniformLexiconHandle lexicon) { return Get(lexicon); }
+	static const Uniform* GetValue(UniformLexiconHandle lexicon, const std::string& name);
+	static void SetValue(UniformLexiconHandle lexicon, const std::string& name, const Uniform& value);
+	static bool DefineNewValue(UniformLexiconHandle lexicon, const std::string& name, const Uniform& value);
+	static void MarkStatic(UniformLexiconHandle lexicon);
+	static void MarkDynamic(UniformLexiconHandle lexicon);
 };

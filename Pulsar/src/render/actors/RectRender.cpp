@@ -8,7 +8,7 @@
 
 Renderable RectRender::rect_renderable;
 
-RectRender::RectRender(const TextureHandle& texture, const Transform2D& transform, const ShaderHandle& shader, const ZIndex& z, const bool& visible)
+RectRender::RectRender(TextureHandle texture, const Transform2D& transform, ShaderHandle shader, ZIndex z, bool visible)
 	: ActorPrimitive2D(rect_renderable, transform, z, visible)
 {
 	SetShaderHandle(shader);
@@ -16,6 +16,32 @@ RectRender::RectRender(const TextureHandle& texture, const Transform2D& transfor
 	SetPivot(0.5, 0.5);
 	m_UVWidth = static_cast<float>(GetWidth());
 	m_UVHeight = static_cast<float>(GetHeight());
+}
+
+RectRender::RectRender(const RectRender& other)
+	: ActorPrimitive2D(other), m_UVWidth(other.m_UVWidth), m_UVHeight(other.m_UVHeight), m_Pivot(other.m_Pivot)
+{
+}
+
+RectRender::RectRender(RectRender&& other) noexcept
+	: ActorPrimitive2D(std::move(other)), m_UVWidth(other.m_UVWidth), m_UVHeight(other.m_UVHeight), m_Pivot(other.m_Pivot)
+{
+}
+
+RectRender& RectRender::operator=(const RectRender& other)
+{
+	m_UVWidth = other.m_UVWidth;
+	m_UVHeight = other.m_UVHeight;
+	m_Pivot = other.m_Pivot;
+	return *this;
+}
+
+RectRender& RectRender::operator=(RectRender&& other) noexcept
+{
+	m_UVWidth = other.m_UVWidth;
+	m_UVHeight = other.m_UVHeight;
+	m_Pivot = other.m_Pivot;
+	return *this;
 }
 
 void RectRender::DefineRectRenderable()
@@ -29,6 +55,7 @@ void RectRender::DefineRectRenderable()
 
 void RectRender::SetPivot(float pivotX, float pivotY)
 {
+	m_Pivot = { pivotX, pivotY };
 	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
 	int width = GetWidth();
 	int height = GetHeight();

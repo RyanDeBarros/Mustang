@@ -13,6 +13,52 @@ ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystemData<
 }
 
 template<std::unsigned_integral ParticleCount>
+ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystem<ParticleCount>& other)
+	: m_SpawnFunc(other.m_SpawnFunc), m_LifespanFunc(other.m_LifespanFunc), m_CharacteristicGen(other.m_CharacteristicGen), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(other.m_Shape), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), Transformable2D(other)
+{
+}
+
+// TODO throughout project, use std::move and r-value function overloads for std::function parameters, unless they are bound to data.
+
+template<std::unsigned_integral ParticleCount>
+ParticleSubsystem<ParticleCount>::ParticleSubsystem(ParticleSubsystem<ParticleCount>&& other) noexcept
+	: m_SpawnFunc(std::move(other.m_SpawnFunc)), m_LifespanFunc(std::move(other.m_LifespanFunc)), m_CharacteristicGen(std::move(other.m_CharacteristicGen)), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(std::move(other.m_Shape)), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), Transformable2D(std::move(other))
+{
+}
+
+template<std::unsigned_integral ParticleCount>
+ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(const ParticleSubsystem<ParticleCount>& other)
+{
+	m_SpawnFunc = other.m_SpawnFunc;
+	m_LifespanFunc = other.m_LifespanFunc;
+	m_CharacteristicGen = other.m_CharacteristicGen;
+	m_Period = other.m_Period;
+	m_PeriodInv = other.m_PeriodInv;
+	m_Shape = other.m_Shape;
+	m_NumSpawned = other.m_NumSpawned;
+	m_TotalSpawn = other.m_TotalSpawn;
+	m_WaveNum = other.m_WaveNum;
+	m_SubsystemIndex = other.m_SubsystemIndex;
+	return *this;
+}
+
+template<std::unsigned_integral ParticleCount>
+ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(ParticleSubsystem<ParticleCount>&& other) noexcept
+{
+	m_SpawnFunc = std::move(other.m_SpawnFunc);
+	m_LifespanFunc = std::move(other.m_LifespanFunc);
+	m_CharacteristicGen = std::move(other.m_CharacteristicGen);
+	m_Period = other.m_Period;
+	m_PeriodInv = other.m_PeriodInv;
+	m_Shape = std::move(other.m_Shape);
+	m_NumSpawned = other.m_NumSpawned;
+	m_TotalSpawn = other.m_TotalSpawn;
+	m_WaveNum = other.m_WaveNum;
+	m_SubsystemIndex = other.m_SubsystemIndex;
+	return *this;
+}
+
+template<std::unsigned_integral ParticleCount>
 void ParticleSubsystem<ParticleCount>::OnUpdate(ParticleEffect<ParticleCount>& psys)
 {
 	unsigned int wave_num = static_cast<unsigned int>(psys.m_TotalPlayed * m_PeriodInv);

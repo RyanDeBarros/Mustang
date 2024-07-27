@@ -75,43 +75,70 @@ Renderable::Renderable(Renderable&& other) noexcept
 	other.indexBufferData = nullptr;
 }
 
-Renderable::Renderable(const Renderable& other) noexcept
+Renderable::Renderable(const Renderable& other)
 	: model(other.model), textureHandle(other.textureHandle), vertexBufferData(nullptr), vertexCount(other.vertexCount), indexBufferData(nullptr), indexCount(other.indexCount)
 {
-	if (other.vertexBufferData && other.indexBufferData)
+	if (other.vertexBufferData)
 	{
 		auto buffer_size = Render::VertexBufferLayoutCount(other);
 		vertexBufferData = new GLfloat[buffer_size];
-		indexBufferData = new GLuint[indexCount];
 		memcpy_s(vertexBufferData, buffer_size * sizeof(GLfloat), other.vertexBufferData, buffer_size * sizeof(GLfloat));
+	}
+	if (other.indexBufferData)
+	{
+		indexBufferData = new GLuint[indexCount];
 		memcpy_s(indexBufferData, indexCount * sizeof(GLuint), other.indexBufferData, indexCount * sizeof(GLuint));
 	}
 }
 
-void Renderable::operator=(const Renderable& other) noexcept
+Renderable& Renderable::operator=(const Renderable& other)
 {
 	model = other.model;
 	textureHandle = other.textureHandle;
+	
 	if (vertexBufferData)
 	{
 		delete[] vertexBufferData;
 		vertexBufferData = nullptr;
 	}
 	vertexCount = other.vertexCount;
+	if (other.vertexBufferData)
+	{
+		auto buffer_size = Render::VertexBufferLayoutCount(other);
+		vertexBufferData = new GLfloat[buffer_size];
+		memcpy_s(vertexBufferData, buffer_size * sizeof(GLfloat), other.vertexBufferData, buffer_size * sizeof(GLfloat));
+	}
+
 	if (indexBufferData)
 	{
 		delete[] indexBufferData;
 		indexBufferData = nullptr;
 	}
 	indexCount = other.indexCount;
-	if (other.vertexBufferData && other.indexBufferData)
+	if (other.indexBufferData)
 	{
-		auto buffer_size = Render::VertexBufferLayoutCount(other);
-		vertexBufferData = new GLfloat[buffer_size];
 		indexBufferData = new GLuint[indexCount];
-		memcpy_s(vertexBufferData, buffer_size * sizeof(GLfloat), other.vertexBufferData, buffer_size * sizeof(GLfloat));
 		memcpy_s(indexBufferData, indexCount * sizeof(GLuint), other.indexBufferData, indexCount * sizeof(GLuint));
 	}
+	return *this;
+}
+
+Renderable& Renderable::operator=(Renderable&& other) noexcept
+{
+	model = other.model;
+	textureHandle = other.textureHandle;
+	if (vertexBufferData)
+		delete[] vertexBufferData;
+	vertexBufferData = other.vertexBufferData;
+	vertexCount = other.vertexCount;
+	if (indexBufferData)
+		delete[] indexBufferData;
+	indexBufferData = other.indexBufferData;
+	indexCount = other.indexCount;
+
+	other.vertexBufferData = nullptr;
+	other.indexBufferData = nullptr;
+	return *this;
 }
 
 Renderable::~Renderable()

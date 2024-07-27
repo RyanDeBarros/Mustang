@@ -14,6 +14,8 @@ struct Subtile : public Tile
 		m_ImageBuffer = new unsigned char[buffer_size];
 		memcpy_s(m_ImageBuffer, buffer_size, tile->GetImageBuffer(), buffer_size);
 	}
+	Subtile(const Subtile&) = delete;
+	Subtile(Subtile&&) = delete;
 	~Subtile()
 	{
 		if (m_ImageBuffer)

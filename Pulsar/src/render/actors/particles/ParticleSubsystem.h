@@ -39,8 +39,10 @@ class ParticleSubsystem : public Transformable2D
 
 public:
 	ParticleSubsystem(const ParticleSubsystemData<ParticleCount>& wave_data, ParticleSubsystemIndex subsystem_index);
-	ParticleSubsystem(const ParticleSubsystem&) = default;
-	ParticleSubsystem(ParticleSubsystem&&) = default;
+	ParticleSubsystem(const ParticleSubsystem<ParticleCount>&);
+	ParticleSubsystem(ParticleSubsystem<ParticleCount>&&) noexcept;
+	ParticleSubsystem<ParticleCount>& operator=(const ParticleSubsystem<ParticleCount>&);
+	ParticleSubsystem<ParticleCount>& operator=(ParticleSubsystem<ParticleCount>&&) noexcept;
 
 	inline void SetWavePeriod(real wave_period) { m_Period = wave_period; m_PeriodInv = 1.0f / m_Period; }
 

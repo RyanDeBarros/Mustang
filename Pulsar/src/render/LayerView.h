@@ -15,6 +15,8 @@ class LayerView2D : public Transformable2D
 
 public:
 	LayerView2D(float pLeft, float pRight, float pBottom, float pTop);
+	LayerView2D(const LayerView2D&) = delete;
+	LayerView2D(LayerView2D&&) = delete;
 
 	inline virtual void OperateTransform(const std::function<void(Transform2D& position)>& op) override { op(*m_Transform); UpdateVP(); }
 	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform->position); UpdateVP(); }
@@ -23,6 +25,6 @@ public:
 
 private:
 	friend class CanvasLayer;
-	void PassVPUniform(const ShaderHandle&) const;
+	void PassVPUniform(ShaderHandle) const;
 	void UpdateVP();
 };

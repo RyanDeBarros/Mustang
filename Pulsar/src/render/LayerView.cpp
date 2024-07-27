@@ -10,7 +10,7 @@ LayerView2D::LayerView2D(float pLeft, float pRight, float pBottom, float pTop)
 	UpdateVP();
 }
 
-void LayerView2D::PassVPUniform(const ShaderHandle& handle) const
+void LayerView2D::PassVPUniform(ShaderHandle handle) const
 {
 	if (shaderCache.find(handle) == shaderCache.end())
 	{

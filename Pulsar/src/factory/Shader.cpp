@@ -91,9 +91,19 @@ Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
 }
 
 Shader::Shader(Shader&& shader) noexcept
-	: m_RID(shader.m_RID), m_VertexFilepath(shader.m_VertexFilepath), m_FragmentFilepath(shader.m_FragmentFilepath)
+	: m_RID(shader.m_RID), m_VertexFilepath(std::move(shader.m_VertexFilepath)), m_FragmentFilepath(std::move(shader.m_FragmentFilepath))
 {
 	shader.m_RID = 0;
+}
+
+Shader& Shader::operator=(Shader&& shader) noexcept
+{
+	TRY(glDeleteProgram(m_RID));
+	m_RID = shader.m_RID;
+	m_VertexFilepath = std::move(shader.m_VertexFilepath);
+	m_FragmentFilepath = std::move(shader.m_FragmentFilepath);
+	shader.m_RID = 0;
+	return *this;
 }
 
 Shader::~Shader()

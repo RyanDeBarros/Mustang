@@ -38,9 +38,11 @@ protected:
 	virtual void CheckStatus();
 
 public:
-	DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform = {}, const glm::vec4 & color = { 1.0f, 1.0f, 1.0f, 1.0f }, const GLenum & indexing_mode = GL_LINE_STRIP, const ZIndex & z = 0);
+	DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform = {}, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f }, GLenum indexing_mode = GL_LINE_STRIP, ZIndex z = 0);
 	DebugPolygon(const DebugPolygon&);
 	DebugPolygon(DebugPolygon&&) noexcept;
+	DebugPolygon& operator=(const DebugPolygon&);
+	DebugPolygon& operator=(DebugPolygon&&) noexcept;
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
@@ -51,7 +53,7 @@ public:
 	inline void SetPointPosition(const size_t& i, const glm::vec2& point) { if (i >= 0 && i < m_Points.size()) { m_Points[i] = point; m_Status |= 0b100; } }
 
 	inline GLenum GetIndexingMode() const { return m_IndexingMode; }
-	inline void SetIndexingMode(const GLenum& indexing_mode) { m_Status |= 0b1; m_IndexingMode = indexing_mode; }
+	inline void SetIndexingMode(GLenum indexing_mode) { m_Status |= 0b1; m_IndexingMode = indexing_mode; }
 	inline glm::vec4 GetColor() const { return m_Color; }
 	inline void SetColor(const glm::vec4& color) { m_Status |= 0b10; m_Color = color; }
 
@@ -67,3 +69,5 @@ private:
 	friend class ParticleSubsystem;
 	inline std::shared_ptr<Transform2D> TransformRef() { return m_Transform; }
 };
+
+// TODO DebugRect class.

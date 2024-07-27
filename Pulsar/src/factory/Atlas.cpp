@@ -19,16 +19,6 @@ Atlas::Atlas(std::vector<TileHandle>& tiles, int width, int height, int border)
 	PlaceTiles();
 }
 
-Atlas::Atlas(std::vector<TileHandle>&& tiles, int width, int height, int border)
-	: m_Border(border)
-{
-	m_BPP = Atlas::BPP;
-	RectPack(tiles, width, height);
-	m_BufferSize = Atlas::BPP * m_Width * m_Height;
-	m_ImageBuffer = new unsigned char[m_BufferSize](0);
-	PlaceTiles();
-}
-
 Atlas::Atlas(const char* texture_filepath, const std::vector<Placement>& placements, int border)
 	: Tile(texture_filepath)
 {
@@ -38,9 +28,33 @@ Atlas::Atlas(const char* texture_filepath, const std::vector<Placement>& placeme
 	m_Placements = placements;
 }
 
-Atlas::Atlas(Atlas&& atlas) noexcept
-	: Tile(std::move(atlas)), m_Border(atlas.m_Border), m_BufferSize(atlas.m_BufferSize), m_Placements(atlas.m_Placements)
+Atlas::Atlas(const char* texture_filepath, std::vector<Placement>&& placements, int border)
+	: Tile(texture_filepath)
 {
+	ASSERT(m_BPP == Atlas::BPP);
+	m_BufferSize = Atlas::BPP * m_Width * m_Height;
+	m_Border = border;
+	m_Placements = std::move(placements);
+}
+
+Atlas::Atlas(Atlas&& atlas) noexcept
+	: Tile(std::move(atlas)), m_Border(atlas.m_Border), m_BufferSize(atlas.m_BufferSize), m_Placements(std::move(atlas.m_Placements))
+{
+}
+
+Atlas& Atlas::operator=(Atlas&& atlas) noexcept
+{
+	m_Border = atlas.m_Border;
+	m_BufferSize = atlas.m_BufferSize;
+	m_Placements = std::move(atlas.m_Placements);
+	// TODO this and ~Atlas() might interfere without ~Tile().
+	if (m_ImageBuffer)
+	{
+		delete[] m_ImageBuffer;
+		m_ImageBuffer = nullptr;
+	}
+	m_ImageBuffer = atlas.m_ImageBuffer;
+	return *this;
 }
 
 Atlas::Atlas(const Atlas* const atlas)
@@ -79,34 +93,7 @@ static int min_bound(const std::vector<TileHandle>& tiles, const int& border)
 	return bound;
 }
 
-bool Atlas::Equivalent(std::vector<TileHandle>& tiles, int width, int height, int border) const
-{
-	if (m_Border != border)
-		return false;
-	int bound = min_bound(tiles, m_Border);
-	if (width <= 0)
-		width = bound;
-	if (height <= 0)
-		height = bound;
-	if (m_Width != width || m_Height != height)
-		return false;
-
-	std::unordered_map<TileHandle, int> occurences;
-	for (const auto& tile : tiles)
-		occurences[tile]++;
-
-	for (auto iter = m_Placements.begin(); iter != m_Placements.end(); iter++)
-	{
-		auto leftover = occurences[iter->tile]--;
-		if (leftover < 0)
-			return false;
-		else if (leftover == 0)
-			occurences.erase(iter->tile);
-	}
-	return occurences.empty();
-}
-
-bool Atlas::Equivalent(std::vector<TileHandle>&& tiles, int width, int height, int border) const
+bool Atlas::Equivalent(const std::vector<TileHandle>& tiles, int width, int height, int border) const
 {
 	if (m_Border != border)
 		return false;
@@ -234,7 +221,7 @@ struct Subsection
 
 };
 
-void Atlas::RectPack(std::vector<TileHandle>& tiles, const int& width, const int& height)
+void Atlas::RectPack(std::vector<TileHandle>& tiles, int width, int height)
 {
 	int bound = min_bound(tiles, m_Border);
 	m_Width = width > 0 ? width : bound;
@@ -348,7 +335,7 @@ void Atlas::PlaceTiles()
 	}
 }
 
-RectRender Atlas::SampleSubtile(const size_t& index, const TextureSettings& texture_settings, const ShaderHandle& shader, const ZIndex& z, const bool& visible) const
+RectRender Atlas::SampleSubtile(size_t index, const TextureSettings& texture_settings, ShaderHandle shader, ZIndex z, bool visible) const
 {
 	if (index >= m_Placements.size() || m_Placements[index].x < 0)
 		return { 0, {}, 0, 0, false };
@@ -359,6 +346,6 @@ RectRender Atlas::SampleSubtile(const size_t& index, const TextureSettings& text
 	else
 		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.w - m_Border, rect.h - m_Border }, m_Width, m_Height);
 	actor.SetPivot(0.5, 0.5);
-	actor.SetScale((rect.w - m_Border) / (float)m_Width, (rect.h - m_Border) / (float)m_Height);
+	actor.SetScale((rect.w - m_Border) / static_cast<float>(m_Width), (rect.h - m_Border) / static_cast<float>(m_Height));
 	return actor;
 }

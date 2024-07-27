@@ -28,7 +28,7 @@ class TileMap : public ActorRenderBase2D
 	std::shared_ptr<Transform2D> m_Transform;
 
 public:
-	TileMap(const TileHandle& atlas_handle, const TextureSettings& texture_settings = Texture::nearest_settings, const ShaderHandle& shader = ShaderFactory::standard_shader, const ZIndex& z = 0, const bool& visible = true);
+	TileMap(TileHandle atlas_handle, const TextureSettings& texture_settings = Texture::nearest_settings, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, bool visible = true);
 	TileMap(const TileMap&) = delete;
 	TileMap(TileMap&&) = delete;
 
@@ -37,7 +37,9 @@ public:
 
 	bool SetOrdering(const Permutation& permutation);
 	void SetTransform(const Transform2D& tr);
-	void Insert(const size_t& tessel, float posX, float posY);
+	void Insert(size_t tessel, float posX, float posY);
 
-	ActorTesselation2D* const TesselationRef(const size_t& tessel) const;
+	// TODO use typedef instead of size_t
+
+	ActorTesselation2D* const TesselationRef(size_t tessel) const;
 };

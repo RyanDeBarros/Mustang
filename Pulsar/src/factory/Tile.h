@@ -23,8 +23,9 @@ protected:
 
 public:
 	Tile(const char* filepath);
-	Tile(Tile&& tile) noexcept;
 	Tile(const Tile&) = delete;
+	Tile(Tile&& tile) noexcept;
+	Tile& operator=(Tile&& tile) noexcept;
 	virtual ~Tile();
 
 	const std::string& GetFilepath() const { return m_Filepath; }

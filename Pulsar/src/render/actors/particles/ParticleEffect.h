@@ -10,6 +10,7 @@ template<std::unsigned_integral ParticleCount = unsigned short>
 class ParticleEffect : public Transformable2D
 {
 	friend class ParticleSubsystem<ParticleCount>;
+	//std::vector<std::vector<std::shared_ptr<Particle>>> m_Particles;
 	std::vector<std::vector<Particle>> m_Particles;
 	real m_TotalPlayed = 0.0f;
 	real m_DeltaTime = 0.0f;
@@ -18,6 +19,8 @@ class ParticleEffect : public Transformable2D
 
 public:
 	ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform = {}, bool enabled = true);
+	ParticleEffect(const ParticleEffect<ParticleCount>&) = delete;
+	ParticleEffect(ParticleEffect<ParticleCount>&&) = delete;
 
 	/// Whether the particle system is updated every update frame. This does not affect whether the system should be drawn.
 	bool enabled;
@@ -42,6 +45,7 @@ protected:
 	virtual void DespawnInvalidParticles();
 	virtual void InvalidateParticle(const Particle& part, ParticleSubsystemIndex i) {};
 	virtual void AddParticle(ParticleSubsystemIndex i, const Particle& part);
+	virtual void AddParticle(ParticleSubsystemIndex i, Particle&& part);
 
 private:
 	void OnSubsystemsUpdate();

@@ -4,15 +4,17 @@
 
 class DebugCircle : public DebugPolygon
 {
-	float m_Radius;
+	float m_Diameter;
 
 public:
-	DebugCircle(const float& radius = 1.0f, const Transform2D& transform = {}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, const ZIndex& z = 0);
+	DebugCircle(float radius = 1.0f, const Transform2D& transform = {}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, ZIndex z = 0);
 	DebugCircle(const DebugCircle&);
 	DebugCircle(DebugCircle&&) noexcept;
+	DebugCircle& operator=(const DebugCircle&);
+	DebugCircle& operator=(DebugCircle&&) noexcept;
 
-	inline float GetRadius() const { return m_Radius; }
-	void SetRadius(const float& radius);
+	inline float GetDiameter() const { return m_Diameter; }
+	void SetRadius(float radius);
 	
 private:
 	using DebugPolygon::GetIndexingMode;

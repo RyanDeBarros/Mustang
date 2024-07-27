@@ -3,6 +3,8 @@
 #include "Transform.h"
 #include "Transformable.h"
 
+// TODO make Transformer and MultiTransformer a Transformable, so they can be chained. The parent will be the transformer.
+
 class Transformer2D
 {
 	std::shared_ptr<Transform2D> m_Parent;
@@ -11,10 +13,13 @@ class Transformer2D
 
 public:
 	Transformer2D(const std::shared_ptr<Transform2D>& parent, const std::shared_ptr<Transformable2D>& child, bool discard_old_transform = true);
+	Transformer2D(std::shared_ptr<Transform2D>&& parent, std::shared_ptr<Transformable2D>&& child, bool discard_old_transform = true);
 	Transformer2D(const std::shared_ptr<Transform2D>& parent, const Transform2D& local, bool discard_old_transform = true);
+	Transformer2D(std::shared_ptr<Transform2D>&& parent, const Transform2D& local, bool discard_old_transform = true);
 	Transformer2D(const Transformer2D&);
 	Transformer2D(Transformer2D&&) noexcept;
 	Transformer2D& operator=(const Transformer2D&);
+	Transformer2D& operator=(Transformer2D&&) noexcept;
 
 	void SetLocalTransform(const Transform2D& tr);
 	inline Transform2D GetLocalTransform() const { return m_Local; }

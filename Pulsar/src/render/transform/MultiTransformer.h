@@ -11,11 +11,15 @@ class MultiTransformer2D
 
 public:
 	MultiTransformer2D(const std::shared_ptr<Transform2D>& parent);
+	MultiTransformer2D(std::shared_ptr<Transform2D>&& parent);
 	MultiTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transforms = true);
+	MultiTransformer2D(std::shared_ptr<Transform2D>&& parent, std::vector<std::shared_ptr<Transformable2D>>&& children, bool discard_old_transforms = true);
 	MultiTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms = true);
+	MultiTransformer2D(std::shared_ptr<Transform2D>&& parent, std::vector<Transform2D>&& locals, bool discard_old_transforms = true);
 	MultiTransformer2D(const MultiTransformer2D&);
 	MultiTransformer2D(MultiTransformer2D&&) noexcept;
 	MultiTransformer2D& operator=(const MultiTransformer2D&);
+	MultiTransformer2D& operator=(MultiTransformer2D&&) noexcept;
 
 	void SetLocalTransforms(const Transform2D& tr) { for (size_t i = 0; i < m_Locals.size(); i++) SetLocalTransform(i, tr); }
 	inline std::vector<Transform2D> GetLocalTransforms() const { return m_Locals; }
@@ -88,8 +92,10 @@ public:
 	inline glm::vec2 GetGlobalScale(size_t i) const { return m_Children[i]->GetTransform().scale; }
 
 	void PushBackGlobal(const std::shared_ptr<Transformable2D>& child, bool discard_old_transform = true);
+	void PushBackGlobal(std::shared_ptr<Transformable2D>&& child, bool discard_old_transform = true);
 	void PushBackLocal(const Transform2D& local, bool discard_old_transform = true);
 	void PushBackGlobals(const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transform = true);
+	void PushBackGlobals(std::vector<std::shared_ptr<Transformable2D>>&& children, bool discard_old_transform = true);
 	void PushBackLocals(const std::vector<Transform2D>& locals, bool discard_old_transform = true);
 	void Remove(size_t i);
 	void Remove(const std::vector<std::shared_ptr<Transformable2D>>::iterator& where);

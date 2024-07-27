@@ -21,40 +21,27 @@ namespace Logger {
 		std::cout << message << std::endl;
 	}
 
-	void LogInfo(const unsigned char* message)
-	{
-		std::cout << message << std::endl;
-	}
-
 	void LogInfo(const std::string& message)
 	{
 		std::cout << message << std::endl;
 	}
 	
-	void LogInfo(const unsigned int message)
+	void LogInfo(unsigned int message)
 	{
 		std::cout << message << std::endl;
 	}
 
-	void LogInfo(const int message)
+	void LogInfo(int message)
 	{
 		std::cout << message << std::endl;
 	}
 
-	void LogInfo(const double message)
+	void LogInfo(double message)
 	{
 		std::cout << message << std::endl;
 	}
 
 	void LogWarning(const char* message, const char* source, const char* file, const char* line)
-	{
-		if (source[0] != '\0')
-			std::cout << "[Warning] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
-		else
-			std::cout << "[Warning] " << message << std::endl;
-	}
-
-	void LogWarning(const unsigned char* message, const char* source, const char* file, const char* line)
 	{
 		if (source[0] != '\0')
 			std::cout << "[Warning] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
@@ -70,7 +57,7 @@ namespace Logger {
 			std::cout << "[Warning] " << message << std::endl;
 	}
 
-	void LogWarning(const unsigned int message, const char* source, const char* file, const char* line)
+	void LogWarning(unsigned int message, const char* source, const char* file, const char* line)
 	{
 		if (source[0] != '\0')
 			std::cout << "[Warning] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
@@ -79,14 +66,6 @@ namespace Logger {
 	}
 
 	void LogError(const char* message, const char* source, const char* file, const char* line)
-	{
-		if (source[0] != '\0')
-			std::cout << "[Error] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
-		else
-			std::cout << "[Error] " << message << std::endl;
-	}
-
-	void LogError(const unsigned char* message, const char* source, const char* file, const char* line)
 	{
 		if (source[0] != '\0')
 			std::cout << "[Error] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
@@ -102,7 +81,7 @@ namespace Logger {
 			std::cout << "[Error] " << message << std::endl;
 	}
 
-	void LogError(const unsigned int message, const char* source, const char* file, const char* line)
+	void LogError(unsigned int message, const char* source, const char* file, const char* line)
 	{
 		if (source[0] != '\0')
 			std::cout << "[Error] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
@@ -111,15 +90,6 @@ namespace Logger {
 	}
 
 	void LogErrorFatal(const char* message, const char* source, const char* file, const char* line)
-	{
-		if (source[0] != '\0')
-			std::cout << "[Fatal] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
-		else
-			std::cout << "[Fatal] " << message << std::endl;
-		ASSERT(false);
-	}
-
-	void LogErrorFatal(const unsigned char* message, const char* source, const char* file, const char* line)
 	{
 		if (source[0] != '\0')
 			std::cout << "[Fatal] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
@@ -137,7 +107,7 @@ namespace Logger {
 		ASSERT(false);
 	}
 
-	void LogErrorFatal(const unsigned int message, const char* source, const char* file, const char* line)
+	void LogErrorFatal(unsigned int message, const char* source, const char* file, const char* line)
 	{
 		if (source[0] != '\0')
 			std::cout << "[Fatal] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;

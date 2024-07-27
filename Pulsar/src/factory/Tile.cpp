@@ -17,9 +17,20 @@ Tile::Tile(const char* filepath)
 }
 
 Tile::Tile(Tile&& tile) noexcept
-	: m_Filepath(tile.m_Filepath), m_ImageBuffer(tile.m_ImageBuffer), m_Width(tile.m_Width), m_Height(tile.m_Height), m_BPP(tile.m_BPP)
+	: m_Filepath(std::move(tile.m_Filepath)), m_ImageBuffer(tile.m_ImageBuffer), m_Width(tile.m_Width), m_Height(tile.m_Height), m_BPP(tile.m_BPP)
 {
 	tile.m_ImageBuffer = nullptr;
+}
+
+Tile& Tile::operator=(Tile&& tile) noexcept
+{
+	m_Filepath = std::move(tile.m_Filepath);
+	m_ImageBuffer = tile.m_ImageBuffer;
+	m_Width = tile.m_Width;
+	m_Height = tile.m_Height;
+	m_BPP = tile.m_BPP;
+	tile.m_ImageBuffer = nullptr;
+	return *this;
 }
 
 Tile::~Tile()

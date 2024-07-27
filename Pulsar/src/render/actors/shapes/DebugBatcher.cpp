@@ -4,16 +4,28 @@
 
 #include "render/CanvasLayer.h"
 
-// TODO in all ActorRenderBase2D subclasses, use SetZIndex and GetZIndex in copy/move constructor/assignments. Similar for Transformable2D.
 DebugBatcher::DebugBatcher(const DebugBatcher& other)
-	: ActorRenderBase2D(other.GetZIndex()), m_Slots(other.m_Slots), m_OrderedTraversal(other.m_OrderedTraversal)
+	: ActorRenderBase2D(other), m_Slots(other.m_Slots), m_OrderedTraversal(other.m_OrderedTraversal)
 {
 }
 
-// TODO USE STD::MOVE FOR ALL MOVE CONSTRUCTOR/ASSIGNMENTS
 DebugBatcher::DebugBatcher(DebugBatcher&& other) noexcept
-	: ActorRenderBase2D(other.GetZIndex()), m_Slots(std::move(other.m_Slots)), m_OrderedTraversal(std::move(other.m_OrderedTraversal))
+	: ActorRenderBase2D(std::move(other)), m_Slots(std::move(other.m_Slots)), m_OrderedTraversal(std::move(other.m_OrderedTraversal))
 {
+}
+
+DebugBatcher& DebugBatcher::operator=(const DebugBatcher& other)
+{
+	m_Slots = other.m_Slots;
+	m_OrderedTraversal = other.m_OrderedTraversal;
+	return *this;
+}
+
+DebugBatcher& DebugBatcher::operator=(DebugBatcher&& other) noexcept
+{
+	m_Slots = std::move(other.m_Slots);
+	m_OrderedTraversal = std::move(other.m_OrderedTraversal);
+	return *this;
 }
 
 void DebugBatcher::RequestDraw(CanvasLayer* canvas_layer)
@@ -22,7 +34,7 @@ void DebugBatcher::RequestDraw(CanvasLayer* canvas_layer)
 		multi_polygon->RequestDraw(canvas_layer);
 }
 
-bool DebugBatcher::ChangeZIndex(const DebugModel& model, const ZIndex& z)
+bool DebugBatcher::ChangeZIndex(const DebugModel& model, ZIndex z)
 {
 	auto multi_polygon = m_Slots.find(model);
 	if (multi_polygon == m_Slots.end())
@@ -32,7 +44,7 @@ bool DebugBatcher::ChangeZIndex(const DebugModel& model, const ZIndex& z)
 	return true;
 }
 
-bool DebugBatcher::ChangeZIndex(const DebugMultiPolygon::iterator& where, const ZIndex& z)
+bool DebugBatcher::ChangeZIndex(const DebugMultiPolygon::iterator& where, ZIndex z)
 {
 	const auto& multi_polygon = m_Slots.find((*where)->GetDebugModel());
 	if (multi_polygon != m_Slots.end())
@@ -58,6 +70,21 @@ void DebugBatcher::PushBack(const std::shared_ptr<DebugPolygon>& poly)
 	}
 }
 
+void DebugBatcher::PushBack(std::shared_ptr<DebugPolygon>&& poly)
+{
+	DebugModel model = poly->GetDebugModel();
+	const auto& multi_polygon = m_Slots.find(model);
+	if (multi_polygon != m_Slots.end())
+		multi_polygon->second.PushBack(std::move(poly));
+	else
+	{
+		DebugMultiPolygon multi(model);
+		multi.PushBack(std::move(poly));
+		m_Slots.emplace(model, std::move(multi));
+		Sort();
+	}
+}
+
 void DebugBatcher::PushBackAll(const std::vector<std::shared_ptr<DebugPolygon>>& polys)
 {
 	std::unordered_set<std::pair<GLenum, BatchModel>> pushed;
@@ -73,6 +100,29 @@ void DebugBatcher::PushBackAll(const std::vector<std::shared_ptr<DebugPolygon>>&
 		{
 			DebugMultiPolygon multi(model);
 			multi.BufferPush(poly);
+			m_Slots.emplace(model, std::move(multi));
+		}
+	}
+	for (auto iter = pushed.begin(); iter != pushed.end(); iter++)
+		m_Slots[*iter].FlushPush();
+	Sort();
+}
+
+void DebugBatcher::PushBackAll(std::vector<std::shared_ptr<DebugPolygon>>&& polys)
+{
+	std::unordered_set<std::pair<GLenum, BatchModel>> pushed;
+	DebugModel model;
+	for (auto&& poly : polys)
+	{
+		model = poly->GetDebugModel();
+		pushed.insert(model);
+		const auto& multi_polygon = m_Slots.find(model);
+		if (multi_polygon != m_Slots.end())
+			multi_polygon->second.BufferPush(std::move(poly));
+		else
+		{
+			DebugMultiPolygon multi(model);
+			multi.BufferPush(std::move(poly));
 			m_Slots.emplace(model, std::move(multi));
 		}
 	}

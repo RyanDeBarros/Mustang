@@ -24,8 +24,7 @@ struct CanvasLayerData
 	VertexSize maxVertexPoolSize, maxIndexPoolSize;
 	CanvasLayerData(CanvasIndex ci, VertexSize max_vertex_pool_size = _RendererSettings::standard_vertex_pool_size, VertexSize max_index_pool_size = _RendererSettings::standard_index_pool_size)
 		: ci(ci), enableGLBlend(true), sourceBlend(GL_SRC_ALPHA), destBlend(GL_ONE_MINUS_SRC_ALPHA),
-			pLeft(0), pRight(_RendererSettings::initial_window_width),
-			pBottom(0), pTop(_RendererSettings::initial_window_height),
+		pLeft(0), pRight(_RendererSettings::initial_window_width), pBottom(0), pTop(_RendererSettings::initial_window_height),
 		maxVertexPoolSize(max_vertex_pool_size), maxIndexPoolSize(max_index_pool_size)
 	{}
 };
@@ -35,7 +34,7 @@ class CanvasLayer
 	friend class Renderer;
 	CanvasLayerData m_Data;
 	LayerView2D m_LayerView;
-	std::map<ZIndex, std::list<ActorRenderBase2D*>*> m_Batcher;
+	std::map<ZIndex, std::list<ActorRenderBase2D*>> m_Batcher;
 	GLfloat* m_VertexPool;
 	GLfloat* vertexPos;
 	GLuint* m_IndexPool;
@@ -48,11 +47,13 @@ class CanvasLayer
 	std::unordered_map<BatchModel, VAO> m_VAOs;
 
 public:
-	CanvasLayer(CanvasLayerData data);
+	CanvasLayer(const CanvasLayerData& data);
+	CanvasLayer(const CanvasLayer&) = delete;
+	CanvasLayer(CanvasLayer&&) = delete;
 	~CanvasLayer();
 
 	void OnAttach(ActorRenderBase2D* const actor);
-	bool OnSetZIndex(ActorRenderBase2D* const actor, const ZIndex new_val);
+	bool OnSetZIndex(ActorRenderBase2D* const actor, ZIndex new_val);
 	bool OnDetach(ActorRenderBase2D* const actor);
 	void OnDraw();
 

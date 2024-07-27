@@ -9,10 +9,29 @@ Transformer2D::Transformer2D(const std::shared_ptr<Transform2D>& parent, const s
 		SyncLocalWithGlobal();
 }
 
+Transformer2D::Transformer2D(std::shared_ptr<Transform2D>&& parent, std::shared_ptr<Transformable2D>&& child, bool discard_old_transform)
+	: m_Parent(std::move(parent)), m_Child(std::move(child))
+{
+	if (discard_old_transform)
+		SyncGlobalWithLocal();
+	else
+		SyncLocalWithGlobal();
+}
+
 Transformer2D::Transformer2D(const std::shared_ptr<Transform2D>& parent, const Transform2D& local, bool discard_old_transform)
 	: m_Parent(parent), m_Local(local)
 {
-	m_Child = std::make_shared<Transformable2D>(Transformable2D(Transform2D{}));
+	m_Child = std::make_shared<Transformable2D>();
+	if (discard_old_transform)
+		SyncLocalWithGlobal();
+	else
+		SyncGlobalWithLocal();
+}
+
+Transformer2D::Transformer2D(std::shared_ptr<Transform2D>&& parent, const Transform2D& local, bool discard_old_transform)
+	: m_Parent(std::move(parent)), m_Local(local)
+{
+	m_Child = std::make_shared<Transformable2D>();
 	if (discard_old_transform)
 		SyncLocalWithGlobal();
 	else
@@ -25,7 +44,7 @@ Transformer2D::Transformer2D(const Transformer2D& other)
 }
 
 Transformer2D::Transformer2D(Transformer2D&& other) noexcept
-	: m_Parent(other.m_Parent), m_Child(other.m_Child), m_Local(other.m_Local)
+	: m_Parent(std::move(other.m_Parent)), m_Child(std::move(other.m_Child)), m_Local(std::move(other.m_Local))
 {
 }
 
@@ -34,6 +53,14 @@ Transformer2D& Transformer2D::operator=(const Transformer2D& other)
 	m_Parent = other.m_Parent;
 	m_Child = other.m_Child;
 	m_Local = other.m_Local;
+	return *this;
+}
+
+Transformer2D& Transformer2D::operator=(Transformer2D&& other) noexcept
+{
+	m_Parent = std::move(other.m_Parent);
+	m_Child = std::move(other.m_Child);
+	m_Local = std::move(other.m_Local);
 	return *this;
 }
 

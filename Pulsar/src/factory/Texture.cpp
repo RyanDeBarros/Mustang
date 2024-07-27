@@ -73,7 +73,7 @@ Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_
 		delete tile_ref;
 }
 
-Texture::Texture(const TileHandle& tile, TextureSettings settings)
+Texture::Texture(TileHandle tile, TextureSettings settings)
 	: m_RID(0), m_Tile(tile), m_Settings(settings)//, m_Atlas(nullptr)
 {
 	const Tile* const tile_ref = TileFactory::GetConstTileRef(m_Tile);
@@ -128,6 +128,16 @@ Texture::Texture(Texture&& texture) noexcept
 	: m_RID(texture.m_RID), m_Tile(texture.m_Tile), m_Settings(texture.m_Settings)
 {
 	texture.m_RID = 0;
+}
+
+Texture& Texture::operator=(Texture&& texture) noexcept
+{
+	TRY(glDeleteTextures(1, &m_RID));
+	m_RID = texture.m_RID;
+	m_Tile = texture.m_Tile;
+	m_Settings = texture.m_Settings;
+	texture.m_RID = 0;
+	return *this;
 }
 
 Texture::~Texture()

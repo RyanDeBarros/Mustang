@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
-TileMap::TileMap(const TileHandle& atlas_handle, const TextureSettings& texture_settings, const ShaderHandle& shader, const ZIndex& z, const bool& visible)
-	: ActorRenderBase2D(z), m_Transform(std::make_shared<Transform2D>(Transform2D{}))
+TileMap::TileMap(TileHandle atlas_handle, const TextureSettings& texture_settings, ShaderHandle shader, ZIndex z, bool visible)
+	: ActorRenderBase2D(z), m_Transform(std::make_shared<Transform2D>())
 {
 	Tile* t = TileFactory::GetTileRef(atlas_handle);
 	m_Atlas = dynamic_cast<Atlas*>(t);
@@ -47,12 +47,12 @@ void TileMap::SetTransform(const Transform2D& tr)
 		m_Map[i].transformer.SyncGlobalWithParent();
 }
 
-void TileMap::Insert(const size_t& tessel, float posX, float posY)
+void TileMap::Insert(size_t tessel, float posX, float posY)
 {
 	m_Map[tessel].tessel->PushBackLocal({ {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} });
 }
 
-ActorTesselation2D* const TileMap::TesselationRef(const size_t& i) const
+ActorTesselation2D* const TileMap::TesselationRef(size_t i) const
 {
 	if (i >= 0 && i < m_Ordering.size())
 		return m_Map[i].tessel.get();

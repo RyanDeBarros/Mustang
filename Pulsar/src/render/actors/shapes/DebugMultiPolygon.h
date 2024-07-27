@@ -33,18 +33,23 @@ public:
 	DebugMultiPolygon(const std::pair<GLenum, BatchModel>& pair, const ZIndex& z = 0);
 	DebugMultiPolygon(const DebugMultiPolygon&);
 	DebugMultiPolygon(DebugMultiPolygon&&) noexcept;
+	DebugMultiPolygon& operator=(const DebugMultiPolygon&);
+	DebugMultiPolygon& operator=(DebugMultiPolygon&&) noexcept;
 	~DebugMultiPolygon();
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
-	void ChangeZIndex(const iterator& where, const ZIndex& z);
-	void ChangeZIndex(const size_t& i, const ZIndex& z);
+	void ChangeZIndex(const iterator& where, ZIndex z);
+	void ChangeZIndex(size_t i, ZIndex z);
 	void PushBack(const std::shared_ptr<DebugPolygon>& poly);
+	void PushBack(std::shared_ptr<DebugPolygon>&& poly);
 	void PushBackAll(const std::vector<std::shared_ptr<DebugPolygon>>& polys);
+	void PushBackAll(std::vector<std::shared_ptr<DebugPolygon>>&& polys);
 	void BufferPush(const std::shared_ptr<DebugPolygon>& poly);
+	void BufferPush(std::shared_ptr<DebugPolygon>&& poly);
 	void FlushPush();
 	void Erase(const iterator& where);
-	void Erase(const size_t& i);
+	void Erase(size_t i);
 	void EraseAll(const std::vector<size_t>& is);
 	void EraseAll(const std::unordered_set<std::shared_ptr<DebugPolygon>>& polys);
 	iterator Find(const std::shared_ptr<DebugPolygon>& poly);

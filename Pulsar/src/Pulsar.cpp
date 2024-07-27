@@ -82,8 +82,8 @@ int Pulsar::StartUp()
 		return -1;
 	}
 	Logger::LogInfo("Welcome to Pulsar Renderer! GL_VERSION:");
-	TRY(Logger::LogInfo(glGetString(GL_VERSION)));
-	std::srand(time(0));
+	TRY(Logger::LogInfo(reinterpret_cast<const char*>(glGetString(GL_VERSION))));
+	std::srand(static_cast<unsigned int>(time(0)));
 	Renderer::Init();
 	Renderer::FocusWindow(window);
 	Run(window);
@@ -164,9 +164,9 @@ void Pulsar::Run(GLFWwindow* window)
 	float w = actor3->GetWidth() * actor3->GetScale().x;
 	float h = actor3->GetHeight() * actor3->GetScale().y;
 	tessel->PushBackGlobals({
-		std::make_shared<Transformable2D>(Transformable2D({ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} })),
-		std::make_shared<Transformable2D>(Transformable2D({ {w, 0.0f}, 0.0f, {1.0f, 1.0f} })),
-		std::make_shared<Transformable2D>(Transformable2D({ {2.0f * w, 0.0f}, 0.5f, {1.0f, 1.0f} }))
+		std::make_shared<Transformable2D>(Transform2D{ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} }),
+		std::make_shared<Transformable2D>(Transform2D{ {w, 0.0f}, 0.0f, {1.0f, 1.0f} }),
+		std::make_shared<Transformable2D>(Transform2D{ {2.0f * w, 0.0f}, 0.5f, {1.0f, 1.0f} })
 	});
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(tessel.get(), 10);
 
@@ -181,7 +181,7 @@ void Pulsar::Run(GLFWwindow* window)
 			});
 	}
 
-	std::shared_ptr<ActorTesselation2D> tesselVertical(std::make_shared<ActorTesselation2D>(ActorTesselation2D(tessel)));
+	std::shared_ptr<ActorTesselation2D> tesselVertical(std::make_shared<ActorTesselation2D>(tessel));
 	Renderer::GetCanvasLayer(0)->OnDetach(tessel.get());
 	Renderer::GetCanvasLayer(0)->OnAttach(tesselVertical.get());
 	tesselVertical->PushBackGlobals({
@@ -190,7 +190,7 @@ void Pulsar::Run(GLFWwindow* window)
 		std::shared_ptr<Transformable2D>(new Transformable2D({ {0.0f, -2 * h}, 0.5f, {1.0f, 1.0f}}))
 	});
 	
-	std::shared_ptr<ActorTesselation2D> tesselDiagonal(std::make_shared<ActorTesselation2D>(ActorTesselation2D(tesselVertical)));
+	std::shared_ptr<ActorTesselation2D> tesselDiagonal(std::make_shared<ActorTesselation2D>(tesselVertical));
 	Renderer::GetCanvasLayer(0)->OnDetach(tesselVertical.get());
 	Renderer::GetCanvasLayer(0)->OnAttach(tesselDiagonal.get());
 	tesselDiagonal->PushBackGlobals({
@@ -335,7 +335,7 @@ void Pulsar::Run(GLFWwindow* window)
 	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 	//Renderer::GetCanvasLayer(11)->OnAttach(tesselDiagonal.get());
 	tesselDiagonal->SetPosition(-400, 300);
-	tessel->SetScale(0.6, 0.6);
+	tessel->SetScale(0.6f, 0.6f);
 	actor3->OperateScale([](glm::vec2& scale) { scale *= 2.0f; });
 
 	for (;;)

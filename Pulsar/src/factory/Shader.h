@@ -10,12 +10,13 @@
 class Shader
 {
 	RID m_RID;
-	const std::string m_VertexFilepath, m_FragmentFilepath;
+	std::string m_VertexFilepath, m_FragmentFilepath;
 	mutable std::unordered_map<const char*, GLint> m_UniformLocationCache;
 public:
 	Shader(const char* vertex_filepath, const char* fragment_filepath);
-	Shader(Shader&& shader) noexcept;
 	Shader(const Shader& shader) = delete;
+	Shader(Shader&& shader) noexcept;
+	Shader& operator=(Shader&& shader) noexcept;
 	~Shader();
 
 	void Bind() const;

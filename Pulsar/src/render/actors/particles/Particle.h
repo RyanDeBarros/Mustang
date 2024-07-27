@@ -9,7 +9,6 @@
 #include "../shapes/DebugPolygon.h"
 #include "../../transform/Transformer.h"
 
-// TODO throughout project, pass by value for built-in types instead of const&.
 struct Particle;
 namespace Particles {
 
@@ -48,10 +47,9 @@ public:
 	Particle(const std::shared_ptr<DebugPolygon>& shape, const Transformer2D& transformer, const float& lifespan, const Particles::CHRBind& characteristic);
 	Particle(const Particle&);
 	Particle(Particle&&) noexcept;
-	~Particle();
-	// TODO for all classes with assignment operator, implement both copy and move overloads.
 	Particle& operator=(const Particle&);
 	Particle& operator=(Particle&&) noexcept;
+	~Particle();
 
 	inline float& operator[](Particles::DataIndex i) { return m_Data[i]; }
 	

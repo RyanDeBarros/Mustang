@@ -40,7 +40,7 @@ void TextureFactory::Terminate()
 	factory.clear();
 }
 
-TextureHandle TextureFactory::CreateHandle(const char* filepath, const TextureSettings& settings, const bool& temporary_buffer)
+TextureHandle TextureFactory::CreateHandle(const char* filepath, const TextureSettings& settings, bool temporary_buffer)
 {
 	Texture texture(filepath, settings, temporary_buffer);
 	if (texture.IsValid())
@@ -52,7 +52,7 @@ TextureHandle TextureFactory::CreateHandle(const char* filepath, const TextureSe
 	else return 0;
 }
 
-TextureHandle TextureFactory::CreateHandle(const TileHandle& tile, const TextureSettings& settings)
+TextureHandle TextureFactory::CreateHandle(TileHandle tile, const TextureSettings& settings)
 {
 	Texture texture(tile, settings);
 	if (texture.IsValid())
@@ -64,7 +64,7 @@ TextureHandle TextureFactory::CreateHandle(const TileHandle& tile, const Texture
 	else return 0;
 }
 
-TextureHandle TextureFactory::GetHandle(const char* filepath, const TextureSettings& settings, const bool& new_texture, const bool& temporary_buffer)
+TextureHandle TextureFactory::GetHandle(const char* filepath, const TextureSettings& settings, bool new_texture, bool temporary_buffer)
 {
 	if (new_texture)
 		return CreateHandle(filepath, settings, temporary_buffer);
@@ -76,7 +76,7 @@ TextureHandle TextureFactory::GetHandle(const char* filepath, const TextureSetti
 	return CreateHandle(filepath, settings, temporary_buffer);
 }
 
-TextureHandle TextureFactory::GetHandle(const TileHandle& tile, const TextureSettings& settings, const bool& new_texture)
+TextureHandle TextureFactory::GetHandle(TileHandle tile, const TextureSettings& settings, bool new_texture)
 {
 	if (new_texture)
 		return CreateHandle(tile, settings);
@@ -88,7 +88,7 @@ TextureHandle TextureFactory::GetHandle(const TileHandle& tile, const TextureSet
 	return CreateHandle(tile, settings);
 }
 
-void TextureFactory::Bind(const TextureHandle& handle, const TextureSlot& slot)
+void TextureFactory::Bind(TextureHandle handle, TextureSlot slot)
 {
 	Texture* texture = Get(handle);
 	if (texture)
@@ -99,13 +99,13 @@ void TextureFactory::Bind(const TextureHandle& handle, const TextureSlot& slot)
 #endif
 }
 
-void TextureFactory::Unbind(const TextureSlot& slot)
+void TextureFactory::Unbind(TextureSlot slot)
 {
 	TRY(glActiveTexture(GL_TEXTURE0 + slot));
 	TRY(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
-void TextureFactory::SetSettings(const TextureHandle& handle, const TextureSettings& settings)
+void TextureFactory::SetSettings(TextureHandle handle, const TextureSettings& settings)
 {
 	Texture* texture = Get(handle);
 	if (texture)

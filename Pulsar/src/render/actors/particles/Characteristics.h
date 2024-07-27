@@ -2,6 +2,8 @@
 
 #include "Particle.h"
 
+// TODO versions of all of these for r-value functions, since often-times lambdas are used directly.
+
 namespace Particles {
 
 	extern CharacteristicGen CombineSequential(const std::vector<CharacteristicGen>& characteristics);

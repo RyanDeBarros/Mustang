@@ -14,6 +14,8 @@ class ShaderFactory
 	static Shader* Get(ShaderHandle);
 
 	ShaderFactory() = delete;
+	ShaderFactory(const ShaderFactory&) = delete;
+	ShaderFactory(ShaderFactory&&) = delete;
 	~ShaderFactory() = delete;
 
 	friend class Renderer;

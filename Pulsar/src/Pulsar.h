@@ -6,7 +6,6 @@
 
 #include "Typedefs.h"
 
-
 struct GLFWwindow;
 
 namespace Pulsar

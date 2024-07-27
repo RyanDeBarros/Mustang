@@ -23,17 +23,11 @@ Particle::Particle(const Particle& other)
 }
 
 Particle::Particle(Particle&& other) noexcept
-	: m_Shape(other.m_Shape), m_Transformer(other.m_Transformer), m_Characteristic(other.m_Characteristic), m_LifespanInv(other.m_LifespanInv),
+	: m_Shape(std::move(other.m_Shape)), m_Transformer(std::move(other.m_Transformer)), m_Characteristic(std::move(other.m_Characteristic)), m_LifespanInv(other.m_LifespanInv),
 	m_Data(other.m_Data), m_DataSize(other.m_DataSize), m_Invalid(other.m_Invalid), m_T(other.m_T), m_DT(other.m_DT)
 {
 	other.m_Data = nullptr;
 	m_Characteristic(*this);
-}
-
-Particle::~Particle()
-{
-	if (m_Data)
-		delete[] m_Data;
 }
 
 Particle& Particle::operator=(const Particle& other)
@@ -58,9 +52,9 @@ Particle& Particle::operator=(const Particle& other)
 
 Particle& Particle::operator=(Particle&& other) noexcept
 {
-	m_Shape = other.m_Shape;
-	m_Transformer = other.m_Transformer;
-	m_Characteristic = other.m_Characteristic;
+	m_Shape = std::move(other.m_Shape);
+	m_Transformer = std::move(other.m_Transformer);
+	m_Characteristic = std::move(other.m_Characteristic);
 	m_LifespanInv = other.m_LifespanInv;
 	m_Invalid = other.m_Invalid;
 	m_T = other.m_T;
@@ -69,6 +63,12 @@ Particle& Particle::operator=(Particle&& other) noexcept
 	m_Data = other.m_Data;
 	other.m_Data = nullptr;
 	return *this;
+}
+
+Particle::~Particle()
+{
+	if (m_Data)
+		delete[] m_Data;
 }
 
 void Particle::OnDraw(real delta_time)

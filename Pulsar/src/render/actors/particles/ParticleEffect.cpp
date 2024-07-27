@@ -12,7 +12,7 @@ ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsyste
 	ParticleSubsystemIndex i = 0;
 	for (const auto& subsys : subsystem_data)
 	{
-		std::shared_ptr<ParticleSubsystem<ParticleCount>> subsystem = std::make_shared<ParticleSubsystem<ParticleCount>>(ParticleSubsystem<ParticleCount>(subsys, i));
+		std::shared_ptr<ParticleSubsystem<ParticleCount>> subsystem = std::make_shared<ParticleSubsystem<ParticleCount>>(subsys, i);
 		m_Subsystems.push_back(subsystem);
 		m_Transformer.PushBackGlobal(subsystem);
 		m_Particles.push_back({});
@@ -88,6 +88,12 @@ void ParticleEffect<ParticleCount>::DespawnInvalidParticles()
 
 template<std::unsigned_integral ParticleCount>
 void ParticleEffect<ParticleCount>::AddParticle(ParticleSubsystemIndex i, const Particle& part)
+{
+	m_Particles[i].push_back(part);
+}
+
+template<std::unsigned_integral ParticleCount>
+void ParticleEffect<ParticleCount>::AddParticle(ParticleSubsystemIndex i, Particle&& part)
 {
 	m_Particles[i].push_back(std::move(part));
 }

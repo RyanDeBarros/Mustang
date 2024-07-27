@@ -22,9 +22,13 @@ class ActorComposite2D : virtual public ActorSequencer2D
 
 public:
 	ActorComposite2D(CompositeMode mode, ActorPrimitiveCounter initial_size = 1, ZIndex z = 0);
+	ActorComposite2D(const ActorComposite2D&);
+	ActorComposite2D(ActorComposite2D&&) noexcept;
+	ActorComposite2D& operator=(const ActorComposite2D&);
+	ActorComposite2D& operator=(ActorComposite2D&&) noexcept;
 	~ActorComposite2D();
 
-	ActorPrimitive2D* const operator[](const int& i) override;
+	ActorPrimitive2D* const operator[](int i) override;
 	BufferCounter PrimitiveCount() const override { return static_cast<BufferCounter>(head - tail); }
 
 	void Push(ActorPrimitive2D* primitive);

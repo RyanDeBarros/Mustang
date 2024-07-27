@@ -25,6 +25,10 @@ class UniformLexicon
 	
 public:
 	UniformLexicon();
+	UniformLexicon(const UniformLexicon&);
+	UniformLexicon(UniformLexicon&&) noexcept;
+	UniformLexicon& operator=(const UniformLexicon&);
+	UniformLexicon& operator=(UniformLexicon&&) noexcept;
 	UniformLexicon(const std::map<std::string, Uniform>& uniforms);
 	~UniformLexicon();
 

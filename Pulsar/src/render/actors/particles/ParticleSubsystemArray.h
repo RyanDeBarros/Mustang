@@ -14,6 +14,8 @@ class ParticleSubsystemArray: public ActorRenderBase2D, public ParticleEffect<Pa
 
 public:
 	ParticleSubsystemArray(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform = {}, ZIndex z = 0, bool visible = true, bool enabled = true);
+	ParticleSubsystemArray(const ParticleSubsystemArray<ParticleCount>&) = delete;
+	ParticleSubsystemArray(ParticleSubsystemArray<ParticleCount>&&) = delete;
 
 	/// Whether the particle system should be drawn. This does not affect whether the system is updated every update frame.
 	bool visible;
@@ -22,4 +24,5 @@ public:
 	virtual void InvalidateParticle(const Particle& part, ParticleSubsystemIndex i) override;
 	virtual void DespawnInvalidParticles() override;
 	virtual void AddParticle(ParticleSubsystemIndex i, const Particle& part) override;
+	virtual void AddParticle(ParticleSubsystemIndex i, Particle&& part) override;
 };
