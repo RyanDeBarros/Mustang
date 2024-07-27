@@ -47,13 +47,7 @@ Atlas& Atlas::operator=(Atlas&& atlas) noexcept
 	m_Border = atlas.m_Border;
 	m_BufferSize = atlas.m_BufferSize;
 	m_Placements = std::move(atlas.m_Placements);
-	// TODO this and ~Atlas() might interfere without ~Tile().
-	if (m_ImageBuffer)
-	{
-		delete[] m_ImageBuffer;
-		m_ImageBuffer = nullptr;
-	}
-	m_ImageBuffer = atlas.m_ImageBuffer;
+	Tile::operator=(std::move(atlas));
 	return *this;
 }
 
@@ -72,11 +66,6 @@ Atlas::Atlas(const Atlas* const atlas)
 
 Atlas::~Atlas()
 {
-	if (m_ImageBuffer)
-	{
-		delete[] m_ImageBuffer;
-		m_ImageBuffer = nullptr;
-	}
 }
 
 bool Atlas::operator==(const Atlas& other) const

@@ -23,6 +23,8 @@ ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
 	m_Render = primitive.m_Render;
 	m_Status = primitive.m_Status;
 	m_ModulationColors = primitive.m_ModulationColors;
+	ActorRenderBase2D::operator=(primitive);
+	Transformable2D::operator=(primitive);
 	return *this;
 }
 
@@ -31,6 +33,8 @@ ActorPrimitive2D& ActorPrimitive2D::operator=(ActorPrimitive2D&& primitive) noex
 	m_Render = std::move(primitive.m_Render);
 	m_Status = primitive.m_Status;
 	m_ModulationColors = std::move(primitive.m_ModulationColors);
+	ActorRenderBase2D::operator=(std::move(primitive));
+	Transformable2D::operator=(std::move(primitive));
 	return *this;
 }
 

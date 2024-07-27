@@ -18,6 +18,7 @@ DebugBatcher& DebugBatcher::operator=(const DebugBatcher& other)
 {
 	m_Slots = other.m_Slots;
 	m_OrderedTraversal = other.m_OrderedTraversal;
+	ActorRenderBase2D::operator=(other);
 	return *this;
 }
 
@@ -25,6 +26,7 @@ DebugBatcher& DebugBatcher::operator=(DebugBatcher&& other) noexcept
 {
 	m_Slots = std::move(other.m_Slots);
 	m_OrderedTraversal = std::move(other.m_OrderedTraversal);
+	ActorRenderBase2D::operator=(std::move(other));
 	return *this;
 }
 

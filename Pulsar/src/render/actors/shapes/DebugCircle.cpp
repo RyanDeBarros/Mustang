@@ -25,12 +25,14 @@ DebugCircle::DebugCircle(DebugCircle&& other) noexcept
 DebugCircle& DebugCircle::operator=(const DebugCircle& other)
 {
 	m_Diameter = other.m_Diameter;
+	DebugPolygon::operator=(other);
 	return *this;
 }
 
 DebugCircle& DebugCircle::operator=(DebugCircle&& other) noexcept
 {
 	m_Diameter = other.m_Diameter;
+	DebugPolygon::operator=(std::move(other));
 	return *this;
 }
 

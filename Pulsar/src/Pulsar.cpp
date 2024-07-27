@@ -207,8 +207,7 @@ void Pulsar::Run(GLFWwindow* window)
 	ParticleSubsystemData<> wave1{
 		1.5f,
 		std::shared_ptr<DebugPolygon>(new DebugCircle(4.0f)),
-		//CumulativeFunc<>([](float t) { return t < 0.6f ? PowerFunc(2000.0f, 0.5f)(t) : PowerFunc(2000.0f, 0.5f)(0.6f); }),
-		CumulativeFunc<>(LinearFunc(100)),
+		CumulativeFunc<>([](float t) { return t < 0.6f ? PowerFunc(2000.0f, 0.5f)(t) : PowerFunc(2000.0f, 0.5f)(0.6f); }),
 		[](const Particles::CHRSeed& seed) { return 0.4f - seed.waveT * 0.05f; },
 		Particles::CombineSequential({
 			Particles::CombineConditionalTimeLessThan(

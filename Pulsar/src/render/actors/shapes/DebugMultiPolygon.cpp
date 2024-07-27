@@ -64,6 +64,8 @@ DebugMultiPolygon& DebugMultiPolygon::operator=(const DebugMultiPolygon& other)
 	}
 	else
 		index_counts_ptr = nullptr;
+
+	ActorRenderBase2D::operator=(other);
 	return *this;
 }
 
@@ -84,6 +86,7 @@ DebugMultiPolygon& DebugMultiPolygon::operator=(DebugMultiPolygon&& other) noexc
 	index_counts_ptr = other.index_counts_ptr;
 	other.index_counts_ptr = nullptr;
 
+	ActorRenderBase2D::operator=(std::move(other));
 	return *this;
 }
 

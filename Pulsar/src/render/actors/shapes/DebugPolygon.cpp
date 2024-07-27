@@ -28,6 +28,8 @@ DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
 	m_Points = other.m_Points;
 	m_IndexingMode = other.m_IndexingMode;
 	m_Status = other.m_Status;
+	ActorRenderBase2D::operator=(other);
+	Transformable2D::operator=(other);
 	return *this;
 }
 
@@ -38,6 +40,8 @@ DebugPolygon& DebugPolygon::operator=(DebugPolygon&& other) noexcept
 	m_Points = std::move(other.m_Points);
 	m_IndexingMode = other.m_IndexingMode;
 	m_Status = other.m_Status;
+	ActorRenderBase2D::operator=(std::move(other));
+	Transformable2D::operator=(std::move(other));
 	return *this;
 }
 

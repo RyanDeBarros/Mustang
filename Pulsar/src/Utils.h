@@ -64,6 +64,12 @@ inline std::function<glm::vec2(const glm::vec2&)> Vec2Wrap(const std::function<f
 	return [f, g](const glm::vec2& v) -> glm::vec2 { return { f(v[0]), f(v[1]) }; };
 }
 
+template<typename T, typename U, typename V, typename W>
+inline std::function<glm::vec2(const glm::vec2&)> Vec2Wrap(const std::function<T(U)>& f, const std::function<V(W)>& g)
+{
+	return [f, g](const glm::vec2& v) -> glm::vec2 { return { static_cast<float>(f(v[0])), static_cast<float>(f(v[1])) }; };
+}
+
 template<std::floating_point Float = float>
 inline Float rng() { return std::rand() / static_cast<Float>(RAND_MAX); }
 

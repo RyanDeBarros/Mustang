@@ -26,6 +26,7 @@ DebugPoint& DebugPoint::operator=(const DebugPoint& other)
 	m_InnerRadius = other.m_InnerRadius;
 	m_InnerColor = other.m_InnerColor;
 	m_PointStatus = other.m_PointStatus;
+	DebugPolygon::operator=(other);
 	return *this;
 }
 
@@ -35,6 +36,7 @@ DebugPoint& DebugPoint::operator=(DebugPoint&& other) noexcept
 	m_InnerRadius = other.m_InnerRadius;
 	m_InnerColor = other.m_InnerColor;
 	m_PointStatus = other.m_PointStatus;
+	DebugPolygon::operator=(std::move(other));
 	return *this;
 }
 

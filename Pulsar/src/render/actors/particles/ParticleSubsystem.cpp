@@ -39,6 +39,7 @@ ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(co
 	m_TotalSpawn = other.m_TotalSpawn;
 	m_WaveNum = other.m_WaveNum;
 	m_SubsystemIndex = other.m_SubsystemIndex;
+	Transformable2D::operator=(other);
 	return *this;
 }
 
@@ -55,6 +56,7 @@ ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(Pa
 	m_TotalSpawn = other.m_TotalSpawn;
 	m_WaveNum = other.m_WaveNum;
 	m_SubsystemIndex = other.m_SubsystemIndex;
+	Transformable2D::operator=(std::move(other));
 	return *this;
 }
 

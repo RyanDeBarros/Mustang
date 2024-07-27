@@ -25,6 +25,8 @@ Tile::Tile(Tile&& tile) noexcept
 Tile& Tile::operator=(Tile&& tile) noexcept
 {
 	m_Filepath = std::move(tile.m_Filepath);
+	if (m_ImageBuffer)
+		stbi_image_free(m_ImageBuffer);
 	m_ImageBuffer = tile.m_ImageBuffer;
 	m_Width = tile.m_Width;
 	m_Height = tile.m_Height;

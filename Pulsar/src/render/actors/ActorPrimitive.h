@@ -23,7 +23,7 @@ public:
 	ActorPrimitive2D(const Renderable& render = Renderable(), const Transform2D& transform = Transform2D(), ZIndex z = 0, bool visible = true);
 	ActorPrimitive2D(const ActorPrimitive2D& primitive);
 	ActorPrimitive2D(ActorPrimitive2D&& primitive) noexcept;
-	ActorPrimitive2D& operator = (const ActorPrimitive2D & primitive);
+	ActorPrimitive2D& operator=(const ActorPrimitive2D & primitive);
 	ActorPrimitive2D& operator=(ActorPrimitive2D&& primitive) noexcept;
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;

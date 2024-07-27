@@ -29,6 +29,8 @@ ActorTesselation2D& ActorTesselation2D::operator=(const ActorTesselation2D& othe
 	m_Actor = other.m_Actor;
 	m_Transformer = other.m_Transformer;
 	BindFunctions();
+	ActorSequencer2D::operator=(other);
+	Transformable2D::operator=(other);
 	return *this;
 }
 
@@ -37,6 +39,8 @@ ActorTesselation2D& ActorTesselation2D::operator=(ActorTesselation2D&& other) no
 	m_Actor = std::move(other.m_Actor);
 	m_Transformer = std::move(other.m_Transformer);
 	BindFunctions();
+	ActorSequencer2D::operator=(std::move(other));
+	Transformable2D::operator=(std::move(other));
 	return *this;
 }
 

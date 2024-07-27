@@ -16,7 +16,7 @@ ActorComposite2D::ActorComposite2D(CompositeMode mode, ActorPrimitiveCounter ini
 }
 
 ActorComposite2D::ActorComposite2D(const ActorComposite2D& other)
-	: m_Mode(other.m_Mode), ActorSequencer2D(other.GetZIndex())
+	: m_Mode(other.m_Mode), ActorSequencer2D(other)
 {
 	auto initial_size = other.cap - other.tail;
 	tail = new ActorPrimitive2D*[initial_size];
@@ -25,7 +25,7 @@ ActorComposite2D::ActorComposite2D(const ActorComposite2D& other)
 }
 
 ActorComposite2D::ActorComposite2D(ActorComposite2D&& other) noexcept
-	: m_Mode(other.m_Mode), ActorSequencer2D(other.GetZIndex()), tail(other.tail), head(other.head), cap(other.cap)
+	: m_Mode(other.m_Mode), ActorSequencer2D(std::move(other)), tail(other.tail), head(other.head), cap(other.cap)
 {
 	other.tail = nullptr;
 }
@@ -40,6 +40,7 @@ ActorComposite2D& ActorComposite2D::operator=(const ActorComposite2D& other)
 	tail = new ActorPrimitive2D*[initial_size];
 	head = tail;
 	cap = tail + initial_size;
+	ActorSequencer2D::operator=(other);
 	return *this;
 }
 
@@ -53,6 +54,7 @@ ActorComposite2D& ActorComposite2D::operator=(ActorComposite2D&& other) noexcept
 	head = other.head;
 	cap = other.cap;
 	other.tail = nullptr;
+	ActorSequencer2D::operator=(std::move(other));
 	return *this;
 }
 

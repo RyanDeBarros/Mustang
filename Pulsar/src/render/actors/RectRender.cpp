@@ -33,6 +33,7 @@ RectRender& RectRender::operator=(const RectRender& other)
 	m_UVWidth = other.m_UVWidth;
 	m_UVHeight = other.m_UVHeight;
 	m_Pivot = other.m_Pivot;
+	ActorPrimitive2D::operator=(other);
 	return *this;
 }
 
@@ -41,6 +42,7 @@ RectRender& RectRender::operator=(RectRender&& other) noexcept
 	m_UVWidth = other.m_UVWidth;
 	m_UVHeight = other.m_UVHeight;
 	m_Pivot = other.m_Pivot;
+	ActorPrimitive2D::operator=(std::move(other));
 	return *this;
 }
 

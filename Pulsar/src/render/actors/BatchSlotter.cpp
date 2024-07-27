@@ -18,12 +18,14 @@ BatchSlotter2D::BatchSlotter2D(BatchSlotter2D&& other) noexcept
 BatchSlotter2D& BatchSlotter2D::operator=(const BatchSlotter2D& other)
 {
 	m_Slots = other.m_Slots;
+	ActorRenderBase2D::operator=(other);
 	return *this;
 }
 
 BatchSlotter2D& BatchSlotter2D::operator=(BatchSlotter2D&& other) noexcept
 {
 	m_Slots = std::move(other.m_Slots);
+	ActorRenderBase2D::operator=(std::move(other));
 	return *this;
 }
 

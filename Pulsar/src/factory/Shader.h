@@ -12,6 +12,7 @@ class Shader
 	RID m_RID;
 	std::string m_VertexFilepath, m_FragmentFilepath;
 	mutable std::unordered_map<const char*, GLint> m_UniformLocationCache;
+
 public:
 	Shader(const char* vertex_filepath, const char* fragment_filepath);
 	Shader(const Shader& shader) = delete;
