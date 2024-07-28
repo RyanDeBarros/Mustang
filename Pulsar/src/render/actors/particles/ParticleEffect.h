@@ -7,7 +7,7 @@
 #include "../../transform/MultiTransformer.h"
 
 template<std::unsigned_integral ParticleCount = unsigned short>
-class ParticleEffect : public Transformable2D
+class ParticleEffect : public TransformableProxy2D
 {
 	friend class ParticleSubsystem<ParticleCount>;
 	//std::vector<std::vector<std::shared_ptr<Particle>>> m_Particles;

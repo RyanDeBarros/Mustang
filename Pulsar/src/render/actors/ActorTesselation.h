@@ -9,7 +9,7 @@
 #include "ActorSequencer.h"
 #include "../transform/MultiTransformer.h"
 
-class ActorTesselation2D : virtual public ActorSequencer2D, public Transformable2D
+class ActorTesselation2D : virtual public ActorSequencer2D, public TransformableProxy2D
 {
 private:
 	std::shared_ptr<ActorRenderBase2D> m_Actor;

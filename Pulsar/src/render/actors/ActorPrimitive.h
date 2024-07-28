@@ -7,7 +7,7 @@
 #include "../Renderable.h"
 #include "../transform/Transformable.h"
 
-class ActorPrimitive2D : public ActorRenderBase2D, public Transformable2D
+class ActorPrimitive2D : public ActorRenderBase2D, public TransformableProxy2D
 {
 protected:
 	static constexpr Stride end_attrib_pos = 11;
@@ -34,9 +34,6 @@ public:
 	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform->position); FlushPosition(); }
 	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform->rotation); FlushRotation(); }
 	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform->scale); FlushScale(); }
-
-	// TODO make private. just for testing
-	inline std::shared_ptr<Transform2D> GetTransformRef() { return m_Transform; }
 
 	inline void SetShaderHandle(ShaderHandle handle) { m_Render.model.shader = handle; }
 	inline void SetTextureHandle(TextureHandle handle) { m_Render.textureHandle = handle; }

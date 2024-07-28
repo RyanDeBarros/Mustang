@@ -3,28 +3,35 @@
 #include "Transform.h"
 #include "Transformable.h"
 
-// TODO make Transformer and MultiTransformer a Transformable, so they can be chained. The parent will be the transformer.
-
 class Transformer2D : public Transformable2D
 {
+	// TODO consider using weak ptrs here and throughout project
+	std::shared_ptr<Transformable2D> m_Parent;
 	std::shared_ptr<Transformable2D> m_Child;
 	Transform2D m_Local;
 
 public:
-	Transformer2D(const std::shared_ptr<Transform2D>& parent, const std::shared_ptr<Transformable2D>& child, bool discard_old_transform = true);
-	Transformer2D(const std::shared_ptr<Transform2D>& parent, std::shared_ptr<Transformable2D>&& child, bool discard_old_transform = true);
-	Transformer2D(std::shared_ptr<Transform2D>&& parent, std::shared_ptr<Transformable2D>&& child, bool discard_old_transform = true);
-	Transformer2D(const std::shared_ptr<Transform2D>& parent, const Transform2D& local, bool discard_old_transform = true);
-	Transformer2D(std::shared_ptr<Transform2D>&& parent, const Transform2D& local, bool discard_old_transform = true);
+	Transformer2D(const std::shared_ptr<Transformable2D>& parent, const std::shared_ptr<Transformable2D>& child, bool discard_old_transform = true);
+	Transformer2D(const std::shared_ptr<Transformable2D>& parent, std::shared_ptr<Transformable2D>&& child, bool discard_old_transform = true);
+	Transformer2D(std::shared_ptr<Transformable2D>&& parent, const std::shared_ptr<Transformable2D>& child, bool discard_old_transform = true);
+	Transformer2D(std::shared_ptr<Transformable2D>&& parent, std::shared_ptr<Transformable2D>&& child, bool discard_old_transform = true);
+	Transformer2D(const std::shared_ptr<Transformable2D>& parent, const Transform2D& local, bool discard_old_transform = true);
+	Transformer2D(std::shared_ptr<Transformable2D>&& parent, const Transform2D& local, bool discard_old_transform = true);
 	Transformer2D(const Transformer2D&);
 	Transformer2D(Transformer2D&&) noexcept;
 	Transformer2D& operator=(const Transformer2D&);
 	Transformer2D& operator=(Transformer2D&&) noexcept;
 
-	inline virtual void OperateTransform(const std::function<void(Transform2D& position)>& op) { op(*m_Transform); SyncGlobalWithParent(); }
-	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) { op(m_Transform->position); SyncGlobalWithParentPosition(); }
-	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) { op(m_Transform->rotation); SyncGlobalWithParentRotation(); }
-	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) { op(m_Transform->scale); SyncGlobalWithParentScale(); }
+	inline Transform2D GetTransform() const override { return m_Parent->GetTransform(); };
+	inline glm::vec2 GetPosition() const override { return m_Parent->GetPosition(); }
+	inline glm::float32 GetRotation() const override { return m_Parent->GetRotation(); }
+	inline glm::vec2 GetScale() const override { return m_Parent->GetScale(); }
+
+	// TODO buffer versions, at least for MultiTransformer, so that parent sync can be delayed. also consider parent-independent functions that don't sync children with transforms on parent.
+	inline void OperateTransform(const std::function<void(Transform2D& position)>& op) { m_Parent->OperateTransform(op); SyncGlobalWithParent(); }
+	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) { m_Parent->OperatePosition(op); SyncGlobalWithParentPosition(); }
+	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) { m_Parent->OperateRotation(op); SyncGlobalWithParentRotation(); }
+	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) { m_Parent->OperateScale(op); SyncGlobalWithParentScale(); }
 
 	void SetLocalTransform(const Transform2D& tr);
 	inline Transform2D GetLocalTransform() const { return m_Local; }

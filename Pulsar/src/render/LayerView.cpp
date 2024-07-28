@@ -5,7 +5,7 @@
 #include "factory/ShaderFactory.h"
 
 LayerView2D::LayerView2D(float pLeft, float pRight, float pBottom, float pTop)
-	: Transformable2D(Transform2D{}), m_ProjectionMatrix(glm::ortho<float>(pLeft, pRight, pBottom, pTop)), m_VP()
+	: TransformableProxy2D(Transform2D{}), m_ProjectionMatrix(glm::ortho<float>(pLeft, pRight, pBottom, pTop)), m_VP()
 {
 	UpdateVP();
 }

@@ -9,7 +9,7 @@ template class ParticleEffect<unsigned short>;
 
 template<std::unsigned_integral ParticleCount>
 ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform, bool enabled)
-	: Transformable2D(transform), enabled(enabled), m_Transformer(m_Transform)
+	: TransformableProxy2D(transform), enabled(enabled), m_Transformer(m_Transform)
 {
 	ParticleSubsystemIndex i = 0;
 	for (const auto& subsys : subsystem_data)

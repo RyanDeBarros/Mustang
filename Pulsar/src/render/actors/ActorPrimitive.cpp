@@ -4,17 +4,17 @@
 #include "render/CanvasLayer.h"
 
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, ZIndex z, bool visible)
-	: m_Render(render), Transformable2D(transform), ActorRenderBase2D(z), m_Status(visible ? 0b111 : 0b110)
+	: m_Render(render), TransformableProxy2D(transform), ActorRenderBase2D(z), m_Status(visible ? 0b111 : 0b110)
 {
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const ActorPrimitive2D& primitive)
-	: m_Render(primitive.m_Render), Transformable2D(primitive), ActorRenderBase2D(primitive), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
+	: m_Render(primitive.m_Render), TransformableProxy2D(primitive), ActorRenderBase2D(primitive), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
 {
 }
 
 ActorPrimitive2D::ActorPrimitive2D(ActorPrimitive2D&& primitive) noexcept
-	: m_Render(std::move(primitive.m_Render)), Transformable2D(std::move(primitive)), ActorRenderBase2D(std::move(primitive)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors))
+	: m_Render(std::move(primitive.m_Render)), TransformableProxy2D(std::move(primitive)), ActorRenderBase2D(std::move(primitive)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors))
 {
 }
 
@@ -24,7 +24,7 @@ ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
 	m_Status = primitive.m_Status;
 	m_ModulationColors = primitive.m_ModulationColors;
 	ActorRenderBase2D::operator=(primitive);
-	Transformable2D::operator=(primitive);
+	TransformableProxy2D::operator=(primitive);
 	return *this;
 }
 
@@ -34,7 +34,7 @@ ActorPrimitive2D& ActorPrimitive2D::operator=(ActorPrimitive2D&& primitive) noex
 	m_Status = primitive.m_Status;
 	m_ModulationColors = std::move(primitive.m_ModulationColors);
 	ActorRenderBase2D::operator=(std::move(primitive));
-	Transformable2D::operator=(std::move(primitive));
+	TransformableProxy2D::operator=(std::move(primitive));
 	return *this;
 }
 

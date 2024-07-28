@@ -4,7 +4,7 @@
 #include "AssetLoader.h"
 
 DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform, const glm::vec4& color, GLenum indexing_mode, ZIndex z)
-	: ActorRenderBase2D(z), m_Color(color), Transformable2D(transform)
+	: ActorRenderBase2D(z), m_Color(color), TransformableProxy2D(transform)
 {
 	loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
 	SetIndexingMode(indexing_mode);
@@ -12,12 +12,12 @@ DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const Transform
 }
 
 DebugPolygon::DebugPolygon(const DebugPolygon& other)
-	: ActorRenderBase2D(other), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), Transformable2D(other), m_Status(other.m_Status)
+	: ActorRenderBase2D(other), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), TransformableProxy2D(other), m_Status(other.m_Status)
 {
 }
 
 DebugPolygon::DebugPolygon(DebugPolygon&& other) noexcept
-	: ActorRenderBase2D(std::move(other)), m_Color(other.m_Color), m_Renderable(std::move(other.m_Renderable)), m_Points(std::move(other.m_Points)), m_IndexingMode(other.m_IndexingMode), Transformable2D(std::move(other)), m_Status(other.m_Status)
+	: ActorRenderBase2D(std::move(other)), m_Color(other.m_Color), m_Renderable(std::move(other.m_Renderable)), m_Points(std::move(other.m_Points)), m_IndexingMode(other.m_IndexingMode), TransformableProxy2D(std::move(other)), m_Status(other.m_Status)
 {
 }
 
@@ -29,7 +29,7 @@ DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
 	m_IndexingMode = other.m_IndexingMode;
 	m_Status = other.m_Status;
 	ActorRenderBase2D::operator=(other);
-	Transformable2D::operator=(other);
+	TransformableProxy2D::operator=(other);
 	return *this;
 }
 
@@ -41,7 +41,7 @@ DebugPolygon& DebugPolygon::operator=(DebugPolygon&& other) noexcept
 	m_IndexingMode = other.m_IndexingMode;
 	m_Status = other.m_Status;
 	ActorRenderBase2D::operator=(std::move(other));
-	Transformable2D::operator=(std::move(other));
+	TransformableProxy2D::operator=(std::move(other));
 	return *this;
 }
 

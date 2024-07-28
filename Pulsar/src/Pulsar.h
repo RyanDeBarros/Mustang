@@ -10,7 +10,7 @@ struct GLFWwindow;
 
 namespace Pulsar
 {
-	int StartUp();
+	int StartUp(GLFWwindow*&);
 	void Terminate();
 
 	extern real drawTime;

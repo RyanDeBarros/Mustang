@@ -7,7 +7,7 @@
 #include "transform/Transformable.h"
 #include "factory/Shader.h"
 
-class LayerView2D : public Transformable2D
+class LayerView2D : public TransformableProxy2D
 {
 	glm::mat3 m_ProjectionMatrix;
 	glm::mat3 m_VP;

@@ -20,7 +20,7 @@ struct std::hash<DebugModel>
 	}
 };
 
-class DebugPolygon : public ActorRenderBase2D, public Transformable2D
+class DebugPolygon : public ActorRenderBase2D, public TransformableProxy2D
 {
 protected:
 	friend class DebugMultiPolygon;
