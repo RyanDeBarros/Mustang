@@ -3,23 +3,37 @@
 #include "Transform.h"
 #include "Transformable.h"
 
-class MultiTransformer2D
+class MultiTransformer2D : public Transformable2D
 {
-	std::shared_ptr<Transform2D> m_Parent;
+	std::shared_ptr<Transformable2D> m_Parent;
 	std::vector<std::shared_ptr<Transformable2D>> m_Children;
 	std::vector<Transform2D> m_Locals;
 
 public:
-	MultiTransformer2D(const std::shared_ptr<Transform2D>& parent);
-	MultiTransformer2D(std::shared_ptr<Transform2D>&& parent);
-	MultiTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transforms = true);
-	MultiTransformer2D(std::shared_ptr<Transform2D>&& parent, std::vector<std::shared_ptr<Transformable2D>>&& children, bool discard_old_transforms = true);
-	MultiTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms = true);
-	MultiTransformer2D(std::shared_ptr<Transform2D>&& parent, std::vector<Transform2D>&& locals, bool discard_old_transforms = true);
+	MultiTransformer2D() = default;
+	MultiTransformer2D(const std::shared_ptr<Transformable2D>& parent);
+	MultiTransformer2D(std::shared_ptr<Transformable2D>&& parent);
+	MultiTransformer2D(const std::shared_ptr<Transformable2D>& parent, const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transforms = true);
+	MultiTransformer2D(std::shared_ptr<Transformable2D>&& parent, std::vector<std::shared_ptr<Transformable2D>>&& children, bool discard_old_transforms = true);
+	MultiTransformer2D(const std::shared_ptr<Transformable2D>& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms = true);
+	MultiTransformer2D(std::shared_ptr<Transformable2D>&& parent, std::vector<Transform2D>&& locals, bool discard_old_transforms = true);
 	MultiTransformer2D(const MultiTransformer2D&);
 	MultiTransformer2D(MultiTransformer2D&&) noexcept;
 	MultiTransformer2D& operator=(const MultiTransformer2D&);
 	MultiTransformer2D& operator=(MultiTransformer2D&&) noexcept;
+
+	inline void SetParent(const std::shared_ptr<Transformable2D>& parent) { m_Parent = parent; }
+	inline void SetParent(std::shared_ptr<Transformable2D>&& parent) { m_Parent = std::move(parent); }
+
+	inline Transform2D GetTransform() const override { return m_Parent->GetTransform(); };
+	inline glm::vec2 GetPosition() const override { return m_Parent->GetPosition(); }
+	inline glm::float32 GetRotation() const override { return m_Parent->GetRotation(); }
+	inline glm::vec2 GetScale() const override { return m_Parent->GetScale(); }
+
+	inline void OperateTransform(const std::function<void(Transform2D& position)>& op) { m_Parent->OperateTransform(op); SyncGlobalWithParent(); }
+	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) { m_Parent->OperatePosition(op); SyncGlobalWithParentPositions(); }
+	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) { m_Parent->OperateRotation(op); SyncGlobalWithParentRotations(); }
+	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) { m_Parent->OperateScale(op); SyncGlobalWithParentScales(); }
 
 	void SetLocalTransforms(const Transform2D& tr) { for (size_t i = 0; i < m_Locals.size(); i++) SetLocalTransform(i, tr); }
 	inline std::vector<Transform2D> GetLocalTransforms() const { return m_Locals; }

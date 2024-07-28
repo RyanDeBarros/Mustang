@@ -159,7 +159,7 @@ void Pulsar::Run(GLFWwindow* window)
 	actor3->SetScale(0.1f, 0.1f);
 	Renderer::GetCanvasLayer(0)->OnDetach(actor3.get());
 
-	std::shared_ptr<ActorTesselation2D> tessel(std::make_shared<ActorTesselation2D>(std::static_pointer_cast<ActorRenderBase2D>(actor3)));
+	std::shared_ptr<ActorTesselation2D> tessel = std::make_shared<ActorTesselation2D>(actor3);
 	Renderer::GetCanvasLayer(0)->OnAttach(tessel.get());
 
 	float w = actor3->GetWidth() * actor3->GetScale().x;
@@ -303,12 +303,12 @@ void Pulsar::Run(GLFWwindow* window)
 
 	ParticleSystem<> psys({ wave2, wave2 });
 	//psys.SubsystemRef(1).SetRotation(0.5f * glm::pi<float>());
-	psys.TransformerRef().SetLocalRotation(1, 0.5f * glm::pi<float>());
+	psys.TransformerRef()->SetLocalRotation(1, 0.5f * glm::pi<float>());
 	// TODO this local scale set shouldn't be necessary. the parent scale set below should take care of it
-	psys.TransformerRef().SetLocalScale(1, { 1, _RendererSettings::initial_window_width / static_cast<float>(_RendererSettings::initial_window_height) });
+	psys.TransformerRef()->SetLocalScale(1, { 1, _RendererSettings::initial_window_width / static_cast<float>(_RendererSettings::initial_window_height) });
 	
-	psys.SetScale(_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height);
-	psys.TransformerRef().SyncGlobalWithParentScales();
+	psys.TransformRef()->SetScale(_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height);
+	psys.TransformerRef()->SyncGlobalWithParentScales();
 	//ParticleSubsystemArray<> parr({ wave1, wave2 });
 
 	//psys.SetPosition(-400, 0);
@@ -334,8 +334,8 @@ void Pulsar::Run(GLFWwindow* window)
 
 	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 	//Renderer::GetCanvasLayer(11)->OnAttach(tesselDiagonal.get());
-	tesselDiagonal->SetPosition(-400, 300);
-	tessel->SetScale(0.6f, 0.6f);
+	tesselDiagonal->TransformRef()->SetPosition(-400, 300);
+	tessel->TransformRef()->SetScale(0.6f, 0.6f);
 	actor3->OperateScale([](glm::vec2& scale) { scale *= 2.0f; });
 	
 	TextureFactory::SetSettings(textureFlag, Texture::nearest_settings);
@@ -343,18 +343,29 @@ void Pulsar::Run(GLFWwindow* window)
 	std::shared_ptr<RectRender> root(std::make_shared<RectRender>(textureFlag));
 	std::shared_ptr<RectRender> child(std::make_shared<RectRender>(textureSnowman));
 	std::shared_ptr<RectRender> grandchild(std::make_shared<RectRender>(textureTux));
+	std::shared_ptr<RectRender> child2(std::make_shared<RectRender>(textureSnowman));
+	std::shared_ptr<RectRender> grandchild2(std::make_shared<RectRender>(textureTux));
+	
 	std::shared_ptr<Transformer2D> first(std::make_shared<Transformer2D>(child, grandchild));
 	first->SetLocalScale({ 0.25f, 0.25f });
 	first->SetLocalPosition({ 300.0f, -100.0f });
 	first->SetScale({ 0.25f, 0.25f });
-	Transformer2D second(root, first, false);
+	std::shared_ptr<Transformer2D> first2(std::make_shared<Transformer2D>(child2, grandchild2));
+	first2->SetLocalScale({ 0.25f, 0.25f });
+	first2->SetLocalPosition({ 300.0f, -100.0f });
+	first2->SetScale({ 0.25f, 0.25f });
+	
+	MultiTransformer2D second(root);
+	second.PushBackGlobals({ first, first2 }, false);
 	second.SetScale(10.0f, 10.0f);
-	second.OperateLocalScale([](glm::vec2& scale) { scale *= 0.2f; });
-	second.SetLocalPosition({ 0.0f, -30.0f });
+	second.OperateLocalScales([](glm::vec2& scale) { scale *= 0.2f; });
+	second.SetLocalPositions({ 0.0f, -30.0f });
 
 	Renderer::GetCanvasLayer(11)->OnAttach(root.get());
 	Renderer::GetCanvasLayer(11)->OnAttach(child.get());
 	Renderer::GetCanvasLayer(11)->OnAttach(grandchild.get());
+	Renderer::GetCanvasLayer(11)->OnAttach(child2.get());
+	Renderer::GetCanvasLayer(11)->OnAttach(grandchild2.get());
 
 	for (;;)
 	{
@@ -371,10 +382,12 @@ void Pulsar::Run(GLFWwindow* window)
 			//psys.SetScale(1.0f - 0.2f * glm::sin(totalDrawTime), 1.0f + 0.2f * glm::sin(totalDrawTime));
 			//parr.Resume();
 		//}
-			second.SetLocalRotation(Pulsar::totalDrawTime);
-			first->SetLocalRotation(-Pulsar::totalDrawTime);
-			second.SetRotation(-Pulsar::totalDrawTime);
-
+		second.SetLocalRotations(Pulsar::totalDrawTime);
+		first->SetLocalRotation(-Pulsar::totalDrawTime);
+		first2->SetLocalRotation(Pulsar::totalDrawTime);
+		second.SetRotation(-Pulsar::totalDrawTime);
+		second.OperateLocalPosition(0, [](glm::vec2& scale) { scale.x += 5 * Pulsar::deltaDrawTime; });
+		
 		Renderer::OnDraw();
 		glfwPollEvents();
 		if (glfwWindowShouldClose(window))

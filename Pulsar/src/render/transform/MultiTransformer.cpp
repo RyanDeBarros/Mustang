@@ -1,16 +1,16 @@
 #include "MultiTransformer.h"
 
-MultiTransformer2D::MultiTransformer2D(const std::shared_ptr<Transform2D>& parent)
+MultiTransformer2D::MultiTransformer2D(const std::shared_ptr<Transformable2D>& parent)
 	: m_Parent(parent)
 {
 }
 
-MultiTransformer2D::MultiTransformer2D(std::shared_ptr<Transform2D>&& parent)
+MultiTransformer2D::MultiTransformer2D(std::shared_ptr<Transformable2D>&& parent)
 	: m_Parent(std::move(parent))
 {
 }
 
-MultiTransformer2D::MultiTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transforms)
+MultiTransformer2D::MultiTransformer2D(const std::shared_ptr<Transformable2D>& parent, const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transforms)
 	: m_Parent(parent), m_Children(children)
 {
 	for (size_t i = 0; i < m_Children.size(); i++)
@@ -21,7 +21,7 @@ MultiTransformer2D::MultiTransformer2D(const std::shared_ptr<Transform2D>& paren
 		SyncLocalWithGlobals();
 }
 
-MultiTransformer2D::MultiTransformer2D(std::shared_ptr<Transform2D>&& parent, std::vector<std::shared_ptr<Transformable2D>>&& children, bool discard_old_transforms)
+MultiTransformer2D::MultiTransformer2D(std::shared_ptr<Transformable2D>&& parent, std::vector<std::shared_ptr<Transformable2D>>&& children, bool discard_old_transforms)
 	: m_Parent(std::move(parent)), m_Children(std::move(children))
 {
 	for (size_t i = 0; i < m_Children.size(); i++)
@@ -32,7 +32,7 @@ MultiTransformer2D::MultiTransformer2D(std::shared_ptr<Transform2D>&& parent, st
 		SyncLocalWithGlobals();
 }
 
-MultiTransformer2D::MultiTransformer2D(const std::shared_ptr<Transform2D>& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms)
+MultiTransformer2D::MultiTransformer2D(const std::shared_ptr<Transformable2D>& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms)
 	: m_Parent(parent), m_Locals(locals)
 {
 	for (size_t i = 0; i < m_Children.size(); i++)
@@ -102,95 +102,95 @@ void MultiTransformer2D::SetLocalTransform(size_t i, const Transform2D& tr)
 void MultiTransformer2D::SetLocalPosition(size_t i, const glm::vec2& pos)
 {
 	m_Locals[i].position = pos;
-	m_Children[i]->SetPosition(m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Locals[i].position));
+	m_Children[i]->SetPosition(m_Parent->GetPosition() + Transform::Rotation(m_Parent->GetRotation()) * (m_Parent->GetScale() * m_Locals[i].position));
 }
 
 void MultiTransformer2D::OperateLocalPosition(size_t i, const std::function<void(glm::vec2& position)>& op)
 {
 	op(m_Locals[i].position);
-	m_Children[i]->SetPosition(m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Locals[i].position));
+	m_Children[i]->SetPosition(m_Parent->GetPosition() + Transform::Rotation(m_Parent->GetRotation()) * (m_Parent->GetScale() * m_Locals[i].position));
 }
 
 void MultiTransformer2D::SetLocalRotation(size_t i, const glm::float32& rot)
 {
 	m_Locals[i].rotation = rot;
-	m_Children[i]->SetRotation(m_Parent->rotation + m_Locals[i].rotation);
+	m_Children[i]->SetRotation(m_Parent->GetRotation() + m_Locals[i].rotation);
 }
 
 void MultiTransformer2D::OperateLocalRotation(size_t i, const std::function<void(glm::float32& rotation)>& op)
 {
 	op(m_Locals[i].rotation);
-	m_Children[i]->SetRotation(m_Parent->rotation + m_Locals[i].rotation);
+	m_Children[i]->SetRotation(m_Parent->GetRotation() + m_Locals[i].rotation);
 }
 
 void MultiTransformer2D::SetLocalScale(size_t i, const glm::vec2& sc)
 {
 	m_Locals[i].scale = sc;
-	m_Children[i]->SetScale(m_Parent->scale * m_Locals[i].scale);
+	m_Children[i]->SetScale(m_Parent->GetScale() * m_Locals[i].scale);
 }
 
 void MultiTransformer2D::OperateLocalScale(size_t i, const std::function<void(glm::vec2& scale)>& op)
 {
 	op(m_Locals[i].scale);
-	m_Children[i]->SetScale(m_Parent->scale * m_Locals[i].scale);
+	m_Children[i]->SetScale(m_Parent->GetScale() * m_Locals[i].scale);
 }
 
 void MultiTransformer2D::SyncGlobalWithLocal(size_t i)
 {
-	m_Children[i]->SetTransform(Transform::AbsTo(m_Locals[i], *m_Parent));
+	m_Children[i]->SetTransform(Transform::AbsTo(m_Locals[i], m_Parent->GetTransform()));
 }
 
 void MultiTransformer2D::SyncLocalWithGlobal(size_t i)
 {
-	m_Locals[i] = Transform::RelTo(m_Children[i]->GetTransform(), *m_Parent);
+	m_Locals[i] = Transform::RelTo(m_Children[i]->GetTransform(), m_Parent->GetTransform());
 }
 
 void MultiTransformer2D::SyncGlobalWithParent(size_t i)
 {
-	m_Children[i]->SetPosition(m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Locals[i].position));
-	m_Children[i]->SetRotation(m_Parent->rotation + m_Locals[i].rotation);
-	m_Children[i]->SetScale(m_Parent->scale * m_Locals[i].scale);
+	m_Children[i]->SetPosition(m_Parent->GetPosition() + Transform::Rotation(m_Parent->GetRotation()) * (m_Parent->GetScale() * m_Locals[i].position));
+	m_Children[i]->SetRotation(m_Parent->GetRotation() + m_Locals[i].rotation);
+	m_Children[i]->SetScale(m_Parent->GetScale() * m_Locals[i].scale);
 }
 
 void MultiTransformer2D::SyncGlobalWithParentPosition(size_t i)
 {
-	m_Children[i]->SetPosition(m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Locals[i].position));
+	m_Children[i]->SetPosition(m_Parent->GetPosition() + Transform::Rotation(m_Parent->GetRotation()) * (m_Parent->GetScale() * m_Locals[i].position));
 }
 
 void MultiTransformer2D::SyncGlobalWithParentRotation(size_t i)
 {
-	m_Children[i]->SetPosition(m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Locals[i].position));
-	m_Children[i]->SetRotation(m_Parent->rotation + m_Locals[i].rotation);
+	m_Children[i]->SetPosition(m_Parent->GetPosition() + Transform::Rotation(m_Parent->GetRotation()) * (m_Parent->GetScale() * m_Locals[i].position));
+	m_Children[i]->SetRotation(m_Parent->GetRotation() + m_Locals[i].rotation);
 }
 
 void MultiTransformer2D::SyncGlobalWithParentScale(size_t i)
 {
-	m_Children[i]->SetPosition(m_Parent->position + Transform::Rotation(m_Parent->rotation) * (m_Parent->scale * m_Locals[i].position));
-	m_Children[i]->SetScale(m_Parent->scale * m_Locals[i].scale);
+	m_Children[i]->SetPosition(m_Parent->GetPosition() + Transform::Rotation(m_Parent->GetRotation()) * (m_Parent->GetScale() * m_Locals[i].position));
+	m_Children[i]->SetScale(m_Parent->GetScale() * m_Locals[i].scale);
 }
 
 void MultiTransformer2D::SyncLocalWithParent(size_t i)
 {
-	m_Locals[i].position = (Transform::Rotation(-m_Parent->rotation) * (m_Children[i]->GetPosition() - m_Parent->position)) / m_Parent->scale;
-	m_Locals[i].rotation = m_Children[i]->GetRotation() - m_Parent->rotation;
-	m_Locals[i].scale = m_Children[i]->GetScale() / m_Parent->scale;
+	m_Locals[i].position = (Transform::Rotation(-m_Parent->GetRotation()) * (m_Children[i]->GetPosition() - m_Parent->GetPosition())) / m_Parent->GetScale();
+	m_Locals[i].rotation = m_Children[i]->GetRotation() - m_Parent->GetRotation();
+	m_Locals[i].scale = m_Children[i]->GetScale() / m_Parent->GetScale();
 }
 
 void MultiTransformer2D::SyncLocalWithParentPosition(size_t i)
 {
-	m_Locals[i].position = (Transform::Rotation(-m_Parent->rotation) * (m_Children[i]->GetPosition() - m_Parent->position)) / m_Parent->scale;
+	m_Locals[i].position = (Transform::Rotation(-m_Parent->GetRotation()) * (m_Children[i]->GetPosition() - m_Parent->GetPosition())) / m_Parent->GetScale();
 }
 
 void MultiTransformer2D::SyncLocalWithParentRotation(size_t i)
 {
-	m_Locals[i].position = (Transform::Rotation(-m_Parent->rotation) * (m_Children[i]->GetPosition() - m_Parent->position)) / m_Parent->scale;
-	m_Locals[i].rotation = m_Children[i]->GetRotation() - m_Parent->rotation;
+	m_Locals[i].position = (Transform::Rotation(-m_Parent->GetRotation()) * (m_Children[i]->GetPosition() - m_Parent->GetPosition())) / m_Parent->GetScale();
+	m_Locals[i].rotation = m_Children[i]->GetRotation() - m_Parent->GetRotation();
 }
 
 void MultiTransformer2D::SyncLocalWithParentScale(size_t i)
 {
-	m_Locals[i].position = (Transform::Rotation(-m_Parent->rotation) * (m_Children[i]->GetPosition() - m_Parent->position)) / m_Parent->scale;
-	m_Locals[i].scale = m_Children[i]->GetScale() / m_Parent->scale;
+	m_Locals[i].position = (Transform::Rotation(-m_Parent->GetRotation()) * (m_Children[i]->GetPosition() - m_Parent->GetPosition())) / m_Parent->GetScale();
+	m_Locals[i].scale = m_Children[i]->GetScale() / m_Parent->GetScale();
 }
 
 std::vector<Transform2D> MultiTransformer2D::GetGlobalTransforms() const
@@ -234,37 +234,37 @@ void MultiTransformer2D::SetGlobalTransform(size_t i, const Transform2D& tr)
 void MultiTransformer2D::SetGlobalPosition(size_t i, const glm::vec2& pos)
 {
 	m_Children[i]->SetPosition(pos);
-	m_Locals[i].position = (Transform::Rotation(-m_Parent->rotation) * (m_Children[i]->GetPosition() - m_Parent->position)) / m_Parent->scale;
+	m_Locals[i].position = (Transform::Rotation(-m_Parent->GetRotation()) * (m_Children[i]->GetPosition() - m_Parent->GetPosition())) / m_Parent->GetScale();
 }
 
 void MultiTransformer2D::OperateGlobalPosition(size_t i, const std::function<void(glm::vec2& position)>& op)
 {
 	m_Children[i]->OperatePosition(op);
-	m_Locals[i].position = (Transform::Rotation(-m_Parent->rotation) * (m_Children[i]->GetPosition() - m_Parent->position)) / m_Parent->scale;
+	m_Locals[i].position = (Transform::Rotation(-m_Parent->GetRotation()) * (m_Children[i]->GetPosition() - m_Parent->GetPosition())) / m_Parent->GetScale();
 }
 
 void MultiTransformer2D::SetGlobalRotation(size_t i, const glm::float32& rot)
 {
 	m_Children[i]->SetRotation(rot);
-	m_Locals[i].rotation = m_Children[i]->GetRotation() - m_Parent->rotation;
+	m_Locals[i].rotation = m_Children[i]->GetRotation() - m_Parent->GetRotation();
 }
 
 void MultiTransformer2D::OperateGlobalRotation(size_t i, const std::function<void(glm::float32& rotation)>& op)
 {
 	m_Children[i]->OperateRotation(op);
-	m_Locals[i].rotation = m_Children[i]->GetRotation() - m_Parent->rotation;
+	m_Locals[i].rotation = m_Children[i]->GetRotation() - m_Parent->GetRotation();
 }
 
 void MultiTransformer2D::SetGlobalScale(size_t i, const glm::vec2& sc)
 {
 	m_Children[i]->SetScale(sc);
-	m_Locals[i].scale = m_Children[i]->GetScale() / m_Parent->scale;
+	m_Locals[i].scale = m_Children[i]->GetScale() / m_Parent->GetScale();
 }
 
 void MultiTransformer2D::OperateGlobalScale(size_t i, const std::function<void(glm::vec2& scale)>& op)
 {
 	m_Children[i]->OperateScale(op);
-	m_Locals[i].scale = m_Children[i]->GetScale() / m_Parent->scale;
+	m_Locals[i].scale = m_Children[i]->GetScale() / m_Parent->GetScale();
 }
 
 void MultiTransformer2D::PushBackGlobal(const std::shared_ptr<Transformable2D>& child, bool discard_old_transform)

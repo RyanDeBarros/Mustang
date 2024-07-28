@@ -1,46 +1,46 @@
 #include "ActorTesselation.h"
 
 ActorTesselation2D::ActorTesselation2D(const std::shared_ptr<ActorRenderBase2D>& actor)
-	: m_Actor(actor), m_Transformer(m_Transform)
+	: m_Actor(actor), m_Transform(std::make_shared<TransformableProxy2D>()), m_Transformer(m_Transform)
 {
 	BindFunctions();
 }
 
 ActorTesselation2D::ActorTesselation2D(std::shared_ptr<ActorRenderBase2D>&& actor)
-	: m_Actor(std::move(actor)), m_Transformer(m_Transform)
+	: m_Actor(std::move(actor)), m_Transform(std::make_shared<TransformableProxy2D>()), m_Transformer(m_Transform)
 {
 	BindFunctions();
 }
 
-ActorTesselation2D::ActorTesselation2D(const ActorTesselation2D& other)
-	: m_Actor(other.m_Actor), ActorSequencer2D(other), TransformableProxy2D(other), m_Transformer(other.m_Transformer)
-{
-	BindFunctions();
-}
+//ActorTesselation2D::ActorTesselation2D(const ActorTesselation2D& other)
+//	: m_Actor(other.m_Actor), ActorSequencer2D(other), TransformableProxy2D(other), m_Transformer(other.m_Transformer)
+//{
+//	BindFunctions();
+//}
 
 ActorTesselation2D::ActorTesselation2D(ActorTesselation2D&& other) noexcept
-	: m_Actor(std::move(other.m_Actor)), ActorSequencer2D(std::move(other)), TransformableProxy2D(std::move(other)), m_Transformer(std::move(other.m_Transformer))
+	: m_Actor(std::move(other.m_Actor)), ActorSequencer2D(std::move(other)), m_Transform(std::move(other.m_Transform)), m_Transformer(std::move(other.m_Transformer))
 {
 	BindFunctions();
 }
 
-ActorTesselation2D& ActorTesselation2D::operator=(const ActorTesselation2D& other)
-{
-	m_Actor = other.m_Actor;
-	m_Transformer = other.m_Transformer;
-	BindFunctions();
-	ActorSequencer2D::operator=(other);
-	TransformableProxy2D::operator=(other);
-	return *this;
-}
+//ActorTesselation2D& ActorTesselation2D::operator=(const ActorTesselation2D& other)
+//{
+//	m_Actor = other.m_Actor;
+//	m_Transformer = other.m_Transformer;
+//	BindFunctions();
+//	ActorSequencer2D::operator=(other);
+//	TransformableProxy2D::operator=(other);
+//	return *this;
+//}
 
 ActorTesselation2D& ActorTesselation2D::operator=(ActorTesselation2D&& other) noexcept
 {
 	m_Actor = std::move(other.m_Actor);
+	m_Transform = std::move(other.m_Transform);
 	m_Transformer = std::move(other.m_Transformer);
 	BindFunctions();
 	ActorSequencer2D::operator=(std::move(other));
-	TransformableProxy2D::operator=(std::move(other));
 	return *this;
 }
 
@@ -84,7 +84,7 @@ ActorPrimitive2D* const ActorTesselation2D::operator[](int i)
 ActorPrimitive2D* const ActorTesselation2D::f_prim_operator(ActorTesselation2D* const tessel, int i)
 {
 	ActorPrimitive2D* const primitive = static_cast<ActorPrimitive2D* const>(tessel->m_Actor.get());
-	primitive->SetTransform(Transform::AbsTo(Transform::AbsTo(tessel->m_ActorPreDrawTransforms[0], tessel->m_Transformer.GetLocalTransform(i)), *tessel->m_Transform));
+	primitive->SetTransform(Transform::AbsTo(Transform::AbsTo(tessel->m_ActorPreDrawTransforms[0], tessel->m_Transformer.GetLocalTransform(i)), tessel->m_Transform->GetTransform()));
 	return primitive;
 }
 
@@ -93,7 +93,7 @@ ActorPrimitive2D* const ActorTesselation2D::f_sequ_operator(ActorTesselation2D* 
 	ActorSequencer2D* const sequencer = static_cast<ActorSequencer2D* const>(tessel->m_Actor.get());
 	ActorPrimitive2D* const primitive = (*sequencer)[i % tessel->RenderSeqCount()];
 	if (primitive)
-		primitive->SetTransform(Transform::AbsTo(Transform::AbsTo(tessel->m_ActorPreDrawTransforms[i % tessel->m_ActorPreDrawTransforms.size()], tessel->m_Transformer.GetLocalTransform(i / tessel->RenderSeqCount())), *tessel->m_Transform));
+		primitive->SetTransform(Transform::AbsTo(Transform::AbsTo(tessel->m_ActorPreDrawTransforms[i % tessel->m_ActorPreDrawTransforms.size()], tessel->m_Transformer.GetLocalTransform(i / tessel->RenderSeqCount())), tessel->m_Transform->GetTransform()));
 	return primitive;
 }
 

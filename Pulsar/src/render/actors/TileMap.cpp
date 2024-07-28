@@ -3,7 +3,7 @@
 #include <algorithm>
 
 TileMap::TileMap(TileHandle atlas_handle, const TextureSettings& texture_settings, ShaderHandle shader, ZIndex z, bool visible)
-	: ActorRenderBase2D(z), m_Transform(std::make_shared<Transform2D>()), m_Transformer(m_Transform)
+	: ActorRenderBase2D(z), m_Transform(std::make_shared<TransformableProxy2D>()), m_Transformer(m_Transform)
 {
 	Tile* t = TileFactory::GetTileRef(atlas_handle);
 	m_Atlas = dynamic_cast<Atlas*>(t);
@@ -13,8 +13,8 @@ TileMap::TileMap(TileHandle atlas_handle, const TextureSettings& texture_setting
 	{
 		std::shared_ptr<RectRender> rect_render(new RectRender(m_Atlas->SampleSubtile(i, texture_settings, shader, 0, visible)));
 		std::shared_ptr<ActorTesselation2D> tessel(new ActorTesselation2D(rect_render));
-		m_Map.push_back({ rect_render, tessel });
-		m_Transformer.PushBackGlobal(std::move(tessel));
+		m_Map.push_back({ std::move(rect_render), tessel });
+		m_Transformer.PushBackGlobal(tessel->TransformRef());
 	}
 	m_Ordering = Permutation(m_Atlas->GetPlacements().size());
 }
@@ -39,12 +39,6 @@ bool TileMap::SetOrdering(const Permutation& permutation)
 		return false;
 	m_Ordering = permutation;
 	return true;
-}
-
-void TileMap::SetTransform(const Transform2D& tr)
-{
-	*m_Transform = tr;
-	m_Transformer.SyncGlobalWithParent();
 }
 
 void TileMap::Insert(size_t tessel, float posX, float posY)

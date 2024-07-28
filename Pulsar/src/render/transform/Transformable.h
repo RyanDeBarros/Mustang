@@ -29,6 +29,7 @@ public:
 class TransformableProxy2D : public Transformable2D
 {
 protected:
+	// TODO don't use shared_ptr?
 	std::shared_ptr<Transform2D> m_Transform;
 
 public:

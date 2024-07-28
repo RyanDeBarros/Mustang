@@ -7,10 +7,9 @@
 #include "../../transform/MultiTransformer.h"
 
 template<std::unsigned_integral ParticleCount = unsigned short>
-class ParticleEffect : public TransformableProxy2D
+class ParticleEffect : public std::enable_shared_from_this<ParticleEffect<ParticleCount>>
 {
 	friend class ParticleSubsystem<ParticleCount>;
-	//std::vector<std::vector<std::shared_ptr<Particle>>> m_Particles;
 	std::vector<std::vector<Particle>> m_Particles;
 	real m_TotalPlayed = 0.0f;
 	real m_DeltaTime = 0.0f;
@@ -34,11 +33,13 @@ public:
 	inline void Reset() { m_TotalPlayed = 0.0f; m_DeltaTime = 0.0f; m_PlayTime = 0.0f; }
 	void PlayFor(real n);
 
-	inline MultiTransformer2D& TransformerRef() { return m_Transformer; }
+	inline MultiTransformer2D* TransformerRef() { return &m_Transformer; }
 	inline ParticleSubsystem<ParticleCount>& SubsystemRef(unsigned int i) { return *m_Subsystems[i]; }
+	inline std::shared_ptr<TransformableProxy2D> TransformRef() { return m_Transform; }
 
 protected:
 	std::vector<std::shared_ptr<ParticleSubsystem<ParticleCount>>> m_Subsystems;
+	std::shared_ptr<TransformableProxy2D> m_Transform;
 	MultiTransformer2D m_Transformer;
 
 	void OnUpdate();

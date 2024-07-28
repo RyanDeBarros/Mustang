@@ -5,7 +5,7 @@
 
 class Transformer2D : public Transformable2D
 {
-	// TODO consider using weak ptrs here and throughout project
+	// TODO consider using weak ptrs here and throughout project. TransformableProxy2D can then also extend std::enable_shared_from_this, and define copy constructor/assignment operator PROVIDED that weak ptr can be used here. It can extend it privately, and have an inline protected method weak_ref().
 	std::shared_ptr<Transformable2D> m_Parent;
 	std::shared_ptr<Transformable2D> m_Child;
 	Transform2D m_Local;

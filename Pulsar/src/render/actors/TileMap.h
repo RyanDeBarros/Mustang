@@ -19,12 +19,12 @@ struct TMElement
 	std::shared_ptr<ActorTesselation2D> tessel;
 };
 
-class TileMap : public ActorRenderBase2D
+class TileMap : public ActorRenderBase2D, public std::enable_shared_from_this<TileMap>
 {
 	Atlas* m_Atlas;
 	std::vector<TMElement> m_Map;
 	Permutation m_Ordering;
-	std::shared_ptr<Transform2D> m_Transform;
+	std::shared_ptr<TransformableProxy2D> m_Transform;
 	MultiTransformer2D m_Transformer;
 
 public:
@@ -36,7 +36,6 @@ public:
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
 	bool SetOrdering(const Permutation& permutation);
-	void SetTransform(const Transform2D& tr);
 	void Insert(size_t tessel, float posX, float posY);
 
 	// TODO use typedef instead of size_t

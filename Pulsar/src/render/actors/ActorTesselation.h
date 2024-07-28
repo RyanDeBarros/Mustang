@@ -9,10 +9,11 @@
 #include "ActorSequencer.h"
 #include "../transform/MultiTransformer.h"
 
-class ActorTesselation2D : virtual public ActorSequencer2D, public TransformableProxy2D
+class ActorTesselation2D : virtual public ActorSequencer2D, public std::enable_shared_from_this<ActorTesselation2D>
 {
 private:
 	std::shared_ptr<ActorRenderBase2D> m_Actor;
+	std::shared_ptr<TransformableProxy2D> m_Transform;
 	MultiTransformer2D m_Transformer;
 	std::vector<Transform2D> m_ActorPreDrawTransforms;
 
@@ -36,13 +37,14 @@ private:
 public:
 	ActorTesselation2D(const std::shared_ptr<ActorRenderBase2D>& actor);
 	ActorTesselation2D(std::shared_ptr<ActorRenderBase2D>&& actor);
-	ActorTesselation2D(const ActorTesselation2D&);
+	ActorTesselation2D(const ActorTesselation2D&) = delete;
 	ActorTesselation2D(ActorTesselation2D&&) noexcept;
-	ActorTesselation2D& operator=(const ActorTesselation2D&);
+	ActorTesselation2D& operator=(const ActorTesselation2D&) = delete;
 	ActorTesselation2D& operator=(ActorTesselation2D&&) noexcept;
 	~ActorTesselation2D();
 
 	inline std::shared_ptr<ActorRenderBase2D> ActorRef() const { return m_Actor; }
+	inline std::shared_ptr<TransformableProxy2D> TransformRef() { return m_Transform; }
 	inline MultiTransformer2D* const TransformerRef() { return &m_Transformer; }
 	inline void PushBackGlobal(const std::shared_ptr<Transformable2D>& child) { m_Transformer.PushBackGlobal(child, false); }
 	inline void PushBackGlobal(std::shared_ptr<Transformable2D>&& child) { m_Transformer.PushBackGlobal(std::move(child), false); }
