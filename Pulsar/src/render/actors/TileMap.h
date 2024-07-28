@@ -41,4 +41,5 @@ public:
 	// TODO use typedef instead of size_t
 
 	ActorTesselation2D* const TesselationRef(size_t tessel) const;
+	MultiTransformer2D* TransformerRef() { return &m_Transformer; }
 };

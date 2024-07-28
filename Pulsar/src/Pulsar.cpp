@@ -165,9 +165,9 @@ void Pulsar::Run(GLFWwindow* window)
 	float w = actor3->GetWidth() * actor3->GetScale().x;
 	float h = actor3->GetHeight() * actor3->GetScale().y;
 	tessel->PushBackGlobals({
-		std::make_shared<Transformable2D>(TransformableProxy2D({ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} })),
-		std::make_shared<Transformable2D>(TransformableProxy2D({ {w, 0.0f}, 0.0f, {1.0f, 1.0f} })),
-		std::make_shared<Transformable2D>(TransformableProxy2D({ {2.0f * w, 0.0f}, 0.5f, {1.0f, 1.0f} }))
+		{ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} },
+		{ {w, 0.0f}, 0.0f, {1.0f, 1.0f} },
+		{ {2.0f * w, 0.0f}, 0.5f, {1.0f, 1.0f} }
 	});
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(tessel.get(), 10);
 
@@ -179,24 +179,24 @@ void Pulsar::Run(GLFWwindow* window)
 			{1.0f, 1.0f, 1.0f, 1.0f},
 			{0.0f, 0.0f, 0.0f, 0.0f},
 			{0.0f, 0.0f, 0.0f, 0.0f},
-			});
+		});
 	}
 
 	std::shared_ptr<ActorTesselation2D> tesselVertical(std::make_shared<ActorTesselation2D>(tessel));
 	Renderer::GetCanvasLayer(0)->OnDetach(tessel.get());
 	Renderer::GetCanvasLayer(0)->OnAttach(tesselVertical.get());
 	tesselVertical->PushBackGlobals({
-		std::shared_ptr<Transformable2D>(new TransformableProxy2D({ {0.0f, 0}, 0.0f, {1.0f, 1.0f} })),
-		std::shared_ptr<Transformable2D>(new TransformableProxy2D({ {0.0f, -h}, 0.0f, {1.0f, 1.0f} })),
-		std::shared_ptr<Transformable2D>(new TransformableProxy2D({ {0.0f, -2 * h}, 0.5f, {1.0f, 1.0f}}))
+		{ {0.0f, 0}, 0.0f, {1.0f, 1.0f} },
+		{ {0.0f, -h}, 0.0f, {1.0f, 1.0f} },
+		{ {0.0f, -2 * h}, 0.5f, {1.0f, 1.0f} }
 	});
 	
 	std::shared_ptr<ActorTesselation2D> tesselDiagonal(std::make_shared<ActorTesselation2D>(tesselVertical));
 	Renderer::GetCanvasLayer(0)->OnDetach(tesselVertical.get());
 	Renderer::GetCanvasLayer(0)->OnAttach(tesselDiagonal.get());
 	tesselDiagonal->PushBackGlobals({
-		std::shared_ptr<Transformable2D>(new TransformableProxy2D({ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} })),
-		std::shared_ptr<Transformable2D>(new TransformableProxy2D({ {-0.5f * w, 0.5f * h}, -0.8f, {0.75f, -0.75f} })),
+		{ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} },
+		{ {-0.5f * w, 0.5f * h}, -0.8f, {0.75f, -0.75f} }
 	});
 
 	actor2->CropToRelativeRect({ 0.3f, 0.4f, 0.4f, 0.55f });
@@ -329,10 +329,11 @@ void Pulsar::Run(GLFWwindow* window)
 	if (loadTileMap("res/assets/tilemap.toml", tilemap) != LOAD_STATUS::OK)
 		ASSERT(false);
 
-	//tilemap->SetTransform({ {100.0f, 200.0f}, 0.3f, { 5.0f, 8.0f } });
-	//tilemap->Insert(4, 0, 1);
+	//tilemap->TransformerRef()->SetLocalTransforms({{100.0f, 200.0f}, 0.3f, {5.0f, 8.0f}});
+	tilemap->TransformerRef()->SetTransform({{100.0f, 200.0f}, 0.3f, {5.0f, 8.0f}});
+	tilemap->Insert(4, 0, 1);
 
-	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
+	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 	//Renderer::GetCanvasLayer(11)->OnAttach(tesselDiagonal.get());
 	tesselDiagonal->TransformRef()->SetPosition(-400, 300);
 	tessel->TransformRef()->SetScale(0.6f, 0.6f);
@@ -361,11 +362,11 @@ void Pulsar::Run(GLFWwindow* window)
 	second.OperateLocalScales([](glm::vec2& scale) { scale *= 0.2f; });
 	second.SetLocalPositions({ 0.0f, -30.0f });
 
-	Renderer::GetCanvasLayer(11)->OnAttach(root.get());
+/*	Renderer::GetCanvasLayer(11)->OnAttach(root.get());
 	Renderer::GetCanvasLayer(11)->OnAttach(child.get());
 	Renderer::GetCanvasLayer(11)->OnAttach(grandchild.get());
 	Renderer::GetCanvasLayer(11)->OnAttach(child2.get());
-	Renderer::GetCanvasLayer(11)->OnAttach(grandchild2.get());
+	Renderer::GetCanvasLayer(11)->OnAttach(grandchild2.get());*/
 
 	for (;;)
 	{

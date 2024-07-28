@@ -5,35 +5,35 @@
 
 class MultiTransformer2D : public Transformable2D
 {
-	std::shared_ptr<Transformable2D> m_Parent;
-	std::vector<std::shared_ptr<Transformable2D>> m_Children;
+	std::weak_ptr<Transformable2D> m_Parent;
+	std::vector<std::weak_ptr<Transformable2D>> m_Children;
 	std::vector<Transform2D> m_Locals;
 
 public:
 	MultiTransformer2D() = default;
-	MultiTransformer2D(const std::shared_ptr<Transformable2D>& parent);
-	MultiTransformer2D(std::shared_ptr<Transformable2D>&& parent);
-	MultiTransformer2D(const std::shared_ptr<Transformable2D>& parent, const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transforms = true);
-	MultiTransformer2D(std::shared_ptr<Transformable2D>&& parent, std::vector<std::shared_ptr<Transformable2D>>&& children, bool discard_old_transforms = true);
-	MultiTransformer2D(const std::shared_ptr<Transformable2D>& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms = true);
-	MultiTransformer2D(std::shared_ptr<Transformable2D>&& parent, std::vector<Transform2D>&& locals, bool discard_old_transforms = true);
+	MultiTransformer2D(const std::weak_ptr<Transformable2D>& parent);
+	MultiTransformer2D(std::weak_ptr<Transformable2D>&& parent);
+	MultiTransformer2D(const std::weak_ptr<Transformable2D>& parent, const std::vector<std::weak_ptr<Transformable2D>>& children, bool discard_old_transforms = true);
+	MultiTransformer2D(std::weak_ptr<Transformable2D>&& parent, std::vector<std::weak_ptr<Transformable2D>>&& children, bool discard_old_transforms = true);
+	MultiTransformer2D(const std::weak_ptr<Transformable2D>& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms = true);
+	MultiTransformer2D(std::weak_ptr<Transformable2D>&& parent, std::vector<Transform2D>&& locals, bool discard_old_transforms = true);
 	MultiTransformer2D(const MultiTransformer2D&);
 	MultiTransformer2D(MultiTransformer2D&&) noexcept;
 	MultiTransformer2D& operator=(const MultiTransformer2D&);
 	MultiTransformer2D& operator=(MultiTransformer2D&&) noexcept;
 
-	inline void SetParent(const std::shared_ptr<Transformable2D>& parent) { m_Parent = parent; }
-	inline void SetParent(std::shared_ptr<Transformable2D>&& parent) { m_Parent = std::move(parent); }
+	inline void SetParent(const std::weak_ptr<Transformable2D>& parent) { m_Parent = parent; }
+	inline void SetParent(std::weak_ptr<Transformable2D>&& parent) { m_Parent = std::move(parent); }
 
-	inline Transform2D GetTransform() const override { return m_Parent->GetTransform(); };
-	inline glm::vec2 GetPosition() const override { return m_Parent->GetPosition(); }
-	inline glm::float32 GetRotation() const override { return m_Parent->GetRotation(); }
-	inline glm::vec2 GetScale() const override { return m_Parent->GetScale(); }
+	inline Transform2D GetTransform() const override { WEAK_LOCK_CHECK(m_Parent, p) return p->GetTransform(); };
+	inline glm::vec2 GetPosition() const override { WEAK_LOCK_CHECK(m_Parent, p) return p->GetPosition(); }
+	inline glm::float32 GetRotation() const override { WEAK_LOCK_CHECK(m_Parent, p) return p->GetRotation(); }
+	inline glm::vec2 GetScale() const override { WEAK_LOCK_CHECK(m_Parent, p) return p->GetScale(); }
 
-	inline void OperateTransform(const std::function<void(Transform2D& position)>& op) { m_Parent->OperateTransform(op); SyncGlobalWithParent(); }
-	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) { m_Parent->OperatePosition(op); SyncGlobalWithParentPositions(); }
-	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) { m_Parent->OperateRotation(op); SyncGlobalWithParentRotations(); }
-	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) { m_Parent->OperateScale(op); SyncGlobalWithParentScales(); }
+	inline void OperateTransform(const std::function<void(Transform2D& position)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperateTransform(op); SyncGlobalWithParent(); }
+	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperatePosition(op); SyncGlobalWithParentPositions(); }
+	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperateRotation(op); SyncGlobalWithParentRotations(); }
+	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperateScale(op); SyncGlobalWithParentScales(); }
 
 	void SetLocalTransforms(const Transform2D& tr) { for (size_t i = 0; i < m_Locals.size(); i++) SetLocalTransform(i, tr); }
 	inline std::vector<Transform2D> GetLocalTransforms() const { return m_Locals; }
@@ -94,25 +94,25 @@ public:
 	std::vector<glm::vec2> GetGlobalScales() const;
 
 	void SetGlobalTransform(size_t i, const Transform2D& tr);
-	inline Transform2D GetGlobalTransform(size_t i) const { return m_Children[i]->GetTransform(); }
+	inline Transform2D GetGlobalTransform(size_t i) const { WEAK_LOCK_CHECK(m_Children[i], c) return c->GetTransform(); }
 	void SetGlobalPosition(size_t i, const glm::vec2& pos);
 	void OperateGlobalPosition(size_t i, const std::function<void(glm::vec2& position)>&);
-	inline glm::vec2 GetGlobalPosition(size_t i) const { return m_Children[i]->GetTransform().position; }
+	inline glm::vec2 GetGlobalPosition(size_t i) const { WEAK_LOCK_CHECK(m_Children[i], c) return c->GetTransform().position; }
 	void SetGlobalRotation(size_t i, const glm::float32& rot);
 	void OperateGlobalRotation(size_t i, const std::function<void(glm::float32& rotation)>&);
-	inline glm::float32 GetGlobalRotation(size_t i) const { return m_Children[i]->GetTransform().rotation; }
+	inline glm::float32 GetGlobalRotation(size_t i) const { WEAK_LOCK_CHECK(m_Children[i], c) return c->GetTransform().rotation; }
 	void SetGlobalScale(size_t i, const glm::vec2& sc);
 	void OperateGlobalScale(size_t i, const std::function<void(glm::vec2& scale)>&);
-	inline glm::vec2 GetGlobalScale(size_t i) const { return m_Children[i]->GetTransform().scale; }
+	inline glm::vec2 GetGlobalScale(size_t i) const { WEAK_LOCK_CHECK(m_Children[i], c) return c->GetTransform().scale; }
 
-	void PushBackGlobal(const std::shared_ptr<Transformable2D>& child, bool discard_old_transform = true);
-	void PushBackGlobal(std::shared_ptr<Transformable2D>&& child, bool discard_old_transform = true);
-	void PushBackLocal(const Transform2D& local, bool discard_old_transform = true);
-	void PushBackGlobals(const std::vector<std::shared_ptr<Transformable2D>>& children, bool discard_old_transform = true);
-	void PushBackGlobals(std::vector<std::shared_ptr<Transformable2D>>&& children, bool discard_old_transform = true);
-	void PushBackLocals(const std::vector<Transform2D>& locals, bool discard_old_transform = true);
+	void PushBackGlobal(const std::weak_ptr<Transformable2D>& child, bool discard_old_transform = true);
+	void PushBackGlobal(std::weak_ptr<Transformable2D>&& child, bool discard_old_transform = true);
+	void PushBackGlobals(const std::vector<std::weak_ptr<Transformable2D>>& children, bool discard_old_transform = true);
+	void PushBackGlobals(std::vector<std::weak_ptr<Transformable2D>>&& children, bool discard_old_transform = true);
+	std::shared_ptr<TransformableProxy2D> PushBackLocal(const Transform2D& local, bool discard_old_transform = true);
+	std::vector<std::shared_ptr<TransformableProxy2D>> PushBackLocals(const std::vector<Transform2D>& locals, bool discard_old_transform = true);
 	void Remove(size_t i);
-	void Remove(const std::vector<std::shared_ptr<Transformable2D>>::iterator& where);
-	std::vector<std::shared_ptr<Transformable2D>>::iterator Find(const std::shared_ptr<Transformable2D>& child);
+	void Remove(const std::vector<std::weak_ptr<Transformable2D>>::iterator& where);
+	std::vector<std::weak_ptr<Transformable2D>>::iterator Find(const std::weak_ptr<Transformable2D>& child);
 	inline size_t Size() const { return m_Locals.size(); }
 };

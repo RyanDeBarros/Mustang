@@ -24,6 +24,8 @@ public:
 	inline void SetRotation(float r) { OperateRotation([r](glm::float32& rotation) { rotation = r; }); }
 	inline void SetScale(float sx, float sy) { OperateScale([sx, sy](glm::vec2& scale) { scale = { sx, sy }; }); }
 	inline void SetScale(const glm::vec2& sc) { OperateScale([&sc](glm::vec2& scale) { scale = sc; }); }
+
+	inline virtual bool operator==(const Transformable2D& other) const { return GetTransform() == other.GetTransform(); }
 };
 
 class TransformableProxy2D : public Transformable2D
@@ -47,8 +49,6 @@ public:
 	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); }
 	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform.rotation); }
 	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); }
-
-	inline virtual bool operator==(const TransformableProxy2D& other) const { return m_Transform == other.m_Transform; }
 };
 
 #ifndef WEAK_LOCK_CHECK
@@ -57,6 +57,8 @@ auto lock_ptr = weak_ptr.lock();\
 if (!lock_ptr)\
 	throw MissingWeakReference();
 #endif
+
+inline bool operator==(const std::weak_ptr<Transformable2D>& lhs, const std::weak_ptr<Transformable2D>& rhs) { return !lhs.owner_before(rhs) && !rhs.owner_before(lhs); }
 
 // TODO common Pulsar exception base class?
 

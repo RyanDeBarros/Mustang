@@ -13,13 +13,13 @@ ActorTesselation2D::ActorTesselation2D(std::shared_ptr<ActorRenderBase2D>&& acto
 }
 
 //ActorTesselation2D::ActorTesselation2D(const ActorTesselation2D& other)
-//	: m_Actor(other.m_Actor), ActorSequencer2D(other), TransformableProxy2D(other), m_Transformer(other.m_Transformer)
+//	: m_Actor(other.m_Actor), ActorSequencer2D(other), TransformableProxy2D(other), m_Transformer(other.m_Transformer), m_TransformsList(other.m_TransformsList)
 //{
 //	BindFunctions();
 //}
 
 ActorTesselation2D::ActorTesselation2D(ActorTesselation2D&& other) noexcept
-	: m_Actor(std::move(other.m_Actor)), ActorSequencer2D(std::move(other)), m_Transform(std::move(other.m_Transform)), m_Transformer(std::move(other.m_Transformer))
+	: m_Actor(std::move(other.m_Actor)), ActorSequencer2D(std::move(other)), m_Transform(std::move(other.m_Transform)), m_Transformer(std::move(other.m_Transformer)), m_TransformsList(std::move(other.m_TransformsList))
 {
 	BindFunctions();
 }
@@ -28,6 +28,7 @@ ActorTesselation2D::ActorTesselation2D(ActorTesselation2D&& other) noexcept
 //{
 //	m_Actor = other.m_Actor;
 //	m_Transformer = other.m_Transformer;
+//	m_TransformsList = other.m_TransformsList;
 //	BindFunctions();
 //	ActorSequencer2D::operator=(other);
 //	TransformableProxy2D::operator=(other);
@@ -39,6 +40,7 @@ ActorTesselation2D& ActorTesselation2D::operator=(ActorTesselation2D&& other) no
 	m_Actor = std::move(other.m_Actor);
 	m_Transform = std::move(other.m_Transform);
 	m_Transformer = std::move(other.m_Transformer);
+	m_TransformsList = std::move(other.m_TransformsList);
 	BindFunctions();
 	ActorSequencer2D::operator=(std::move(other));
 	return *this;
@@ -72,6 +74,35 @@ void ActorTesselation2D::BindFunctions()
 
 ActorTesselation2D::~ActorTesselation2D()
 {
+}
+
+void ActorTesselation2D::PushBackGlobal(const Transform2D& child)
+{
+	std::shared_ptr<TransformableProxy2D> addition(std::make_shared<TransformableProxy2D>(child));
+	m_Transformer.PushBackGlobal(addition, false);
+	m_TransformsList.push_back(addition);
+}
+
+void ActorTesselation2D::PushBackGlobals(const std::vector<Transform2D>& children)
+{
+	std::vector<std::shared_ptr<TransformableProxy2D>> additions;
+	for (const auto& child : children)
+	{
+		std::shared_ptr<TransformableProxy2D> addition(std::make_shared<TransformableProxy2D>(child));
+		m_Transformer.PushBackGlobal(addition, false);
+		additions.push_back(addition);
+	}
+}
+
+void ActorTesselation2D::PushBackLocal(const Transform2D& local)
+{
+	m_TransformsList.push_back(m_Transformer.PushBackLocal(local, false));
+}
+
+void ActorTesselation2D::PushBackLocals(const std::vector<Transform2D>& locals)
+{
+	std::vector<std::shared_ptr<TransformableProxy2D>> additions(m_Transformer.PushBackLocals(locals, false));
+	m_TransformsList.insert(m_TransformsList.end(), additions.begin(), additions.end());
 }
 
 ActorPrimitive2D* const ActorTesselation2D::operator[](int i)
