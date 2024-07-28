@@ -30,10 +30,10 @@ public:
 
 	inline bool IsVisible() const { return (m_Status & 1) > 0; }
 
-	inline void OperateTransform(const std::function<void(Transform2D& transform)>& op) override { op(*m_Transform); m_Status |= 0b110; }
-	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform->position); FlushPosition(); }
-	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform->rotation); FlushRotation(); }
-	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform->scale); FlushScale(); }
+	inline void OperateTransform(const std::function<void(Transform2D& transform)>& op) override { op(m_Transform); m_Status |= 0b110; }
+	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); FlushPosition(); }
+	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform.rotation); FlushRotation(); }
+	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); FlushScale(); }
 
 	inline void SetShaderHandle(ShaderHandle handle) { m_Render.model.shader = handle; }
 	inline void SetTextureHandle(TextureHandle handle) { m_Render.textureHandle = handle; }

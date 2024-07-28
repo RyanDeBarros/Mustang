@@ -104,8 +104,8 @@ void DebugPolygon::CheckStatus()
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
 		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 		{
-			m_Renderable.vertexBufferData[i * stride] = static_cast<GLfloat>(m_Transform->position.x);
-			m_Renderable.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(m_Transform->position.y);
+			m_Renderable.vertexBufferData[i * stride	] = static_cast<GLfloat>(m_Transform.position.x);
+			m_Renderable.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(m_Transform.position.y);
 		}
 	}
 	// update TransformRS
@@ -113,7 +113,7 @@ void DebugPolygon::CheckStatus()
 	{
 		m_Status &= ~0b10000;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
-		glm::mat2 condensed_rs_matrix = Transform::CondensedRS(*m_Transform);
+		glm::mat2 condensed_rs_matrix = Transform::CondensedRS(m_Transform);
 		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 		{
 			m_Renderable.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);

@@ -21,6 +21,6 @@ void LayerView2D::PassVPUniform(ShaderHandle handle) const
 
 void LayerView2D::UpdateVP()
 {
-	m_VP = m_ProjectionMatrix * Transform::ToInverseMatrix(*m_Transform);
+	m_VP = m_ProjectionMatrix * Transform::ToInverseMatrix(m_Transform);
 	shaderCache.clear();
 }

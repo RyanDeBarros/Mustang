@@ -29,27 +29,24 @@ public:
 class TransformableProxy2D : public Transformable2D
 {
 protected:
-	// TODO don't use shared_ptr?
-	std::shared_ptr<Transform2D> m_Transform;
+	Transform2D m_Transform;
 
 public:
 	TransformableProxy2D(const Transform2D& transform = {});
-	TransformableProxy2D(const std::shared_ptr<Transform2D>& transform);
-	TransformableProxy2D(std::shared_ptr<Transform2D>&& transform);
 	TransformableProxy2D(const TransformableProxy2D&);
 	TransformableProxy2D(TransformableProxy2D&&) noexcept;
 	TransformableProxy2D& operator=(const TransformableProxy2D&);
 	TransformableProxy2D& operator=(TransformableProxy2D&&) noexcept;
 
-	inline Transform2D GetTransform() const override { return *m_Transform; };
-	inline glm::vec2 GetPosition() const override { return m_Transform->position; }
-	inline glm::float32 GetRotation() const override { return m_Transform->rotation; }
-	inline glm::vec2 GetScale() const override { return m_Transform->scale; }
+	inline Transform2D GetTransform() const override { return m_Transform; };
+	inline glm::vec2 GetPosition() const override { return m_Transform.position; }
+	inline glm::float32 GetRotation() const override { return m_Transform.rotation; }
+	inline glm::vec2 GetScale() const override { return m_Transform.scale; }
 
-	inline virtual void OperateTransform(const std::function<void(Transform2D& position)>& op) override { op(*m_Transform); }
-	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform->position); }
-	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform->rotation); }
-	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform->scale); }
+	inline virtual void OperateTransform(const std::function<void(Transform2D& position)>& op) override { op(m_Transform); }
+	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); }
+	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform.rotation); }
+	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); }
 
-	inline virtual bool operator==(const TransformableProxy2D& other) const { return *m_Transform == *other.m_Transform; }
+	inline virtual bool operator==(const TransformableProxy2D& other) const { return m_Transform == other.m_Transform; }
 };

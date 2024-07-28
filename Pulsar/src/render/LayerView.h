@@ -18,10 +18,10 @@ public:
 	LayerView2D(const LayerView2D&) = delete;
 	LayerView2D(LayerView2D&&) = delete;
 
-	inline virtual void OperateTransform(const std::function<void(Transform2D& position)>& op) override { op(*m_Transform); UpdateVP(); }
-	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform->position); UpdateVP(); }
-	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform->rotation); UpdateVP(); }
-	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform->scale); UpdateVP(); }
+	inline virtual void OperateTransform(const std::function<void(Transform2D& position)>& op) override { op(m_Transform); UpdateVP(); }
+	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); UpdateVP(); }
+	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform.rotation); UpdateVP(); }
+	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); UpdateVP(); }
 
 private:
 	friend class CanvasLayer;

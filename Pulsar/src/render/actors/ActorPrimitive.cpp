@@ -60,15 +60,15 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 		m_Status &= ~0b10;
 		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 		{
-			m_Render.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(m_Transform->position.x);
-			m_Render.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(m_Transform->position.y);
+			m_Render.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(m_Transform.position.x);
+			m_Render.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(m_Transform.position.y);
 		}
 	}
 	// update TransformRS
 	if ((m_Status & 0b100) == 0b100)
 	{
 		m_Status &= ~0b100;
-		glm::mat2 condensed_rs_matrix = Transform::CondensedRS(*m_Transform);
+		glm::mat2 condensed_rs_matrix = Transform::CondensedRS(m_Transform);
 		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 		{
 			m_Render.vertexBufferData[i * stride + 3] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);
