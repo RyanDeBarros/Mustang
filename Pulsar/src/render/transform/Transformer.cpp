@@ -1,6 +1,6 @@
 #include "Transformer.h"
 
-Transformer2D::Transformer2D(const std::shared_ptr<Transformable2D>& parent, const std::shared_ptr<Transformable2D>& child, bool discard_old_transform)
+Transformer2D::Transformer2D(const std::weak_ptr<Transformable2D>& parent, const std::weak_ptr<Transformable2D>& child, bool discard_old_transform)
 	: m_Parent(parent), m_Child(child)
 {
 	if (discard_old_transform)
@@ -9,7 +9,7 @@ Transformer2D::Transformer2D(const std::shared_ptr<Transformable2D>& parent, con
 		SyncLocalWithGlobal();
 }
 
-Transformer2D::Transformer2D(const std::shared_ptr<Transformable2D>& parent, std::shared_ptr<Transformable2D>&& child, bool discard_old_transform)
+Transformer2D::Transformer2D(const std::weak_ptr<Transformable2D>& parent, std::weak_ptr<Transformable2D>&& child, bool discard_old_transform)
 	: m_Parent(parent), m_Child(std::move(child))
 {
 	if (discard_old_transform)
@@ -18,7 +18,7 @@ Transformer2D::Transformer2D(const std::shared_ptr<Transformable2D>& parent, std
 		SyncLocalWithGlobal();
 }
 
-Transformer2D::Transformer2D(std::shared_ptr<Transformable2D>&& parent, const std::shared_ptr<Transformable2D>& child, bool discard_old_transform)
+Transformer2D::Transformer2D(std::weak_ptr<Transformable2D>&& parent, const std::weak_ptr<Transformable2D>& child, bool discard_old_transform)
 	: m_Parent(std::move(parent)), m_Child(child)
 {
 	if (discard_old_transform)
@@ -27,7 +27,7 @@ Transformer2D::Transformer2D(std::shared_ptr<Transformable2D>&& parent, const st
 		SyncLocalWithGlobal();
 }
 
-Transformer2D::Transformer2D(std::shared_ptr<Transformable2D>&& parent, std::shared_ptr<Transformable2D>&& child, bool discard_old_transform)
+Transformer2D::Transformer2D(std::weak_ptr<Transformable2D>&& parent, std::weak_ptr<Transformable2D>&& child, bool discard_old_transform)
 	: m_Parent(std::move(parent)), m_Child(std::move(child))
 {
 	if (discard_old_transform)
@@ -36,7 +36,7 @@ Transformer2D::Transformer2D(std::shared_ptr<Transformable2D>&& parent, std::sha
 		SyncLocalWithGlobal();
 }
 
-Transformer2D::Transformer2D(const std::shared_ptr<Transformable2D>& parent, const Transform2D& local, bool discard_old_transform)
+Transformer2D::Transformer2D(const std::weak_ptr<Transformable2D>& parent, const Transform2D& local, bool discard_old_transform)
 	: m_Parent(parent), m_Local(local)
 {
 	m_Child = std::make_shared<Transformable2D>();
@@ -46,7 +46,7 @@ Transformer2D::Transformer2D(const std::shared_ptr<Transformable2D>& parent, con
 		SyncGlobalWithLocal();
 }
 
-Transformer2D::Transformer2D(std::shared_ptr<Transformable2D>&& parent, const Transform2D& local, bool discard_old_transform)
+Transformer2D::Transformer2D(std::weak_ptr<Transformable2D>&& parent, const Transform2D& local, bool discard_old_transform)
 	: m_Parent(std::move(parent)), m_Local(local)
 {
 	m_Child = std::make_shared<Transformable2D>();
@@ -91,135 +91,180 @@ void Transformer2D::SetLocalTransform(const Transform2D& tr)
 void Transformer2D::SetLocalPosition(const glm::vec2& pos)
 {
 	m_Local.position = pos;
-	m_Child->SetPosition(m_Parent->GetPosition() + Transform::Rotation(m_Parent->GetRotation()) * (m_Parent->GetScale() * m_Local.position));
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Local.position));
 }
 
 void Transformer2D::OperateLocalPosition(const std::function<void(glm::vec2& position)>& op)
 {
 	op(m_Local.position);
-	m_Child->SetPosition(m_Parent->GetPosition() + Transform::Rotation(m_Parent->GetRotation()) * (m_Parent->GetScale() * m_Local.position));
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Local.position));
 }
 
 void Transformer2D::SetLocalRotation(const glm::float32& rot)
 {
 	m_Local.rotation = rot;
-	m_Child->SetRotation(m_Parent->GetRotation() + m_Local.rotation);
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetRotation(p->GetRotation() + m_Local.rotation);
 }
 
 void Transformer2D::OperateLocalRotation(const std::function<void(glm::float32& rotation)>& op)
 {
 	op(m_Local.rotation);
-	m_Child->SetRotation(m_Parent->GetRotation() + m_Local.rotation);
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetRotation(p->GetRotation() + m_Local.rotation);
 }
 
 void Transformer2D::SetLocalScale(const glm::vec2& sc)
 {
 	m_Local.scale = sc;
-	m_Child->SetScale(m_Parent->GetScale() * m_Local.scale);
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetScale(p->GetScale() * m_Local.scale);
 }
 
 void Transformer2D::OperateLocalScale(const std::function<void(glm::vec2& scale)>& op)
 {
 	op(m_Local.scale);
-	m_Child->SetScale(m_Parent->GetScale() * m_Local.scale);
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetScale(p->GetScale() * m_Local.scale);
 }
 
 void Transformer2D::SyncGlobalWithLocal()
 {
-	m_Child->SetTransform(Transform::AbsTo(m_Local, m_Parent->GetTransform()));
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetTransform(Transform::AbsTo(m_Local, p->GetTransform()));
 }
 
 void Transformer2D::SyncLocalWithGlobal()
 {
-	m_Local = Transform::RelTo(m_Child->GetTransform(), m_Parent->GetTransform());
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	m_Local = Transform::RelTo(c->GetTransform(), p->GetTransform());
 }
 
 void Transformer2D::SyncGlobalWithParent()
 {
-	m_Child->SetPosition(m_Parent->GetPosition() + Transform::Rotation(m_Parent->GetRotation()) * (m_Parent->GetScale() * m_Local.position));
-	m_Child->SetRotation(m_Parent->GetRotation() + m_Local.rotation);
-	m_Child->SetScale(m_Parent->GetScale() * m_Local.scale);
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Local.position));
+	c->SetRotation(p->GetRotation() + m_Local.rotation);
+	c->SetScale(p->GetScale() * m_Local.scale);
 }
 
 void Transformer2D::SyncGlobalWithParentPosition()
 {
-	m_Child->SetPosition(m_Parent->GetPosition() + Transform::Rotation(m_Parent->GetRotation()) * (m_Parent->GetScale() * m_Local.position));
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Local.position));
 }
 
 void Transformer2D::SyncGlobalWithParentRotation()
 {
-	m_Child->SetPosition(m_Parent->GetPosition() + Transform::Rotation(m_Parent->GetRotation()) * (m_Parent->GetScale() * m_Local.position));
-	m_Child->SetRotation(m_Parent->GetRotation() + m_Local.rotation);
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Local.position));
+	c->SetRotation(p->GetRotation() + m_Local.rotation);
 }
 
 void Transformer2D::SyncGlobalWithParentScale()
 {
-	m_Child->SetPosition(m_Parent->GetPosition() + Transform::Rotation(m_Parent->GetRotation()) * (m_Parent->GetScale() * m_Local.position));
-	m_Child->SetScale(m_Parent->GetScale() * m_Local.scale);
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Local.position));
+	c->SetScale(p->GetScale() * m_Local.scale);
 }
 
 void Transformer2D::SyncLocalWithParent()
 {
-	m_Local.position = (Transform::Rotation(-m_Parent->GetRotation()) * (m_Child->GetPosition() - m_Parent->GetPosition())) / m_Parent->GetScale();
-	m_Local.rotation = m_Child->GetRotation() - m_Parent->GetRotation();
-	m_Local.scale = m_Child->GetScale() / m_Parent->GetScale();
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	m_Local.position = (Transform::Rotation(-p->GetRotation()) * (c->GetPosition() - p->GetPosition())) / p->GetScale();
+	m_Local.rotation = c->GetRotation() - p->GetRotation();
+	m_Local.scale = c->GetScale() / p->GetScale();
 }
 
 void Transformer2D::SyncLocalWithParentPosition()
 {
-	m_Local.position = (Transform::Rotation(-m_Parent->GetRotation()) * (m_Child->GetPosition() - m_Parent->GetPosition())) / m_Parent->GetScale();
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	m_Local.position = (Transform::Rotation(-p->GetRotation()) * (c->GetPosition() - p->GetPosition())) / p->GetScale();
 }
 
 void Transformer2D::SyncLocalWithParentRotation()
 {
-	m_Local.position = (Transform::Rotation(-m_Parent->GetRotation()) * (m_Child->GetPosition() - m_Parent->GetPosition())) / m_Parent->GetScale();
-	m_Local.rotation = m_Child->GetRotation() - m_Parent->GetRotation();
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	m_Local.position = (Transform::Rotation(-p->GetRotation()) * (c->GetPosition() - p->GetPosition())) / p->GetScale();
+	m_Local.rotation = c->GetRotation() - p->GetRotation();
 }
 
 void Transformer2D::SyncLocalWithParentScale()
 {
-	m_Local.position = (Transform::Rotation(-m_Parent->GetRotation()) * (m_Child->GetPosition() - m_Parent->GetPosition())) / m_Parent->GetScale();
-	m_Local.scale = m_Child->GetScale() / m_Parent->GetScale();
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	m_Local.position = (Transform::Rotation(-p->GetRotation()) * (c->GetPosition() - p->GetPosition())) / p->GetScale();
+	m_Local.scale = c->GetScale() / p->GetScale();
 }
 
 void Transformer2D::SetGlobalTransform(const Transform2D& tr)
 {
-	m_Child->SetTransform(tr);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetTransform(tr);
 	SyncLocalWithGlobal();
 }
 
 void Transformer2D::SetGlobalPosition(const glm::vec2& pos)
 {
-	m_Child->SetPosition(pos);
-	m_Local.position = (Transform::Rotation(-m_Parent->GetRotation()) * (m_Child->GetPosition() - m_Parent->GetPosition())) / m_Parent->GetScale();
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetPosition(pos);
+	m_Local.position = (Transform::Rotation(-p->GetRotation()) * (c->GetPosition() - p->GetPosition())) / p->GetScale();
 }
 
 void Transformer2D::OperateGlobalPosition(const std::function<void(glm::vec2& position)>& op)
 {
-	m_Child->OperatePosition(op);
-	m_Local.position = (Transform::Rotation(-m_Parent->GetRotation()) * (m_Child->GetPosition() - m_Parent->GetPosition())) / m_Parent->GetScale();
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->OperatePosition(op);
+	m_Local.position = (Transform::Rotation(-p->GetRotation()) * (c->GetPosition() - p->GetPosition())) / p->GetScale();
 }
 
 void Transformer2D::SetGlobalRotation(const glm::float32& rot)
 {
-	m_Child->SetRotation(rot);
-	m_Local.rotation = m_Child->GetRotation() - m_Parent->GetRotation();
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetRotation(rot);
+	m_Local.rotation = c->GetRotation() - p->GetRotation();
 }
 
 void Transformer2D::OperateGlobalRotation(const std::function<void(glm::float32& rotation)>& op)
 {
-	m_Child->OperateRotation(op);
-	m_Local.rotation = m_Child->GetRotation() - m_Parent->GetRotation();
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->OperateRotation(op);
+	m_Local.rotation = c->GetRotation() - p->GetRotation();
 }
 
 void Transformer2D::SetGlobalScale(const glm::vec2& sc)
 {
-	m_Child->SetScale(sc);
-	m_Local.scale = m_Child->GetScale() / m_Parent->GetScale();
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->SetScale(sc);
+	m_Local.scale = c->GetScale() / p->GetScale();
 }
 
 void Transformer2D::OperateGlobalScale(const std::function<void(glm::vec2& scale)>& op)
 {
-	m_Child->OperateScale(op);
-	m_Local.scale = m_Child->GetScale() / m_Parent->GetScale();
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->OperateScale(op);
+	m_Local.scale = c->GetScale() / p->GetScale();
 }

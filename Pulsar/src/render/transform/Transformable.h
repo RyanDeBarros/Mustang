@@ -50,3 +50,16 @@ public:
 
 	inline virtual bool operator==(const TransformableProxy2D& other) const { return m_Transform == other.m_Transform; }
 };
+
+#ifndef WEAK_LOCK_CHECK
+#define WEAK_LOCK_CHECK(weak_ptr, lock_ptr)\
+auto lock_ptr = weak_ptr.lock();\
+if (!lock_ptr)\
+	throw MissingWeakReference();
+#endif
+
+// TODO common Pulsar exception base class?
+
+class MissingWeakReference : public std::exception
+{
+};
