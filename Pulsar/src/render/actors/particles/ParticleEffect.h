@@ -6,8 +6,9 @@
 #include "ParticleSubsystem.h"
 #include "../../transform/MultiTransformer.h"
 
+// TODO add global modulation. perhaps use a special Transformer that propogates modulation. A Modulator?
 template<std::unsigned_integral ParticleCount = unsigned short>
-class ParticleEffect : public std::enable_shared_from_this<ParticleEffect<ParticleCount>>
+class ParticleEffect
 {
 	friend class ParticleSubsystem<ParticleCount>;
 	std::vector<std::vector<Particle>> m_Particles;
@@ -33,7 +34,7 @@ public:
 	inline void Reset() { m_TotalPlayed = 0.0f; m_DeltaTime = 0.0f; m_PlayTime = 0.0f; }
 	void PlayFor(real n);
 
-	inline MultiTransformer2D* TransformerRef() { return &m_Transformer; }
+	inline MultiTransformer2D* Transformer() { return &m_Transformer; }
 	inline ParticleSubsystem<ParticleCount>& SubsystemRef(unsigned int i) { return *m_Subsystems[i]; }
 	inline std::shared_ptr<TransformableProxy2D> TransformRef() { return m_Transform; }
 

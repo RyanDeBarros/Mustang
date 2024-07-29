@@ -19,7 +19,7 @@ struct TMElement
 	std::shared_ptr<ActorTesselation2D> tessel;
 };
 
-class TileMap : public ActorRenderBase2D, public std::enable_shared_from_this<TileMap>
+class TileMap : public ActorRenderBase2D
 {
 	Atlas* m_Atlas;
 	std::vector<TMElement> m_Map;
@@ -41,5 +41,5 @@ public:
 	// TODO use typedef instead of size_t
 
 	ActorTesselation2D* const TesselationRef(size_t tessel) const;
-	MultiTransformer2D* TransformerRef() { return &m_Transformer; }
+	MultiTransformer2D* Transformer() { return &m_Transformer; }
 };

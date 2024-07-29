@@ -7,41 +7,41 @@ template class ParticleSubsystem<unsigned short>;
 
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystemData<ParticleCount>& wave_data, ParticleSubsystemIndex subsystem_index)
-	: m_Shape(wave_data.prototypeShape), m_SpawnFunc(wave_data.spawnFunc), m_LifespanFunc(wave_data.lifespanFunc), m_CharacteristicGen(wave_data.characteristicGen), m_TotalSpawn(m_SpawnFunc(1.0f)), m_SubsystemIndex(subsystem_index)
+	: m_Shape(wave_data.prototypeShape), m_SpawnFunc(wave_data.spawnFunc), m_LifespanFunc(wave_data.lifespanFunc), m_CharacteristicGen(wave_data.characteristicGen), m_TotalSpawn(m_SpawnFunc(1.0f)), m_SubsystemIndex(subsystem_index), m_Transform(std::make_shared<TransformableProxy2D>())
 {
 	SetWavePeriod(wave_data.wavePeriod);
 }
 
-//template<std::unsigned_integral ParticleCount>
-//ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystem<ParticleCount>& other)
-//	: m_SpawnFunc(other.m_SpawnFunc), m_LifespanFunc(other.m_LifespanFunc), m_CharacteristicGen(other.m_CharacteristicGen), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(other.m_Shape), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), TransformableProxy2D(other)
-//{
-//}
+template<std::unsigned_integral ParticleCount>
+ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystem<ParticleCount>& other)
+	: m_SpawnFunc(other.m_SpawnFunc), m_LifespanFunc(other.m_LifespanFunc), m_CharacteristicGen(other.m_CharacteristicGen), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(other.m_Shape), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Transform(other.m_Transform)
+{
+}
 
 // TODO throughout project, use std::move and r-value function overloads for std::function parameters, unless they are bound to data.
 
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>::ParticleSubsystem(ParticleSubsystem<ParticleCount>&& other) noexcept
-	: m_SpawnFunc(std::move(other.m_SpawnFunc)), m_LifespanFunc(std::move(other.m_LifespanFunc)), m_CharacteristicGen(std::move(other.m_CharacteristicGen)), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(std::move(other.m_Shape)), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), TransformableProxy2D(std::move(other))
+	: m_SpawnFunc(std::move(other.m_SpawnFunc)), m_LifespanFunc(std::move(other.m_LifespanFunc)), m_CharacteristicGen(std::move(other.m_CharacteristicGen)), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(std::move(other.m_Shape)), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Transform(std::move(other.m_Transform))
 {
 }
 
-//template<std::unsigned_integral ParticleCount>
-//ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(const ParticleSubsystem<ParticleCount>& other)
-//{
-//	m_SpawnFunc = other.m_SpawnFunc;
-//	m_LifespanFunc = other.m_LifespanFunc;
-//	m_CharacteristicGen = other.m_CharacteristicGen;
-//	m_Period = other.m_Period;
-//	m_PeriodInv = other.m_PeriodInv;
-//	m_Shape = other.m_Shape;
-//	m_NumSpawned = other.m_NumSpawned;
-//	m_TotalSpawn = other.m_TotalSpawn;
-//	m_WaveNum = other.m_WaveNum;
-//	m_SubsystemIndex = other.m_SubsystemIndex;
-//	TransformableProxy2D::operator=(other);
-//	return *this;
-//}
+template<std::unsigned_integral ParticleCount>
+ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(const ParticleSubsystem<ParticleCount>& other)
+{
+	m_SpawnFunc = other.m_SpawnFunc;
+	m_LifespanFunc = other.m_LifespanFunc;
+	m_CharacteristicGen = other.m_CharacteristicGen;
+	m_Period = other.m_Period;
+	m_PeriodInv = other.m_PeriodInv;
+	m_Shape = other.m_Shape;
+	m_NumSpawned = other.m_NumSpawned;
+	m_TotalSpawn = other.m_TotalSpawn;
+	m_WaveNum = other.m_WaveNum;
+	m_SubsystemIndex = other.m_SubsystemIndex;
+	m_Transform = other.m_Transform;
+	return *this;
+}
 
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(ParticleSubsystem<ParticleCount>&& other) noexcept
@@ -56,7 +56,7 @@ ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(Pa
 	m_TotalSpawn = other.m_TotalSpawn;
 	m_WaveNum = other.m_WaveNum;
 	m_SubsystemIndex = other.m_SubsystemIndex;
-	TransformableProxy2D::operator=(std::move(other));
+	m_Transform = std::move(other.m_Transform);
 	return *this;
 }
 
@@ -91,5 +91,5 @@ template<std::unsigned_integral ParticleCount>
 void ParticleSubsystem<ParticleCount>::OnSpawn(ParticleEffect<ParticleCount>& psys, const Particles::CHRSeed& seed)
 {
 	std::shared_ptr<DebugPolygon> shape(new DebugPolygon(*m_Shape));
-	psys.AddParticle(m_SubsystemIndex, Particle(shape, Transformer2D(this->shared_from_this(), shape), m_LifespanFunc(seed), m_CharacteristicGen(seed)));
+	psys.AddParticle(m_SubsystemIndex, Particle(shape, Transformer2D(m_Transform, shape), m_LifespanFunc(seed), m_CharacteristicGen(seed)));
 }

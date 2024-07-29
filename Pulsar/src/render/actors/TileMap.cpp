@@ -14,7 +14,7 @@ TileMap::TileMap(TileHandle atlas_handle, const TextureSettings& texture_setting
 		std::shared_ptr<RectRender> rect_render(new RectRender(m_Atlas->SampleSubtile(i, texture_settings, shader, 0, visible)));
 		std::shared_ptr<ActorTesselation2D> tessel(new ActorTesselation2D(rect_render));
 		m_Map.push_back({ std::move(rect_render), tessel });
-		m_Transformer.PushBackGlobal(tessel->TransformRef());
+		m_Transformer.PushBackGlobal(tessel->Transform());
 	}
 	m_Ordering = Permutation(m_Atlas->GetPlacements().size());
 }

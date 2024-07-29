@@ -18,6 +18,9 @@ public:
 	RectRender(RectRender&&) noexcept;
 	RectRender& operator=(const RectRender&);
 	RectRender& operator=(RectRender&&) noexcept;
+	
+	RectRender Clone();
+	void Clone(RectRender&);
 
 	static void DefineRectRenderable();
 
@@ -28,6 +31,7 @@ public:
 	inline float GetUVHeight() const { return m_UVHeight; }
 	inline glm::vec2 GetPivot() const { return m_Pivot; }
 	void SetPivot(float pivotX, float pivotY);
+	inline void SetPivot(const glm::vec2& pivot) { SetPivot(pivot.x, pivot.y); }
 
 	void CropToRect(glm::vec4 rect, int atlas_width, int atlas_height);
 	void CropToRelativeRect(glm::vec4 rect);

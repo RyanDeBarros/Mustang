@@ -16,7 +16,7 @@ ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsyste
 	{
 		std::shared_ptr<ParticleSubsystem<ParticleCount>> subsystem = std::make_shared<ParticleSubsystem<ParticleCount>>(subsys, i);
 		m_Subsystems.push_back(subsystem);
-		m_Transformer.PushBackGlobal(subsystem);
+		m_Transformer.PushBackGlobal(subsystem->m_Transform);
 		m_Particles.push_back({});
 	}
 	Reset();

@@ -32,7 +32,7 @@ RectRender& RectRender::operator=(const RectRender& other)
 {
 	m_UVWidth = other.m_UVWidth;
 	m_UVHeight = other.m_UVHeight;
-	m_Pivot = other.m_Pivot;
+	SetPivot(other.m_Pivot);
 	ActorPrimitive2D::operator=(other);
 	return *this;
 }
@@ -41,18 +41,31 @@ RectRender& RectRender::operator=(RectRender&& other) noexcept
 {
 	m_UVWidth = other.m_UVWidth;
 	m_UVHeight = other.m_UVHeight;
-	m_Pivot = other.m_Pivot;
+	SetPivot(other.m_Pivot);
 	ActorPrimitive2D::operator=(std::move(other));
 	return *this;
+}
+
+RectRender RectRender::Clone()
+{
+	RectRender clone;
+	Clone(clone);
+	return clone;
+}
+
+void RectRender::Clone(RectRender& clone)
+{
+	ActorPrimitive2D::Clone(clone);
+	clone.m_UVWidth = m_UVWidth;
+	clone.m_UVHeight = m_UVHeight;
+	clone.SetPivot(m_Pivot);
 }
 
 void RectRender::DefineRectRenderable()
 {
 	LOAD_STATUS load_status = loadRenderable(_RendererSettings::rect_renderable_filepath.c_str(), rect_renderable);
 	if (load_status != LOAD_STATUS::OK)
-	{
 		Logger::LogErrorFatal("Could not load rect renderable. Load Status = " + std::to_string(static_cast<int>(load_status)));
-	}
 }
 
 void RectRender::SetPivot(float pivotX, float pivotY)
@@ -103,7 +116,7 @@ void RectRender::CropToRelativeRect(glm::vec4 rect)
 
 void RectRender::ResetTransformUVs()
 {
-	SetTransform({});
+	Transform()->SetTransform({});
 	CropToRelativeRect({ 0.0f, 0.0f, 1.0f, 1.0f });
 	SetPivot(0.5f, 0.5f);
 }

@@ -55,7 +55,10 @@ public:
 #define WEAK_LOCK_CHECK(weak_ptr, lock_ptr)\
 auto lock_ptr = weak_ptr.lock();\
 if (!lock_ptr)\
-	throw MissingWeakReference();
+{\
+	Logger::LogError("Tried dereferencing weak pointer.");\
+	throw MissingWeakReference();\
+}
 #endif
 
 inline bool operator==(const std::weak_ptr<Transformable2D>& lhs, const std::weak_ptr<Transformable2D>& rhs) { return !lhs.owner_before(rhs) && !rhs.owner_before(lhs); }

@@ -24,7 +24,7 @@ template<std::unsigned_integral ParticleCount>
 class ParticleEffect;
 
 template<std::unsigned_integral ParticleCount = unsigned short>
-class ParticleSubsystem : public TransformableProxy2D, public std::enable_shared_from_this<ParticleSubsystem<ParticleCount>>
+class ParticleSubsystem
 {
 	CumulativeFunc<ParticleCount> m_SpawnFunc;
 	std::function<real(const Particles::CHRSeed&)> m_LifespanFunc;
@@ -36,12 +36,13 @@ class ParticleSubsystem : public TransformableProxy2D, public std::enable_shared
 	unsigned int m_TotalSpawn;
 	unsigned int m_WaveNum = 0;
 	ParticleSubsystemIndex m_SubsystemIndex;
+	std::shared_ptr<TransformableProxy2D> m_Transform;
 
 public:
 	ParticleSubsystem(const ParticleSubsystemData<ParticleCount>& wave_data, ParticleSubsystemIndex subsystem_index);
-	ParticleSubsystem(const ParticleSubsystem<ParticleCount>&) = delete;
+	ParticleSubsystem(const ParticleSubsystem<ParticleCount>&);
 	ParticleSubsystem(ParticleSubsystem<ParticleCount>&&) noexcept;
-	ParticleSubsystem<ParticleCount>& operator=(const ParticleSubsystem<ParticleCount>&) = delete;
+	ParticleSubsystem<ParticleCount>& operator=(const ParticleSubsystem<ParticleCount>&);
 	ParticleSubsystem<ParticleCount>& operator=(ParticleSubsystem<ParticleCount>&&) noexcept;
 
 	inline void SetWavePeriod(real wave_period) { m_Period = wave_period; m_PeriodInv = 1.0f / m_Period; }

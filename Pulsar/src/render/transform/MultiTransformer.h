@@ -2,6 +2,7 @@
 
 #include "Transform.h"
 #include "Transformable.h"
+#include "Logger.h"
 
 class MultiTransformer2D : public Transformable2D
 {

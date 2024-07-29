@@ -9,7 +9,7 @@
 #include "ActorSequencer.h"
 #include "../transform/MultiTransformer.h"
 
-class ActorTesselation2D : virtual public ActorSequencer2D, public std::enable_shared_from_this<ActorTesselation2D>
+class ActorTesselation2D : virtual public ActorSequencer2D
 {
 private:
 	std::shared_ptr<ActorRenderBase2D> m_Actor;
@@ -39,15 +39,15 @@ private:
 public:
 	ActorTesselation2D(const std::shared_ptr<ActorRenderBase2D>& actor);
 	ActorTesselation2D(std::shared_ptr<ActorRenderBase2D>&& actor);
-	ActorTesselation2D(const ActorTesselation2D&) = delete;
+	ActorTesselation2D(const ActorTesselation2D&);
 	ActorTesselation2D(ActorTesselation2D&&) noexcept;
-	ActorTesselation2D& operator=(const ActorTesselation2D&) = delete;
+	ActorTesselation2D& operator=(const ActorTesselation2D&);
 	ActorTesselation2D& operator=(ActorTesselation2D&&) noexcept;
 	~ActorTesselation2D();
 
 	inline std::shared_ptr<ActorRenderBase2D> ActorRef() const { return m_Actor; }
-	inline std::shared_ptr<TransformableProxy2D> TransformRef() { return m_Transform; }
-	inline MultiTransformer2D* const TransformerRef() { return &m_Transformer; }
+	inline std::shared_ptr<TransformableProxy2D> Transform() { return m_Transform; }
+	inline MultiTransformer2D* const Transformer() { return &m_Transformer; }
 	void PushBackGlobal(const Transform2D& child);
 	void PushBackGlobals(const std::vector<Transform2D>& children);
 	void PushBackLocal(const Transform2D& local);
@@ -59,4 +59,10 @@ public:
 	BufferCounter PrimitiveCount() const override;
 	void OnPreDraw() override;
 	void OnPostDraw() override;
+
+	template<std::derived_from<ActorRenderBase2D> ActorType>
+	inline static std::shared_ptr<ActorTesselation2D> MakeShared(const ActorType& actor)
+	{
+		return std::make_shared<ActorTesselation2D>(std::make_shared<ActorType>(actor));
+	}
 };
