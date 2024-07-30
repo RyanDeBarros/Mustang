@@ -106,21 +106,21 @@ void ActorTesselation2D::PushBackLocals(const std::vector<Transform2D>& locals)
 	m_TransformsList.insert(m_TransformsList.end(), additions.begin(), additions.end());
 }
 
-ActorPrimitive2D* const ActorTesselation2D::operator[](int i)
+ActorPrimitive2D* const ActorTesselation2D::operator[](PrimitiveIndex i)
 {
 	if (i >= static_cast<int>(PrimitiveCount()) || i < 0)
 		return nullptr;
 	return f_operator(i);
 }
 
-ActorPrimitive2D* const ActorTesselation2D::f_prim_operator(ActorTesselation2D* const tessel, int i)
+ActorPrimitive2D* const ActorTesselation2D::f_prim_operator(ActorTesselation2D* const tessel, PrimitiveIndex i)
 {
 	ActorPrimitive2D* const primitive = static_cast<ActorPrimitive2D* const>(tessel->m_Actor.get());
 	primitive->Transform()->SetTransform(Transform::AbsTo(Transform::AbsTo(tessel->m_ActorPreDrawTransforms[0], tessel->m_Transformer.GetLocalTransform(i)), tessel->m_Transform->GetTransform()));
 	return primitive;
 }
 
-ActorPrimitive2D* const ActorTesselation2D::f_sequ_operator(ActorTesselation2D* const tessel, int i)
+ActorPrimitive2D* const ActorTesselation2D::f_sequ_operator(ActorTesselation2D* const tessel, PrimitiveIndex i)
 {
 	ActorSequencer2D* const sequencer = static_cast<ActorSequencer2D* const>(tessel->m_Actor.get());
 	ActorPrimitive2D* const primitive = (*sequencer)[i % tessel->RenderSeqCount()];

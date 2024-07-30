@@ -28,7 +28,7 @@ public:
 	ActorComposite2D& operator=(ActorComposite2D&&) noexcept;
 	~ActorComposite2D();
 
-	ActorPrimitive2D* const operator[](int i) override;
+	ActorPrimitive2D* const operator[](PrimitiveIndex i) override;
 	BufferCounter PrimitiveCount() const override { return static_cast<BufferCounter>(head - tail); }
 
 	void Push(ActorPrimitive2D* primitive);

@@ -19,6 +19,8 @@ struct TMElement
 	std::shared_ptr<ActorTesselation2D> tessel;
 };
 
+typedef size_t TileMapIndex;
+
 class TileMap : public ActorRenderBase2D
 {
 	Atlas* m_Atlas;
@@ -36,10 +38,8 @@ public:
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
 	bool SetOrdering(const Permutation& permutation);
-	void Insert(size_t tessel, float posX, float posY);
+	void Insert(TileMapIndex tessel, float posX, float posY);
 
-	// TODO use typedef instead of size_t
-
-	ActorTesselation2D* const TesselationRef(size_t tessel) const;
+	ActorTesselation2D* const TesselationRef(TileMapIndex tessel) const;
 	MultiTransformer2D* Transformer() { return &m_Transformer; }
 };

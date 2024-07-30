@@ -19,13 +19,13 @@ private:
 
 	std::vector<std::shared_ptr<TransformableProxy2D>> m_TransformsList;
 
-	std::function<ActorPrimitive2D* const(int i)> f_operator;
+	std::function<ActorPrimitive2D* const(PrimitiveIndex i)> f_operator;
 	std::function<BufferCounter()> f_RenderSeqCount;
 	std::function<void()> f_OnPreDraw;
 	std::function<void()> f_OnPostDraw;
 
-	static ActorPrimitive2D* const f_prim_operator(ActorTesselation2D* const, int);
-	static ActorPrimitive2D* const f_sequ_operator(ActorTesselation2D* const, int);
+	static ActorPrimitive2D* const f_prim_operator(ActorTesselation2D* const, PrimitiveIndex);
+	static ActorPrimitive2D* const f_sequ_operator(ActorTesselation2D* const, PrimitiveIndex);
 	static BufferCounter f_prim_RenderSeqCount(ActorTesselation2D const* const);
 	static BufferCounter f_sequ_RenderSeqCount(ActorTesselation2D const* const);
 	static void f_prim_OnPreDraw(ActorTesselation2D * const);
@@ -53,7 +53,7 @@ public:
 	void PushBackLocal(const Transform2D& local);
 	void PushBackLocals(const std::vector<Transform2D>& locals);
 	
-	ActorPrimitive2D* const operator[](int i) override;
+	ActorPrimitive2D* const operator[](PrimitiveIndex i) override;
 	ZIndex GetZIndex() const override;
 	void SetZIndex(ZIndex z) override;
 	BufferCounter PrimitiveCount() const override;
