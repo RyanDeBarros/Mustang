@@ -5,7 +5,6 @@
 #include <functional>
 #include <glm/glm.hpp>
 
-#include "Utils.h"
 #include "../shapes/DebugPolygon.h"
 #include "../../transform/Transformer.h"
 

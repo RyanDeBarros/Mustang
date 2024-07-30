@@ -202,7 +202,10 @@
     <ClCompile Include="src\render\transform\Transform.cpp" />
     <ClCompile Include="src\render\transform\Transformable.cpp" />
     <ClCompile Include="src\render\transform\Transformer.cpp" />
-    <ClCompile Include="src\Utils.cpp" />
+    <ClCompile Include="src\utils\Functors.cpp" />
+    <ClCompile Include="src\utils\Permutation.cpp" />
+    <ClCompile Include="src\utils\Strings.cpp" />
+    <ClCompile Include="src\utils\CommonMath.cpp" />
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
     <ClCompile Include="vendor\stb\stb_image.cpp" />
@@ -252,7 +255,10 @@
     <ClInclude Include="src\render\transform\Transformer.h" />
     <ClInclude Include="src\Typedefs.h" />
     <ClInclude Include="src\Macros.h" />
-    <ClInclude Include="src\Utils.h" />
+    <ClInclude Include="src\utils\Functors.h" />
+    <ClInclude Include="src\utils\Permutation.h" />
+    <ClInclude Include="src\utils\Strings.h" />
+    <ClInclude Include="src\utils\CommonMath.h" />
     <ClInclude Include="vendor\glm\common.hpp" />
     <ClInclude Include="vendor\glm\detail\compute_common.hpp" />
     <ClInclude Include="vendor\glm\detail\compute_vector_decl.hpp" />

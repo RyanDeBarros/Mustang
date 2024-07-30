@@ -1,7 +1,5 @@
 #include "Pulsar.h"
 
-#include <cmath>
-
 #include <glm/ext/scalar_constants.hpp>
 
 #include "Typedefs.h"
@@ -24,6 +22,8 @@
 #include "render/actors/particles/ParticleSystem.h"
 #include "render/actors/particles/ParticleSubsystemArray.h"
 #include "render/actors/particles/Characteristics.h"
+#include "utils/CommonMath.h"
+#include "utils/Functors.h"
 
 using namespace Pulsar;
 

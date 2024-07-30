@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "Typedefs.h"
-#include "Utils.h"
+#include "utils/Permutation.h"
 #include "ActorSequencer.h"
 #include "ActorPrimitive.h"
 #include "ActorTesselation.h"

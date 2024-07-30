@@ -1,5 +1,7 @@
 #include "Characteristics.h"
 
+#include "utils/CommonMath.h"
+
 namespace Particles {
 
 	CharacteristicGen CombineSequential(const std::vector<CharacteristicGen>& characteristics)

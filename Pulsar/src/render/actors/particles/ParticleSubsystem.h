@@ -5,7 +5,7 @@
 #include <functional>
 
 #include "Typedefs.h"
-#include "Utils.h"
+#include "utils/CommonMath.h"
 #include "Particle.h"
 
 typedef unsigned char ParticleSubsystemIndex;
