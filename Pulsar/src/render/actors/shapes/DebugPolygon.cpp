@@ -4,21 +4,25 @@
 #include "AssetLoader.h"
 
 DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform, const glm::vec4& color, GLenum indexing_mode, ZIndex z)
-	: ActorRenderBase2D(z), m_Color(color), TransformableProxy2D(transform)
+	: ActorRenderBase2D(z), m_Color(color), m_Transform(std::make_shared<DebugTransformable2D>())
 {
 	Loader::loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
 	SetIndexingMode(indexing_mode);
 	PointsRef() = points;
+	m_Transform->SetPolygon(this);
+	m_Transform->SetTransform(transform);
 }
 
 DebugPolygon::DebugPolygon(const DebugPolygon& other)
-	: ActorRenderBase2D(other), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), TransformableProxy2D(other), m_Status(other.m_Status)
+	: ActorRenderBase2D(other), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Transform(other.m_Transform), m_Status(other.m_Status)
 {
+	m_Transform->SetPolygon(this);
 }
 
 DebugPolygon::DebugPolygon(DebugPolygon&& other) noexcept
-	: ActorRenderBase2D(std::move(other)), m_Color(other.m_Color), m_Renderable(std::move(other.m_Renderable)), m_Points(std::move(other.m_Points)), m_IndexingMode(other.m_IndexingMode), TransformableProxy2D(std::move(other)), m_Status(other.m_Status)
+	: ActorRenderBase2D(std::move(other)), m_Color(other.m_Color), m_Renderable(std::move(other.m_Renderable)), m_Points(std::move(other.m_Points)), m_IndexingMode(other.m_IndexingMode), m_Transform(std::move(other.m_Transform)), m_Status(other.m_Status)
 {
+	m_Transform->SetPolygon(this);
 }
 
 DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
@@ -28,8 +32,8 @@ DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
 	m_Points = other.m_Points;
 	m_IndexingMode = other.m_IndexingMode;
 	m_Status = other.m_Status;
+	m_Transform = other.m_Transform;
 	ActorRenderBase2D::operator=(other);
-	TransformableProxy2D::operator=(other);
 	return *this;
 }
 
@@ -40,8 +44,8 @@ DebugPolygon& DebugPolygon::operator=(DebugPolygon&& other) noexcept
 	m_Points = std::move(other.m_Points);
 	m_IndexingMode = other.m_IndexingMode;
 	m_Status = other.m_Status;
+	m_Transform = std::move(other.m_Transform);
 	ActorRenderBase2D::operator=(std::move(other));
-	TransformableProxy2D::operator=(std::move(other));
 	return *this;
 }
 
@@ -104,8 +108,8 @@ void DebugPolygon::CheckStatus()
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
 		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 		{
-			m_Renderable.vertexBufferData[i * stride	] = static_cast<GLfloat>(m_Transform.position.x);
-			m_Renderable.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(m_Transform.position.y);
+			m_Renderable.vertexBufferData[i * stride	] = static_cast<GLfloat>(m_Transform->GetPosition().x);
+			m_Renderable.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(m_Transform->GetPosition().y);
 		}
 	}
 	// update TransformRS
@@ -113,7 +117,7 @@ void DebugPolygon::CheckStatus()
 	{
 		m_Status &= ~0b10000;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
-		glm::mat2 condensed_rs_matrix = Transform::CondensedRS(m_Transform);
+		glm::mat2 condensed_rs_matrix = Transform::CondensedRS(m_Transform->GetTransform());
 		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 		{
 			m_Renderable.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);

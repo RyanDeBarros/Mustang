@@ -148,7 +148,7 @@ void DebugMultiPolygon::PushBackAll(const std::vector<std::shared_ptr<DebugPolyg
 	UpdatePtrs();
 }
 
-// TODO might be an issue if the shared_ptr elements in vectors continued to be used after PushBackAll, even though vector isn't.
+// TODO might be an issue if the shared_ptr elements in vectors continued to be used after PushBackAll, even though vector isn't. use weak ptrs instead?
 void DebugMultiPolygon::PushBackAll(std::vector<std::shared_ptr<DebugPolygon>>&& polys)
 {
 	for (auto&& poly : polys)

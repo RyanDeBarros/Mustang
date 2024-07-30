@@ -18,6 +18,7 @@
 #include "render/actors/shapes/DebugPolygon.h"
 #include "render/actors/shapes/DebugPoint.h"
 #include "render/actors/shapes/DebugCircle.h"
+#include "render/actors/shapes/DebugRect.h"
 #include "render/actors/shapes/DebugBatcher.h"
 #include "render/actors/particles/ParticleSystem.h"
 #include "render/actors/particles/ParticleSubsystemArray.h"
@@ -367,6 +368,9 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
 	Renderer::GetCanvasLayer(11)->OnAttach(&child2);
 	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
+
+	DebugRect rect(_RendererSettings::initial_window_width * 0.5f, _RendererSettings::initial_window_height, true, { 1.0f, 0.5f }, {}, { 0.5f, 0.5f, 1.0f, 0.8f }, 1);
+	Renderer::GetCanvasLayer(11)->OnAttach(&rect);
 
 	for (;;)
 	{

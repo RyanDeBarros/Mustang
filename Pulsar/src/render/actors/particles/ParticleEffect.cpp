@@ -26,7 +26,7 @@ ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsyste
 template<std::unsigned_integral ParticleCount>
 void ParticleEffect<ParticleCount>::OnUpdate()
 {
-	// TODO perhaps spawning and enabled should be moved to particle wave?
+	// TODO perhaps spawning and enabled should be moved to particle subsystem?
 	if (!paused)
 	{
 		m_LeftoverDT += Pulsar::deltaDrawTime;

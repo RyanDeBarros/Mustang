@@ -189,6 +189,7 @@
     <ClCompile Include="src\render\actors\particles\ParticleSubsystemArray.cpp" />
     <ClCompile Include="src\render\actors\particles\ParticleSystem.cpp" />
     <ClCompile Include="src\render\actors\particles\ParticleSubsystem.cpp" />
+    <ClCompile Include="src\render\actors\shapes\DebugRect.cpp" />
     <ClCompile Include="src\render\CanvasLayer.cpp" />
     <ClCompile Include="src\render\LayerView.cpp" />
     <ClCompile Include="src\render\Renderable.cpp" />
@@ -239,6 +240,7 @@
     <ClInclude Include="src\render\actors\particles\ParticleSubsystemArray.h" />
     <ClInclude Include="src\render\actors\particles\ParticleSystem.h" />
     <ClInclude Include="src\render\actors\particles\ParticleSubsystem.h" />
+    <ClInclude Include="src\render\actors\shapes\DebugRect.h" />
     <ClInclude Include="src\render\CanvasLayer.h" />
     <ClInclude Include="src\render\LayerView.h" />
     <ClInclude Include="src\render\Renderable.h" />

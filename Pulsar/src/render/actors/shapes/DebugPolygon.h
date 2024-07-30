@@ -20,7 +20,7 @@ struct std::hash<DebugModel>
 	}
 };
 
-class DebugPolygon : public ActorRenderBase2D, public TransformableProxy2D
+class DebugPolygon : public ActorRenderBase2D
 {
 protected:
 	friend class DebugMultiPolygon;
@@ -31,6 +31,7 @@ protected:
 	std::vector<glm::vec2> m_Points;
 	glm::vec4 m_Color;
 	GLenum m_IndexingMode;
+	std::shared_ptr<class DebugTransformable2D> m_Transform;
 
 	// 0b ... transform RS | transform P | point positions | color | indexing mode or points vector
 	unsigned char m_Status = 0b11111;
@@ -57,12 +58,28 @@ public:
 	inline glm::vec4 GetColor() const { return m_Color; }
 	inline void SetColor(const glm::vec4& color) { m_Status |= 0b10; m_Color = color; }
 
-	inline virtual void OperateTransform(const std::function<void(Transform2D& transform)>& op) override { op(m_Transform); m_Status |= 0b11000; }
-	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); m_Status |= 0b1000; }
-	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform.rotation); m_Status |= 0b10000; }
-	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); m_Status |= 0b10000; }
+	inline void FlushTransform() { m_Status |= 0b11000; }
+	inline void FlushPosition() { m_Status |= 0b1000; }
+	inline void FlushRotation() { m_Status |= 0b10000; }
+	inline void FlushScale() { m_Status |= 0b10000; }
 
 	bool visible = true;
+
+	std::shared_ptr<DebugTransformable2D> Transform() { return m_Transform; }
+	std::weak_ptr<DebugTransformable2D> TransformWeak() { return m_Transform; }
 };
 
-// TODO DebugRect class.
+class DebugTransformable2D : public TransformableProxy2D
+{
+	DebugPolygon* m_Poly;
+
+public:
+	DebugTransformable2D(DebugPolygon* poly = nullptr, const Transform2D& transform = {}) : TransformableProxy2D(transform), m_Poly(poly) {}
+
+	inline void SetPolygon(DebugPolygon* poly) { m_Poly = poly; }
+
+	inline virtual void OperateTransform(const std::function<void(Transform2D& transform)>& op) override { op(m_Transform); m_Poly->FlushTransform(); }
+	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); m_Poly->FlushPosition(); }
+	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform.rotation); m_Poly->FlushRotation(); }
+	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); m_Poly->FlushScale(); }
+};

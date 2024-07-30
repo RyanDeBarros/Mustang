@@ -56,6 +56,7 @@ public:
 	inline const Renderable& GetRenderable() const { return m_Render; }
 
 	std::shared_ptr<class PrimitiveTransformable2D> Transform() { return m_Transform; }
+	std::weak_ptr<class PrimitiveTransformable2D> TransformWeak() { return m_Transform; }
 
 protected:
 	void OnDraw(signed char texture_slot);
