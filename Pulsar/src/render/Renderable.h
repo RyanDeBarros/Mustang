@@ -60,6 +60,6 @@ private:
 	friend class DebugPolygon;
 	friend class DebugPoint;
 	friend class DebugPoint;
-	friend enum class LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable, bool new_texture, bool temporary_buffer);
+	friend struct Loader;
 	friend BufferCounter Render::VertexBufferLayoutCount(const Renderable& render);
 };

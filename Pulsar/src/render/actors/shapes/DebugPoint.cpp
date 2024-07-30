@@ -7,7 +7,7 @@
 DebugPoint::DebugPoint(const glm::vec2& position, const glm::vec4& outer_color, float diameter, float inner_radius, const glm::vec4& inner_color, ZIndex z)
 	: DebugPolygon({{ 0.0f, 0.0f }}, {position}, outer_color, GL_POINTS, z), m_Diameter(diameter), m_InnerRadius(inner_radius), m_InnerColor(inner_color)
 {
-	loadRenderable(_RendererSettings::solid_point_filepath.c_str(), m_Renderable);
+	Loader::loadRenderable(_RendererSettings::solid_point_filepath.c_str(), m_Renderable);
 }
 
 DebugPoint::DebugPoint(const DebugPoint& other)

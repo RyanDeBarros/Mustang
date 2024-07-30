@@ -60,7 +60,7 @@ int main()
 
 int Pulsar::StartUp(GLFWwindow*& window)
 {
-	if (!_LoadRendererSettings())
+	if (!Loader::_LoadRendererSettings())
 		return -1;
 	if (!glfwInit())
 		return -1;
@@ -104,11 +104,11 @@ void Pulsar::Run(GLFWwindow* window)
 
 	// Load textures
 	TextureHandle textureSnowman, textureTux, textureFlag;
-	if (loadTexture("res/assets/snowman.toml", textureSnowman) != LOAD_STATUS::OK)
+	if (Loader::loadTexture("res/assets/snowman.toml", textureSnowman) != LOAD_STATUS::OK)
 		ASSERT(false);
-	if (loadTexture("res/assets/tux.toml", textureTux) != LOAD_STATUS::OK)
+	if (Loader::loadTexture("res/assets/tux.toml", textureTux) != LOAD_STATUS::OK)
 		ASSERT(false);
-	if (loadTexture("res/assets/flag.toml", textureFlag, true) != LOAD_STATUS::OK)
+	if (Loader::loadTexture("res/assets/flag.toml", textureFlag, true) != LOAD_STATUS::OK)
 		ASSERT(false);
 	//if (loadTexture("res/assets/atlas.toml", textureAtlas) != LOAD_STATUS::OK)
 	//	ASSERT(false);
@@ -133,7 +133,7 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::AddCanvasLayer(-1);
 
 	Renderable renderable;
-	if (loadRenderable("res/assets/renderable.toml", renderable, true) != LOAD_STATUS::OK)
+	if (Loader::loadRenderable("res/assets/renderable.toml", renderable, true) != LOAD_STATUS::OK)
 		ASSERT(false);
 	std::shared_ptr<ActorPrimitive2D> actor4(new ActorPrimitive2D(renderable, { {-200.0f, 0.0f}, 0.0f, {800.0f, 800.0f} }));
 	Renderer::GetCanvasLayer(-1)->OnAttach(actor4.get());
@@ -326,7 +326,7 @@ void Pulsar::Run(GLFWwindow* window)
 	//Renderer::GetCanvasLayer(11)->OnAttach(&parr);
 
 	std::shared_ptr<TileMap> tilemap;
-	if (loadTileMap("res/assets/tilemap.toml", tilemap) != LOAD_STATUS::OK)
+	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap) != LOAD_STATUS::OK)
 		ASSERT(false);
 
 	//tilemap->Transformer()->SetLocalTransforms({{100.0f, 200.0f}, 0.3f, {5.0f, 8.0f}});

@@ -34,7 +34,7 @@ static LOAD_STATUS verify_header(const toml::v3::ex::parse_result& file, const c
 	else return LOAD_STATUS::SYNTAX_ERR;
 }
 
-bool _LoadRendererSettings()
+bool Loader::_LoadRendererSettings()
 {
 	try
 	{
@@ -91,7 +91,7 @@ bool _LoadRendererSettings()
 	}
 }
 
-LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle)
+LOAD_STATUS Loader::loadShader(const char* filepath, ShaderHandle& handle)
 {
 	try
 	{
@@ -148,7 +148,7 @@ static LOAD_STATUS readTextureSettings(const toml::v3::node_view<toml::v3::node>
 	return LOAD_STATUS::OK;
 }
 
-LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, bool new_texture, bool temporary_buffer)
+LOAD_STATUS Loader::loadTexture(const char* filepath, TextureHandle& handle, bool new_texture, bool temporary_buffer)
 {
 	try
 	{
@@ -177,7 +177,7 @@ LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, bool new_te
 	}
 }
 
-LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handle)
+LOAD_STATUS Loader::loadUniformLexicon(const char* filepath, UniformLexiconHandle& handle)
 {
 	try
 	{
@@ -422,7 +422,7 @@ LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handl
 	}
 }
 
-LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, bool new_texture, bool temporary_buffer)
+LOAD_STATUS Loader::loadRenderable(const char* filepath, Renderable& renderable, bool new_texture, bool temporary_buffer)
 {
 	try
 	{
@@ -492,7 +492,7 @@ LOAD_STATUS loadRenderable(const char* filepath, Renderable& renderable, bool ne
 	}
 }
 
-bool saveAtlas(const Atlas& atlas, const char* texture_filepath, const char* asset_filepath, const char* image_format, unsigned char jpg_quality)
+bool Loader::saveAtlas(const Atlas& atlas, const char* texture_filepath, const char* asset_filepath, const char* image_format, unsigned char jpg_quality)
 {
 	try
 	{
@@ -545,7 +545,7 @@ bool saveAtlas(const Atlas& atlas, const char* texture_filepath, const char* ass
 	return true;
 }
 
-LOAD_STATUS loadAtlas(const char* asset_filepath, TileHandle& handle)
+LOAD_STATUS Loader::loadAtlas(const char* asset_filepath, TileHandle& handle)
 {
 	try
 	{
@@ -595,7 +595,7 @@ LOAD_STATUS loadAtlas(const char* asset_filepath, TileHandle& handle)
 	}
 }
 
-LOAD_STATUS loadTileMap(const char* asset_filepath, std::shared_ptr<TileMap>& tilemap)
+LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, std::shared_ptr<TileMap>& tilemap)
 {
 	try
 	{

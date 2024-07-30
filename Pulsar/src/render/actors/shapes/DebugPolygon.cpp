@@ -6,7 +6,7 @@
 DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform, const glm::vec4& color, GLenum indexing_mode, ZIndex z)
 	: ActorRenderBase2D(z), m_Color(color), TransformableProxy2D(transform)
 {
-	loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
+	Loader::loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
 	SetIndexingMode(indexing_mode);
 	PointsRef() = points;
 }

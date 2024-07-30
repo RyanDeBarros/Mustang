@@ -7,7 +7,7 @@
 DebugCircle::DebugCircle(float radius, const Transform2D& transform, const glm::vec4& color, ZIndex z)
 	: DebugPolygon({}, transform, color, GL_TRIANGLE_FAN, z), m_Diameter(2 * radius)
 {
-	loadRenderable(_RendererSettings::solid_circle_filepath.c_str(), m_Renderable);
+	Loader::loadRenderable(_RendererSettings::solid_circle_filepath.c_str(), m_Renderable);
 	PointsRef() = { {m_Diameter, m_Diameter}, {-m_Diameter, m_Diameter}, {-m_Diameter, -m_Diameter}, {m_Diameter, -m_Diameter} };
 	m_Status &= ~0b1;
 }

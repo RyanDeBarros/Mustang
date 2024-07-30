@@ -34,7 +34,7 @@ Shader* ShaderFactory::Get(ShaderHandle handle)
 void ShaderFactory::Init()
 {
 	handle_cap = 1;
-	auto status = loadShader(_RendererSettings::standard_shader_assetfile.c_str(), standard_shader);
+	auto status = Loader::loadShader(_RendererSettings::standard_shader_assetfile.c_str(), standard_shader);
 	if (status != LOAD_STATUS::OK)
 		Logger::LogErrorFatal("Standard shader could not be loaded (error code " + std::to_string(static_cast<int>(status)) + "): " + _RendererSettings::standard_shader_assetfile);
 }
