@@ -4,22 +4,24 @@
 #include "render/CanvasLayer.h"
 
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, ZIndex z, bool visible)
-	: m_Render(render), m_Transform(std::make_shared<PrimitiveTransformable2D>()), ActorRenderBase2D(z), m_Status(visible ? 0b111 : 0b110)
+	: m_Render(render), m_Transform(std::make_shared<PrimitiveTransformable2D>(transform)), m_Modulate(std::make_shared<PrimitiveModulatable>()), ActorRenderBase2D(z), m_Status(visible ? 0b111 : 0b110)
 {
-	m_Transform->SetPrimitive(this);
-	m_Transform->SetTransform(transform);
+	m_Transform->m_Primitive = this;
+	m_Modulate->m_Primitive = this;
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const ActorPrimitive2D& primitive)
-	: m_Render(primitive.m_Render), m_Transform(primitive.m_Transform), ActorRenderBase2D(primitive), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
+	: m_Render(primitive.m_Render), m_Transform(primitive.m_Transform), m_Modulate(primitive.m_Modulate), ActorRenderBase2D(primitive), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
 {
-	m_Transform->SetPrimitive(this);
+	m_Transform->m_Primitive = this;
+	m_Modulate->m_Primitive = this;
 }
 
 ActorPrimitive2D::ActorPrimitive2D(ActorPrimitive2D&& primitive) noexcept
-	: m_Render(std::move(primitive.m_Render)), m_Transform(std::move(primitive.m_Transform)), ActorRenderBase2D(std::move(primitive)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors))
+	: m_Render(std::move(primitive.m_Render)), m_Transform(std::move(primitive.m_Transform)), m_Modulate(std::move(primitive.m_Modulate)), ActorRenderBase2D(std::move(primitive)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors))
 {
-	m_Transform->SetPrimitive(this);
+	m_Transform->m_Primitive = this;
+	m_Modulate->m_Primitive = this;
 }
 
 ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
@@ -28,7 +30,7 @@ ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
 	m_Status = primitive.m_Status;
 	m_ModulationColors = primitive.m_ModulationColors;
 	m_Transform = primitive.m_Transform;
-	m_Transform->SetPrimitive(this);
+	m_Modulate = primitive.m_Modulate;
 	ActorRenderBase2D::operator=(primitive);
 	return *this;
 }
@@ -39,14 +41,14 @@ ActorPrimitive2D& ActorPrimitive2D::operator=(ActorPrimitive2D&& primitive) noex
 	m_Status = primitive.m_Status;
 	m_ModulationColors = std::move(primitive.m_ModulationColors);
 	m_Transform = std::move(primitive.m_Transform);
-	m_Transform->SetPrimitive(this);
+	m_Modulate = std::move(primitive.m_Modulate);
 	ActorRenderBase2D::operator=(std::move(primitive));
 	return *this;
 }
 
 ActorPrimitive2D ActorPrimitive2D::Clone()
 {
-	ActorPrimitive2D clone(m_Render, m_Transform->GetTransform(), GetZIndex(), IsVisible());
+	ActorPrimitive2D clone(m_Render, m_Transform->GetTransform(), GetZIndex(), m_Status & 0b1);
 	clone.m_Status = m_Status;
 	m_ModulationColors = m_ModulationColors;
 	return clone;
@@ -57,14 +59,17 @@ void ActorPrimitive2D::Clone(ActorPrimitive2D& clone)
 	clone.m_Render = m_Render;
 	clone.m_Status = m_Status;
 	clone.SetZIndex(GetZIndex());
-	clone.m_Transform->SetPrimitive(&clone);
+	clone.m_Transform->m_Primitive = &clone;
 	clone.m_Transform->SetTransform(m_Transform->GetTransform());
+	clone.m_Modulate->m_Primitive = &clone;
+	clone.m_Modulate->SetColor(m_Modulate->GetColor());
 	clone.m_ModulationColors = m_ModulationColors;
 }
 
 void ActorPrimitive2D::RequestDraw(CanvasLayer* canvas_layer)
 {
-	canvas_layer->DrawPrimitive(*this);
+	if (m_Status & 0b1)
+		canvas_layer->DrawPrimitive(*this);
 }
 
 void ActorPrimitive2D::OnDraw(signed char texture_slot)
@@ -79,7 +84,7 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 			m_Render.vertexBufferData[i * stride	] = static_cast<GLfloat>(texture_slot);
 	}
 	// update TransformP
-	if ((m_Status & 0b10) == 0b10)
+	if (m_Status & 0b10)
 	{
 		m_Status &= ~0b10;
 		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
@@ -89,7 +94,7 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 		}
 	}
 	// update TransformRS
-	if ((m_Status & 0b100) == 0b100)
+	if (m_Status & 0b100)
 	{
 		m_Status &= ~0b100;
 		glm::mat2 condensed_rs_matrix = Transform::CondensedRS(m_Transform->GetTransform());
@@ -102,15 +107,16 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 		}
 	}
 	// update ModulationColor
-	if ((m_Status & 0b1000) == 0b1000)
+	if (m_Status & 0b1000)
 	{
 		m_Status &= ~0b1000;
 		for (BufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
 		{
-			m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(m_ModulationColors[i][0]);
-			m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(m_ModulationColors[i][1]);
-			m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(m_ModulationColors[i][2]);
-			m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(m_ModulationColors[i][3]);
+			auto color = m_ModulationColors[i] * m_Modulate->GetColor();
+			m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(color.r);
+			m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(color.g);
+			m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(color.b);
+			m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(color.a);
 		}
 	}
 }

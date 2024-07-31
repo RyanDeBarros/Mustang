@@ -7,8 +7,9 @@
 #include "Logger.h"
 #include "utils/CommonMath.h"
 
-static auto StandardModulationMethod = [](const glm::vec4& parent, const glm::vec4& local) -> glm::vec4 { return parent * local; };
-static auto StandardModulationMethodInverse = [](const glm::vec4& parent, const glm::vec4& child) -> glm::vec4 { return DivideOrZero(child, parent); };
+extern glm::vec4(*StandardModulationMethod)(const glm::vec4& parent, const glm::vec4& local);
+extern glm::vec4(*StandardModulationMethodInverse)(const glm::vec4& parent, const glm::vec4& child);
+extern std::vector<glm::vec4> ModulateGradient(const glm::vec4& modulation, const std::vector<glm::vec4>& gradient);
 
 class Modulator : public Modulatable
 {
@@ -19,13 +20,13 @@ class Modulator : public Modulatable
 public:
 	Modulator() = delete;
 
-	Modulator(const std::weak_ptr<Modulatable>& parent, const std::weak_ptr<Modulatable>& child, bool discard_old_color = true);
-	Modulator(const std::weak_ptr<Modulatable>& parent, std::weak_ptr<Modulatable>&& child, bool discard_old_color = true);
-	Modulator(std::weak_ptr<Modulatable>&& parent, const std::weak_ptr<Modulatable>& child, bool discard_old_color = true);
-	Modulator(std::weak_ptr<Modulatable>&& parent, std::weak_ptr<Modulatable>&& child, bool discard_old_color = true);
+	Modulator(const std::weak_ptr<Modulatable>& parent, const std::weak_ptr<Modulatable>& child, bool discard_old_color = false);
+	Modulator(const std::weak_ptr<Modulatable>& parent, std::weak_ptr<Modulatable>&& child, bool discard_old_color = false);
+	Modulator(std::weak_ptr<Modulatable>&& parent, const std::weak_ptr<Modulatable>& child, bool discard_old_color = false);
+	Modulator(std::weak_ptr<Modulatable>&& parent, std::weak_ptr<Modulatable>&& child, bool discard_old_color = false);
 
-	Modulator(const std::weak_ptr<Modulatable>& parent, const glm::vec4& local, bool discard_old_color = true);
-	Modulator(std::weak_ptr<Modulatable>&& parent, const glm::vec4& local, bool discard_old_color = true);
+	Modulator(const std::weak_ptr<Modulatable>& parent, const glm::vec4& local, bool discard_old_color = false);
+	Modulator(std::weak_ptr<Modulatable>&& parent, const glm::vec4& local, bool discard_old_color = false);
 
 	Modulator(const Modulator&);
 	Modulator(Modulator&&) noexcept;

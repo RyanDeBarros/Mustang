@@ -1,5 +1,16 @@
 #include "Modulator.h"
 
+glm::vec4(*StandardModulationMethod)(const glm::vec4& parent, const glm::vec4& local) = [](const glm::vec4& parent, const glm::vec4& local) -> glm::vec4 { return parent * local; };
+glm::vec4(*StandardModulationMethodInverse)(const glm::vec4& parent, const glm::vec4& child) = [](const glm::vec4& parent, const glm::vec4& child) -> glm::vec4 { return DivideOrZero(child, parent); };
+std::vector<glm::vec4> ModulateGradient(const glm::vec4& modulation, const std::vector<glm::vec4>& gradient)
+{
+	// TODO use initialize and assignment over push_backs more often for these types of vector transformations.
+	std::vector<glm::vec4> result(gradient.size());
+	for (auto i = 0; i < result.size(); i++)
+		result[i] = modulation * gradient[i];
+	return result;
+}
+
 Modulator::Modulator(const std::weak_ptr<Modulatable>& parent, const std::weak_ptr<Modulatable>& child, bool discard_old_color)
 	: m_Parent(parent), m_Child(child)
 {

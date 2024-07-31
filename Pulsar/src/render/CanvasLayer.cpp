@@ -95,26 +95,23 @@ void CanvasLayer::OnDraw()
 
 void CanvasLayer::DrawPrimitive(ActorPrimitive2D& primitive)
 {
-	if (primitive.IsVisible())
+	const auto& render = primitive.m_Render;
+	if (render.model != currentModel)
 	{
-		const auto& render = primitive.m_Render;
-		if (render.model != currentModel)
-		{
-			FlushAndReset();
-			currentModel = render.model;
-			currentLexiconHandle = render.model.uniformLexicon;
-			currentLexicon.MergeLexicon(render.model.uniformLexicon);
-			if (m_VAOs.find(currentModel) == m_VAOs.end())
-				RegisterModel();
-		}
-		else if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(render)
-				|| m_Data.maxIndexPoolSize - (indexPos - m_IndexPool) < render.indexCount)
-		{
-			FlushAndReset();
-		}
-		primitive.OnDraw(GetTextureSlot(render));
-		PoolOver(render);
+		FlushAndReset();
+		currentModel = render.model;
+		currentLexiconHandle = render.model.uniformLexicon;
+		currentLexicon.MergeLexicon(render.model.uniformLexicon);
+		if (m_VAOs.find(currentModel) == m_VAOs.end())
+			RegisterModel();
 	}
+	else if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(render)
+			|| m_Data.maxIndexPoolSize - (indexPos - m_IndexPool) < render.indexCount)
+	{
+		FlushAndReset();
+	}
+	primitive.OnDraw(GetTextureSlot(render));
+	PoolOver(render);
 }
 
 void CanvasLayer::DrawSequencer(ActorSequencer2D& sequencer)

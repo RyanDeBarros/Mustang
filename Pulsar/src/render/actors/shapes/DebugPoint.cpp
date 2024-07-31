@@ -53,7 +53,7 @@ bool DebugPoint::DrawPrep()
 
 void DebugPoint::CheckStatus()
 {
-	if ((m_PointStatus & 0b1) == 0b1)
+	if (m_PointStatus & 0b1)
 	{
 		m_PointStatus &= ~0b1;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
@@ -62,7 +62,7 @@ void DebugPoint::CheckStatus()
 			m_Renderable.vertexBufferData[i * stride + 12] = static_cast<GLfloat>(m_Diameter);
 		}
 	}
-	if ((m_PointStatus & 0b10) == 0b10)
+	if (m_PointStatus & 0b10)
 	{
 		m_PointStatus &= ~0b10;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
@@ -71,7 +71,7 @@ void DebugPoint::CheckStatus()
 			m_Renderable.vertexBufferData[i * stride + 13] = static_cast<GLfloat>(m_InnerRadius);
 		}
 	}
-	if ((m_PointStatus & 0b100) == 0b100)
+	if (m_PointStatus & 0b100)
 	{
 		m_PointStatus &= ~0b100;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);

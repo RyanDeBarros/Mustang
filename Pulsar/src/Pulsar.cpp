@@ -25,6 +25,8 @@
 #include "render/actors/particles/Characteristics.h"
 #include "utils/CommonMath.h"
 #include "utils/Functors.h"
+#include "utils/Strings.h"
+#include "render/transform/Modulator.h"
 
 using namespace Pulsar;
 
@@ -334,8 +336,8 @@ void Pulsar::Run(GLFWwindow* window)
 	tilemap->Transformer()->SetTransform({ {100.0f, 200.0f}, 0.3f, {5.0f, 8.0f} });
 	tilemap->Insert(4, 0, 1);
 
-	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
-	Renderer::GetCanvasLayer(11)->OnAttach(tesselDiagonal.get());
+	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
+	//Renderer::GetCanvasLayer(11)->OnAttach(tesselDiagonal.get());
 	tesselDiagonal->Transformer()->SetPosition(-400, 300);
 	tessel->Transformer()->SetScale(0.6f, 0.6f);
 	actor3.Transform()->OperateScale([](glm::vec2& scale) { scale *= 2.0f; });
@@ -363,14 +365,20 @@ void Pulsar::Run(GLFWwindow* window)
 	second.OperateLocalScales([](glm::vec2& scale) { scale *= 0.2f; });
 	second.SetLocalPositions({ 0.0f, -30.0f });
 
+	std::shared_ptr<Modulator> first_mod(std::make_shared<Modulator>(child.ModulateWeak(), grandchild.ModulateWeak()));
+	first_mod->SetColor({ 1.0f, 1.0f, 0.0f, 1.0f });
+	first_mod->SetGlobalColor({ 1.0f, 0.0f, 1.0f, 1.0f });
+	std::shared_ptr<Modulator> root_mod(std::make_shared<Modulator>(root.ModulateWeak(), first_mod));
+	root_mod->SetColor(glm::vec4{ 1.0f } * 0.5f);
+	
 	Renderer::GetCanvasLayer(11)->OnAttach(&root);
-	Renderer::GetCanvasLayer(11)->OnAttach(&child);
-	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
 	Renderer::GetCanvasLayer(11)->OnAttach(&child2);
 	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
+	Renderer::GetCanvasLayer(11)->OnAttach(&child);
+	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
 
-	DebugRect rect(_RendererSettings::initial_window_width * 0.5f, _RendererSettings::initial_window_height, true, { 1.0f, 0.5f }, {}, { 0.5f, 0.5f, 1.0f, 0.8f }, 1);
-	Renderer::GetCanvasLayer(11)->OnAttach(&rect);
+	DebugRect rect(_RendererSettings::initial_window_width * 0.5f, _RendererSettings::initial_window_height, true, { 1.0f, 0.5f }, {}, { 0.5f, 0.5f, 1.0f, 0.3f }, 1);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&rect);
 
 	for (;;)
 	{
@@ -387,10 +395,10 @@ void Pulsar::Run(GLFWwindow* window)
 			//psys.SetScale(1.0f - 0.2f * glm::sin(totalDrawTime), 1.0f + 0.2f * glm::sin(totalDrawTime));
 			//parr.Resume();
 		//}
-		second.SetLocalRotations(Pulsar::totalDrawTime);
-		first->SetLocalRotation(-Pulsar::totalDrawTime);
-		first2->SetLocalRotation(Pulsar::totalDrawTime);
-		second.SetRotation(-Pulsar::totalDrawTime);
+		second.SetLocalRotations(-Pulsar::totalDrawTime);
+		first->SetLocalRotation(Pulsar::totalDrawTime);
+		first2->SetLocalRotation(-Pulsar::totalDrawTime);
+		second.SetRotation(Pulsar::totalDrawTime);
 		second.OperateLocalPosition(0, [](glm::vec2& position) { position.x += 5 * Pulsar::deltaDrawTime; });
 		second.OperateLocalScale(1, [](glm::vec2& scale) { scale *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime) ; });
 

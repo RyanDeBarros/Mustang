@@ -68,7 +68,7 @@ bool DebugPolygon::DrawPrep()
 void DebugPolygon::CheckStatus()
 {
 	// allocate vertex buffer
-	if ((m_Status & 0b1) == 0b1)
+	if (m_Status & 0b1)
 	{
 		m_Status = ~0b1;
 		m_Renderable.vertexCount = static_cast<BufferCounter>(m_Points.size());
@@ -78,12 +78,13 @@ void DebugPolygon::CheckStatus()
 	}
 	ASSERT(m_Points.size() == m_Renderable.vertexCount);
 	// modify color of vertices
-	if ((m_Status & 0b10) == 0b10)
+	if (m_Status & 0b10)
 	{
 		m_Status &= ~0b10;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
 		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 		{
+			// TODO why is there a buffer warning overflow?
 			m_Renderable.vertexBufferData[i * stride + 6] = static_cast<GLfloat>(m_Color[0]);
 			m_Renderable.vertexBufferData[i * stride + 7] = static_cast<GLfloat>(m_Color[1]);
 			m_Renderable.vertexBufferData[i * stride + 8] = static_cast<GLfloat>(m_Color[2]);
@@ -91,7 +92,7 @@ void DebugPolygon::CheckStatus()
 		}
 	}
 	// modify point positions
-	if ((m_Status & 0b100) == 0b100)
+	if (m_Status & 0b100)
 	{
 		m_Status &= ~0b100;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
@@ -102,7 +103,7 @@ void DebugPolygon::CheckStatus()
 		}
 	}
 	// update TransformP
-	if ((m_Status & 0b1000) == 0b1000)
+	if (m_Status & 0b1000)
 	{
 		m_Status &= ~0b1000;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
@@ -113,7 +114,7 @@ void DebugPolygon::CheckStatus()
 		}
 	}
 	// update TransformRS
-	if ((m_Status & 0b10000) == 0b10000)
+	if (m_Status & 0b10000)
 	{
 		m_Status &= ~0b10000;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
