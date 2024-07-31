@@ -64,11 +64,11 @@ protected:
 
 class PrimitiveTransformable2D : public TransformableProxy2D
 {
-	ActorPrimitive2D* m_Primitive;
+	ActorPrimitive2D* m_Primitive = nullptr;
 
 public:
-	PrimitiveTransformable2D(ActorPrimitive2D* primitive = nullptr, const Transform2D& transform = {}) : TransformableProxy2D(transform), m_Primitive(primitive) {}
-	
+	PrimitiveTransformable2D() : TransformableProxy2D() {}
+
 	inline void SetPrimitive(ActorPrimitive2D* primitive) { m_Primitive = primitive; }
 
 	inline void OperateTransform(const std::function<void(Transform2D& transform)>& op) override { op(m_Transform); m_Primitive->FlushTransform(); }

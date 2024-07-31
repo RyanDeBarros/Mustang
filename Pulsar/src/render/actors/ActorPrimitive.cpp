@@ -57,7 +57,8 @@ void ActorPrimitive2D::Clone(ActorPrimitive2D& clone)
 	clone.m_Render = m_Render;
 	clone.m_Status = m_Status;
 	clone.SetZIndex(GetZIndex());
-	clone.m_Transform = std::make_shared<PrimitiveTransformable2D>(&clone, m_Transform->GetTransform());
+	clone.m_Transform->SetPrimitive(&clone);
+	clone.m_Transform->SetTransform(m_Transform->GetTransform());
 	clone.m_ModulationColors = m_ModulationColors;
 }
 

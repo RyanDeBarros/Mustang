@@ -71,10 +71,10 @@ public:
 
 class DebugTransformable2D : public TransformableProxy2D
 {
-	DebugPolygon* m_Poly;
+	DebugPolygon* m_Poly = nullptr;
 
 public:
-	DebugTransformable2D(DebugPolygon* poly = nullptr, const Transform2D& transform = {}) : TransformableProxy2D(transform), m_Poly(poly) {}
+	DebugTransformable2D() : TransformableProxy2D() {}
 
 	inline void SetPolygon(DebugPolygon* poly) { m_Poly = poly; }
 
