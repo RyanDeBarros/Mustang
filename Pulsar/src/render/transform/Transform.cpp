@@ -1,9 +1,6 @@
 #include "Transform.h"
 
-static inline glm::vec2 operator/(const float& f, const glm::vec2& v)
-{
-	return glm::vec2(f / v.x, f / v.y);
-}
+#include "utils/CommonMath.h"
 
 namespace Transform {
 	
@@ -29,7 +26,7 @@ namespace Transform {
 	
 	Transform2D Inverse(const Transform2D& tr)
 	{
-		return { -tr.position, -tr.rotation, 1 / tr.scale };
+		return { -tr.position, -tr.rotation, DivideOrZero(1.0f, tr.scale) };
 	}
 
 	glm::mat2 Rotation(glm::float32 r)

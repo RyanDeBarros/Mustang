@@ -1,6 +1,8 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include <functional>
+#include <limits>
 
 template<std::floating_point Float = float>
 inline Float rng() { return std::rand() / static_cast<Float>(RAND_MAX); }
@@ -49,14 +51,36 @@ struct CumulativeFunc
 	}
 };
 
+// TODO use constexpr for compatible functions
 template<typename T>
-inline T Max(const T& first)
+constexpr T Max(const T& first)
 {
 	return first;
 }
 
 template<typename T, typename... Args>
-inline T Max(const T& first, const Args&... args)
+constexpr T Max(const T& first, const Args&... args)
 {
 	return std::max(first, static_cast<T>(Max(args...)));
+}
+
+template<typename T = float>
+inline bool SafeToDivide(T denominator)
+{
+	return std::abs(denominator) > std::numeric_limits<T>::epsilon();
+}
+
+inline glm::vec2 DivideOrZero(float f, const glm::vec2& v)
+{
+	return { SafeToDivide<>(v.x) ? f / v.x : 0.0f, SafeToDivide<>(v.y) ? f / v.y : 0.0f };
+}
+
+inline glm::vec4 DivideOrZero(const glm::vec4& n, const glm::vec4& d)
+{
+	return {
+		SafeToDivide<>(d.r) ? n.r / d.r : 0.0f,
+		SafeToDivide<>(d.g) ? n.g / d.g : 0.0f,
+		SafeToDivide<>(d.b) ? n.b / d.b : 0.0f,
+		SafeToDivide<>(d.a) ? n.a / d.a : 0.0f
+	};
 }

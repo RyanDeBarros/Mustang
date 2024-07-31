@@ -37,9 +37,8 @@ Transformer2D::Transformer2D(std::weak_ptr<Transformable2D>&& parent, std::weak_
 }
 
 Transformer2D::Transformer2D(const std::weak_ptr<Transformable2D>& parent, const Transform2D& local, bool discard_old_transform)
-	: m_Parent(parent), m_Local(local)
+	: m_Parent(parent), m_Child(std::make_shared<TransformableProxy2D>()), m_Local(local)
 {
-	m_Child = std::make_shared<Transformable2D>();
 	if (discard_old_transform)
 		SyncLocalWithGlobal();
 	else
@@ -47,9 +46,8 @@ Transformer2D::Transformer2D(const std::weak_ptr<Transformable2D>& parent, const
 }
 
 Transformer2D::Transformer2D(std::weak_ptr<Transformable2D>&& parent, const Transform2D& local, bool discard_old_transform)
-	: m_Parent(std::move(parent)), m_Local(local)
+	: m_Parent(std::move(parent)), m_Child(std::make_shared<TransformableProxy2D>()), m_Local(local)
 {
-	m_Child = std::make_shared<Transformable2D>();
 	if (discard_old_transform)
 		SyncLocalWithGlobal();
 	else
@@ -62,7 +60,7 @@ Transformer2D::Transformer2D(const Transformer2D& other)
 }
 
 Transformer2D::Transformer2D(Transformer2D&& other) noexcept
-	: m_Parent(std::move(other.m_Parent)), m_Child(std::move(other.m_Child)), m_Local(std::move(other.m_Local))
+	: m_Parent(std::move(other.m_Parent)), m_Child(std::move(other.m_Child)), m_Local(other.m_Local)
 {
 }
 
@@ -85,6 +83,12 @@ Transformer2D& Transformer2D::operator=(Transformer2D&& other) noexcept
 void Transformer2D::SetLocalTransform(const Transform2D& tr)
 {
 	m_Local = tr;
+	SyncGlobalWithLocal();
+}
+
+void Transformer2D::OperateLocalTransform(const std::function<void(Transform2D& transform)>& op)
+{
+	op(m_Local);
 	SyncGlobalWithLocal();
 }
 
@@ -218,6 +222,13 @@ void Transformer2D::SetGlobalTransform(const Transform2D& tr)
 {
 	WEAK_LOCK_CHECK(m_Child, c);
 	c->SetTransform(tr);
+	SyncLocalWithGlobal();
+}
+
+void Transformer2D::OperateGlobalTransform(const std::function<void(Transform2D& transform)>& op)
+{
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->OperateTransform(op);
 	SyncLocalWithGlobal();
 }
 

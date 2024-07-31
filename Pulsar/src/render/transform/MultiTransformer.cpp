@@ -99,6 +99,12 @@ void MultiTransformer2D::SetLocalTransform(size_t i, const Transform2D& tr)
 	SyncGlobalWithLocal(i);
 }
 
+void MultiTransformer2D::OperateLocalTransform(size_t i, const std::function<void(Transform2D& transform)>& op)
+{
+	op(m_Locals[i]);
+	SyncGlobalWithLocal(i);
+}
+
 void MultiTransformer2D::SetLocalPosition(size_t i, const glm::vec2& pos)
 {
 	m_Locals[i].position = pos;
@@ -276,6 +282,13 @@ void MultiTransformer2D::SetGlobalTransform(size_t i, const Transform2D& tr)
 	SyncLocalWithGlobal(i);
 }
 
+void MultiTransformer2D::OperateGlobalTransform(size_t i, const std::function<void(Transform2D& transform)>& op)
+{
+	WEAK_LOCK_CHECK(m_Children[i], c);
+	c->OperateTransform(op);
+	SyncLocalWithGlobal(i);
+}
+
 void MultiTransformer2D::SetGlobalPosition(size_t i, const glm::vec2& pos)
 {
 	WEAK_LOCK_CHECK(m_Parent, p);
@@ -352,8 +365,8 @@ void MultiTransformer2D::PushBackGlobals(const std::vector<std::weak_ptr<Transfo
 
 void MultiTransformer2D::PushBackGlobals(std::vector<std::weak_ptr<Transformable2D>>&& children, bool discard_old_transform)
 {
-	for (auto&& child : children)
-		PushBackGlobal(std::move(child), discard_old_transform);
+	for (const auto& child : children)
+		PushBackGlobal(child, discard_old_transform);
 }
 
 std::shared_ptr<TransformableProxy2D> MultiTransformer2D::PushBackLocal(const Transform2D& local, bool discard_old_transform)

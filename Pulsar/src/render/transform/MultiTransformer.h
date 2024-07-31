@@ -37,6 +37,7 @@ public:
 	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperateScale(op); SyncGlobalWithParentScales(); }
 
 	void SetLocalTransforms(const Transform2D& tr) { for (size_t i = 0; i < m_Locals.size(); i++) SetLocalTransform(i, tr); }
+	inline void OperateLocalTransforms(const std::function<void(Transform2D& position)>& op) { for (size_t i = 0; i < m_Locals.size(); i++) OperateLocalTransform(i, op); }
 	inline std::vector<Transform2D> GetLocalTransforms() const { return m_Locals; }
 	inline void SetLocalPositions(const glm::vec2& pos) { for (size_t i = 0; i < m_Locals.size(); i++) SetLocalPosition(i, pos); }
 	inline void OperateLocalPositions(const std::function<void(glm::vec2& position)>& op) { for (size_t i = 0; i < m_Locals.size(); i++) OperateLocalPosition(i, op); }
@@ -49,6 +50,7 @@ public:
 	std::vector<glm::vec2> GetLocalScales() const;
 
 	void SetLocalTransform(size_t i, const Transform2D& tr);
+	void OperateLocalTransform(size_t i, const std::function<void(Transform2D& transform)>&);
 	inline Transform2D GetLocalTransform(size_t i) const { return m_Locals[i]; }
 	void SetLocalPosition(size_t i, const glm::vec2& pos);
 	void OperateLocalPosition(size_t i, const std::function<void(glm::vec2& position)>&);
@@ -83,6 +85,7 @@ public:
 	void SyncLocalWithParentScale(size_t i);
 
 	void SetGlobalTransforms(const Transform2D& tr) { for (size_t i = 0; i < m_Locals.size(); i++) SetGlobalTransform(i, tr); }
+	void OperateGlobalTransforms(const std::function<void(Transform2D& transform)>& op) { for (size_t i = 0; i < m_Locals.size(); i++) OperateGlobalTransform(i, op); }
 	std::vector<Transform2D> GetGlobalTransforms() const;
 	void SetGlobalPositions(const glm::vec2& pos) { for (size_t i = 0; i < m_Locals.size(); i++) SetGlobalPosition(i, pos); }
 	void OperateGlobalPositions(const std::function<void(glm::vec2& position)>& op) { for (size_t i = 0; i < m_Locals.size(); i++) OperateGlobalPosition(i, op); }
@@ -95,6 +98,7 @@ public:
 	std::vector<glm::vec2> GetGlobalScales() const;
 
 	void SetGlobalTransform(size_t i, const Transform2D& tr);
+	void OperateGlobalTransform(size_t i, const std::function<void(Transform2D& transform)>&);
 	inline Transform2D GetGlobalTransform(size_t i) const { WEAK_LOCK_CHECK(m_Children[i], c) return c->GetTransform(); }
 	void SetGlobalPosition(size_t i, const glm::vec2& pos);
 	void OperateGlobalPosition(size_t i, const std::function<void(glm::vec2& position)>&);

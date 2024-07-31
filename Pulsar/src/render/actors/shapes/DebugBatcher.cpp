@@ -114,17 +114,17 @@ void DebugBatcher::PushBackAll(std::vector<std::shared_ptr<DebugPolygon>>&& poly
 {
 	std::unordered_set<std::pair<GLenum, BatchModel>> pushed;
 	DebugModel model;
-	for (auto&& poly : polys)
+	for (const auto& poly : polys)
 	{
 		model = poly->GetDebugModel();
 		pushed.insert(model);
 		const auto& multi_polygon = m_Slots.find(model);
 		if (multi_polygon != m_Slots.end())
-			multi_polygon->second.BufferPush(std::move(poly));
+			multi_polygon->second.BufferPush(poly);
 		else
 		{
 			DebugMultiPolygon multi(model);
-			multi.BufferPush(std::move(poly));
+			multi.BufferPush(poly);
 			m_Slots.emplace(model, std::move(multi));
 		}
 	}

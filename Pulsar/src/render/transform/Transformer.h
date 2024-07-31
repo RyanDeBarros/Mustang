@@ -28,12 +28,13 @@ public:
 	inline glm::vec2 GetScale() const override { WEAK_LOCK_CHECK(m_Parent, p) return p->GetScale(); }
 
 	// TODO buffer versions, at least for MultiTransformer, so that parent sync can be delayed. also consider parent-independent functions that don't sync children with transforms on parent.
-	inline void OperateTransform(const std::function<void(Transform2D& position)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperateTransform(op); SyncGlobalWithParent(); }
-	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperatePosition(op); SyncGlobalWithParentPosition(); }
-	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperateRotation(op); SyncGlobalWithParentRotation(); }
-	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperateScale(op); SyncGlobalWithParentScale(); }
+	inline void OperateTransform(const std::function<void(Transform2D& position)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperateTransform(op); SyncGlobalWithParent(); }
+	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperatePosition(op); SyncGlobalWithParentPosition(); }
+	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperateRotation(op); SyncGlobalWithParentRotation(); }
+	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperateScale(op); SyncGlobalWithParentScale(); }
 
 	void SetLocalTransform(const Transform2D& tr);
+	void OperateLocalTransform(const std::function<void(Transform2D& transform)>&);
 	inline Transform2D GetLocalTransform() const { return m_Local; }
 	void SetLocalPosition(const glm::vec2& pos);
 	void OperateLocalPosition(const std::function<void(glm::vec2& position)>&);
@@ -49,6 +50,7 @@ public:
 	void SyncLocalWithGlobal();
 
 	void SetGlobalTransform(const Transform2D& tr);
+	void OperateGlobalTransform(const std::function<void(Transform2D& transform)>&);
 	inline Transform2D GetGlobalTransform() const { WEAK_LOCK_CHECK(m_Child, c) return c->GetTransform(); }
 	void SetGlobalPosition(const glm::vec2& pos);
 	void OperateGlobalPosition(const std::function<void(glm::vec2& position)>&);

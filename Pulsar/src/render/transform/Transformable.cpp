@@ -6,23 +6,23 @@ TransformableProxy2D::TransformableProxy2D(const Transform2D& transform)
 }
 
 TransformableProxy2D::TransformableProxy2D(const TransformableProxy2D& other)
-	: m_Transform(other.m_Transform)
+	: m_Transform(other.GetTransform())
 {
 }
 
 TransformableProxy2D::TransformableProxy2D(TransformableProxy2D&& other) noexcept
-	: m_Transform(std::move(other.m_Transform))
+	: m_Transform(std::move(other.GetTransform()))
 {
 }
 
 TransformableProxy2D& TransformableProxy2D::operator=(const TransformableProxy2D& other)
 {
-	SetTransform(other.m_Transform);
+	SetTransform(other.GetTransform());
 	return *this;
 }
 
 TransformableProxy2D& TransformableProxy2D::operator=(TransformableProxy2D&& other) noexcept
 {
-	SetTransform(std::move(other.m_Transform));
+	SetTransform(std::move(other.GetTransform()));
 	return *this;
 }
