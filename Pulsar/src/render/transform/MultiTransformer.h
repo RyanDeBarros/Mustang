@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Transform.h"
 #include "Transformable.h"
 #include "Logger.h"
 
@@ -11,13 +10,20 @@ class MultiTransformer2D : public Transformable2D
 	std::vector<Transform2D> m_Locals;
 
 public:
-	MultiTransformer2D() = default;
+	MultiTransformer2D() = delete;
 	MultiTransformer2D(const std::weak_ptr<Transformable2D>& parent);
 	MultiTransformer2D(std::weak_ptr<Transformable2D>&& parent);
+	
 	MultiTransformer2D(const std::weak_ptr<Transformable2D>& parent, const std::vector<std::weak_ptr<Transformable2D>>& children, bool discard_old_transforms = true);
+	MultiTransformer2D(const std::weak_ptr<Transformable2D>& parent, std::vector<std::weak_ptr<Transformable2D>>&& children, bool discard_old_transforms = true);
+	MultiTransformer2D(std::weak_ptr<Transformable2D>&& parent, const std::vector<std::weak_ptr<Transformable2D>>& children, bool discard_old_transforms = true);
 	MultiTransformer2D(std::weak_ptr<Transformable2D>&& parent, std::vector<std::weak_ptr<Transformable2D>>&& children, bool discard_old_transforms = true);
+	
 	MultiTransformer2D(const std::weak_ptr<Transformable2D>& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms = true);
+	MultiTransformer2D(const std::weak_ptr<Transformable2D>& parent, std::vector<Transform2D>&& locals, bool discard_old_transforms = true);
+	MultiTransformer2D(std::weak_ptr<Transformable2D>&& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms = true);
 	MultiTransformer2D(std::weak_ptr<Transformable2D>&& parent, std::vector<Transform2D>&& locals, bool discard_old_transforms = true);
+	
 	MultiTransformer2D(const MultiTransformer2D&);
 	MultiTransformer2D(MultiTransformer2D&&) noexcept;
 	MultiTransformer2D& operator=(const MultiTransformer2D&);
@@ -31,10 +37,10 @@ public:
 	inline glm::float32 GetRotation() const override { WEAK_LOCK_CHECK(m_Parent, p) return p->GetRotation(); }
 	inline glm::vec2 GetScale() const override { WEAK_LOCK_CHECK(m_Parent, p) return p->GetScale(); }
 
-	inline void OperateTransform(const std::function<void(Transform2D& position)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperateTransform(op); SyncGlobalWithParent(); }
-	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperatePosition(op); SyncGlobalWithParentPositions(); }
-	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperateRotation(op); SyncGlobalWithParentRotations(); }
-	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) { WEAK_LOCK_CHECK(m_Parent, p) p->OperateScale(op); SyncGlobalWithParentScales(); }
+	inline void OperateTransform(const std::function<void(Transform2D& position)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperateTransform(op); SyncGlobalWithLocals(); }
+	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperatePosition(op); SyncGlobalWithLocalPositions(); }
+	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperateRotation(op); SyncGlobalWithLocalRotations(); }
+	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperateScale(op); SyncGlobalWithLocalScales(); }
 
 	void SetLocalTransforms(const Transform2D& tr) { for (size_t i = 0; i < m_Locals.size(); i++) SetLocalTransform(i, tr); }
 	inline void OperateLocalTransforms(const std::function<void(Transform2D& position)>& op) { for (size_t i = 0; i < m_Locals.size(); i++) OperateLocalTransform(i, op); }
@@ -63,26 +69,22 @@ public:
 	inline glm::vec2 GetLocalScale(size_t i) const { return m_Locals[i].scale; }
 
 	inline void SyncGlobalWithLocals() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithLocal(i); }
+	inline void SyncGlobalWithLocalPositions() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithLocalPosition(i); }
+	inline void SyncGlobalWithLocalRotations() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithLocalRotation(i); }
+	inline void SyncGlobalWithLocalScales() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithLocalScale(i); }
 	inline void SyncLocalWithGlobals() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithGlobal(i); }
-	inline void SyncGlobalWithParent() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithParent(i); }
-	inline void SyncGlobalWithParentPositions() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithParentPosition(i); }
-	inline void SyncGlobalWithParentRotations() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithParentRotation(i); }
-	inline void SyncGlobalWithParentScales() { for (size_t i = 0; i < m_Locals.size(); i++) SyncGlobalWithParentScale(i); }
-	inline void SyncLocalWithParent() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithParent(i); }
-	inline void SyncLocalWithParentPositions() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithParentPosition(i); }
-	inline void SyncLocalWithParentRotations() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithParentRotation(i); }
-	inline void SyncLocalWithParentScales() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithParentScale(i); }
+	inline void SyncLocalWithGlobalPositions() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithGlobalPosition(i); }
+	inline void SyncLocalWithGlobalRotations() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithGlobalRotation(i); }
+	inline void SyncLocalWithGlobalScales() { for (size_t i = 0; i < m_Locals.size(); i++) SyncLocalWithGlobalScale(i); }
 
 	void SyncGlobalWithLocal(size_t i);
+	void SyncGlobalWithLocalPosition(size_t i);
+	void SyncGlobalWithLocalRotation(size_t i);
+	void SyncGlobalWithLocalScale(size_t i);
 	void SyncLocalWithGlobal(size_t i);
-	void SyncGlobalWithParent(size_t i);
-	void SyncGlobalWithParentPosition(size_t i);
-	void SyncGlobalWithParentRotation(size_t i);
-	void SyncGlobalWithParentScale(size_t i);
-	void SyncLocalWithParent(size_t i);
-	void SyncLocalWithParentPosition(size_t i);
-	void SyncLocalWithParentRotation(size_t i);
-	void SyncLocalWithParentScale(size_t i);
+	void SyncLocalWithGlobalPosition(size_t i);
+	void SyncLocalWithGlobalRotation(size_t i);
+	void SyncLocalWithGlobalScale(size_t i);
 
 	void SetGlobalTransforms(const Transform2D& tr) { for (size_t i = 0; i < m_Locals.size(); i++) SetGlobalTransform(i, tr); }
 	void OperateGlobalTransforms(const std::function<void(Transform2D& transform)>& op) { for (size_t i = 0; i < m_Locals.size(); i++) OperateGlobalTransform(i, op); }

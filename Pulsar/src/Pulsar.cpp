@@ -309,13 +309,13 @@ void Pulsar::Run(GLFWwindow* window)
 	psys.Transformer()->SetLocalScale(1, { 1, _RendererSettings::initial_window_width / static_cast<float>(_RendererSettings::initial_window_height) });
 	
 	psys.TransformRef()->SetScale(_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height);
-	psys.Transformer()->SyncGlobalWithParentScales();
+	psys.Transformer()->SyncGlobalWithLocalScales();
 	//ParticleSubsystemArray<> parr({ wave1, wave2 });
 
 	//psys.SetPosition(-400, 0);
-	//psys.Transformer().SyncGlobalWithParentPositions();
+	//psys.Transformer().SyncGlobalWithLocalPositions();
 	//parr.SetPosition(400, 0);
-	//parr.Transformer().SyncGlobalWithParentPositions();
+	//parr.Transformer().SyncGlobalWithLocalPositions();
 
 	//parr.SubsystemRef(0).SetRotation(1.57f);
 	

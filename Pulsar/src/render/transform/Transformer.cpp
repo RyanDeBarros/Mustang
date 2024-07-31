@@ -154,23 +154,14 @@ void Transformer2D::SyncLocalWithGlobal()
 	m_Local = Transform::RelTo(c->GetTransform(), p->GetTransform());
 }
 
-void Transformer2D::SyncGlobalWithParent()
-{
-	WEAK_LOCK_CHECK(m_Parent, p);
-	WEAK_LOCK_CHECK(m_Child, c);
-	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Local.position));
-	c->SetRotation(p->GetRotation() + m_Local.rotation);
-	c->SetScale(p->GetScale() * m_Local.scale);
-}
-
-void Transformer2D::SyncGlobalWithParentPosition()
+void Transformer2D::SyncGlobalWithLocalPosition()
 {
 	WEAK_LOCK_CHECK(m_Parent, p);
 	WEAK_LOCK_CHECK(m_Child, c);
 	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Local.position));
 }
 
-void Transformer2D::SyncGlobalWithParentRotation()
+void Transformer2D::SyncGlobalWithLocalRotation()
 {
 	WEAK_LOCK_CHECK(m_Parent, p);
 	WEAK_LOCK_CHECK(m_Child, c);
@@ -178,7 +169,7 @@ void Transformer2D::SyncGlobalWithParentRotation()
 	c->SetRotation(p->GetRotation() + m_Local.rotation);
 }
 
-void Transformer2D::SyncGlobalWithParentScale()
+void Transformer2D::SyncGlobalWithLocalScale()
 {
 	WEAK_LOCK_CHECK(m_Parent, p);
 	WEAK_LOCK_CHECK(m_Child, c);
@@ -186,23 +177,14 @@ void Transformer2D::SyncGlobalWithParentScale()
 	c->SetScale(p->GetScale() * m_Local.scale);
 }
 
-void Transformer2D::SyncLocalWithParent()
-{
-	WEAK_LOCK_CHECK(m_Parent, p);
-	WEAK_LOCK_CHECK(m_Child, c);
-	m_Local.position = (Transform::Rotation(-p->GetRotation()) * (c->GetPosition() - p->GetPosition())) / p->GetScale();
-	m_Local.rotation = c->GetRotation() - p->GetRotation();
-	m_Local.scale = c->GetScale() / p->GetScale();
-}
-
-void Transformer2D::SyncLocalWithParentPosition()
+void Transformer2D::SyncLocalWithGlobalPosition()
 {
 	WEAK_LOCK_CHECK(m_Parent, p);
 	WEAK_LOCK_CHECK(m_Child, c);
 	m_Local.position = (Transform::Rotation(-p->GetRotation()) * (c->GetPosition() - p->GetPosition())) / p->GetScale();
 }
 
-void Transformer2D::SyncLocalWithParentRotation()
+void Transformer2D::SyncLocalWithGlobalRotation()
 {
 	WEAK_LOCK_CHECK(m_Parent, p);
 	WEAK_LOCK_CHECK(m_Child, c);
@@ -210,7 +192,7 @@ void Transformer2D::SyncLocalWithParentRotation()
 	m_Local.rotation = c->GetRotation() - p->GetRotation();
 }
 
-void Transformer2D::SyncLocalWithParentScale()
+void Transformer2D::SyncLocalWithGlobalScale()
 {
 	WEAK_LOCK_CHECK(m_Parent, p);
 	WEAK_LOCK_CHECK(m_Child, c);

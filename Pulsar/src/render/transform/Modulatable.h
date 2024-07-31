@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <functional>
+#include <memory>
 
 class Modulatable
 {
@@ -9,6 +10,8 @@ public:
 	inline virtual glm::vec4 GetColor() const { return {}; }
 	inline virtual void OperateColor(const std::function<void(glm::vec4&)>& op) {}
 	inline void SetColor(const glm::vec4& color) { OperateColor([&color](glm::vec4& c) { c = color; }); }
+
+	inline bool operator==(const Modulatable& other) const { return GetColor() == other.GetColor(); }
 };
 
 class ModulatableProxy : public Modulatable
@@ -26,3 +29,5 @@ public:
 	inline glm::vec4 GetColor() const override { return m_Color; }
 	inline virtual void OperateColor(const std::function<void(glm::vec4&)>& op) override { op(m_Color); }
 };
+
+inline bool operator==(const std::weak_ptr<Modulatable>& lhs, const std::weak_ptr<Modulatable>& rhs) { return lhs.lock() == rhs.lock(); }

@@ -21,6 +21,28 @@ MultiTransformer2D::MultiTransformer2D(const std::weak_ptr<Transformable2D>& par
 		SyncLocalWithGlobals();
 }
 
+MultiTransformer2D::MultiTransformer2D(const std::weak_ptr<Transformable2D>& parent, std::vector<std::weak_ptr<Transformable2D>>&& children, bool discard_old_transforms)
+	: m_Parent(parent), m_Children(std::move(children))
+{
+	for (size_t i = 0; i < m_Children.size(); i++)
+		m_Locals.push_back({});
+	if (discard_old_transforms)
+		SyncGlobalWithLocals();
+	else
+		SyncLocalWithGlobals();
+}
+
+MultiTransformer2D::MultiTransformer2D(std::weak_ptr<Transformable2D>&& parent, const std::vector<std::weak_ptr<Transformable2D>>& children, bool discard_old_transforms)
+	: m_Parent(std::move(parent)), m_Children(children)
+{
+	for (size_t i = 0; i < m_Children.size(); i++)
+		m_Locals.push_back({});
+	if (discard_old_transforms)
+		SyncGlobalWithLocals();
+	else
+		SyncLocalWithGlobals();
+}
+
 MultiTransformer2D::MultiTransformer2D(std::weak_ptr<Transformable2D>&& parent, std::vector<std::weak_ptr<Transformable2D>>&& children, bool discard_old_transforms)
 	: m_Parent(std::move(parent)), m_Children(std::move(children))
 {
@@ -36,7 +58,40 @@ MultiTransformer2D::MultiTransformer2D(const std::weak_ptr<Transformable2D>& par
 	: m_Parent(parent), m_Locals(locals)
 {
 	for (size_t i = 0; i < m_Children.size(); i++)
-		m_Children.push_back(std::make_shared<Transformable2D>());
+		m_Children.push_back(std::make_shared<TransformableProxy2D>());
+	if (discard_old_transforms)
+		SyncLocalWithGlobals();
+	else
+		SyncGlobalWithLocals();
+}
+
+MultiTransformer2D::MultiTransformer2D(const std::weak_ptr<Transformable2D>& parent, std::vector<Transform2D>&& locals, bool discard_old_transforms)
+	: m_Parent(parent), m_Locals(std::move(locals))
+{
+	for (size_t i = 0; i < m_Children.size(); i++)
+		m_Children.push_back(std::make_shared<TransformableProxy2D>());
+	if (discard_old_transforms)
+		SyncLocalWithGlobals();
+	else
+		SyncGlobalWithLocals();
+}
+
+MultiTransformer2D::MultiTransformer2D(std::weak_ptr<Transformable2D>&& parent, const std::vector<Transform2D>& locals, bool discard_old_transforms)
+	: m_Parent(std::move(parent)), m_Locals(locals)
+{
+	for (size_t i = 0; i < m_Children.size(); i++)
+		m_Children.push_back(std::make_shared<TransformableProxy2D>());
+	if (discard_old_transforms)
+		SyncLocalWithGlobals();
+	else
+		SyncGlobalWithLocals();
+}
+
+MultiTransformer2D::MultiTransformer2D(std::weak_ptr<Transformable2D>&& parent, std::vector<Transform2D>&& locals, bool discard_old_transforms)
+	: m_Parent(std::move(parent)), m_Locals(std::move(locals))
+{
+	for (size_t i = 0; i < m_Children.size(); i++)
+		m_Children.push_back(std::make_shared<TransformableProxy2D>());
 	if (discard_old_transforms)
 		SyncLocalWithGlobals();
 	else
@@ -160,6 +215,29 @@ void MultiTransformer2D::SyncGlobalWithLocal(size_t i)
 	c->SetTransform(Transform::AbsTo(m_Locals[i], p->GetTransform()));
 }
 
+void MultiTransformer2D::SyncGlobalWithLocalPosition(size_t i)
+{
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Children[i], c);
+	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Locals[i].position));
+}
+
+void MultiTransformer2D::SyncGlobalWithLocalRotation(size_t i)
+{
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Children[i], c);
+	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Locals[i].position));
+	c->SetRotation(p->GetRotation() + m_Locals[i].rotation);
+}
+
+void MultiTransformer2D::SyncGlobalWithLocalScale(size_t i)
+{
+	WEAK_LOCK_CHECK(m_Parent, p);
+	WEAK_LOCK_CHECK(m_Children[i], c);
+	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Locals[i].position));
+	c->SetScale(p->GetScale() * m_Locals[i].scale);
+}
+
 void MultiTransformer2D::SyncLocalWithGlobal(size_t i)
 {
 	WEAK_LOCK_CHECK(m_Parent, p);
@@ -167,55 +245,14 @@ void MultiTransformer2D::SyncLocalWithGlobal(size_t i)
 	m_Locals[i] = Transform::RelTo(c->GetTransform(), p->GetTransform());
 }
 
-void MultiTransformer2D::SyncGlobalWithParent(size_t i)
-{
-	WEAK_LOCK_CHECK(m_Parent, p);
-	WEAK_LOCK_CHECK(m_Children[i], c);
-	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Locals[i].position));
-	c->SetRotation(p->GetRotation() + m_Locals[i].rotation);
-	c->SetScale(p->GetScale() * m_Locals[i].scale);
-}
-
-void MultiTransformer2D::SyncGlobalWithParentPosition(size_t i)
-{
-	WEAK_LOCK_CHECK(m_Parent, p);
-	WEAK_LOCK_CHECK(m_Children[i], c);
-	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Locals[i].position));
-}
-
-void MultiTransformer2D::SyncGlobalWithParentRotation(size_t i)
-{
-	WEAK_LOCK_CHECK(m_Parent, p);
-	WEAK_LOCK_CHECK(m_Children[i], c);
-	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Locals[i].position));
-	c->SetRotation(p->GetRotation() + m_Locals[i].rotation);
-}
-
-void MultiTransformer2D::SyncGlobalWithParentScale(size_t i)
-{
-	WEAK_LOCK_CHECK(m_Parent, p);
-	WEAK_LOCK_CHECK(m_Children[i], c);
-	c->SetPosition(p->GetPosition() + Transform::Rotation(p->GetRotation()) * (p->GetScale() * m_Locals[i].position));
-	c->SetScale(p->GetScale() * m_Locals[i].scale);
-}
-
-void MultiTransformer2D::SyncLocalWithParent(size_t i)
-{
-	WEAK_LOCK_CHECK(m_Parent, p);
-	WEAK_LOCK_CHECK(m_Children[i], c);
-	m_Locals[i].position = (Transform::Rotation(-p->GetRotation()) * (c->GetPosition() - p->GetPosition())) / p->GetScale();
-	m_Locals[i].rotation = c->GetRotation() - p->GetRotation();
-	m_Locals[i].scale = c->GetScale() / p->GetScale();
-}
-
-void MultiTransformer2D::SyncLocalWithParentPosition(size_t i)
+void MultiTransformer2D::SyncLocalWithGlobalPosition(size_t i)
 {
 	WEAK_LOCK_CHECK(m_Parent, p);
 	WEAK_LOCK_CHECK(m_Children[i], c);
 	m_Locals[i].position = (Transform::Rotation(-p->GetRotation()) * (c->GetPosition() - p->GetPosition())) / p->GetScale();
 }
 
-void MultiTransformer2D::SyncLocalWithParentRotation(size_t i)
+void MultiTransformer2D::SyncLocalWithGlobalRotation(size_t i)
 {
 	WEAK_LOCK_CHECK(m_Parent, p);
 	WEAK_LOCK_CHECK(m_Children[i], c);
@@ -223,7 +260,7 @@ void MultiTransformer2D::SyncLocalWithParentRotation(size_t i)
 	m_Locals[i].rotation = c->GetRotation() - p->GetRotation();
 }
 
-void MultiTransformer2D::SyncLocalWithParentScale(size_t i)
+void MultiTransformer2D::SyncLocalWithGlobalScale(size_t i)
 {
 	WEAK_LOCK_CHECK(m_Parent, p);
 	WEAK_LOCK_CHECK(m_Children[i], c);
@@ -342,9 +379,9 @@ void MultiTransformer2D::PushBackGlobal(const std::weak_ptr<Transformable2D>& ch
 	m_Children.push_back(child);
 	m_Locals.push_back({});
 	if (discard_old_transform)
-		SyncGlobalWithLocals();
+		SyncGlobalWithLocal(m_Locals.size() - 1);
 	else
-		SyncLocalWithGlobals();
+		SyncLocalWithGlobal(m_Locals.size() - 1);
 }
 
 void MultiTransformer2D::PushBackGlobal(std::weak_ptr<Transformable2D>&& child, bool discard_old_transform)
@@ -352,9 +389,9 @@ void MultiTransformer2D::PushBackGlobal(std::weak_ptr<Transformable2D>&& child, 
 	m_Children.push_back(std::move(child));
 	m_Locals.push_back({});
 	if (discard_old_transform)
-		SyncGlobalWithLocals();
+		SyncGlobalWithLocal(m_Locals.size() - 1);
 	else
-		SyncLocalWithGlobals();
+		SyncLocalWithGlobal(m_Locals.size() - 1);
 }
 
 void MultiTransformer2D::PushBackGlobals(const std::vector<std::weak_ptr<Transformable2D>>& children, bool discard_old_transform)
@@ -365,8 +402,8 @@ void MultiTransformer2D::PushBackGlobals(const std::vector<std::weak_ptr<Transfo
 
 void MultiTransformer2D::PushBackGlobals(std::vector<std::weak_ptr<Transformable2D>>&& children, bool discard_old_transform)
 {
-	for (const auto& child : children)
-		PushBackGlobal(child, discard_old_transform);
+	for (auto& child : children)
+		PushBackGlobal(std::move(child), discard_old_transform);
 }
 
 std::shared_ptr<TransformableProxy2D> MultiTransformer2D::PushBackLocal(const Transform2D& local, bool discard_old_transform)

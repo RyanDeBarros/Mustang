@@ -201,7 +201,9 @@
     <ClCompile Include="src\render\actors\TileMap.cpp" />
     <ClCompile Include="src\render\transform\Modulatable.cpp" />
     <ClCompile Include="src\render\transform\Modulator.cpp" />
+    <ClCompile Include="src\render\transform\MultiModulator.cpp" />
     <ClCompile Include="src\render\transform\MultiTransformer.cpp" />
+    <ClCompile Include="src\render\transform\Protean.cpp" />
     <ClCompile Include="src\render\transform\Transform.cpp" />
     <ClCompile Include="src\render\transform\Transformable.cpp" />
     <ClCompile Include="src\render\transform\Transformer.cpp" />
@@ -255,7 +257,9 @@
     <ClInclude Include="src\render\actors\TileMap.h" />
     <ClInclude Include="src\render\transform\Modulatable.h" />
     <ClInclude Include="src\render\transform\Modulator.h" />
+    <ClInclude Include="src\render\transform\MultiModulator.h" />
     <ClInclude Include="src\render\transform\MultiTransformer.h" />
+    <ClInclude Include="src\render\transform\Protean.h" />
     <ClInclude Include="src\render\transform\Transform.h" />
     <ClInclude Include="src\render\transform\Transformable.h" />
     <ClInclude Include="src\render\transform\Transformer.h" />

@@ -25,7 +25,7 @@ public:
 	inline void SetScale(float sx, float sy) { OperateScale([sx, sy](glm::vec2& scale) { scale = { sx, sy }; }); }
 	inline void SetScale(const glm::vec2& sc) { OperateScale([&sc](glm::vec2& scale) { scale = sc; }); }
 
-	inline virtual bool operator==(const Transformable2D& other) const { return GetTransform() == other.GetTransform(); }
+	inline bool operator==(const Transformable2D& other) const { return GetTransform() == other.GetTransform(); }
 };
 
 class TransformableProxy2D : public Transformable2D
@@ -61,7 +61,7 @@ if (!lock_ptr)\
 }
 #endif
 
-inline bool operator==(const std::weak_ptr<Transformable2D>& lhs, const std::weak_ptr<Transformable2D>& rhs) { return !lhs.owner_before(rhs) && !rhs.owner_before(lhs); }
+inline bool operator==(const std::weak_ptr<Transformable2D>& lhs, const std::weak_ptr<Transformable2D>& rhs) { return lhs.lock() == rhs.lock(); }
 
 // TODO common Pulsar exception base class?
 

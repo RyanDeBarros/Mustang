@@ -17,12 +17,16 @@ class Modulator : public Modulatable
 	glm::vec4 m_Local;
 
 public:
+	Modulator() = delete;
+
 	Modulator(const std::weak_ptr<Modulatable>& parent, const std::weak_ptr<Modulatable>& child, bool discard_old_color = true);
 	Modulator(const std::weak_ptr<Modulatable>& parent, std::weak_ptr<Modulatable>&& child, bool discard_old_color = true);
 	Modulator(std::weak_ptr<Modulatable>&& parent, const std::weak_ptr<Modulatable>& child, bool discard_old_color = true);
 	Modulator(std::weak_ptr<Modulatable>&& parent, std::weak_ptr<Modulatable>&& child, bool discard_old_color = true);
+
 	Modulator(const std::weak_ptr<Modulatable>& parent, const glm::vec4& local, bool discard_old_color = true);
 	Modulator(std::weak_ptr<Modulatable>&& parent, const glm::vec4& local, bool discard_old_color = true);
+
 	Modulator(const Modulator&);
 	Modulator(Modulator&&) noexcept;
 	Modulator& operator=(const Modulator&);

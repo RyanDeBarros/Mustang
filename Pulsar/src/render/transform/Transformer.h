@@ -11,12 +11,16 @@ class Transformer2D : public Transformable2D
 	Transform2D m_Local;
 
 public:
+	Transformer2D() = delete;
+
 	Transformer2D(const std::weak_ptr<Transformable2D>& parent, const std::weak_ptr<Transformable2D>& child, bool discard_old_transform = true);
 	Transformer2D(const std::weak_ptr<Transformable2D>& parent, std::weak_ptr<Transformable2D>&& child, bool discard_old_transform = true);
 	Transformer2D(std::weak_ptr<Transformable2D>&& parent, const std::weak_ptr<Transformable2D>& child, bool discard_old_transform = true);
 	Transformer2D(std::weak_ptr<Transformable2D>&& parent, std::weak_ptr<Transformable2D>&& child, bool discard_old_transform = true);
+	
 	Transformer2D(const std::weak_ptr<Transformable2D>& parent, const Transform2D& local, bool discard_old_transform = true);
 	Transformer2D(std::weak_ptr<Transformable2D>&& parent, const Transform2D& local, bool discard_old_transform = true);
+	
 	Transformer2D(const Transformer2D&);
 	Transformer2D(Transformer2D&&) noexcept;
 	Transformer2D& operator=(const Transformer2D&);
@@ -28,10 +32,10 @@ public:
 	inline glm::vec2 GetScale() const override { WEAK_LOCK_CHECK(m_Parent, p) return p->GetScale(); }
 
 	// TODO buffer versions, at least for MultiTransformer, so that parent sync can be delayed. also consider parent-independent functions that don't sync children with transforms on parent.
-	inline void OperateTransform(const std::function<void(Transform2D& position)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperateTransform(op); SyncGlobalWithParent(); }
-	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperatePosition(op); SyncGlobalWithParentPosition(); }
-	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperateRotation(op); SyncGlobalWithParentRotation(); }
-	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperateScale(op); SyncGlobalWithParentScale(); }
+	inline void OperateTransform(const std::function<void(Transform2D& position)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperateTransform(op); SyncGlobalWithLocal(); }
+	inline void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperatePosition(op); SyncGlobalWithLocalPosition(); }
+	inline void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperateRotation(op); SyncGlobalWithLocalRotation(); }
+	inline void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { WEAK_LOCK_CHECK(m_Parent, p) p->OperateScale(op); SyncGlobalWithLocalScale(); }
 
 	void SetLocalTransform(const Transform2D& tr);
 	void OperateLocalTransform(const std::function<void(Transform2D& transform)>&);
@@ -47,7 +51,13 @@ public:
 	inline glm::vec2 GetLocalScale() const { return m_Local.scale; }
 
 	void SyncGlobalWithLocal();
+	void SyncGlobalWithLocalPosition();
+	void SyncGlobalWithLocalRotation();
+	void SyncGlobalWithLocalScale();
 	void SyncLocalWithGlobal();
+	void SyncLocalWithGlobalPosition();
+	void SyncLocalWithGlobalRotation();
+	void SyncLocalWithGlobalScale();
 
 	void SetGlobalTransform(const Transform2D& tr);
 	void OperateGlobalTransform(const std::function<void(Transform2D& transform)>&);
@@ -61,15 +71,4 @@ public:
 	void SetGlobalScale(const glm::vec2& sc);
 	void OperateGlobalScale(const std::function<void(glm::vec2& scale)>&);
 	inline glm::vec2 GetGlobalScale() const { WEAK_LOCK_CHECK(m_Child, c) return c->GetScale(); }
-
-private:
-	void SyncGlobalWithParent();
-	void SyncGlobalWithParentPosition();
-	void SyncGlobalWithParentRotation();
-	void SyncGlobalWithParentScale();
-	void SyncLocalWithParent();
-	void SyncLocalWithParentPosition();
-	void SyncLocalWithParentRotation();
-	void SyncLocalWithParentScale();
-
 };
