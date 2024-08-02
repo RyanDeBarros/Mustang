@@ -13,7 +13,7 @@ ActorTesselation2D::ActorTesselation2D(std::shared_ptr<ActorRenderBase2D>&& acto
 }
 
 ActorTesselation2D::ActorTesselation2D(const ActorTesselation2D& other)
-	: m_Actor(other.m_Actor), ActorSequencer2D(other), m_Transform(other.m_Transform), m_Transformer(other.m_Transformer), m_TransformsList(other.m_TransformsList)
+	: m_Actor(other.m_Actor), ActorSequencer2D(other), m_Transform(std::make_shared<TransformableProxy2D>(other.m_Transform->GetTransform())), m_Transformer(other.m_Transformer), m_TransformsList(other.m_TransformsList)
 {
 	BindFunctions();
 }

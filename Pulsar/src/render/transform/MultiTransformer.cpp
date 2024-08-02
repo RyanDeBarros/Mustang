@@ -428,6 +428,7 @@ std::vector<std::shared_ptr<TransformableProxy2D>> MultiTransformer2D::PushBackL
 
 void MultiTransformer2D::Remove(size_t i)
 {
+	// TODO use swap/pop instead? maybe define a swap/pop utility function to use throughout project?
 	m_Children.erase(m_Children.begin() + i);
 	m_Locals.erase(m_Locals.begin() + i);
 }
@@ -436,6 +437,17 @@ void MultiTransformer2D::Remove(const std::vector<std::weak_ptr<Transformable2D>
 {
 	m_Children.erase(where);
 	m_Locals.erase(m_Locals.begin() + (where - m_Children.begin()));
+}
+
+void MultiTransformer2D::SwapPop(size_t i)
+{
+	if (m_Children.size() > 1)
+	{
+		std::swap(m_Children[i], m_Children.back());
+		std::swap(m_Locals[i], m_Locals.back());
+	}
+	m_Children.pop_back();
+	m_Locals.pop_back();
 }
 
 std::vector<std::weak_ptr<Transformable2D>>::iterator MultiTransformer2D::Find(const std::weak_ptr<Transformable2D>& child)

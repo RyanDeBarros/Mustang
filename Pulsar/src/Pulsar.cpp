@@ -27,6 +27,7 @@
 #include "utils/Functors.h"
 #include "utils/Strings.h"
 #include "render/transform/Modulator.h"
+#include "render/transform/Transformer.h"
 
 using namespace Pulsar;
 
@@ -228,7 +229,7 @@ void Pulsar::Run(GLFWwindow* window)
 						return Particles::CHRBind{
 							[](Particle& p)
 							{
-								p.m_Transformer.SetLocalPosition(glm::vec2{ glm::cos(p[0] * 2 * glm::pi<float>()), glm::sin(p[0] * 2 * glm::pi<float>()) } * 20.0f * p[1]);
+								p.m_Shape->TransformWeak().lock()->SetPosition(glm::vec2{ glm::cos(p[0] * 2 * glm::pi<float>()), glm::sin(p[0] * 2 * glm::pi<float>()) } *20.0f * p[1]);
 							}, 1
 						};
 					},
@@ -299,19 +300,17 @@ void Pulsar::Run(GLFWwindow* window)
 						Particles::CHR::SetLocalPositionUsingData(Composition(LinearCombo2x1({ -0.5f * p2width, -0.5f * p2height}, { 0.0f, 2.0f }), CastFloatToUInt), 1)
 					)
 				})
-			),
-			Particles::CHR::SyncGlobalWithLocal
+			)
 		})
 	};
 
 	ParticleSystem<> psys({ wave2, wave2 });
-	//psys.SubsystemRef(1).SetRotation(0.5f * glm::pi<float>());
 	psys.Transformer()->SetLocalRotation(1, 0.5f * glm::pi<float>());
-	// TODO this local scale set shouldn't be necessary. the parent scale set below should take care of it
-	psys.Transformer()->SetLocalScale(1, { 1, _RendererSettings::initial_window_width / static_cast<float>(_RendererSettings::initial_window_height) });
-	
-	psys.TransformRef()->SetScale(_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height);
-	psys.Transformer()->SyncGlobalWithLocalScales();
+	//psys.Transformer()->SetLocalScale(1, { 1, _RendererSettings::initial_window_width / static_cast<float>(_RendererSettings::initial_window_height) });
+	// TODO local to global scale function is wrong, as can be demonstrated below:
+	//psys.Transformer()->SetScale(_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height);
+	//psys.Transformer()->SyncGlobalWithLocalScales();
+	psys.Transformer()->SetPosition(300, 0);
 	//ParticleSubsystemArray<> parr({ wave1, wave2 });
 
 	//psys.SetPosition(-400, 0);
@@ -371,11 +370,11 @@ void Pulsar::Run(GLFWwindow* window)
 	std::shared_ptr<Modulator> root_mod(std::make_shared<Modulator>(root.ModulateWeak(), first_mod));
 	root_mod->SetColor(glm::vec4{ 1.0f } * 0.5f);
 	
-	Renderer::GetCanvasLayer(11)->OnAttach(&root);
-	Renderer::GetCanvasLayer(11)->OnAttach(&child2);
-	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
-	Renderer::GetCanvasLayer(11)->OnAttach(&child);
-	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&root);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&child2);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&child);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
 
 	DebugRect rect(_RendererSettings::initial_window_width * 0.5f, _RendererSettings::initial_window_height, true, { 1.0f, 0.5f }, {}, { 0.5f, 0.5f, 1.0f, 0.3f }, 1);
 	//Renderer::GetCanvasLayer(11)->OnAttach(&rect);

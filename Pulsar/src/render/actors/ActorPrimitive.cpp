@@ -11,7 +11,7 @@ ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& 
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const ActorPrimitive2D& primitive)
-	: m_Render(primitive.m_Render), m_Transform(primitive.m_Transform), m_Modulate(primitive.m_Modulate), ActorRenderBase2D(primitive), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
+	: m_Render(primitive.m_Render), m_Transform(std::make_shared<PrimitiveTransformable2D>(primitive.m_Transform->GetTransform())), m_Modulate(primitive.m_Modulate), ActorRenderBase2D(primitive), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
 {
 	m_Transform->m_Primitive = this;
 	m_Modulate->m_Primitive = this;
@@ -29,7 +29,7 @@ ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
 	m_Render = primitive.m_Render;
 	m_Status = primitive.m_Status;
 	m_ModulationColors = primitive.m_ModulationColors;
-	m_Transform = primitive.m_Transform;
+	m_Transform->SetTransform(primitive.m_Transform->GetTransform());
 	m_Modulate = primitive.m_Modulate;
 	ActorRenderBase2D::operator=(primitive);
 	return *this;
@@ -40,7 +40,7 @@ ActorPrimitive2D& ActorPrimitive2D::operator=(ActorPrimitive2D&& primitive) noex
 	m_Render = std::move(primitive.m_Render);
 	m_Status = primitive.m_Status;
 	m_ModulationColors = std::move(primitive.m_ModulationColors);
-	m_Transform = std::move(primitive.m_Transform);
+	m_Transform->SetTransform(primitive.m_Transform->GetTransform());
 	m_Modulate = std::move(primitive.m_Modulate);
 	ActorRenderBase2D::operator=(std::move(primitive));
 	return *this;

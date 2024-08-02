@@ -237,6 +237,17 @@ void MultiModulator::Remove(const std::vector<std::weak_ptr<Modulatable>>::itera
 	m_Locals.erase(m_Locals.begin() + (where - m_Children.begin()));
 }
 
+void MultiModulator::SwapPop(size_t i)
+{
+	if (m_Children.size() > 1)
+	{
+		std::swap(m_Children[i], m_Children.back());
+		std::swap(m_Locals[i], m_Locals.back());
+	}
+	m_Children.pop_back();
+	m_Locals.pop_back();
+}
+
 std::vector<std::weak_ptr<Modulatable>>::iterator MultiModulator::Find(const std::weak_ptr<Modulatable>& child)
 {
 	return std::find(m_Children.begin(), m_Children.end(), child);

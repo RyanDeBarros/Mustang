@@ -69,6 +69,7 @@ public:
 	std::vector<std::shared_ptr<ModulatableProxy>> PushBackLocals(const std::vector<glm::vec4>& locals, bool discard_old_color = true);
 	void Remove(size_t i);
 	void Remove(const std::vector<std::weak_ptr<Modulatable>>::iterator& where);
+	void SwapPop(size_t i);
 	std::vector<std::weak_ptr<Modulatable>>::iterator Find(const std::weak_ptr<Modulatable>& child);
 	inline size_t Size() const { return m_Locals.size(); }
 

@@ -21,8 +21,7 @@ public:
 	bool visible;
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
-	virtual void InvalidateParticle(const Particle& part, ParticleSubsystemIndex i) override;
+	virtual void InvalidateParticleShape(ParticleSubsystemIndex i, const std::shared_ptr<DebugPolygon>& shape) override;
 	virtual void DespawnInvalidParticles() override;
-	virtual void AddParticle(ParticleSubsystemIndex i, const Particle& part) override;
-	virtual void AddParticle(ParticleSubsystemIndex i, Particle&& part) override;
+	virtual void AddParticleShape(ParticleSubsystemIndex i, const std::shared_ptr<DebugPolygon>& shape) override;
 };

@@ -19,13 +19,13 @@ void ParticleSystem<ParticleCount>::RequestDraw(CanvasLayer* canvas_layer)
 }
 
 template<std::unsigned_integral ParticleCount>
-void ParticleSystem<ParticleCount>::InvalidateParticle(const Particle& part, ParticleSubsystemIndex i)
+void ParticleSystem<ParticleCount>::InvalidateParticleShape(ParticleSubsystemIndex i, const std::shared_ptr<DebugPolygon>& shape)
 {
-	auto iter = m_WaitingForDespawn.find(part.m_Shape->GetDebugModel());
+	auto iter = m_WaitingForDespawn.find(shape->GetDebugModel());
 	if (iter == m_WaitingForDespawn.end())
-		m_WaitingForDespawn[part.m_Shape->GetDebugModel()] = { part.m_Shape };
+		m_WaitingForDespawn[shape->GetDebugModel()] = { shape };
 	else
-		iter->second.insert(part.m_Shape);
+		iter->second.insert(shape);
 }
 
 template<std::unsigned_integral ParticleCount>
@@ -37,15 +37,7 @@ void ParticleSystem<ParticleCount>::DespawnInvalidParticles()
 }
 
 template<std::unsigned_integral ParticleCount>
-void ParticleSystem<ParticleCount>::AddParticle(ParticleSubsystemIndex i, const Particle& part)
+void ParticleSystem<ParticleCount>::AddParticleShape(ParticleSubsystemIndex i, const std::shared_ptr<DebugPolygon>& shape)
 {
-	m_Batcher.PushBack(part.m_Shape);
-	ParticleEffect<ParticleCount>::AddParticle(i, part);
-}
-
-template<std::unsigned_integral ParticleCount>
-void ParticleSystem<ParticleCount>::AddParticle(ParticleSubsystemIndex i, Particle&& part)
-{
-	m_Batcher.PushBack(part.m_Shape);
-	ParticleEffect<ParticleCount>::AddParticle(i, std::move(part));
+	m_Batcher.PushBack(shape);
 }

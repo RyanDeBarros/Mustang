@@ -14,10 +14,9 @@ ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsyste
 	ParticleSubsystemIndex i = 0;
 	for (const auto& subsys : subsystem_data)
 	{
-		std::shared_ptr<ParticleSubsystem<ParticleCount>> subsystem = std::make_shared<ParticleSubsystem<ParticleCount>>(subsys, i);
+		std::shared_ptr<ParticleSubsystem<ParticleCount>> subsystem = std::make_shared<ParticleSubsystem<ParticleCount>>(subsys, i++);
 		m_Subsystems.push_back(subsystem);
-		m_Transformer.PushBackGlobal(subsystem->m_Transform);
-		m_Particles.push_back({});
+		m_Transformer.PushBackGlobal(subsystem->m_Transformer);
 	}
 	Reset();
 }
@@ -43,61 +42,21 @@ void ParticleEffect<ParticleCount>::OnUpdate()
 		m_TotalPlayed += m_DeltaTime;
 	}
 	if (spawning)
-		OnSubsystemsUpdate();
-	if (enabled)
-		OnParticlesUpdate();
-}
-
-template<std::unsigned_integral ParticleCount>
-void ParticleEffect<ParticleCount>::OnSubsystemsUpdate()
-{
-	if (m_PlayTime > 0.0f && m_TotalPlayed > m_PlayTime)
 	{
-		spawning = false;
-		Reset();
-		return;
-	}
-	for (auto& subsystem : m_Subsystems)
-		subsystem->OnUpdate(*this);
-}
-
-template<std::unsigned_integral ParticleCount>
-void ParticleEffect<ParticleCount>::OnParticlesUpdate()
-{
-	bool erase = false;
-	for (ParticleSubsystemIndex i = 0; i < m_Particles.size(); i++)
-	{
-		for (auto& part : m_Particles[i])
+		if (m_PlayTime > 0.0f && m_TotalPlayed > m_PlayTime)
 		{
-			part.OnDraw(m_DeltaTime);
-			if (part.m_Invalid)
-			{
-				erase = true;
-				InvalidateParticle(part, i);
-			}
+			spawning = false;
+			Reset();
+			return;
 		}
+		for (auto& subsystem : m_Subsystems)
+			subsystem->OnSpawnFrame(*this);
 	}
-	if (erase)
-		DespawnInvalidParticles();
-}
-
-template<std::unsigned_integral ParticleCount>
-void ParticleEffect<ParticleCount>::DespawnInvalidParticles()
-{
-	for (auto& p_vec : m_Particles)
-		std::erase_if(p_vec, [](const Particle& part) { return part.m_Invalid; });
-}
-
-template<std::unsigned_integral ParticleCount>
-void ParticleEffect<ParticleCount>::AddParticle(ParticleSubsystemIndex i, const Particle& part)
-{
-	m_Particles[i].push_back(part);
-}
-
-template<std::unsigned_integral ParticleCount>
-void ParticleEffect<ParticleCount>::AddParticle(ParticleSubsystemIndex i, Particle&& part)
-{
-	m_Particles[i].push_back(std::move(part));
+	if (enabled)
+	{
+		for (auto& subsystem : m_Subsystems)
+			subsystem->OnParticlesUpdate(*this);
+	}
 }
 
 template<std::unsigned_integral ParticleCount>

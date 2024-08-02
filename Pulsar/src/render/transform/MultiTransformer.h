@@ -120,6 +120,7 @@ public:
 	std::vector<std::shared_ptr<TransformableProxy2D>> PushBackLocals(const std::vector<Transform2D>& locals, bool discard_old_transform = true);
 	void Remove(size_t i);
 	void Remove(const std::vector<std::weak_ptr<Transformable2D>>::iterator& where);
+	void SwapPop(size_t i);
 	std::vector<std::weak_ptr<Transformable2D>>::iterator Find(const std::weak_ptr<Transformable2D>& child);
 	inline size_t Size() const { return m_Locals.size(); }
 };

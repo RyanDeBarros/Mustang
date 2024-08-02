@@ -7,6 +7,7 @@
 #include "Typedefs.h"
 #include "utils/CommonMath.h"
 #include "Particle.h"
+#include "../../transform/MultiTransformer.h"
 
 typedef unsigned char ParticleSubsystemIndex;
 
@@ -23,6 +24,7 @@ struct ParticleSubsystemData
 template<std::unsigned_integral ParticleCount>
 class ParticleEffect;
 
+// TODO just use ParticleSubsystemData as a data member of ParticleSubsystem, to avoid all this repeating.
 template<std::unsigned_integral ParticleCount = unsigned short>
 class ParticleSubsystem
 {
@@ -37,6 +39,8 @@ class ParticleSubsystem
 	unsigned int m_WaveNum = 0;
 	ParticleSubsystemIndex m_SubsystemIndex;
 	std::shared_ptr<TransformableProxy2D> m_Transform;
+	std::shared_ptr<MultiTransformer2D> m_Transformer;
+	std::vector<Particle> m_Particles;
 
 public:
 	ParticleSubsystem(const ParticleSubsystemData<ParticleCount>& wave_data, ParticleSubsystemIndex subsystem_index);
@@ -49,6 +53,8 @@ public:
 
 private:
 	friend class ParticleEffect<ParticleCount>;
-	void OnUpdate(ParticleEffect<ParticleCount>& psys);
-	void OnSpawn(ParticleEffect<ParticleCount>& psys, const Particles::CHRSeed& seed);
+	void OnSpawnFrame(ParticleEffect<ParticleCount>& psys);
+	void Spawn(ParticleEffect<ParticleCount>& psys, const Particles::CHRSeed& seed);
+	void OnParticlesUpdate(ParticleEffect<ParticleCount>& psys);
+	void RemoveUnordered(ParticleCount i);
 };

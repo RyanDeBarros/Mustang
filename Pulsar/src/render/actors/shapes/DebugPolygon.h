@@ -71,12 +71,11 @@ public:
 
 class DebugTransformable2D : public TransformableProxy2D
 {
+	friend class DebugPolygon;
 	DebugPolygon* m_Poly = nullptr;
 
 public:
-	DebugTransformable2D() : TransformableProxy2D() {}
-
-	inline void SetPolygon(DebugPolygon* poly) { m_Poly = poly; }
+	DebugTransformable2D(const Transform2D& transform = {}) : TransformableProxy2D(transform) {}
 
 	inline virtual void OperateTransform(const std::function<void(Transform2D& transform)>& op) override { op(m_Transform); m_Poly->FlushTransform(); }
 	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); m_Poly->FlushPosition(); }

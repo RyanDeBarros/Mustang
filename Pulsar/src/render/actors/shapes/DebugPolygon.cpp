@@ -9,20 +9,20 @@ DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const Transform
 	Loader::loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
 	SetIndexingMode(indexing_mode);
 	PointsRef() = points;
-	m_Transform->SetPolygon(this);
+	m_Transform->m_Poly = this;
 	m_Transform->SetTransform(transform);
 }
 
 DebugPolygon::DebugPolygon(const DebugPolygon& other)
-	: ActorRenderBase2D(other), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Transform(other.m_Transform), m_Status(other.m_Status)
+	: ActorRenderBase2D(other), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Transform(std::make_shared<DebugTransformable2D>(other.m_Transform->GetTransform())), m_Status(other.m_Status)
 {
-	m_Transform->SetPolygon(this);
+	m_Transform->m_Poly = this;
 }
 
 DebugPolygon::DebugPolygon(DebugPolygon&& other) noexcept
 	: ActorRenderBase2D(std::move(other)), m_Color(other.m_Color), m_Renderable(std::move(other.m_Renderable)), m_Points(std::move(other.m_Points)), m_IndexingMode(other.m_IndexingMode), m_Transform(std::move(other.m_Transform)), m_Status(other.m_Status)
 {
-	m_Transform->SetPolygon(this);
+	m_Transform->m_Poly = this;
 }
 
 DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
@@ -32,7 +32,7 @@ DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
 	m_Points = other.m_Points;
 	m_IndexingMode = other.m_IndexingMode;
 	m_Status = other.m_Status;
-	m_Transform = other.m_Transform;
+	m_Transform->SetTransform(other.m_Transform->GetTransform());
 	ActorRenderBase2D::operator=(other);
 	return *this;
 }
@@ -44,7 +44,7 @@ DebugPolygon& DebugPolygon::operator=(DebugPolygon&& other) noexcept
 	m_Points = std::move(other.m_Points);
 	m_IndexingMode = other.m_IndexingMode;
 	m_Status = other.m_Status;
-	m_Transform = std::move(other.m_Transform);
+	m_Transform->SetTransform(other.m_Transform->GetTransform());
 	ActorRenderBase2D::operator=(std::move(other));
 	return *this;
 }

@@ -36,8 +36,6 @@ namespace Particles {
 		extern CharacteristicGen SetLocalPositionUsingData(const std::function<glm::vec2(glm::vec2)>& position, DataIndex di1, DataIndex di2);
 		extern CharacteristicGen OperateLocalPositionFromVelocityData(DataIndex dix, DataIndex diy);
 		
-		extern CharacteristicGen SyncGlobalWithLocal;
-
 	}
 
 }

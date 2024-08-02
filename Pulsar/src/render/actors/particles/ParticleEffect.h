@@ -11,7 +11,6 @@ template<std::unsigned_integral ParticleCount = unsigned short>
 class ParticleEffect
 {
 	friend class ParticleSubsystem<ParticleCount>;
-	std::vector<std::vector<Particle>> m_Particles;
 	real m_TotalPlayed = 0.0f;
 	real m_DeltaTime = 0.0f;
 	real m_PlayTime = 0.0f;
@@ -36,7 +35,6 @@ public:
 
 	inline MultiTransformer2D* Transformer() { return &m_Transformer; }
 	inline ParticleSubsystem<ParticleCount>& SubsystemRef(unsigned int i) { return *m_Subsystems[i]; }
-	inline std::shared_ptr<TransformableProxy2D> TransformRef() { return m_Transform; }
 
 protected:
 	std::vector<std::shared_ptr<ParticleSubsystem<ParticleCount>>> m_Subsystems;
@@ -44,12 +42,7 @@ protected:
 	MultiTransformer2D m_Transformer;
 
 	void OnUpdate();
-	virtual void DespawnInvalidParticles();
-	virtual void InvalidateParticle(const Particle& part, ParticleSubsystemIndex i) {};
-	virtual void AddParticle(ParticleSubsystemIndex i, const Particle& part);
-	virtual void AddParticle(ParticleSubsystemIndex i, Particle&& part);
-
-private:
-	void OnSubsystemsUpdate();
-	void OnParticlesUpdate();
+	virtual void DespawnInvalidParticles() {}
+	virtual void InvalidateParticleShape(ParticleSubsystemIndex i, const std::shared_ptr<DebugPolygon>& shape) {}
+	virtual void AddParticleShape(ParticleSubsystemIndex i, const std::shared_ptr<DebugPolygon>& shape) {}
 };

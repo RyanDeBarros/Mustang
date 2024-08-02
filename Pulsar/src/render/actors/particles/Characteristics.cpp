@@ -1,6 +1,7 @@
 #include "Characteristics.h"
 
 #include "utils/CommonMath.h"
+#include "utils/Strings.h"
 
 namespace Particles {
 
@@ -262,7 +263,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[scale, di](Particle& p)
 					{
-						p.m_Transformer.SetLocalScale(scale(p[di]));
+						p.m_Transformer->SetLocalScale(p.ti(), scale(p[di]));
 					}, di + 1
 				};
 			};
@@ -275,7 +276,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[position, di](Particle& p)
 					{
-						p.m_Transformer.SetLocalPosition(position(p[di]));
+						p.m_Transformer->SetLocalPosition(p.ti(), position(p[di]));
 					}, di + 1
 				};
 			};
@@ -288,7 +289,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[position, di1, di2](Particle& p)
 					{
-						p.m_Transformer.SetLocalPosition(position({ p[di1], p[di2] }));
+						p.m_Transformer->SetLocalPosition(p.ti(), position({p[di1], p[di2]}));
 					}, Max(di1, di2) + 1
 				};
 			};
@@ -301,15 +302,12 @@ namespace Particles {
 				return Particles::CHRBind{
 					[dix, diy](Particle& p)
 					{
-						p.m_Transformer.OperateLocalPosition([&p, dix, diy](glm::vec2& pos) { pos += glm::vec2{ p[dix], p[diy] } * p.dt(); });
+						p.m_Transformer->OperateLocalPosition(p.ti(), [&p, dix, diy](glm::vec2& pos) { pos += glm::vec2{p[dix], p[diy]} * p.dt(); });
 					}, Max(dix, diy) + 1
 				};
 			};
 		}
 
-		CharacteristicGen SyncGlobalWithLocal = [](const Particles::CHRSeed& seed) {
-			return Particles::CHRBind{[](Particle& p) { p.m_Transformer.SyncGlobalWithLocal(); }, 0 };
-		};
 	}
 
 }
