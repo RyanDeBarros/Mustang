@@ -191,7 +191,7 @@ void DebugBatcher::Sort()
 	m_OrderedTraversal.clear();
 	for (auto& pair : m_Slots)
 		m_OrderedTraversal.push_back(&pair.second);
-	std::sort(m_OrderedTraversal.begin(), m_OrderedTraversal.end(),
+	std::stable_sort(m_OrderedTraversal.begin(), m_OrderedTraversal.end(),
 		[](const DebugMultiPolygon* const first, const DebugMultiPolygon* const second)
 		{
 			return first->GetZIndex() < second->GetZIndex();

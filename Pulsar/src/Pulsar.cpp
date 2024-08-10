@@ -229,7 +229,7 @@ void Pulsar::Run(GLFWwindow* window)
 						return Particles::CHRBind{
 							[](Particle& p)
 							{
-								p.m_Shape->TransformWeak().lock()->SetPosition(glm::vec2{ glm::cos(p[0] * 2 * glm::pi<float>()), glm::sin(p[0] * 2 * glm::pi<float>()) } *20.0f * p[1]);
+								p.m_Transformer->SetLocalPosition(p.ti(), glm::vec2{glm::cos(p[0] * 2 * glm::pi<float>()), glm::sin(p[0] * 2 * glm::pi<float>())} *20.0f * p[1]);
 							}, 1
 						};
 					},
@@ -304,13 +304,15 @@ void Pulsar::Run(GLFWwindow* window)
 		})
 	};
 
-	ParticleSystem<> psys({ wave2, wave2 });
-	psys.Transformer()->SetLocalRotation(1, 0.5f * glm::pi<float>());
+	//ParticleSystem<> psys({ wave2, wave2, wave1 });
+	ParticleSystem<> psys({ wave1 });
+	//psys.Transformer()->SetLocalRotation(1, 0.5f * glm::pi<float>());
 	//psys.Transformer()->SetLocalScale(1, { 1, _RendererSettings::initial_window_width / static_cast<float>(_RendererSettings::initial_window_height) });
 	// TODO local to global scale function is wrong, as can be demonstrated below:
 	//psys.Transformer()->SetScale(_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height);
 	//psys.Transformer()->SyncGlobalWithLocalScales();
-	psys.Transformer()->SetPosition(300, 0);
+	//psys.Transformer()->SetPosition(300, 0);
+	//psys.Transformer()->SetLocalTransform(2, { {-500, 0}, 0, {2, 2} });
 	//ParticleSubsystemArray<> parr({ wave1, wave2 });
 
 	//psys.SetPosition(-400, 0);
