@@ -7,6 +7,7 @@
 
 #include "../shapes/DebugPolygon.h"
 #include "../../transform/MultiTransformer.h"
+#include "../../transform/MultiModulator.h"
 
 struct Particle;
 namespace Particles {
@@ -33,6 +34,7 @@ struct Particle
 	float* m_Data = nullptr;
 	Particles::DataIndex m_DataSize;
 	MultiTransformer2D* m_Transformer;
+	MultiModulator* m_Modulator;
 
 private:
 	template<std::unsigned_integral ParticleCount>
@@ -47,7 +49,7 @@ private:
 	unsigned short m_TI = 0;
 
 public:
-	Particle(const std::shared_ptr<DebugPolygon>& shape, const float& lifespan, const Particles::CHRBind& characteristic, MultiTransformer2D* const transformer);
+	Particle(const std::shared_ptr<DebugPolygon>& shape, const float& lifespan, const Particles::CHRBind& characteristic, MultiTransformer2D* transformer, MultiModulator* modulator);
 	Particle(const Particle&);
 	Particle(Particle&&) noexcept;
 	Particle& operator=(const Particle&);

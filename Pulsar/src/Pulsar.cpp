@@ -268,7 +268,7 @@ void Pulsar::Run(GLFWwindow* window)
 	float p2height = 400.0f;
 	ParticleSubsystemData<> wave2{
 		1.5f,
-		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 2}, {1, 2}, {1, 0} }, {}, {}, GL_TRIANGLE_FAN)),
+		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 2}, {1, 2}, {1, 0} }, {}, Colors::WHITE, GL_TRIANGLE_FAN)),
 		CumulativeFunc<>(LinearFunc(p2height * 0.5f)),
 		[](const Particles::CHRSeed& seed) { return 1.5f; },
 		Particles::CombineSequential({
@@ -305,11 +305,12 @@ void Pulsar::Run(GLFWwindow* window)
 	};
 
 	//ParticleSystem<> psys({ wave2, wave2, wave1 });
-	ParticleSystem<> psys({ wave1 });
-	//psys.Transformer()->SetLocalRotation(1, 0.5f * glm::pi<float>());
+	//ParticleSystem<> psys({ wave1 });
+	ParticleSystem<> psys({ wave2, wave2 });
+	psys.Transformer()->SetLocalRotation(1, 0.5f * glm::pi<float>());
 	//psys.Transformer()->SetLocalScale(1, { 1, _RendererSettings::initial_window_width / static_cast<float>(_RendererSettings::initial_window_height) });
 	// TODO local to global scale function is wrong, as can be demonstrated below:
-	//psys.Transformer()->SetScale(_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height);
+	psys.Transformer()->SetScale(_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height);
 	//psys.Transformer()->SyncGlobalWithLocalScales();
 	//psys.Transformer()->SetPosition(300, 0);
 	//psys.Transformer()->SetLocalTransform(2, { {-500, 0}, 0, {2, 2} });
@@ -321,6 +322,7 @@ void Pulsar::Run(GLFWwindow* window)
 	//parr.Transformer().SyncGlobalWithLocalPositions();
 
 	//parr.SubsystemRef(0).SetRotation(1.57f);
+	psys.Modulator()->SetColor(Colors::PSYCHEDELIC_PURPLE);
 	
 	psys.Pause();
 	//parr.Pause();
@@ -391,17 +393,17 @@ void Pulsar::Run(GLFWwindow* window)
 		//if (totalDrawTime > 0.3f)
 		//{
 			// OnUpdate here
-			psys.Resume();
+		psys.Resume();
 			//psys.SetRotation(totalDrawTime * 0.25f);
 			//psys.SetScale(1.0f - 0.2f * glm::sin(totalDrawTime), 1.0f + 0.2f * glm::sin(totalDrawTime));
 			//parr.Resume();
 		//}
-		second.SetLocalRotations(-Pulsar::totalDrawTime);
-		first->SetLocalRotation(Pulsar::totalDrawTime);
-		first2->SetLocalRotation(-Pulsar::totalDrawTime);
-		second.SetRotation(Pulsar::totalDrawTime);
-		second.OperateLocalPosition(0, [](glm::vec2& position) { position.x += 5 * Pulsar::deltaDrawTime; });
-		second.OperateLocalScale(1, [](glm::vec2& scale) { scale *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime) ; });
+		//second.SetLocalRotations(-Pulsar::totalDrawTime);
+		//first->SetLocalRotation(Pulsar::totalDrawTime);
+		//first2->SetLocalRotation(-Pulsar::totalDrawTime);
+		//second.SetRotation(Pulsar::totalDrawTime);
+		//second.OperateLocalPosition(0, [](glm::vec2& position) { position.x += 5 * Pulsar::deltaDrawTime; });
+		//second.OperateLocalScale(1, [](glm::vec2& scale) { scale *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime) ; });
 
 		Renderer::OnDraw();
 		glfwPollEvents();

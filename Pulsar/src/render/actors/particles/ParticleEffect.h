@@ -2,11 +2,12 @@
 
 #include <vector>
 
+#include "utils/Constants.h"
 #include "Particle.h"
 #include "ParticleSubsystem.h"
 #include "../../transform/MultiTransformer.h"
+#include "../../transform/MultiModulator.h"
 
-// TODO add global modulation. perhaps use a special Transformer that propogates modulation. A Modulator?
 template<std::unsigned_integral ParticleCount = unsigned short>
 class ParticleEffect
 {
@@ -17,7 +18,7 @@ class ParticleEffect
 	real m_LeftoverDT = 0.0f;
 
 public:
-	ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform = {}, bool enabled = true);
+	ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform = {}, const glm::vec4& modulate = WHITE, bool enabled = true);
 	ParticleEffect(const ParticleEffect<ParticleCount>&) = delete;
 	ParticleEffect(ParticleEffect<ParticleCount>&&) = delete;
 
@@ -34,12 +35,15 @@ public:
 	void PlayFor(real n);
 
 	inline MultiTransformer2D* Transformer() { return &m_Transformer; }
+	inline MultiModulator* Modulator() { return &m_Modulator; }
 	inline ParticleSubsystem<ParticleCount>& SubsystemRef(unsigned int i) { return *m_Subsystems[i]; }
 
 protected:
 	std::vector<std::shared_ptr<ParticleSubsystem<ParticleCount>>> m_Subsystems;
 	std::shared_ptr<TransformableProxy2D> m_Transform;
 	MultiTransformer2D m_Transformer;
+	std::shared_ptr<ModulatableProxy> m_Modulate;
+	MultiModulator m_Modulator;
 
 	void OnUpdate();
 	virtual void DespawnInvalidParticles() {}

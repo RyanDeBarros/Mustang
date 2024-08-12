@@ -3,9 +3,11 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+#include "utils/Constants.h"
 #include "../../Renderable.h"
 #include "../../ActorRenderBase.h"
 #include "../../transform/Transformable.h"
+#include "../../transform/Modulatable.h"
 
 typedef std::pair<GLenum, BatchModel> DebugModel;
 
@@ -29,7 +31,7 @@ protected:
 	friend class CanvasLayer;
 	Renderable m_Renderable;
 	std::vector<glm::vec2> m_Points;
-	glm::vec4 m_Color;
+	std::shared_ptr<class DebugModulatable> m_Color;
 	GLenum m_IndexingMode;
 	std::shared_ptr<class DebugTransformable2D> m_Transform;
 
@@ -39,7 +41,7 @@ protected:
 	virtual void CheckStatus();
 
 public:
-	DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform = {}, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f }, GLenum indexing_mode = GL_LINE_STRIP, ZIndex z = 0);
+	DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform = {}, const glm::vec4& color = Colors::WHITE, GLenum indexing_mode = GL_LINE_STRIP, ZIndex z = 0);
 	DebugPolygon(const DebugPolygon&);
 	DebugPolygon(DebugPolygon&&) noexcept;
 	DebugPolygon& operator=(const DebugPolygon&);
@@ -55,18 +57,19 @@ public:
 
 	inline GLenum GetIndexingMode() const { return m_IndexingMode; }
 	inline void SetIndexingMode(GLenum indexing_mode) { m_Status |= 0b1; m_IndexingMode = indexing_mode; }
-	inline glm::vec4 GetColor() const { return m_Color; }
-	inline void SetColor(const glm::vec4& color) { m_Status |= 0b10; m_Color = color; }
 
 	inline void FlushTransform() { m_Status |= 0b11000; }
 	inline void FlushPosition() { m_Status |= 0b1000; }
 	inline void FlushRotation() { m_Status |= 0b10000; }
 	inline void FlushScale() { m_Status |= 0b10000; }
+	inline void FlushColor() { m_Status |= 0b10; }
 
 	bool visible = true;
 
 	std::shared_ptr<DebugTransformable2D> Transform() { return m_Transform; }
 	std::weak_ptr<DebugTransformable2D> TransformWeak() { return m_Transform; }
+	std::shared_ptr<DebugModulatable> Modulate() { return m_Color; }
+	std::weak_ptr<DebugModulatable> ModulateWeak() { return m_Color; }
 };
 
 class DebugTransformable2D : public TransformableProxy2D
@@ -81,4 +84,15 @@ public:
 	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); m_Poly->FlushPosition(); }
 	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform.rotation); m_Poly->FlushRotation(); }
 	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); m_Poly->FlushScale(); }
+};
+
+class DebugModulatable : public ModulatableProxy
+{
+	friend class DebugPolygon;
+	DebugPolygon* m_Poly = nullptr;
+
+public:
+	DebugModulatable(const glm::vec4& color = Colors::WHITE) : ModulatableProxy(color) {}
+
+	inline virtual void OperateColor(const std::function<void(glm::vec4& color)>& op) override { op(m_Color); m_Poly->FlushColor(); }
 };

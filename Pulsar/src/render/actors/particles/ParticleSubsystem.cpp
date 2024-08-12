@@ -8,14 +8,14 @@ template class ParticleSubsystem<unsigned short>;
 
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystemData<ParticleCount>& wave_data, ParticleSubsystemIndex subsystem_index)
-	: m_Shape(wave_data.prototypeShape), m_SpawnFunc(wave_data.spawnFunc), m_LifespanFunc(wave_data.lifespanFunc), m_CharacteristicGen(wave_data.characteristicGen), m_TotalSpawn(m_SpawnFunc(1.0f)), m_SubsystemIndex(subsystem_index), m_Transform(std::make_shared<TransformableProxy2D>()), m_Transformer(std::make_shared<MultiTransformer2D>(m_Transform))
+	: m_Shape(wave_data.prototypeShape), m_SpawnFunc(wave_data.spawnFunc), m_LifespanFunc(wave_data.lifespanFunc), m_CharacteristicGen(wave_data.characteristicGen), m_TotalSpawn(m_SpawnFunc(1.0f)), m_SubsystemIndex(subsystem_index), m_Transform(std::make_shared<TransformableProxy2D>()), m_Transformer(std::make_shared<MultiTransformer2D>(m_Transform)), m_Modulate(std::make_shared<ModulatableProxy>(Colors::WHITE)), m_Modulator(std::make_shared<MultiModulator>(m_Modulate))
 {
 	SetWavePeriod(wave_data.wavePeriod);
 }
 
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystem<ParticleCount>& other)
-	: m_SpawnFunc(other.m_SpawnFunc), m_LifespanFunc(other.m_LifespanFunc), m_CharacteristicGen(other.m_CharacteristicGen), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(other.m_Shape), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Transform(std::make_shared<TransformableProxy2D>(other.m_Transform->GetTransform())), m_Transformer(std::make_shared<MultiTransformer2D>(m_Transform))
+	: m_SpawnFunc(other.m_SpawnFunc), m_LifespanFunc(other.m_LifespanFunc), m_CharacteristicGen(other.m_CharacteristicGen), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(other.m_Shape), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Transform(std::make_shared<TransformableProxy2D>(other.m_Transform->GetTransform())), m_Transformer(std::make_shared<MultiTransformer2D>(m_Transform)), m_Modulate(std::make_shared<ModulatableProxy>(other.m_Modulate->GetColor())), m_Modulator(std::make_shared<MultiModulator>(m_Modulate))
 {
 }
 
@@ -23,7 +23,7 @@ ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystem<Part
 
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>::ParticleSubsystem(ParticleSubsystem<ParticleCount>&& other) noexcept
-	: m_SpawnFunc(std::move(other.m_SpawnFunc)), m_LifespanFunc(std::move(other.m_LifespanFunc)), m_CharacteristicGen(std::move(other.m_CharacteristicGen)), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(std::move(other.m_Shape)), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Transform(std::move(other.m_Transform)), m_Transformer(std::make_shared<MultiTransformer2D>(m_Transform))
+	: m_SpawnFunc(std::move(other.m_SpawnFunc)), m_LifespanFunc(std::move(other.m_LifespanFunc)), m_CharacteristicGen(std::move(other.m_CharacteristicGen)), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(std::move(other.m_Shape)), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Transform(std::move(other.m_Transform)), m_Transformer(std::make_shared<MultiTransformer2D>(m_Transform)), m_Modulate(std::move(other.m_Modulate)), m_Modulator(std::make_shared<MultiModulator>(m_Modulate))
 {
 }
 
@@ -40,8 +40,10 @@ ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(co
 	m_TotalSpawn = other.m_TotalSpawn;
 	m_WaveNum = other.m_WaveNum;
 	m_SubsystemIndex = other.m_SubsystemIndex;
-	m_Transform = other.m_Transform;
-	m_Transformer = other.m_Transformer;
+	m_Transform = std::make_shared<TransformableProxy2D>(*other.m_Transform);
+	m_Transformer = std::make_shared<MultiTransformer2D>(*other.m_Transformer);
+	m_Modulate = std::make_shared<ModulatableProxy>(*other.m_Modulate);
+	m_Modulator = std::make_shared<MultiModulator>(*other.m_Modulator);
 	return *this;
 }
 
@@ -60,6 +62,8 @@ ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(Pa
 	m_SubsystemIndex = other.m_SubsystemIndex;
 	m_Transform = std::move(other.m_Transform);
 	m_Transformer = std::move(other.m_Transformer);
+	m_Modulate = std::move(other.m_Modulate);
+	m_Modulator = std::move(other.m_Modulator);
 	return *this;
 }
 
@@ -95,7 +99,8 @@ void ParticleSubsystem<ParticleCount>::Spawn(ParticleEffect<ParticleCount>& psys
 {
 	std::shared_ptr<DebugPolygon> shape(std::make_shared<DebugPolygon>(*m_Shape));
 	m_Transformer->PushBackGlobal(shape->TransformWeak());
-	m_Particles.push_back(Particle(shape, m_LifespanFunc(seed), m_CharacteristicGen(seed), m_Transformer.get()));
+	m_Modulator->PushBackGlobal(shape->ModulateWeak());
+	m_Particles.push_back(Particle(shape, m_LifespanFunc(seed), m_CharacteristicGen(seed), m_Transformer.get(), m_Modulator.get()));
 	psys.AddParticleShape(m_SubsystemIndex, shape);
 }
 
@@ -124,4 +129,5 @@ void ParticleSubsystem<ParticleCount>::RemoveUnordered(ParticleCount i)
 		std::swap(m_Particles[i], m_Particles.back());
 	m_Particles.pop_back();
 	m_Transformer->SwapPop(i);
+	m_Modulator->SwapPop(i);
 }

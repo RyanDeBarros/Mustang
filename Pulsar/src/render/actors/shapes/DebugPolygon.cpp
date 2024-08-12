@@ -4,30 +4,34 @@
 #include "AssetLoader.h"
 
 DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform, const glm::vec4& color, GLenum indexing_mode, ZIndex z)
-	: ActorRenderBase2D(z), m_Color(color), m_Transform(std::make_shared<DebugTransformable2D>())
+	: ActorRenderBase2D(z), m_Color(std::make_shared<DebugModulatable>()), m_Transform(std::make_shared<DebugTransformable2D>())
 {
 	Loader::loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
 	SetIndexingMode(indexing_mode);
 	PointsRef() = points;
 	m_Transform->m_Poly = this;
 	m_Transform->SetTransform(transform);
+	m_Color->m_Poly = this;
+	m_Color->SetColor(color);
 }
 
 DebugPolygon::DebugPolygon(const DebugPolygon& other)
-	: ActorRenderBase2D(other), m_Color(other.m_Color), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Transform(std::make_shared<DebugTransformable2D>(other.m_Transform->GetTransform())), m_Status(other.m_Status)
+	: ActorRenderBase2D(other), m_Color(std::make_shared<DebugModulatable>(other.m_Color->GetColor())), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Transform(std::make_shared<DebugTransformable2D>(other.m_Transform->GetTransform())), m_Status(other.m_Status)
 {
 	m_Transform->m_Poly = this;
+	m_Color->m_Poly = this;
 }
 
 DebugPolygon::DebugPolygon(DebugPolygon&& other) noexcept
 	: ActorRenderBase2D(std::move(other)), m_Color(other.m_Color), m_Renderable(std::move(other.m_Renderable)), m_Points(std::move(other.m_Points)), m_IndexingMode(other.m_IndexingMode), m_Transform(std::move(other.m_Transform)), m_Status(other.m_Status)
 {
 	m_Transform->m_Poly = this;
+	m_Color->m_Poly = this;
 }
 
 DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
 {
-	m_Color = other.m_Color;
+	m_Color->SetColor(other.m_Color->GetColor());
 	m_Renderable = other.m_Renderable;
 	m_Points = other.m_Points;
 	m_IndexingMode = other.m_IndexingMode;
@@ -39,7 +43,7 @@ DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
 
 DebugPolygon& DebugPolygon::operator=(DebugPolygon&& other) noexcept
 {
-	m_Color = other.m_Color;
+	m_Color->SetColor(other.m_Color->GetColor());
 	m_Renderable = std::move(other.m_Renderable);
 	m_Points = std::move(other.m_Points);
 	m_IndexingMode = other.m_IndexingMode;
@@ -84,11 +88,10 @@ void DebugPolygon::CheckStatus()
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
 		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 		{
-			// TODO why is there a buffer warning overflow?
-			m_Renderable.vertexBufferData[i * stride + 6] = static_cast<GLfloat>(m_Color[0]);
-			m_Renderable.vertexBufferData[i * stride + 7] = static_cast<GLfloat>(m_Color[1]);
-			m_Renderable.vertexBufferData[i * stride + 8] = static_cast<GLfloat>(m_Color[2]);
-			m_Renderable.vertexBufferData[i * stride + 9] = static_cast<GLfloat>(m_Color[3]);
+			m_Renderable.vertexBufferData[i * stride + 6] = static_cast<GLfloat>(m_Color->GetColor()[0]);
+			m_Renderable.vertexBufferData[i * stride + 7] = static_cast<GLfloat>(m_Color->GetColor()[1]);
+			m_Renderable.vertexBufferData[i * stride + 8] = static_cast<GLfloat>(m_Color->GetColor()[2]);
+			m_Renderable.vertexBufferData[i * stride + 9] = static_cast<GLfloat>(m_Color->GetColor()[3]);
 		}
 	}
 	// modify point positions

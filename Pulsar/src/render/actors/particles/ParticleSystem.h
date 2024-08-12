@@ -13,7 +13,7 @@ class ParticleSystem : public ActorRenderBase2D, public ParticleEffect<ParticleC
 	std::unordered_map<DebugModel, std::unordered_set<std::shared_ptr<DebugPolygon>>> m_WaitingForDespawn;
 
 public:
-	ParticleSystem(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform = {}, ZIndex z = 0, bool visible = true, bool enabled = true);
+	ParticleSystem(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform = {}, const glm::vec4& modulate = Colors::WHITE, ZIndex z = 0, bool visible = true, bool enabled = true);
 	ParticleSystem(const ParticleSystem<ParticleCount>&) = delete;
 	ParticleSystem(ParticleSystem<ParticleCount>&&) = delete;
 

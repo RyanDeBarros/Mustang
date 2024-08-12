@@ -237,8 +237,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[color, di](Particle& p)
 					{
-						// TODO use modulator in future
-						p.m_Shape->SetColor(color(p[di]));
+						p.m_Modulator->SetLocalColor(p.ti(), color(p[di]));
 					}, di + 1
 				};
 			};
@@ -251,7 +250,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[color](Particle& p)
 					{
-						p.m_Shape->SetColor(color(p.t()));
+						p.m_Modulator->SetLocalColor(p.ti(), color(p.t()));
 					}, 0
 				};
 			};

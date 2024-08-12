@@ -1,5 +1,7 @@
 #include "MultiModulator.h"
 
+#include "utils/Constants.h"
+
 MultiModulator::MultiModulator(const std::weak_ptr<Modulatable>& parent)
 	: m_Parent(parent)
 {
@@ -176,7 +178,7 @@ void MultiModulator::OperateGlobalColor(size_t i, const std::function<void(glm::
 void MultiModulator::PushBackGlobal(const std::weak_ptr<Modulatable>& child, bool discard_old_color)
 {
 	m_Children.push_back(child);
-	m_Locals.push_back({});
+	m_Locals.push_back(Colors::WHITE);
 	if (discard_old_color)
 		SyncGlobalWithLocal(m_Locals.size() - 1);
 	else
@@ -186,7 +188,7 @@ void MultiModulator::PushBackGlobal(const std::weak_ptr<Modulatable>& child, boo
 void MultiModulator::PushBackGlobal(std::weak_ptr<Modulatable>&& child, bool discard_old_color)
 {
 	m_Children.push_back(std::move(child));
-	m_Locals.push_back({});
+	m_Locals.push_back(Colors::WHITE);
 	if (discard_old_color)
 		SyncGlobalWithLocal(m_Locals.size() - 1);
 	else
