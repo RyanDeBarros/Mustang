@@ -11,7 +11,7 @@ enum class CompositeMode
 	VOLATILE
 };
 
-class ActorComposite2D : virtual public ActorSequencer2D
+class ActorComposite2D : public ActorSequencer2D
 {
 	friend class ActorRenderIterator;
 	friend class CanvasLayer;

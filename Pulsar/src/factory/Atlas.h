@@ -11,7 +11,8 @@
 struct Placement
 {
 	TileHandle tile;
-	int x, y, w, h;
+	int x, y;
+	unsigned int w, h;
 	bool r;
 
 	bool operator==(const Placement& other) const

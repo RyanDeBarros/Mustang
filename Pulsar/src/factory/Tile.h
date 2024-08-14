@@ -4,7 +4,10 @@
 
 struct TileRect
 {
-	int x, y, w, h;
+	int x;
+	int y;
+	unsigned int w;
+	unsigned int h;
 };
 
 class Tile

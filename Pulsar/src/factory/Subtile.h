@@ -2,8 +2,11 @@
 
 struct Subtile : public Tile
 {
-	int x, y, w, h;
-	Subtile(Tile* const tile, int x, int y, int w, int h)
+	int x;
+	int y;
+	unsigned int w;
+	unsigned int h;
+	Subtile(Tile* const tile, int x, int y, unsigned int w, unsigned int h)
 		: x(x), y(y), w(w), h(h)
 	{
 		m_Filepath = tile->GetFilepath();

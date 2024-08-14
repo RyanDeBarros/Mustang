@@ -18,9 +18,9 @@ class DebugMultiPolygon : public ActorRenderBase2D
 	BatchModel m_Model;
 	GLenum m_IndexMode;
 
+	mutable GLsizei draw_count;
 	mutable GLint* indexes_ptr;
 	mutable GLsizei* index_counts_ptr;
-	mutable GLsizei draw_count;
 
 	void UpdatePtrs() const;
 	void Sort();

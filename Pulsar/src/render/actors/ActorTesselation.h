@@ -11,10 +11,9 @@
 
 // TODO add modulator implementation
 
-class ActorTesselation2D : virtual public ActorSequencer2D
+class ActorTesselation2D : public ActorSequencer2D
 {
 	ActorRenderBase2D* m_Actor;
-	//Transformer2D m_Transformer;
 	std::vector<std::shared_ptr<Transformer2D>> m_InternalChildren;
 	
 	std::function<ActorPrimitive2D* const(PrimitiveIndex i)> f_operator;
@@ -43,14 +42,8 @@ public:
 	~ActorTesselation2D();
 
 	inline ActorRenderBase2D* ActorRef() const { return m_Actor; }
-	//inline Transformer2D* Transformer() { return &m_Transformer; }
-	//inline Transform2D* Transform() { return &m_Transformer.self.transform; }
 	void PushBackStatic(const Transform2D& transform, bool sync_on_attach = false);
 	void PushBackStatic(const std::vector<Transform2D>& transforms, bool sync_on_attach = false);
-	//void PushBackLocal(const Transform2D& local);
-	//void PushBackLocals(const std::vector<Transform2D>& locals);
-	//void PushBackLocal(const PackedTransform2D& local);
-	//void PushBackLocals(const std::vector<PackedTransform2D>& locals);
 
 	ActorPrimitive2D* const operator[](PrimitiveIndex i) override;
 	ZIndex GetZIndex() const override;

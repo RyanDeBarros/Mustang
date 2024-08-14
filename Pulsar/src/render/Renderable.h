@@ -47,8 +47,8 @@ struct Renderable
 
 private:
 	GLfloat* vertexBufferData;
-	BufferCounter vertexCount;
 	GLuint* indexBufferData;
+	BufferCounter vertexCount;
 	BufferCounter indexCount;
 	
 	bool AttachVertexBuffer(toml::v3::array* vertex_array, size_t size);

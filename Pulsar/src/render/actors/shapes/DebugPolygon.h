@@ -33,11 +33,12 @@ protected:
 	friend class CanvasLayer;
 	Renderable m_Renderable;
 	std::vector<glm::vec2> m_Points;
-	GLenum m_IndexingMode;
 
 	DP_Notification* m_Notification;
 	Transformer2D m_Transformer;
 	Modulator m_Modulator;
+
+	GLenum m_IndexingMode;
 
 	// 0b ... transform RS | transform P | point positions | color | indexing mode or points vector
 	unsigned char m_Status = 0b11111;

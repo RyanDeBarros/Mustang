@@ -25,13 +25,14 @@ struct ParticleSubsystemData
 template<std::unsigned_integral ParticleCount>
 class ParticleEffect;
 
+// TODO use tesselation for memory efficiency?
 template<std::unsigned_integral ParticleCount = unsigned short>
 class ParticleSubsystem
 {
 	ParticleSubsystemData<ParticleCount> m_Data;
 	real m_PeriodInv;
 	ParticleCount m_NumSpawned = 0;
-	unsigned int m_TotalSpawn;
+	ParticleCount m_TotalSpawn;
 	unsigned int m_WaveNum = 0;
 	ParticleSubsystemIndex m_SubsystemIndex;
 	Transformer2D m_Transformer;
