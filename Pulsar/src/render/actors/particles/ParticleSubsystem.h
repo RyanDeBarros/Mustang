@@ -7,7 +7,7 @@
 #include "Typedefs.h"
 #include "utils/CommonMath.h"
 #include "Particle.h"
-#include "../../transform/MultiTransformer.h"
+#include "../../transform/Transform.h"
 #include "../../transform/MultiModulator.h"
 
 typedef unsigned char ParticleSubsystemIndex;
@@ -39,8 +39,7 @@ class ParticleSubsystem
 	unsigned int m_TotalSpawn;
 	unsigned int m_WaveNum = 0;
 	ParticleSubsystemIndex m_SubsystemIndex;
-	std::shared_ptr<TransformableProxy2D> m_Transform;
-	std::shared_ptr<MultiTransformer2D> m_Transformer;
+	Transformer2D m_Transformer;
 	std::shared_ptr<ModulatableProxy> m_Modulate;
 	std::shared_ptr<MultiModulator> m_Modulator;
 	std::vector<Particle> m_Particles;
@@ -53,6 +52,8 @@ public:
 	ParticleSubsystem<ParticleCount>& operator=(ParticleSubsystem<ParticleCount>&&) noexcept;
 
 	inline void SetWavePeriod(real wave_period) { m_Period = wave_period; m_PeriodInv = 1.0f / m_Period; }
+
+	Transformer2D* Transformer() { return &m_Transformer; }
 
 private:
 	friend class ParticleEffect<ParticleCount>;

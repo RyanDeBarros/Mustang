@@ -5,7 +5,7 @@
 #include "utils/Constants.h"
 #include "Particle.h"
 #include "ParticleSubsystem.h"
-#include "../../transform/MultiTransformer.h"
+#include "../../transform/Transform.h"
 #include "../../transform/MultiModulator.h"
 
 template<std::unsigned_integral ParticleCount = unsigned short>
@@ -34,14 +34,13 @@ public:
 	inline void Reset() { m_TotalPlayed = 0.0f; m_DeltaTime = 0.0f; m_PlayTime = 0.0f; }
 	void PlayFor(real n);
 
-	inline MultiTransformer2D* Transformer() { return &m_Transformer; }
+	inline Transformer2D* Transformer() { return &m_Transformer; }
 	inline MultiModulator* Modulator() { return &m_Modulator; }
 	inline ParticleSubsystem<ParticleCount>& SubsystemRef(unsigned int i) { return *m_Subsystems[i]; }
 
 protected:
 	std::vector<std::shared_ptr<ParticleSubsystem<ParticleCount>>> m_Subsystems;
-	std::shared_ptr<TransformableProxy2D> m_Transform;
-	MultiTransformer2D m_Transformer;
+	Transformer2D m_Transformer;
 	std::shared_ptr<ModulatableProxy> m_Modulate;
 	MultiModulator m_Modulator;
 

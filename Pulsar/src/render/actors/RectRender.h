@@ -19,9 +19,6 @@ public:
 	RectRender& operator=(const RectRender&);
 	RectRender& operator=(RectRender&&) noexcept;
 	
-	RectRender Clone();
-	void Clone(RectRender&);
-
 	static void DefineRectRenderable();
 
 	inline int GetWidth() const { return TextureFactory::GetWidth(m_Render.textureHandle); }

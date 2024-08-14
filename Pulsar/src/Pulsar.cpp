@@ -27,7 +27,6 @@
 #include "utils/Functors.h"
 #include "utils/Strings.h"
 #include "render/transform/Modulator.h"
-#include "render/transform/Transformer.h"
 
 using namespace Pulsar;
 
@@ -142,40 +141,43 @@ void Pulsar::Run(GLFWwindow* window)
 	std::shared_ptr<ActorPrimitive2D> actor4(new ActorPrimitive2D(renderable, { {-200.0f, 0.0f}, 0.0f, {800.0f, 800.0f} }));
 	Renderer::GetCanvasLayer(-1)->OnAttach(actor4.get());
 
-	actor1.Transform()->SetScale(16.0f, 16.0f);
+	actor1.Transform()->scale = { 16.0f, 16.0f };
+	actor1.FlagTransformRS();
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(&actor3, -1);
 
 	actor3.SetPivot(0.0f, 0.0f);
-	actor3.Transform()->SetPosition(_RendererSettings::initial_window_rel_pos(-0.5f, 0.5f));
-	actor3.Transform()->SetScale(0.3f, 0.3f);
+	actor3.Transform()->position = _RendererSettings::initial_window_rel_pos(-0.5f, 0.5f);
+	actor3.Transform()->scale = { 0.3f, 0.3f };
+	actor3.FlagTransform();
 	actor2.SetModulation(glm::vec4(0.7f, 0.7f, 1.0f, 1.0f));
 	actor3.SetModulationPerPoint({
 		glm::vec4(1.0f, 0.5f, 0.5f, 1.0f),
 		glm::vec4(0.5f, 1.0f, 0.5f, 1.0f),
 		glm::vec4(0.5f, 0.5f, 1.0f, 1.0f),
 		glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)
-	});
+		});
 
 	TextureFactory::SetSettings(actor1.GetTextureHandle(), Texture::linear_settings);
 
 	actor3.SetPivot(0.5f, 0.5f);
-	actor3.Transform()->SetPosition(0.0f, 0.0f);
-	actor3.Transform()->SetScale(0.1f, 0.1f);
+	actor3.Transform()->position = { 0.0f, 0.0f };
+	actor3.Transform()->scale = { 0.1f, 0.1f };
+	actor3.FlagTransform();
 	Renderer::GetCanvasLayer(0)->OnDetach(&actor3);
 
-	std::shared_ptr<ActorTesselation2D> tessel = ActorTesselation2D::MakeShared<RectRender>(actor3);
-	Renderer::GetCanvasLayer(0)->OnAttach(tessel.get());
+	//std::shared_ptr<ActorTesselation2D> tessel = std::make_shared<ActorTesselation2D>(&actor3);
+	//Renderer::GetCanvasLayer(0)->OnAttach(tessel.get());
 
-	float w = actor3.GetWidth() * actor3.Transform()->GetScale().x;
-	float h = actor3.GetHeight() * actor3.Transform()->GetScale().y;
-	tessel->PushBackGlobals({
+	//float w = actor3.GetWidth() * actor3.Transform()->scale.x;
+	//float h = actor3.GetHeight() * actor3.Transform()->scale.y;
+	/*tessel->PushBackLocals({
 		{ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} },
 		{ {w, 0.0f}, 0.0f, {1.0f, 1.0f} },
 		{ {2.0f * w, 0.0f}, 0.5f, {1.0f, 1.0f} }
-	});
-	Renderer::GetCanvasLayer(0)->OnSetZIndex(tessel.get(), 10);
+	});*/
+	//Renderer::GetCanvasLayer(0)->OnSetZIndex(tessel.get(), 10);
 
-	ActorPrimitive2D* const actor_ref = dynamic_cast<ActorPrimitive2D* const>(tessel->ActorRef().get());
+	/*ActorPrimitive2D* const actor_ref = dynamic_cast<ActorPrimitive2D* const>(tessel->ActorRef());
 	if (actor_ref)
 	{
 		actor_ref->SetModulationPerPoint({
@@ -184,24 +186,24 @@ void Pulsar::Run(GLFWwindow* window)
 			{0.0f, 0.0f, 0.0f, 0.0f},
 			{0.0f, 0.0f, 0.0f, 0.0f},
 		});
-	}
+	}*/
 
-	std::shared_ptr<ActorTesselation2D> tesselVertical(std::make_shared<ActorTesselation2D>(tessel));
+	/*std::shared_ptr<ActorTesselation2D> tesselVertical(std::make_shared<ActorTesselation2D>(tessel.get()));
 	Renderer::GetCanvasLayer(0)->OnDetach(tessel.get());
 	Renderer::GetCanvasLayer(0)->OnAttach(tesselVertical.get());
-	tesselVertical->PushBackGlobals({
+	tesselVertical->PushBackLocals({
 		{ {0.0f, 0}, 0.0f, {1.0f, 1.0f} },
 		{ {0.0f, -h}, 0.0f, {1.0f, 1.0f} },
 		{ {0.0f, -2 * h}, 0.5f, {1.0f, 1.0f} }
-	});
-	
-	std::shared_ptr<ActorTesselation2D> tesselDiagonal(std::make_shared<ActorTesselation2D>(tesselVertical));
-	Renderer::GetCanvasLayer(0)->OnDetach(tesselVertical.get());
-	Renderer::GetCanvasLayer(0)->OnAttach(tesselDiagonal.get());
-	tesselDiagonal->PushBackGlobals({
+	});*/
+
+	//std::shared_ptr<ActorTesselation2D> tesselDiagonal(std::make_shared<ActorTesselation2D>(tesselVertical.get()));
+	//Renderer::GetCanvasLayer(0)->OnDetach(tesselVertical.get());
+	//Renderer::GetCanvasLayer(0)->OnAttach(tesselDiagonal.get());
+	/*tesselDiagonal->PushBackLocals({
 		{ {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} },
 		{ {-0.5f * w, 0.5f * h}, -0.8f, {0.75f, -0.75f} }
-	});
+	});*/
 
 	actor2.CropToRelativeRect({ 0.3f, 0.4f, 0.4f, 0.55f });
 
@@ -229,7 +231,7 @@ void Pulsar::Run(GLFWwindow* window)
 						return Particles::CHRBind{
 							[](Particle& p)
 							{
-								p.m_Transformer->SetLocalPosition(p.ti(), glm::vec2{glm::cos(p[0] * 2 * glm::pi<float>()), glm::sin(p[0] * 2 * glm::pi<float>())} *20.0f * p[1]);
+								p.m_Shape->Transformer()->self->position = glm::vec2{ glm::cos(p[0] * 2 * glm::pi<float>()), glm::sin(p[0] * 2 * glm::pi<float>()) } *20.0f * p[1];
 							}, 1
 						};
 					},
@@ -261,7 +263,8 @@ void Pulsar::Run(GLFWwindow* window)
 					Particles::CHR::OperateData(0, OperateFloatMultWrap, 2, 1, OperateFloatMultWrap, 2)
 				}),
 				Particles::CHR::OperateLocalPositionFromVelocityData(0, 1)
-			)
+			),
+			Particles::CHR::Sync
 		})
 	};
 	float p2width = 400.0f;
@@ -300,17 +303,19 @@ void Pulsar::Run(GLFWwindow* window)
 						Particles::CHR::SetLocalPositionUsingData(Composition(LinearCombo2x1({ -0.5f * p2width, -0.5f * p2height}, { 0.0f, 2.0f }), CastFloatToUInt), 1)
 					)
 				})
-			)
+			),
+			Particles::CHR::Sync
 		})
 	};
 
 	//ParticleSystem<> psys({ wave2, wave2, wave1 });
 	//ParticleSystem<> psys({ wave1 });
 	ParticleSystem<> psys({ wave2, wave2 });
-	psys.Transformer()->SetLocalRotation(1, 0.5f * glm::pi<float>());
+	psys.SubsystemRef(1).Transformer()->self->rotation = 0.5f * glm::pi<float>();
+	psys.SubsystemRef(1).Transformer()->SyncRS();
 	//psys.Transformer()->SetLocalScale(1, { 1, _RendererSettings::initial_window_width / static_cast<float>(_RendererSettings::initial_window_height) });
-	// TODO local to global scale function is wrong, as can be demonstrated below:
-	psys.Transformer()->SetScale(_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height);
+	psys.Transformer()->self->scale = glm::vec2{ _RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height } *0.75f;
+	psys.Transformer()->SyncRS();
 	//psys.Transformer()->SyncGlobalWithLocalScales();
 	//psys.Transformer()->SetPosition(300, 0);
 	//psys.Transformer()->SetLocalTransform(2, { {-500, 0}, 0, {2, 2} });
@@ -323,28 +328,31 @@ void Pulsar::Run(GLFWwindow* window)
 
 	//parr.SubsystemRef(0).SetRotation(1.57f);
 	psys.Modulator()->SetColor(Colors::PSYCHEDELIC_PURPLE);
-	
+
 	psys.Pause();
 	//parr.Pause();
 
 	Renderer::AddCanvasLayer(11);
-	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&psys);
 	//Renderer::GetCanvasLayer(11)->OnAttach(&parr);
 
 	std::shared_ptr<TileMap> tilemap;
 	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap) != LOAD_STATUS::OK)
 		ASSERT(false);
 
-	//tilemap->Transformer()->SetLocalTransforms({{100.0f, 200.0f}, 0.3f, {5.0f, 8.0f}});
-	tilemap->Transformer()->SetTransform({ {100.0f, 200.0f}, 0.3f, {5.0f, 8.0f} });
+	tilemap->Transformer()->self.transform = { {100.0f, 200.0f}, 0.3f, {5.0f, 8.0f} };
+	tilemap->Transformer()->Sync();
 	tilemap->Insert(4, 0, 1);
 
 	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 	//Renderer::GetCanvasLayer(11)->OnAttach(tesselDiagonal.get());
-	tesselDiagonal->Transformer()->SetPosition(-400, 300);
-	tessel->Transformer()->SetScale(0.6f, 0.6f);
-	actor3.Transform()->OperateScale([](glm::vec2& scale) { scale *= 2.0f; });
-	
+	//tesselDiagonal->Transformer()->self->position = { -400, 300 };
+	//tesselDiagonal->Transformer()->SyncP();
+	//tessel->Transformer()->self->scale = { 0.6f, 0.6f };
+	//tessel->Transformer()->SyncRS();
+	actor3.Transform()->scale *= 2.0f;
+	actor3.Transformer()->SyncRS();
+
 	TextureFactory::SetSettings(textureFlag, Texture::nearest_settings);
 
 	RectRender root(textureFlag);
@@ -352,28 +360,53 @@ void Pulsar::Run(GLFWwindow* window)
 	RectRender grandchild(textureTux);
 	RectRender child2(textureSnowman);
 	RectRender grandchild2(textureTux);
-	
-	std::shared_ptr<Transformer2D> first(std::make_shared<Transformer2D>(child.Transform(), grandchild.Transform()));
-	first->SetLocalScale({ 0.25f, 0.25f });
-	first->SetLocalPosition({ 300.0f, -100.0f });
-	first->SetScale({ 0.25f, 0.25f });
-	std::shared_ptr<Transformer2D> first2(std::make_shared<Transformer2D>(child2.Transform(), grandchild2.Transform()));
-	first2->SetLocalScale({ 0.25f, 0.25f });
-	first2->SetLocalPosition({ 300.0f, -100.0f });
-	first2->SetScale({ 0.25f, 0.25f });
-	
-	MultiTransformer2D second(root.Transform());
-	second.PushBackGlobals({ first, first2 }, false);
-	second.SetScale(10.0f, 10.0f);
-	second.OperateLocalScales([](glm::vec2& scale) { scale *= 0.2f; });
-	second.SetLocalPositions({ 0.0f, -30.0f });
 
-	std::shared_ptr<Modulator> first_mod(std::make_shared<Modulator>(child.ModulateWeak(), grandchild.ModulateWeak()));
-	first_mod->SetColor({ 1.0f, 1.0f, 0.0f, 1.0f });
-	first_mod->SetGlobalColor({ 1.0f, 0.0f, 1.0f, 1.0f });
-	std::shared_ptr<Modulator> root_mod(std::make_shared<Modulator>(root.ModulateWeak(), first_mod));
-	root_mod->SetColor(glm::vec4{ 1.0f } * 0.5f);
-	
+	//std::shared_ptr<Transformer2D> first(std::make_shared<Transformer2D>(child.Transform(), grandchild.Transform()));
+	child.Transformer()->Attach(grandchild.Transformer());
+	//first->SetLocalScale({ 0.25f, 0.25f });
+	//first->SetLocalPosition({ 300.0f, -100.0f });
+	//first->SetScale({ 0.25f, 0.25f });
+	grandchild.Transform()->scale = { 0.25f, 0.25f };
+	grandchild.Transform()->position = { 300.0f, -100.0f };
+	child.Transform()->scale = { 0.25f, 0.25f };
+	child.Transformer()->Sync();
+	//std::shared_ptr<Transformer2D> first2(std::make_shared<Transformer2D>(child2.Transform(), grandchild2.Transform()));
+	//Transformer2D first2(child2.Transform());
+	child2.Transformer()->Attach(grandchild2.Transformer());
+	//first2->SetLocalScale({ 0.25f, 0.25f });
+	//first2->SetLocalPosition({ 300.0f, -100.0f });
+	//first2->SetScale({ 0.25f, 0.25f });
+	grandchild2.Transform()->scale = { 0.25f, 0.25f };
+	grandchild2.Transform()->position = { 300.0f, -100.0f };
+	child2.Transform()->scale = { 0.25f, 0.25f };
+	child2.Transformer()->Sync();
+
+	//MultiTransformer2D second(root.Transform());
+	//Transformer2D second(root.Transform());
+	//second.PushBackGlobals({ first, first2 }, false);
+	root.Transformer()->Attach(child.Transformer());
+	root.Transformer()->Attach(child2.Transformer());
+	root.Transform()->scale = { 10.0f, 10.0f };
+	root.Transformer()->Sync();
+	//second.OperateLocalScales([](glm::vec2& scale) { scale *= 0.2f; });
+	//first.OperateScale([](glm::vec2& scale) { scale *= 0.2f; });
+	//first2.OperateScale([](glm::vec2& scale) { scale *= 0.2f; });
+	//second.SetLocalPositions({ 0.0f, -30.0f });
+	//first.SetPosition(0.0f, -30.0f);
+	//first2.SetPosition(0.0f, -30.0f);
+	for (const auto& child : root.Transformer()->children)
+	{
+		child->self->position = { 0.0f, -30.0f };
+		child->self->scale *= 0.2f;
+		child->Sync();
+	}
+
+	//std::shared_ptr<Modulator> first_mod(std::make_shared<Modulator>(child.ModulateWeak(), grandchild.ModulateWeak()));
+	//first_mod->SetColor({ 1.0f, 1.0f, 0.0f, 1.0f });
+	//first_mod->SetGlobalColor({ 1.0f, 0.0f, 1.0f, 1.0f });
+	//std::shared_ptr<Modulator> root_mod(std::make_shared<Modulator>(root.ModulateWeak(), first_mod));
+	//root_mod->SetColor(glm::vec4{ 1.0f } * 0.5f);
+
 	//Renderer::GetCanvasLayer(11)->OnAttach(&root);
 	//Renderer::GetCanvasLayer(11)->OnAttach(&child2);
 	//Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
@@ -382,6 +415,36 @@ void Pulsar::Run(GLFWwindow* window)
 
 	DebugRect rect(_RendererSettings::initial_window_width * 0.5f, _RendererSettings::initial_window_height, true, { 1.0f, 0.5f }, {}, { 0.5f, 0.5f, 1.0f, 0.3f }, 1);
 	//Renderer::GetCanvasLayer(11)->OnAttach(&rect);
+
+	RectRender tux(textureTux);
+	ActorTesselation2D tuxTessel(&tux);
+	ActorTesselation2D tuxGrid(&tuxTessel);
+	Renderer::GetCanvasLayer(11)->OnAttach(&tuxGrid);
+
+	//Transformer2D* tuxTesselPositions = new Transformer2D[3]{
+		//Transform2D{ {}, 0, {0.1f, 0.1f} },
+		//Transform2D{ {100, 0}, 0, {0.1f, 0.1f} },
+		//Transform2D{ {-100, 0}, 0, {0.1f, 0.1f} }
+	//};
+	//tuxTessel.Transformer()->AttachAll(tuxTesselPositions, 3);
+
+	tuxTessel.PushBackStatic({
+		{ {} },
+		{ {200, 0} },
+		{ {-200, 0} }
+	});
+	tuxTessel.Transform()->scale *= 0.1f;
+	tuxTessel.Transformer()->SyncRS();
+
+	tuxGrid.PushBackStatic({
+		{ {} },
+		{ {0, 200} },
+		{ {0, -200} }
+		});
+	tuxGrid.Transform()->scale *= 0.1f;
+	tuxGrid.Transformer()->SyncRS();
+
+	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::TRANSPARENT, Colors::LIGHT_GREEN });
 
 	for (;;)
 	{
@@ -404,10 +467,20 @@ void Pulsar::Run(GLFWwindow* window)
 		//second.SetRotation(Pulsar::totalDrawTime);
 		//second.OperateLocalPosition(0, [](glm::vec2& position) { position.x += 5 * Pulsar::deltaDrawTime; });
 		//second.OperateLocalScale(1, [](glm::vec2& scale) { scale *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime) ; });
+		child.Transform()->rotation = -Pulsar::totalDrawTime;
+		child2.Transform()->rotation = -Pulsar::totalDrawTime;
+		grandchild.Transform()->rotation = Pulsar::totalDrawTime;
+		grandchild2.Transform()->rotation = -Pulsar::totalDrawTime;
+		root.Transform()->rotation = Pulsar::totalDrawTime;
+		child.Transform()->position += 5 * Pulsar::deltaDrawTime;
+		child2.Transform()->scale *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime);
+		root.Transformer()->Sync();
 
 		Renderer::OnDraw();
 		glfwPollEvents();
 		if (glfwWindowShouldClose(window))
 			break;
 	}
+
+	//delete[] tuxTesselPositions;
 }

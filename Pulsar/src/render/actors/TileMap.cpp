@@ -3,7 +3,7 @@
 #include <algorithm>
 
 TileMap::TileMap(TileHandle atlas_handle, const TextureSettings& texture_settings, ShaderHandle shader, ZIndex z, bool visible)
-	: ActorRenderBase2D(z), m_Transform(std::make_shared<TransformableProxy2D>()), m_Transformer(m_Transform)
+	: ActorRenderBase2D(z), m_Transformer()
 {
 	Tile* t = TileFactory::GetTileRef(atlas_handle);
 	m_Atlas = dynamic_cast<Atlas*>(t);
@@ -11,12 +11,16 @@ TileMap::TileMap(TileHandle atlas_handle, const TextureSettings& texture_setting
 		throw atlas_cast_error();
 	for (TileMapIndex i = 0; i < m_Atlas->GetPlacements().size(); i++)
 	{
-		std::shared_ptr<RectRender> rect_render(new RectRender(m_Atlas->SampleSubtile(i, texture_settings, shader, 0, visible)));
-		std::shared_ptr<ActorTesselation2D> tessel(new ActorTesselation2D(rect_render));
-		m_Map.push_back({ std::move(rect_render), tessel });
-		m_Transformer.PushBackGlobal(tessel->Transform());
+		std::unique_ptr<RectRender> rect_render(new RectRender(m_Atlas->SampleSubtile(i, texture_settings, shader, 0, visible)));
+		std::shared_ptr<ActorTesselation2D> tessel(new ActorTesselation2D(rect_render.get()));
+		m_Transformer.Attach(tessel->Transformer());
+		m_Map.push_back({ std::move(rect_render), std::move(tessel) });
 	}
 	m_Ordering = Permutation(m_Atlas->GetPlacements().size());
+}
+
+TileMap::~TileMap()
+{
 }
 
 BufferCounter TileMap::PrimitiveCount() const
@@ -43,7 +47,7 @@ bool TileMap::SetOrdering(const Permutation& permutation)
 
 void TileMap::Insert(TileMapIndex tessel, float posX, float posY)
 {
-	m_Map[tessel].tessel->PushBackLocal({ {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} });
+	m_Map[tessel].tessel->PushBackStatic({ {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} });
 }
 
 ActorTesselation2D* const TileMap::TesselationRef(TileMapIndex i) const

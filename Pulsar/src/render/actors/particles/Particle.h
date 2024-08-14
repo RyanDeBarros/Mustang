@@ -6,7 +6,6 @@
 #include <glm/glm.hpp>
 
 #include "../shapes/DebugPolygon.h"
-#include "../../transform/MultiTransformer.h"
 #include "../../transform/MultiModulator.h"
 
 struct Particle;
@@ -33,7 +32,6 @@ struct Particle
 	Particles::CHRFunc m_Characteristic;
 	float* m_Data = nullptr;
 	Particles::DataIndex m_DataSize;
-	MultiTransformer2D* m_Transformer;
 	MultiModulator* m_Modulator;
 
 private:
@@ -49,7 +47,7 @@ private:
 	unsigned short m_TI = 0;
 
 public:
-	Particle(const std::shared_ptr<DebugPolygon>& shape, const float& lifespan, const Particles::CHRBind& characteristic, MultiTransformer2D* transformer, MultiModulator* modulator);
+	Particle(const std::shared_ptr<DebugPolygon>& shape, const float& lifespan, const Particles::CHRBind& characteristic, MultiModulator* modulator);
 	Particle(const Particle&);
 	Particle(Particle&&) noexcept;
 	Particle& operator=(const Particle&);
@@ -60,6 +58,7 @@ public:
 	
 	inline real t() const { return m_T; }
 	inline real dt() const { return m_DT; }
+	// TODO remove ti?
 	inline unsigned int ti() const { return m_TI; }
 
 private:

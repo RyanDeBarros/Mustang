@@ -3,9 +3,25 @@
 #include <memory>
 
 #include "Modulatable.h"
-#include "Transformable.h"
-#include "Logger.h"
 #include "utils/CommonMath.h"
+
+#include "Logger.h"
+
+#ifndef WEAK_LOCK_CHECK
+#define WEAK_LOCK_CHECK(weak_ptr, lock_ptr)\
+auto lock_ptr = weak_ptr.lock();\
+if (!lock_ptr)\
+{\
+	Logger::LogError("Tried dereferencing weak pointer.");\
+	throw MissingWeakReference();\
+}
+#endif
+
+// TODO common Pulsar exception base class?
+
+class MissingWeakReference : public std::exception
+{
+};
 
 extern glm::vec4(*StandardModulationMethod)(const glm::vec4& parent, const glm::vec4& local);
 extern glm::vec4(*StandardModulationMethodInverse)(const glm::vec4& parent, const glm::vec4& child);

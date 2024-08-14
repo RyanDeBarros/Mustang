@@ -4,14 +4,38 @@
 #include <functional>
 
 #include "Transform.h"
+#include "Logger.h"
+
+#ifndef WEAK_LOCK_CHECK
+#define WEAK_LOCK_CHECK(weak_ptr, lock_ptr)\
+auto lock_ptr = weak_ptr.lock();\
+if (!lock_ptr)\
+{\
+	Logger::LogError("Tried dereferencing weak pointer.");\
+	throw MissingWeakReference();\
+}
+#endif
+
+// TODO common Pulsar exception base class?
+
+class MissingWeakReference : public std::exception
+{
+};
 
 class Transformable2D
 {
 public:
+	inline virtual void LinkPackedParent(const std::weak_ptr<PackedTransform2D>& tr) {}
+	inline virtual PackedTransform2D* GetPackedParent() { return {}; }
+
 	inline virtual Transform2D GetTransform() const { return {}; }
 	inline virtual glm::vec2 GetPosition() const { return {}; }
 	inline virtual glm::float32 GetRotation() const { return 0.0f; }
 	inline virtual glm::vec2 GetScale() const { return { 1.0f, 1.0f }; }
+	
+	PackedTransform2D GetGlobalPackedTransform();
+	glm::vec2 GetGlobalPackedTransformP();
+	glm::mat4 GetGlobalPackedTransformRS();
 
 	inline virtual void OperateTransform(const std::function<void(Transform2D& position)>& op) {}
 	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) {}
@@ -32,6 +56,7 @@ class TransformableProxy2D : public Transformable2D
 {
 protected:
 	Transform2D m_Transform;
+	std::weak_ptr<PackedTransform2D> m_PackedParent;
 
 public:
 	TransformableProxy2D(const Transform2D& transform = {});
@@ -39,6 +64,9 @@ public:
 	TransformableProxy2D(TransformableProxy2D&&) noexcept;
 	TransformableProxy2D& operator=(const TransformableProxy2D&);
 	TransformableProxy2D& operator=(TransformableProxy2D&&) noexcept;
+
+	inline virtual void LinkPackedParent(const std::weak_ptr<PackedTransform2D>& tr) override { m_PackedParent = tr; }
+	inline virtual PackedTransform2D* GetPackedParent() override { auto pp = m_PackedParent.lock(); if (pp) return pp.get(); else return nullptr; }
 
 	inline Transform2D GetTransform() const override { return m_Transform; };
 	inline glm::vec2 GetPosition() const override { return m_Transform.position; }
@@ -51,20 +79,4 @@ public:
 	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); }
 };
 
-#ifndef WEAK_LOCK_CHECK
-#define WEAK_LOCK_CHECK(weak_ptr, lock_ptr)\
-auto lock_ptr = weak_ptr.lock();\
-if (!lock_ptr)\
-{\
-	Logger::LogError("Tried dereferencing weak pointer.");\
-	throw MissingWeakReference();\
-}
-#endif
-
 inline bool operator==(const std::weak_ptr<Transformable2D>& lhs, const std::weak_ptr<Transformable2D>& rhs) { return lhs.lock() == rhs.lock(); }
-
-// TODO common Pulsar exception base class?
-
-class MissingWeakReference : public std::exception
-{
-};

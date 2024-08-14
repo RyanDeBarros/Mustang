@@ -46,21 +46,6 @@ RectRender& RectRender::operator=(RectRender&& other) noexcept
 	return *this;
 }
 
-RectRender RectRender::Clone()
-{
-	RectRender clone;
-	Clone(clone);
-	return clone;
-}
-
-void RectRender::Clone(RectRender& clone)
-{
-	ActorPrimitive2D::Clone(clone);
-	clone.m_UVWidth = m_UVWidth;
-	clone.m_UVHeight = m_UVHeight;
-	clone.SetPivot(m_Pivot);
-}
-
 void RectRender::DefineRectRenderable()
 {
 	LOAD_STATUS load_status = Loader::loadRenderable(_RendererSettings::rect_renderable_filepath.c_str(), rect_renderable);
@@ -116,7 +101,8 @@ void RectRender::CropToRelativeRect(glm::vec4 rect)
 
 void RectRender::ResetTransformUVs()
 {
-	Transform()->SetTransform({});
+	*Transform() = Transform2D{};
+	Transformer()->Sync();
 	CropToRelativeRect({ 0.0f, 0.0f, 1.0f, 1.0f });
 	SetPivot(0.5f, 0.5f);
 }

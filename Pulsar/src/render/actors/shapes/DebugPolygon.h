@@ -6,7 +6,7 @@
 #include "utils/Constants.h"
 #include "../../Renderable.h"
 #include "../../ActorRenderBase.h"
-#include "../../transform/Transformable.h"
+#include "../../transform/Transform.h"
 #include "../../transform/Modulatable.h"
 
 typedef std::pair<GLenum, BatchModel> DebugModel;
@@ -33,7 +33,8 @@ protected:
 	std::vector<glm::vec2> m_Points;
 	std::shared_ptr<class DebugModulatable> m_Color;
 	GLenum m_IndexingMode;
-	std::shared_ptr<class DebugTransformable2D> m_Transform;
+
+	Transformer2D m_Transformer;
 
 	// 0b ... transform RS | transform P | point positions | color | indexing mode or points vector
 	unsigned char m_Status = 0b11111;
@@ -46,6 +47,7 @@ public:
 	DebugPolygon(DebugPolygon&&) noexcept;
 	DebugPolygon& operator=(const DebugPolygon&);
 	DebugPolygon& operator=(DebugPolygon&&) noexcept;
+	~DebugPolygon();
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
@@ -58,32 +60,28 @@ public:
 	inline GLenum GetIndexingMode() const { return m_IndexingMode; }
 	inline void SetIndexingMode(GLenum indexing_mode) { m_Status |= 0b1; m_IndexingMode = indexing_mode; }
 
-	inline void FlushTransform() { m_Status |= 0b11000; }
-	inline void FlushPosition() { m_Status |= 0b1000; }
-	inline void FlushRotation() { m_Status |= 0b10000; }
-	inline void FlushScale() { m_Status |= 0b10000; }
+	inline void FlagTransform() { m_Status |= 0b11000; }
+	inline void FlagTransformP() { m_Status |= 0b1000; }
+	inline void FlagTransformRS() { m_Status |= 0b10000; }
+
 	inline void FlushColor() { m_Status |= 0b10; }
 
 	bool visible = true;
 
-	std::shared_ptr<DebugTransformable2D> Transform() { return m_Transform; }
-	std::weak_ptr<DebugTransformable2D> TransformWeak() { return m_Transform; }
+	Transformer2D* Transformer() { return &m_Transformer; }
 	std::shared_ptr<DebugModulatable> Modulate() { return m_Color; }
 	std::weak_ptr<DebugModulatable> ModulateWeak() { return m_Color; }
 };
 
-class DebugTransformable2D : public TransformableProxy2D
+struct DebugPolygon_TN : public TransformNotification
 {
-	friend class DebugPolygon;
-	DebugPolygon* m_Poly = nullptr;
+	DebugPolygon* poly = nullptr;
 
-public:
-	DebugTransformable2D(const Transform2D& transform = {}) : TransformableProxy2D(transform) {}
+	DebugPolygon_TN(DebugPolygon* poly) : poly(poly) {}
 
-	inline virtual void OperateTransform(const std::function<void(Transform2D& transform)>& op) override { op(m_Transform); m_Poly->FlushTransform(); }
-	inline virtual void OperatePosition(const std::function<void(glm::vec2& position)>& op) override { op(m_Transform.position); m_Poly->FlushPosition(); }
-	inline virtual void OperateRotation(const std::function<void(glm::float32& rotation)>& op) override { op(m_Transform.rotation); m_Poly->FlushRotation(); }
-	inline virtual void OperateScale(const std::function<void(glm::vec2& scale)>& op) override { op(m_Transform.scale); m_Poly->FlushScale(); }
+	void Notify() override { if (poly) poly->FlagTransform(); }
+	void NotifyP() override { if (poly) poly->FlagTransformP(); }
+	void NotifyRS() override { if (poly) poly->FlagTransformRS(); }
 };
 
 class DebugModulatable : public ModulatableProxy

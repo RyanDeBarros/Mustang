@@ -1,35 +1,43 @@
 #include "Transformer.h"
 
 Transformer2D::Transformer2D(const std::weak_ptr<Transformable2D>& parent, const std::weak_ptr<Transformable2D>& child, bool discard_old_transform)
-	: m_Parent(parent), m_Child(child)
+	: m_Parent(parent), m_Child(child), m_PackedParent(std::make_shared<PackedParentTransform2D>())
 {
-	if (discard_old_transform)
-		SyncGlobalWithLocal();
-	else
-		SyncLocalWithGlobal();
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->LinkPackedParent(m_PackedParent);
+	//if (discard_old_transform)
+	//	SyncGlobalWithLocal();
+	//else
+	//	SyncLocalWithGlobal();
 }
 
 Transformer2D::Transformer2D(const std::weak_ptr<Transformable2D>& parent, std::weak_ptr<Transformable2D>&& child, bool discard_old_transform)
-	: m_Parent(parent), m_Child(std::move(child))
+	: m_Parent(parent), m_Child(std::move(child)), m_PackedParent(std::make_shared<PackedParentTransform2D>())
 {
-	if (discard_old_transform)
-		SyncGlobalWithLocal();
-	else
-		SyncLocalWithGlobal();
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->LinkPackedParent(m_PackedParent);
+	//if (discard_old_transform)
+	//	SyncGlobalWithLocal();
+	//else
+	//	SyncLocalWithGlobal();
 }
 
 Transformer2D::Transformer2D(std::weak_ptr<Transformable2D>&& parent, const std::weak_ptr<Transformable2D>& child, bool discard_old_transform)
-	: m_Parent(std::move(parent)), m_Child(child)
+	: m_Parent(std::move(parent)), m_Child(child), m_PackedParent(std::make_shared<PackedParentTransform2D>())
 {
-	if (discard_old_transform)
-		SyncGlobalWithLocal();
-	else
-		SyncLocalWithGlobal();
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->LinkPackedParent(m_PackedParent);
+	//if (discard_old_transform)
+	//	SyncGlobalWithLocal();
+	//else
+	//	SyncLocalWithGlobal();
 }
 
 Transformer2D::Transformer2D(std::weak_ptr<Transformable2D>&& parent, std::weak_ptr<Transformable2D>&& child, bool discard_old_transform)
-	: m_Parent(std::move(parent)), m_Child(std::move(child))
+	: m_Parent(std::move(parent)), m_Child(std::move(child)), m_PackedParent(std::make_shared<PackedParentTransform2D>())
 {
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->LinkPackedParent(m_PackedParent);
 	if (discard_old_transform)
 		SyncGlobalWithLocal();
 	else
@@ -37,8 +45,10 @@ Transformer2D::Transformer2D(std::weak_ptr<Transformable2D>&& parent, std::weak_
 }
 
 Transformer2D::Transformer2D(const std::weak_ptr<Transformable2D>& parent, const Transform2D& local, bool discard_old_transform)
-	: m_Parent(parent), m_Child(std::make_shared<TransformableProxy2D>()), m_Local(local)
+	: m_Parent(parent), m_Child(std::make_shared<TransformableProxy2D>()), m_Local(local), m_PackedParent(std::make_shared<PackedParentTransform2D>())
 {
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->LinkPackedParent(m_PackedParent);
 	if (discard_old_transform)
 		SyncLocalWithGlobal();
 	else
@@ -46,8 +56,10 @@ Transformer2D::Transformer2D(const std::weak_ptr<Transformable2D>& parent, const
 }
 
 Transformer2D::Transformer2D(std::weak_ptr<Transformable2D>&& parent, const Transform2D& local, bool discard_old_transform)
-	: m_Parent(std::move(parent)), m_Child(std::make_shared<TransformableProxy2D>()), m_Local(local)
+	: m_Parent(std::move(parent)), m_Child(std::make_shared<TransformableProxy2D>()), m_Local(local), m_PackedParent(std::make_shared<PackedParentTransform2D>())
 {
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->LinkPackedParent(m_PackedParent);
 	if (discard_old_transform)
 		SyncLocalWithGlobal();
 	else
@@ -55,13 +67,17 @@ Transformer2D::Transformer2D(std::weak_ptr<Transformable2D>&& parent, const Tran
 }
 
 Transformer2D::Transformer2D(const Transformer2D& other)
-	: m_Parent(other.m_Parent), m_Child(other.m_Child), m_Local(other.m_Local)
+	: m_Parent(other.m_Parent), m_Child(other.m_Child), m_Local(other.m_Local), m_PackedParent(other.m_PackedParent)
 {
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->LinkPackedParent(m_PackedParent);
 }
 
 Transformer2D::Transformer2D(Transformer2D&& other) noexcept
-	: m_Parent(std::move(other.m_Parent)), m_Child(std::move(other.m_Child)), m_Local(other.m_Local)
+	: m_Parent(std::move(other.m_Parent)), m_Child(std::move(other.m_Child)), m_Local(other.m_Local), m_PackedParent(std::move(other.m_PackedParent))
 {
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->LinkPackedParent(m_PackedParent);
 }
 
 Transformer2D& Transformer2D::operator=(const Transformer2D& other)
@@ -69,6 +85,9 @@ Transformer2D& Transformer2D::operator=(const Transformer2D& other)
 	m_Parent = other.m_Parent;
 	m_Child = other.m_Child;
 	m_Local = other.m_Local;
+	m_PackedParent = other.m_PackedParent;
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->LinkPackedParent(m_PackedParent);
 	return *this;
 }
 
@@ -77,7 +96,43 @@ Transformer2D& Transformer2D::operator=(Transformer2D&& other) noexcept
 	m_Parent = std::move(other.m_Parent);
 	m_Child = std::move(other.m_Child);
 	m_Local = other.m_Local;
+	m_PackedParent = std::move(other.m_PackedParent);
+	WEAK_LOCK_CHECK(m_Child, c);
+	c->LinkPackedParent(m_PackedParent);
 	return *this;
+}
+
+void Transformer2D::OperateTransform(const std::function<void(Transform2D& position)>& op)
+{
+	WEAK_LOCK_CHECK(m_Parent, p);
+	p->OperateTransform(op);
+	SyncGlobalWithLocal();
+	m_PackedParent->position = p->GetPosition();
+	m_PackedParent->gamma = Transform::Gamma(p->GetTransform());
+}
+
+void Transformer2D::OperatePosition(const std::function<void(glm::vec2& position)>& op)
+{
+	WEAK_LOCK_CHECK(m_Parent, p);
+	p->OperatePosition(op);
+	SyncGlobalWithLocalPosition();
+	m_PackedParent->position = p->GetPosition();
+}
+
+void Transformer2D::OperateRotation(const std::function<void(glm::float32& rotation)>& op)
+{
+	WEAK_LOCK_CHECK(m_Parent, p);
+	p->OperateRotation(op);
+	SyncGlobalWithLocalRotation();
+	m_PackedParent->gamma = Transform::Gamma(p->GetTransform());
+}
+
+void Transformer2D::OperateScale(const std::function<void(glm::vec2& scale)>& op)
+{
+	WEAK_LOCK_CHECK(m_Parent, p);
+	p->OperateScale(op);
+	SyncGlobalWithLocalScale();
+	m_PackedParent->gamma = Transform::Gamma(p->GetTransform());
 }
 
 void Transformer2D::SetLocalTransform(const Transform2D& tr)

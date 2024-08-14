@@ -263,7 +263,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[scale, di](Particle& p)
 					{
-						p.m_Transformer->SetLocalScale(p.ti(), scale(p[di]));
+						p.m_Shape->Transformer()->self->scale = scale(p[di]);
 					}, di + 1
 				};
 			};
@@ -276,7 +276,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[position, di](Particle& p)
 					{
-						p.m_Transformer->SetLocalPosition(p.ti(), position(p[di]));
+						p.m_Shape->Transformer()->self->position = position(p[di]);
 					}, di + 1
 				};
 			};
@@ -289,7 +289,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[position, di1, di2](Particle& p)
 					{
-						p.m_Transformer->SetLocalPosition(p.ti(), position({p[di1], p[di2]}));
+						p.m_Shape->Transformer()->self->position = position({p[di1], p[di2]});
 					}, Max(di1, di2) + 1
 				};
 			};
@@ -302,11 +302,15 @@ namespace Particles {
 				return Particles::CHRBind{
 					[dix, diy](Particle& p)
 					{
-						p.m_Transformer->OperateLocalPosition(p.ti(), [&p, dix, diy](glm::vec2& pos) { pos += glm::vec2{p[dix], p[diy]} * p.dt(); });
+						p.m_Shape->Transformer()->self->position += glm::vec2{p[dix], p[diy]} * p.dt();
 					}, Max(dix, diy) + 1
 				};
 			};
 		}
+
+		CharacteristicGen Sync = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Transformer()->Sync(); }, 0 }; };
+		CharacteristicGen SyncP = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Transformer()->SyncP(); }, 0 }; };
+		CharacteristicGen SyncRS = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Transformer()->SyncRS(); }, 0 }; };
 
 	}
 

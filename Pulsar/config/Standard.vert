@@ -19,6 +19,6 @@ void main() {
 	t_TexCoord = i_TexCoord;
 
 	// model matrix
-	mat3 M = mat3(vec3(i_TransformRS[0], i_TransformRS[1], 0.0), vec3(i_TransformRS[2], i_TransformRS[3], 0.0), vec3(i_TransformP[0], i_TransformP[1], 1.0));
+	mat3 M = mat3(vec3(i_TransformRS[0], i_TransformRS[1], 0.0), vec3(i_TransformRS[2], i_TransformRS[3], 0.0), vec3(i_TransformP[0], i_TransformP[1], 0.0));
 	gl_Position.xy = (u_VP * M * vec3(i_Position, 1.0)).xy;
 }

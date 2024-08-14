@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Modulatable.h"
-#include "Transformable.h"
-#include "Logger.h"
 #include "Modulator.h"
 
 class MultiModulator : public Modulatable

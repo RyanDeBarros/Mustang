@@ -1,25 +1,21 @@
 #include "ActorTesselation.h"
 
-ActorTesselation2D::ActorTesselation2D(const std::shared_ptr<ActorRenderBase2D>& actor)
-	: m_Actor(actor), m_Transform(std::make_shared<TransformableProxy2D>()), m_Transformer(m_Transform)
-{
-	BindFunctions();
-}
+#include "../transform/Transforms.h"
 
-ActorTesselation2D::ActorTesselation2D(std::shared_ptr<ActorRenderBase2D>&& actor)
-	: m_Actor(std::move(actor)), m_Transform(std::make_shared<TransformableProxy2D>()), m_Transformer(m_Transform)
+ActorTesselation2D::ActorTesselation2D(ActorRenderBase2D* actor)
+	: m_Actor(actor), m_Transformer()
 {
 	BindFunctions();
 }
 
 ActorTesselation2D::ActorTesselation2D(const ActorTesselation2D& other)
-	: m_Actor(other.m_Actor), ActorSequencer2D(other), m_Transform(std::make_shared<TransformableProxy2D>(other.m_Transform->GetTransform())), m_Transformer(other.m_Transformer), m_TransformsList(other.m_TransformsList)
+	: m_Actor(other.m_Actor), ActorSequencer2D(other), m_Transformer(other.m_Transformer), m_InternalChildren(other.m_InternalChildren)
 {
 	BindFunctions();
 }
 
 ActorTesselation2D::ActorTesselation2D(ActorTesselation2D&& other) noexcept
-	: m_Actor(std::move(other.m_Actor)), ActorSequencer2D(std::move(other)), m_Transform(std::move(other.m_Transform)), m_Transformer(std::move(other.m_Transformer)), m_TransformsList(std::move(other.m_TransformsList))
+	: m_Actor(std::move(other.m_Actor)), ActorSequencer2D(std::move(other)), m_Transformer(std::move(other.m_Transformer)), m_InternalChildren(std::move(other.m_InternalChildren))
 {
 	BindFunctions();
 }
@@ -27,9 +23,8 @@ ActorTesselation2D::ActorTesselation2D(ActorTesselation2D&& other) noexcept
 ActorTesselation2D& ActorTesselation2D::operator=(const ActorTesselation2D& other)
 {
 	m_Actor = other.m_Actor;
-	m_Transform = other.m_Transform;
 	m_Transformer = other.m_Transformer;
-	m_TransformsList = other.m_TransformsList;
+	m_InternalChildren = other.m_InternalChildren;
 	BindFunctions();
 	ActorSequencer2D::operator=(other);
 	return *this;
@@ -38,9 +33,8 @@ ActorTesselation2D& ActorTesselation2D::operator=(const ActorTesselation2D& othe
 ActorTesselation2D& ActorTesselation2D::operator=(ActorTesselation2D&& other) noexcept
 {
 	m_Actor = std::move(other.m_Actor);
-	m_Transform = std::move(other.m_Transform);
 	m_Transformer = std::move(other.m_Transformer);
-	m_TransformsList = std::move(other.m_TransformsList);
+	m_InternalChildren = std::move(other.m_InternalChildren);
 	BindFunctions();
 	ActorSequencer2D::operator=(std::move(other));
 	return *this;
@@ -48,15 +42,14 @@ ActorTesselation2D& ActorTesselation2D::operator=(ActorTesselation2D&& other) no
 
 void ActorTesselation2D::BindFunctions()
 {
-	if (dynamic_cast<ActorPrimitive2D*>(m_Actor.get()))
+	if (dynamic_cast<ActorPrimitive2D*>(m_Actor))
 	{
 		f_operator = std::bind(&ActorTesselation2D::f_prim_operator, this, std::placeholders::_1);
 		f_RenderSeqCount = std::bind(&ActorTesselation2D::f_prim_RenderSeqCount, this);
 		f_OnPreDraw = std::bind(&ActorTesselation2D::f_prim_OnPreDraw, this);
 		f_OnPostDraw = std::bind(&ActorTesselation2D::f_prim_OnPostDraw, this);
-		m_ActorPreDrawTransforms.push_back({});
 	}
-	else if (dynamic_cast<ActorSequencer2D*>(m_Actor.get()))
+	else if (dynamic_cast<ActorSequencer2D*>(m_Actor))
 	{
 		f_operator = std::bind(&ActorTesselation2D::f_sequ_operator, this, std::placeholders::_1);
 		f_RenderSeqCount = std::bind(&ActorTesselation2D::f_sequ_RenderSeqCount, this);
@@ -76,35 +69,45 @@ ActorTesselation2D::~ActorTesselation2D()
 {
 }
 
-void ActorTesselation2D::PushBackGlobal(const Transform2D& child)
+void ActorTesselation2D::PushBackStatic(const Transform2D& transform, bool sync_on_attach)
 {
-	std::shared_ptr<TransformableProxy2D> addition(std::make_shared<TransformableProxy2D>(child));
-	m_Transformer.PushBackGlobal(addition, false);
-	m_TransformsList.push_back(addition);
+	auto transformer = std::make_shared<Transformer2D>(transform);
+	m_InternalChildren.push_back(transformer);
+	m_Transformer.Attach(transformer.get());
+	if (sync_on_attach)
+		transformer->Sync();
 }
 
-void ActorTesselation2D::PushBackGlobals(const std::vector<Transform2D>& children)
+void ActorTesselation2D::PushBackStatic(const std::vector<Transform2D>& transforms, bool sync_on_attach)
 {
-	std::vector<std::shared_ptr<TransformableProxy2D>> additions;
-	for (const auto& child : children)
-	{
-		std::shared_ptr<TransformableProxy2D> addition(std::make_shared<TransformableProxy2D>(child));
-		m_Transformer.PushBackGlobal(addition, false);
-		additions.push_back(addition);
-	}
-	m_TransformsList.insert(m_TransformsList.end(), additions.begin(), additions.end());
+	m_InternalChildren.reserve(m_InternalChildren.capacity() + transforms.size());
+	for (const auto& transform : transforms)
+		PushBackStatic(transform, sync_on_attach);
 }
 
-void ActorTesselation2D::PushBackLocal(const Transform2D& local)
-{
-	m_TransformsList.push_back(m_Transformer.PushBackLocal(local, false));
-}
-
-void ActorTesselation2D::PushBackLocals(const std::vector<Transform2D>& locals)
-{
-	std::vector<std::shared_ptr<TransformableProxy2D>> additions(m_Transformer.PushBackLocals(locals, false));
-	m_TransformsList.insert(m_TransformsList.end(), additions.begin(), additions.end());
-}
+//void ActorTesselation2D::PushBackLocal(const Transform2D& local)
+//{
+//	m_Elements.push_back(PackedTransform2D(local));
+//}
+//
+//void ActorTesselation2D::PushBackLocal(const PackedTransform2D& local)
+//{
+//	m_Elements.push_back(local);
+//}
+//
+//void ActorTesselation2D::PushBackLocals(const std::vector<Transform2D>& locals)
+//{
+//	m_Elements.reserve(m_Elements.capacity() + locals.size());
+//	for (const auto& local : locals)
+//		PushBackLocal(local);
+//}
+//
+//void ActorTesselation2D::PushBackLocals(const std::vector<PackedTransform2D>& locals)
+//{
+//	m_Elements.reserve(m_Elements.capacity() + locals.size());
+//	for (const auto& local : locals)
+//		PushBackLocal(local);
+//}
 
 ActorPrimitive2D* const ActorTesselation2D::operator[](PrimitiveIndex i)
 {
@@ -115,17 +118,36 @@ ActorPrimitive2D* const ActorTesselation2D::operator[](PrimitiveIndex i)
 
 ActorPrimitive2D* const ActorTesselation2D::f_prim_operator(ActorTesselation2D* const tessel, PrimitiveIndex i)
 {
-	ActorPrimitive2D* const primitive = static_cast<ActorPrimitive2D* const>(tessel->m_Actor.get());
-	primitive->Transform()->SetTransform(Transform::AbsTo(Transform::AbsTo(tessel->m_ActorPreDrawTransforms[0], tessel->m_Transformer.GetLocalTransform(i)), tessel->m_Transform->GetTransform()));
+	ActorPrimitive2D* const primitive = static_cast<ActorPrimitive2D* const>(tessel->m_Actor);
+	//primitive->m_Transformer.self.transform = Transforms::AbsTo(
+			//Transforms::AbsTo(
+				//tessel->m_ActorPreDrawTransforms[0],
+				//tessel->m_Transformer.children[i]->self.transform),
+			//tessel->m_Transformer.self.transform);
+	// TODO use Transformer instead to not have to sync every frame
+	//tessel->m_Elements[i].Sync(tessel->m_Transform.self);
+	primitive->m_Transformer.self.Sync(tessel->m_Transformer.children[i]->self);
+	primitive->FlagTransform();
 	return primitive;
 }
 
 ActorPrimitive2D* const ActorTesselation2D::f_sequ_operator(ActorTesselation2D* const tessel, PrimitiveIndex i)
 {
-	ActorSequencer2D* const sequencer = static_cast<ActorSequencer2D* const>(tessel->m_Actor.get());
+	ActorSequencer2D* const sequencer = static_cast<ActorSequencer2D* const>(tessel->m_Actor);
 	ActorPrimitive2D* const primitive = (*sequencer)[i % tessel->RenderSeqCount()];
 	if (primitive)
-		primitive->Transform()->SetTransform(Transform::AbsTo(Transform::AbsTo(tessel->m_ActorPreDrawTransforms[i % tessel->m_ActorPreDrawTransforms.size()], tessel->m_Transformer.GetLocalTransform(i / tessel->RenderSeqCount())), tessel->m_Transform->GetTransform()));
+	{
+		//primitive->m_Transformer.self.transform = Transforms::AbsTo(
+				//Transforms::AbsTo(
+					//tessel->m_ActorPreDrawTransforms[i % tessel->m_ActorPreDrawTransforms.size()],
+					//tessel->m_Transformer.children[i / tessel->RenderSeqCount()]->self.transform)
+				//, tessel->m_Transformer.self.transform);
+		//primitive->FlagTransform();
+
+		//tessel->m_Elements[i / tessel->RenderSeqCount()].Sync(tessel->m_Transform.self);
+		primitive->m_Transformer.self.Sync(tessel->m_Transformer.children[i / tessel->RenderSeqCount()]->self);
+		primitive->FlagTransform();
+	}
 	return primitive;
 }
 
@@ -141,7 +163,7 @@ BufferCounter ActorTesselation2D::f_prim_RenderSeqCount(ActorTesselation2D const
 
 BufferCounter ActorTesselation2D::f_sequ_RenderSeqCount(ActorTesselation2D const* const tessel)
 {
-	return static_cast<ActorSequencer2D* const>(tessel->m_Actor.get())->PrimitiveCount();
+	return static_cast<ActorSequencer2D* const>(tessel->m_Actor)->PrimitiveCount();
 }
 
 ZIndex ActorTesselation2D::GetZIndex() const
@@ -156,7 +178,8 @@ void ActorTesselation2D::SetZIndex(ZIndex z)
 
 BufferCounter ActorTesselation2D::PrimitiveCount() const
 {
-	return static_cast<BufferCounter>(m_Transformer.Size()) * RenderSeqCount();
+	//return static_cast<BufferCounter>(m_Elements.size()) * RenderSeqCount();
+	return static_cast<BufferCounter>(m_Transformer.children.size()) * RenderSeqCount();
 }
 
 void ActorTesselation2D::OnPreDraw()
@@ -166,17 +189,17 @@ void ActorTesselation2D::OnPreDraw()
 
 void ActorTesselation2D::f_prim_OnPreDraw(ActorTesselation2D* const tessel)
 {
-	tessel->m_ActorPreDrawTransforms[0] = static_cast<ActorPrimitive2D* const>(tessel->m_Actor.get())->Transform()->GetTransform();
+	//tessel->m_ActorPreDrawTransforms[0] = static_cast<ActorPrimitive2D* const>(tessel->m_Actor.get())->m_Transformer.self.transform;
 }
 
 void ActorTesselation2D::f_sequ_OnPreDraw(ActorTesselation2D* const tessel)
 {
-	ActorSequencer2D* const sequencer = static_cast<ActorSequencer2D* const>(tessel->m_Actor.get());
+	ActorSequencer2D* const sequencer = static_cast<ActorSequencer2D* const>(tessel->m_Actor);
 	sequencer->OnPreDraw();
-	std::vector<Transform2D>().swap(tessel->m_ActorPreDrawTransforms);
-	int i = 0;
-	while (ActorPrimitive2D* const prim = (*sequencer)[i++])
-		tessel->m_ActorPreDrawTransforms.push_back(prim->Transform()->GetTransform());
+	//std::vector<Transform2D>().swap(tessel->m_ActorPreDrawTransforms);
+	//int i = 0;
+	//while (ActorPrimitive2D* const prim = (*sequencer)[i++])
+		//tessel->m_ActorPreDrawTransforms.push_back(prim->m_Transformer.self.transform);
 }
 
 void ActorTesselation2D::OnPostDraw()
@@ -186,13 +209,19 @@ void ActorTesselation2D::OnPostDraw()
 
 void ActorTesselation2D::f_prim_OnPostDraw(ActorTesselation2D* const tessel)
 {
-	static_cast<ActorPrimitive2D* const>(tessel->m_Actor.get())->Transform()->SetTransform(tessel->m_ActorPreDrawTransforms[0]);
+	//static_cast<ActorPrimitive2D* const>(tessel->m_Actor.get())->m_Transformer.self.transform = tessel->m_ActorPreDrawTransforms[0];
+	// TODO is sync necessary?
+	//static_cast<ActorPrimitive2D* const>(tessel->m_Actor.get())->m_Transformer.Sync();
 }
 
 void ActorTesselation2D::f_sequ_OnPostDraw(ActorTesselation2D* const tessel)
 {
-	ActorSequencer2D* const sequencer = static_cast<ActorSequencer2D* const>(tessel->m_Actor.get());
-	for (auto i = 0; i < tessel->m_ActorPreDrawTransforms.size(); i++)
-		(*sequencer)[i]->Transform()->SetTransform(tessel->m_ActorPreDrawTransforms[i]);
+	ActorSequencer2D* const sequencer = static_cast<ActorSequencer2D* const>(tessel->m_Actor);
+	//for (auto i = 0; i < tessel->m_ActorPreDrawTransforms.size(); i++)
+	//{
+		//(*sequencer)[i]->m_Transformer.self.transform = tessel->m_ActorPreDrawTransforms[i];
+		// TODO necessary sync call?
+		//(*sequencer)[i]->m_Transformer.Sync();
+	//}
 	sequencer->OnPostDraw();
 }
