@@ -253,6 +253,7 @@
     <ClInclude Include="src\render\actors\TileMap.h" />
     <ClInclude Include="src\render\transform\Modulate.h" />
     <ClInclude Include="src\render\transform\Transform.h" />
+    <ClInclude Include="src\render\transform\Protean.h" />
     <ClInclude Include="src\render\transform\Transforms.h" />
     <ClInclude Include="src\Typedefs.h" />
     <ClInclude Include="src\Macros.h" />

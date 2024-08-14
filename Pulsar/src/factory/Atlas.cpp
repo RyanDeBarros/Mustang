@@ -335,7 +335,7 @@ RectRender Atlas::SampleSubtile(size_t index, const TextureSettings& texture_set
 	else
 		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.w - m_Border, rect.h - m_Border }, m_Width, m_Height);
 	actor.SetPivot(0.5, 0.5);
-	actor.Transform()->scale = { (rect.w - m_Border) / static_cast<float>(m_Width), (rect.h - m_Border) / static_cast<float>(m_Height) };
-	actor.Transformer()->SyncRS();
+	actor.RefTransform()->scale = { (rect.w - m_Border) / static_cast<float>(m_Width), (rect.h - m_Border) / static_cast<float>(m_Height) };
+	actor.RefTransformer()->SyncRS();
 	return actor;
 }

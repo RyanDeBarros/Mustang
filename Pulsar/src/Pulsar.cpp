@@ -140,13 +140,13 @@ void Pulsar::Run(GLFWwindow* window)
 	std::shared_ptr<ActorPrimitive2D> actor4(new ActorPrimitive2D(renderable, { {-200.0f, 0.0f}, 0.0f, {800.0f, 800.0f} }));
 	Renderer::GetCanvasLayer(-1)->OnAttach(actor4.get());
 
-	actor1.Transform()->scale = { 16.0f, 16.0f };
+	actor1.RefTransform()->scale = { 16.0f, 16.0f };
 	actor1.FlagTransformRS();
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(&actor3, -1);
 
 	actor3.SetPivot(0.0f, 0.0f);
-	actor3.Transform()->position = _RendererSettings::initial_window_rel_pos(-0.5f, 0.5f);
-	actor3.Transform()->scale = { 0.3f, 0.3f };
+	actor3.RefTransform()->position = _RendererSettings::initial_window_rel_pos(-0.5f, 0.5f);
+	actor3.RefTransform()->scale = { 0.3f, 0.3f };
 	actor3.FlagTransform();
 	actor2.SetModulation(glm::vec4(0.7f, 0.7f, 1.0f, 1.0f));
 	actor3.SetModulationPerPoint({
@@ -159,8 +159,8 @@ void Pulsar::Run(GLFWwindow* window)
 	TextureFactory::SetSettings(actor1.GetTextureHandle(), Texture::linear_settings);
 
 	actor3.SetPivot(0.5f, 0.5f);
-	actor3.Transform()->position = { 0.0f, 0.0f };
-	actor3.Transform()->scale = { 0.1f, 0.1f };
+	actor3.RefTransform()->position = { 0.0f, 0.0f };
+	actor3.RefTransform()->scale = { 0.1f, 0.1f };
 	actor3.FlagTransform();
 	Renderer::GetCanvasLayer(0)->OnDetach(&actor3);
 
@@ -246,19 +246,19 @@ void Pulsar::Run(GLFWwindow* window)
 				3, 0.5f,
 				Particles::CombineSequential({
 					Particles::CHR::SetColorUsingData(LinearCombo4x1({ 0.0f, 0.0f, 1.0f, 1.0f }, { 2.0f, 2.0f, 0.0f, 0.0f }), 3),
-					Particles::CHR::SetLocalScaleUsingData(LinearCombo2x1({ 1.0f, 1.0f }, { 2.0f * p2width, 0.0f }), 3),
+					Particles::CHR::SetLocalScaleUsingData(LinearCombo2x1({ 0.0f, 1.0f }, { 2.0f * p2width, 0.0f }), 3),
 					Particles::CombineConditionalDataLessThan(
 						2, 0.0f,
 						Particles::CHR::SetLocalPositionUsingData(Composition(LinearCombo2x1({ -0.5f * p2width, -0.5f * p2height}, { 0.0f, 2.0f }), CastFloatToUInt), 1),
-						Particles::CHR::SetLocalPositionUsingData(Composition(LinearCombo2x2({ 0.5f * p2width - 1.0f, -0.5f * p2height }, { -2.0f * (p2width - 1.0f), 0.0f }, { 0.0f, 2.0f }), Vec2Wrap(Identity, CastFloatToUInt)), 3, 1)
+						Particles::CHR::SetLocalPositionUsingData(Composition(LinearCombo2x2({ 0.5f * p2width, -0.5f * p2height }, { -2.0f * p2width, 0.0f }, { 0.0f, 2.0f }), Vec2Wrap(Identity, CastFloatToUInt)), 3, 1)
 					)
 				}),
 				Particles::CombineSequential({
 					Particles::CHR::SetColorUsingData(LinearCombo4x1({ 2.0f, 2.0f, 1.0f, 1.0f }, { -2.0f, -2.0f, 0.0f, 0.0f }), 3),
-					Particles::CHR::SetLocalScaleUsingData(LinearCombo2x1({ 1.0f + 2.0f * p2width, 1.0f }, { -2.0f * p2width, 0.0f }), 3),
+					Particles::CHR::SetLocalScaleUsingData(LinearCombo2x1({ 2.0f * p2width, 1.0f }, { -2.0f * p2width, 0.0f }), 3),
 					Particles::CombineConditionalDataLessThan(
 						2, 0.0f,
-						Particles::CHR::SetLocalPositionUsingData(Composition(LinearCombo2x2({ -1.5f * p2width - 1.0f, -0.5f * p2height }, { 2.0f * (p2width + 1.0f), 0.0f }, { 0.0f, 2.0f }), Vec2Wrap(Identity, CastFloatToUInt)), 3, 1),
+						Particles::CHR::SetLocalPositionUsingData(Composition(LinearCombo2x2({ -1.5f * p2width, -0.5f * p2height }, { 2.0f * p2width, 0.0f }, { 0.0f, 2.0f }), Vec2Wrap(Identity, CastFloatToUInt)), 3, 1),
 						Particles::CHR::SetLocalPositionUsingData(Composition(LinearCombo2x1({ -0.5f * p2width, -0.5f * p2height}, { 0.0f, 2.0f }), CastFloatToUInt), 1)
 					)
 				})
@@ -302,8 +302,8 @@ void Pulsar::Run(GLFWwindow* window)
 	tilemap->Insert(4, 0, 1);
 	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 
-	actor3.Transform()->scale *= 2.0f;
-	actor3.Transformer()->SyncRS();
+	actor3.RefTransform()->scale *= 2.0f;
+	actor3.RefTransformer()->SyncRS();
 
 	TextureFactory::SetSettings(textureFlag, Texture::nearest_settings);
 
@@ -313,22 +313,22 @@ void Pulsar::Run(GLFWwindow* window)
 	RectRender child2(textureSnowman);
 	RectRender grandchild2(textureTux);
 
-	child.Transformer()->Attach(grandchild.Transformer());
-	grandchild.Transform()->scale = { 0.25f, 0.25f };
-	grandchild.Transform()->position = { 300.0f, -100.0f };
-	child.Transform()->scale = { 0.25f, 0.25f };
-	child.Transformer()->Sync();
-	child2.Transformer()->Attach(grandchild2.Transformer());
-	grandchild2.Transform()->scale = { 0.25f, 0.25f };
-	grandchild2.Transform()->position = { 300.0f, -100.0f };
-	child2.Transform()->scale = { 0.25f, 0.25f };
-	child2.Transformer()->Sync();
+	child.RefTransformer()->Attach(grandchild.RefTransformer());
+	grandchild.RefTransform()->scale = { 0.25f, 0.25f };
+	grandchild.RefTransform()->position = { 300.0f, -100.0f };
+	child.RefTransform()->scale = { 0.25f, 0.25f };
+	child.RefTransformer()->Sync();
+	child2.RefTransformer()->Attach(grandchild2.RefTransformer());
+	grandchild2.RefTransform()->scale = { 0.25f, 0.25f };
+	grandchild2.RefTransform()->position = { 300.0f, -100.0f };
+	child2.RefTransform()->scale = { 0.25f, 0.25f };
+	child2.RefTransformer()->Sync();
 
-	root.Transformer()->Attach(child.Transformer());
-	root.Transformer()->Attach(child2.Transformer());
-	root.Transform()->scale = { 10.0f, 10.0f };
-	root.Transformer()->Sync();
-	for (const auto& child : root.Transformer()->children)
+	root.RefTransformer()->Attach(child.RefTransformer());
+	root.RefTransformer()->Attach(child2.RefTransformer());
+	root.RefTransform()->scale = { 10.0f, 10.0f };
+	root.RefTransformer()->Sync();
+	for (const auto& child : root.RefTransformer()->children)
 	{
 		child->self->position = { 0.0f, -30.0f };
 		child->self->scale *= 0.2f;
@@ -341,29 +341,22 @@ void Pulsar::Run(GLFWwindow* window)
 	//std::shared_ptr<Modulator> root_mod(std::make_shared<Modulator>(root.ModulateWeak(), first_mod));
 	//root_mod->SetColor(glm::vec4{ 1.0f } * 0.5f);
 
-	//Renderer::GetCanvasLayer(11)->OnAttach(&root);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&child2);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&child);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
+	Renderer::GetCanvasLayer(11)->OnAttach(&root);
+	Renderer::GetCanvasLayer(11)->OnAttach(&child2);
+	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
+	Renderer::GetCanvasLayer(11)->OnAttach(&child);
+	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
 
 	DebugRect rect(_RendererSettings::initial_window_width * 0.5f, _RendererSettings::initial_window_height, true, { 1.0f, 0.5f }, {}, { 0.5f, 0.5f, 1.0f, 0.3f }, 1);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&rect);
+	Renderer::GetCanvasLayer(11)->OnAttach(&rect);
 
 	RectRender tux(textureTux);
 	ActorTesselation2D tuxTessel(&tux);
 	ActorTesselation2D tuxGrid(&tuxTessel);
 	Renderer::GetCanvasLayer(11)->OnAttach(&tuxGrid);
 
-	//Transformer2D* tuxTesselPositions = new Transformer2D[3]{
-		//Transform2D{ {}, 0, {0.1f, 0.1f} },
-		//Transform2D{ {100, 0}, 0, {0.1f, 0.1f} },
-		//Transform2D{ {-100, 0}, 0, {0.1f, 0.1f} }
-	//};
-	//tuxTessel.Transformer()->AttachAll(tuxTesselPositions, 3);
-
-	tux.Transform()->scale *= 0.1f;
-	tux.Transformer()->SyncRS();
+	tux.RefTransform()->scale *= 0.1f;
+	tux.RefTransformer()->SyncRS();
 
 	tuxTessel.PushBackStatic({
 		{ {0, 100} },
@@ -386,20 +379,18 @@ void Pulsar::Run(GLFWwindow* window)
 		prevDrawTime = drawTime;
 		totalDrawTime += deltaDrawTime;
 		
-		child.Transform()->rotation = -Pulsar::totalDrawTime;
-		child2.Transform()->rotation = -Pulsar::totalDrawTime;
-		grandchild.Transform()->rotation = Pulsar::totalDrawTime;
-		grandchild2.Transform()->rotation = -Pulsar::totalDrawTime;
-		root.Transform()->rotation = Pulsar::totalDrawTime;
-		child.Transform()->position += 5 * Pulsar::deltaDrawTime;
-		child2.Transform()->scale *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime);
-		root.Transformer()->Sync();
+		child.RefTransform()->rotation = -Pulsar::totalDrawTime;
+		child2.RefTransform()->rotation = -Pulsar::totalDrawTime;
+		grandchild.RefTransform()->rotation = Pulsar::totalDrawTime;
+		grandchild2.RefTransform()->rotation = -Pulsar::totalDrawTime;
+		root.RefTransform()->rotation = Pulsar::totalDrawTime;
+		child.RefTransform()->position += 5 * Pulsar::deltaDrawTime;
+		child2.RefTransform()->scale *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime);
+		root.RefTransformer()->Sync();
 
 		Renderer::OnDraw();
 		glfwPollEvents();
 		if (glfwWindowShouldClose(window))
 			break;
 	}
-
-	//delete[] tuxTesselPositions;
 }

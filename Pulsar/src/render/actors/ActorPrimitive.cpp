@@ -4,19 +4,21 @@
 #include "render/CanvasLayer.h"
 
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, ZIndex z, bool visible)
-	: m_Render(render), m_Notification(new AP2D_Notification(this)), m_Transformer(transform, m_Notification), m_Modulator({ 1.0f, 1.0f, 1.0f, 1.0f }, m_Notification), ActorRenderBase2D(z), m_Status(visible ? 0b111 : 0b110)
+	: ActorRenderBase2D(z), Protean(transform, { 1.0f, 1.0f, 1.0f, 1.0f }), m_Render(render), m_Notification(new AP2D_Notification(this)), m_Status(visible ? 0b111 : 0b110)
 {
+	m_Transformer.notify = m_Notification;
+	m_Modulator.notify = m_Notification;
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const ActorPrimitive2D& primitive)
-	: m_Render(primitive.m_Render), m_Notification(new AP2D_Notification(this)), m_Transformer(primitive.m_Transformer), m_Modulator(primitive.m_Modulator), ActorRenderBase2D(primitive), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
+	: ActorRenderBase2D(primitive), Protean(primitive), m_Render(primitive.m_Render), m_Notification(new AP2D_Notification(this)), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
 {
 	m_Transformer.notify = m_Notification;
 	m_Modulator.notify = m_Notification;
 }
 
 ActorPrimitive2D::ActorPrimitive2D(ActorPrimitive2D&& primitive) noexcept
-	: m_Render(std::move(primitive.m_Render)), m_Notification(new AP2D_Notification(this)), m_Transformer(std::move(primitive.m_Transformer)), m_Modulator(std::move(primitive.m_Modulator)), ActorRenderBase2D(std::move(primitive)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors))
+	: ActorRenderBase2D(std::move(primitive)), Protean(std::move(primitive)), m_Render(std::move(primitive.m_Render)), m_Notification(new AP2D_Notification(this)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors))
 {
 	m_Transformer.notify = m_Notification;
 	m_Modulator.notify = m_Notification;
@@ -24,23 +26,21 @@ ActorPrimitive2D::ActorPrimitive2D(ActorPrimitive2D&& primitive) noexcept
 
 ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
 {
+	ActorRenderBase2D::operator=(primitive);
+	Protean::operator=(primitive);
 	m_Render = primitive.m_Render;
 	m_Status = primitive.m_Status;
 	m_ModulationColors = primitive.m_ModulationColors;
-	m_Transformer = primitive.m_Transformer;
-	m_Modulator = primitive.m_Modulator;
-	ActorRenderBase2D::operator=(primitive);
 	return *this;
 }
 
 ActorPrimitive2D& ActorPrimitive2D::operator=(ActorPrimitive2D&& primitive) noexcept
 {
+	ActorRenderBase2D::operator=(std::move(primitive));
+	Protean::operator=(std::move(primitive));
 	m_Render = std::move(primitive.m_Render);
 	m_Status = primitive.m_Status;
 	m_ModulationColors = std::move(primitive.m_ModulationColors);
-	m_Transformer = std::move(primitive.m_Transformer);
-	m_Modulator = std::move(primitive.m_Modulator);
-	ActorRenderBase2D::operator=(std::move(primitive));
 	return *this;
 }
 

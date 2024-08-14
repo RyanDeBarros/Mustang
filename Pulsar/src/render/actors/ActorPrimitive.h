@@ -5,16 +5,13 @@
 #include "Typedefs.h"
 #include "../ActorRenderBase.h"
 #include "../Renderable.h"
-#include "../transform/Transform.h"
-#include "../transform/Modulate.h"
+#include "../transform/Protean.h"
 
 struct AP2D_Notification;
 
-class ActorPrimitive2D : public ActorRenderBase2D
+class ActorPrimitive2D : public ActorRenderBase2D, public Protean
 {
 	AP2D_Notification* m_Notification;
-	Transformer2D m_Transformer;
-	Modulator m_Modulator;
 
 protected:
 	static constexpr Stride end_attrib_pos = 11;
@@ -61,11 +58,6 @@ public:
 
 	inline TextureHandle GetTextureHandle() const { return m_Render.textureHandle; }
 	inline const Renderable& GetRenderable() const { return m_Render; }
-
-	Transformer2D* Transformer() { return &m_Transformer; }
-	Transform2D* Transform() { return &m_Transformer.self.transform; }
-	Modulator* Modulator() { return &m_Modulator; }
-	Modulate* Modulate() { return &m_Modulator.self.modulate; }
 
 protected:
 	void OnDraw(signed char texture_slot);

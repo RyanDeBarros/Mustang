@@ -13,6 +13,7 @@
 class DebugBatcher : public ActorRenderBase2D
 {
 	std::unordered_map<DebugModel, DebugMultiPolygon> m_Slots;
+	// TODO traversal might be taking up unnecessary space
 	std::vector<DebugMultiPolygon*> m_OrderedTraversal;
 
 public:
