@@ -6,12 +6,15 @@
 #include "../ActorRenderBase.h"
 #include "../Renderable.h"
 #include "../transform/Transform.h"
-#include "../transform/Modulatable.h"
+#include "../transform/Modulate.h"
+
+struct AP2D_Notification;
 
 class ActorPrimitive2D : public ActorRenderBase2D
 {
+	AP2D_Notification* m_Notification;
 	Transformer2D m_Transformer;
-	std::shared_ptr<class PrimitiveModulatable> m_Modulate;
+	Modulator m_Modulator;
 
 protected:
 	static constexpr Stride end_attrib_pos = 11;
@@ -37,21 +40,21 @@ public:
 	inline void SetTextureHandle(TextureHandle handle) { m_Render.textureHandle = handle; }
 
 	inline void SetVisible(bool visible) { m_Status = (visible ? m_Status |= 1 : m_Status &= ~1); }
-	inline void FlushModulate() { m_Status |= 0b1000; }
 	inline void FillModulationPoints(const glm::vec4& default_value = { 1.0f, 1.0f, 1.0f, 1.0f })
 	{ 
 		if (m_ModulationColors.size() < m_Render.vertexCount)
 			m_ModulationColors.resize(m_Render.vertexCount, default_value);
-		FlushModulate();
+		FlagModulate();
 	}
 
 	inline void FlagTransform() { m_Status |= 0b110; }
 	inline void FlagTransformP() { m_Status |= 0b10; }
 	inline void FlagTransformRS() { m_Status |= 0b100; }
+	inline void FlagModulate() { m_Status |= 0b1000; }
 	
-	inline void SetModulation(const glm::vec4& color) { m_ModulationColors = std::vector<glm::vec4>(m_Render.vertexCount, color); FlushModulate(); }
-	inline void SetModulationPerPoint(const std::vector<glm::vec4>& colors) { m_ModulationColors = colors; FlushModulate(); }
-	inline void SetModulationPerPoint(std::vector<glm::vec4>&& colors) { m_ModulationColors = std::move(colors); FlushModulate(); }
+	inline void SetModulation(const glm::vec4& color) { m_ModulationColors = std::vector<glm::vec4>(m_Render.vertexCount, color); FlagModulate(); }
+	inline void SetModulationPerPoint(const std::vector<glm::vec4>& colors) { m_ModulationColors = colors; FlagModulate(); }
+	inline void SetModulationPerPoint(std::vector<glm::vec4>&& colors) { m_ModulationColors = std::move(colors); FlagModulate(); }
 
 	void CropPoints(const std::vector<glm::vec2>& points, int atlas_width, int atlas_height);
 	void CropRelativePoints(const std::vector<glm::vec2>& atlas_points);
@@ -61,31 +64,21 @@ public:
 
 	Transformer2D* Transformer() { return &m_Transformer; }
 	Transform2D* Transform() { return &m_Transformer.self.transform; }
-	std::shared_ptr<class PrimitiveModulatable> Modulate() { return m_Modulate; }
-	std::weak_ptr<class PrimitiveModulatable> ModulateWeak() { return m_Modulate; }
+	Modulator* Modulator() { return &m_Modulator; }
+	Modulate* Modulate() { return &m_Modulator.self.modulate; }
 
 protected:
 	void OnDraw(signed char texture_slot);
 };
 
-struct ActorPrimitive2D_TN : public TransformNotification
+struct AP2D_Notification : public TransformNotification, public ModulateNotification
 {
 	ActorPrimitive2D* prim = nullptr;
 
-	ActorPrimitive2D_TN(ActorPrimitive2D* prim) : prim(prim) {}
+	AP2D_Notification(ActorPrimitive2D* prim) : prim(prim) {}
 
 	void Notify() override { if (prim) prim->FlagTransform(); }
 	void NotifyP() override { if (prim) prim->FlagTransformP(); }
 	void NotifyRS() override { if (prim) prim->FlagTransformRS(); }
-};
-
-class PrimitiveModulatable : public ModulatableProxy
-{
-	friend class ActorPrimitive2D;
-	ActorPrimitive2D* m_Primitive = nullptr;
-
-public:
-	PrimitiveModulatable() : ModulatableProxy({ 1.0f, 1.0f, 1.0f, 1.0f }) {}
-
-	inline void OperateColor(const std::function<void(glm::vec4& color)>& op) override { op(m_Color); m_Primitive->FillModulationPoints(); }
+	void NotifyM() override { if (prim) prim->FlagModulate(); }
 };

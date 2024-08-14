@@ -2,7 +2,6 @@
 
 #include <glm/glm.hpp>
 #include <vector>
-#include <memory>
 
 typedef glm::vec2 Position2D;
 typedef glm::float32 Rotation2D;
@@ -51,11 +50,11 @@ struct TransformNotification
 struct Transformer2D
 {
 	PackedTransform2D self;
-	std::unique_ptr<TransformNotification> notify = nullptr;
+	TransformNotification* notify = nullptr;
 	Transformer2D* parent = nullptr;
 	std::vector<Transformer2D*> children;
 
-	inline Transformer2D(const Transform2D& transform = {}, std::unique_ptr<TransformNotification>&& notify = {})
+	inline Transformer2D(const Transform2D& transform = {}, TransformNotification* notify = nullptr)
 		: self{ transform }, notify(std::move(notify)) 
 	{
 		self.Sync();

@@ -9,7 +9,7 @@ template class ParticleEffect<unsigned short>;
 
 template<std::unsigned_integral ParticleCount>
 ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform, const glm::vec4& modulate, bool enabled)
-	: m_Modulate(std::make_shared<ModulatableProxy>(modulate)), enabled(enabled), m_Transformer(transform), m_Modulator(m_Modulate)
+	: enabled(enabled), m_Transformer(transform), m_Modulator(modulate)
 {
 	ParticleSubsystemIndex i = 0;
 	for (const auto& subsys : subsystem_data)
@@ -17,7 +17,7 @@ ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsyste
 		std::shared_ptr<ParticleSubsystem<ParticleCount>> subsystem = std::make_shared<ParticleSubsystem<ParticleCount>>(subsys, i++);
 		m_Subsystems.push_back(subsystem);
 		m_Transformer.Attach(&subsystem->m_Transformer);
-		m_Modulator.PushBackGlobal(subsystem->m_Modulator);
+		m_Modulator.Attach(&subsystem->m_Modulator);
 	}
 	Reset();
 }

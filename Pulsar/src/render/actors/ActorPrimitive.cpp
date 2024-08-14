@@ -4,23 +4,22 @@
 #include "render/CanvasLayer.h"
 
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, ZIndex z, bool visible)
-	: m_Render(render), m_Transformer(transform, std::make_unique<ActorPrimitive2D_TN>(this)), m_Modulate(std::make_shared<PrimitiveModulatable>()), ActorRenderBase2D(z), m_Status(visible ? 0b111 : 0b110)
+	: m_Render(render), m_Notification(new AP2D_Notification(this)), m_Transformer(transform, m_Notification), m_Modulator({ 1.0f, 1.0f, 1.0f, 1.0f }, m_Notification), ActorRenderBase2D(z), m_Status(visible ? 0b111 : 0b110)
 {
-	m_Modulate->m_Primitive = this;
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const ActorPrimitive2D& primitive)
-	: m_Render(primitive.m_Render), m_Transformer(primitive.m_Transformer), m_Modulate(primitive.m_Modulate), ActorRenderBase2D(primitive), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
+	: m_Render(primitive.m_Render), m_Notification(new AP2D_Notification(this)), m_Transformer(primitive.m_Transformer), m_Modulator(primitive.m_Modulator), ActorRenderBase2D(primitive), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
 {
-	m_Transformer.notify = std::make_unique<ActorPrimitive2D_TN>(this);
-	m_Modulate->m_Primitive = this;
+	m_Transformer.notify = m_Notification;
+	m_Modulator.notify = m_Notification;
 }
 
 ActorPrimitive2D::ActorPrimitive2D(ActorPrimitive2D&& primitive) noexcept
-	: m_Render(std::move(primitive.m_Render)), m_Transformer(std::move(primitive.m_Transformer)), m_Modulate(std::move(primitive.m_Modulate)), ActorRenderBase2D(std::move(primitive)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors))
+	: m_Render(std::move(primitive.m_Render)), m_Notification(new AP2D_Notification(this)), m_Transformer(std::move(primitive.m_Transformer)), m_Modulator(std::move(primitive.m_Modulator)), ActorRenderBase2D(std::move(primitive)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors))
 {
-	m_Transformer.notify = std::make_unique<ActorPrimitive2D_TN>(this);
-	m_Modulate->m_Primitive = this;
+	m_Transformer.notify = m_Notification;
+	m_Modulator.notify = m_Notification;
 }
 
 ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
@@ -29,7 +28,7 @@ ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
 	m_Status = primitive.m_Status;
 	m_ModulationColors = primitive.m_ModulationColors;
 	m_Transformer = primitive.m_Transformer;
-	m_Modulate = primitive.m_Modulate;
+	m_Modulator = primitive.m_Modulator;
 	ActorRenderBase2D::operator=(primitive);
 	return *this;
 }
@@ -40,13 +39,15 @@ ActorPrimitive2D& ActorPrimitive2D::operator=(ActorPrimitive2D&& primitive) noex
 	m_Status = primitive.m_Status;
 	m_ModulationColors = std::move(primitive.m_ModulationColors);
 	m_Transformer = std::move(primitive.m_Transformer);
-	m_Modulate = std::move(primitive.m_Modulate);
+	m_Modulator = std::move(primitive.m_Modulator);
 	ActorRenderBase2D::operator=(std::move(primitive));
 	return *this;
 }
 
 ActorPrimitive2D::~ActorPrimitive2D()
 {
+	if (m_Notification)
+		delete m_Notification;
 }
 
 void ActorPrimitive2D::RequestDraw(CanvasLayer* canvas_layer)
@@ -97,7 +98,7 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 		m_Status &= ~0b1000;
 		for (BufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
 		{
-			auto color = m_ModulationColors[i] * m_Modulate->GetColor();
+			auto color = m_ModulationColors[i] * m_Modulator.self.packedM;
 			m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(color.r);
 			m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(color.g);
 			m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(color.b);

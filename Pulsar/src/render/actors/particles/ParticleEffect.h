@@ -2,11 +2,10 @@
 
 #include <vector>
 
-#include "utils/Constants.h"
 #include "Particle.h"
 #include "ParticleSubsystem.h"
 #include "../../transform/Transform.h"
-#include "../../transform/MultiModulator.h"
+#include "../../transform/Modulate.h"
 
 template<std::unsigned_integral ParticleCount = unsigned short>
 class ParticleEffect
@@ -18,7 +17,7 @@ class ParticleEffect
 	real m_LeftoverDT = 0.0f;
 
 public:
-	ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform = {}, const glm::vec4& modulate = WHITE, bool enabled = true);
+	ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform = {}, const glm::vec4& modulate = {1.0f, 1.0f, 1.0f, 1.0f}, bool enabled = true);
 	ParticleEffect(const ParticleEffect<ParticleCount>&) = delete;
 	ParticleEffect(ParticleEffect<ParticleCount>&&) = delete;
 
@@ -34,15 +33,16 @@ public:
 	inline void Reset() { m_TotalPlayed = 0.0f; m_DeltaTime = 0.0f; m_PlayTime = 0.0f; }
 	void PlayFor(real n);
 
-	inline Transformer2D* Transformer() { return &m_Transformer; }
-	inline MultiModulator* Modulator() { return &m_Modulator; }
+	inline Transformer2D* TransformerRef() { return &m_Transformer; }
+	inline Transform2D* TransformRef() { return &m_Transformer.self.transform; }
+	inline Modulator* ModulatorRef() { return &m_Modulator; }
+	inline Modulate* ModulateRef() { return &m_Modulator.self.modulate; }
 	inline ParticleSubsystem<ParticleCount>& SubsystemRef(unsigned int i) { return *m_Subsystems[i]; }
 
 protected:
 	std::vector<std::shared_ptr<ParticleSubsystem<ParticleCount>>> m_Subsystems;
 	Transformer2D m_Transformer;
-	std::shared_ptr<ModulatableProxy> m_Modulate;
-	MultiModulator m_Modulator;
+	Modulator m_Modulator;
 
 	void OnUpdate();
 	virtual void DespawnInvalidParticles() {}

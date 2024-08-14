@@ -4,55 +4,55 @@
 #include "AssetLoader.h"
 
 DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform, const glm::vec4& color, GLenum indexing_mode, ZIndex z)
-	: ActorRenderBase2D(z), m_Color(std::make_shared<DebugModulatable>()), m_Transformer(transform, std::make_unique<DebugPolygon_TN>(this))
+	: ActorRenderBase2D(z), m_Notification(new DP_Notification(this)), m_Transformer(transform, m_Notification), m_Modulator(color, m_Notification)
 {
 	Loader::loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
 	SetIndexingMode(indexing_mode);
 	PointsRef() = points;
-	m_Color->m_Poly = this;
-	m_Color->SetColor(color);
 }
 
 DebugPolygon::DebugPolygon(const DebugPolygon& other)
-	: ActorRenderBase2D(other), m_Color(std::make_shared<DebugModulatable>(other.m_Color->GetColor())), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Transformer(other.m_Transformer), m_Status(other.m_Status)
+	: ActorRenderBase2D(other), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Notification(new DP_Notification(this)), m_Transformer(other.m_Transformer), m_Modulator(other.m_Modulator), m_Status(other.m_Status)
 {
-	m_Transformer.notify = std::make_unique<DebugPolygon_TN>(this);
-	m_Color->m_Poly = this;
+	m_Transformer.notify = m_Notification;
+	m_Modulator.notify = m_Notification;
 }
 
 DebugPolygon::DebugPolygon(DebugPolygon&& other) noexcept
-	: ActorRenderBase2D(std::move(other)), m_Color(other.m_Color), m_Renderable(std::move(other.m_Renderable)), m_Points(std::move(other.m_Points)), m_IndexingMode(other.m_IndexingMode), m_Transformer(std::move(other.m_Transformer)), m_Status(other.m_Status)
+	: ActorRenderBase2D(std::move(other)), m_Renderable(std::move(other.m_Renderable)), m_Points(std::move(other.m_Points)), m_IndexingMode(other.m_IndexingMode), m_Notification(new DP_Notification(this)), m_Transformer(std::move(other.m_Transformer)), m_Modulator(std::move(other.m_Modulator)), m_Status(other.m_Status)
 {
-	m_Transformer.notify = std::make_unique<DebugPolygon_TN>(this);
-	m_Color->m_Poly = this;
+	m_Transformer.notify = m_Notification;
+	m_Modulator.notify = m_Notification;
 }
 
 DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
 {
-	m_Color->SetColor(other.m_Color->GetColor());
+	ActorRenderBase2D::operator=(other);
 	m_Renderable = other.m_Renderable;
 	m_Points = other.m_Points;
 	m_IndexingMode = other.m_IndexingMode;
 	m_Status = other.m_Status;
 	m_Transformer = other.m_Transformer;
-	ActorRenderBase2D::operator=(other);
+	m_Modulator = other.m_Modulator;
 	return *this;
 }
 
 DebugPolygon& DebugPolygon::operator=(DebugPolygon&& other) noexcept
 {
-	m_Color->SetColor(other.m_Color->GetColor());
+	ActorRenderBase2D::operator=(std::move(other));
 	m_Renderable = std::move(other.m_Renderable);
 	m_Points = std::move(other.m_Points);
 	m_IndexingMode = other.m_IndexingMode;
 	m_Status = other.m_Status;
 	m_Transformer = std::move(other.m_Transformer);
-	ActorRenderBase2D::operator=(std::move(other));
+	m_Modulator = std::move(other.m_Modulator);
 	return *this;
 }
 
 DebugPolygon::~DebugPolygon()
 {
+	if (m_Notification)
+		delete m_Notification;
 }
 
 void DebugPolygon::RequestDraw(CanvasLayer* canvas_layer)
@@ -88,13 +88,14 @@ void DebugPolygon::CheckStatus()
 	{
 		m_Status &= ~0b10;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
+		auto color = m_Modulator.self.packedM;
 		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 		{
 			// TODO buffer overflow?
-			m_Renderable.vertexBufferData[i * stride + 6] = static_cast<GLfloat>(m_Color->GetColor()[0]);
-			m_Renderable.vertexBufferData[i * stride + 7] = static_cast<GLfloat>(m_Color->GetColor()[1]);
-			m_Renderable.vertexBufferData[i * stride + 8] = static_cast<GLfloat>(m_Color->GetColor()[2]);
-			m_Renderable.vertexBufferData[i * stride + 9] = static_cast<GLfloat>(m_Color->GetColor()[3]);
+			m_Renderable.vertexBufferData[i * stride + 6] = static_cast<GLfloat>(color[0]);
+			m_Renderable.vertexBufferData[i * stride + 7] = static_cast<GLfloat>(color[1]);
+			m_Renderable.vertexBufferData[i * stride + 8] = static_cast<GLfloat>(color[2]);
+			m_Renderable.vertexBufferData[i * stride + 9] = static_cast<GLfloat>(color[3]);
 		}
 	}
 	// modify point positions

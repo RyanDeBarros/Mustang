@@ -6,7 +6,6 @@
 #include <glm/glm.hpp>
 
 #include "../shapes/DebugPolygon.h"
-#include "../../transform/MultiModulator.h"
 
 struct Particle;
 namespace Particles {
@@ -32,7 +31,6 @@ struct Particle
 	Particles::CHRFunc m_Characteristic;
 	float* m_Data = nullptr;
 	Particles::DataIndex m_DataSize;
-	MultiModulator* m_Modulator;
 
 private:
 	template<std::unsigned_integral ParticleCount>
@@ -47,7 +45,7 @@ private:
 	unsigned short m_TI = 0;
 
 public:
-	Particle(const std::shared_ptr<DebugPolygon>& shape, const float& lifespan, const Particles::CHRBind& characteristic, MultiModulator* modulator);
+	Particle(const std::shared_ptr<DebugPolygon>& shape, const float& lifespan, const Particles::CHRBind& characteristic);
 	Particle(const Particle&);
 	Particle(Particle&&) noexcept;
 	Particle& operator=(const Particle&);

@@ -90,6 +90,7 @@ ActorPrimitive2D* const ActorTesselation2D::operator[](PrimitiveIndex i)
 	return f_operator(i);
 }
 
+// TODO instead of assuming primitive or sequencer, let m_Actor be a Transformable, i.e. a class that defines the Transformer() method.
 ActorPrimitive2D* const ActorTesselation2D::f_prim_operator(ActorTesselation2D* const tessel, PrimitiveIndex i)
 {
 	ActorPrimitive2D* const primitive = static_cast<ActorPrimitive2D* const>(tessel->m_Actor);

@@ -8,7 +8,7 @@
 #include "utils/CommonMath.h"
 #include "Particle.h"
 #include "../../transform/Transform.h"
-#include "../../transform/MultiModulator.h"
+#include "../../transform/Modulate.h"
 
 typedef unsigned char ParticleSubsystemIndex;
 
@@ -40,8 +40,7 @@ class ParticleSubsystem
 	unsigned int m_WaveNum = 0;
 	ParticleSubsystemIndex m_SubsystemIndex;
 	Transformer2D m_Transformer;
-	std::shared_ptr<ModulatableProxy> m_Modulate;
-	std::shared_ptr<MultiModulator> m_Modulator;
+	Modulator m_Modulator;
 	std::vector<Particle> m_Particles;
 
 public:

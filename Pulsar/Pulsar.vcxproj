@@ -199,9 +199,7 @@
     <ClCompile Include="src\factory\Texture.cpp" />
     <ClCompile Include="src\factory\TextureFactory.cpp" />
     <ClCompile Include="src\render\actors\TileMap.cpp" />
-    <ClCompile Include="src\render\transform\Modulatable.cpp" />
-    <ClCompile Include="src\render\transform\Modulator.cpp" />
-    <ClCompile Include="src\render\transform\MultiModulator.cpp" />
+    <ClCompile Include="src\render\transform\Modulate.cpp" />
     <ClCompile Include="src\render\transform\Transform.cpp" />
     <ClCompile Include="src\render\transform\Transforms.cpp" />
     <ClCompile Include="src\utils\Data.cpp" />
@@ -253,9 +251,7 @@
     <ClInclude Include="src\factory\Texture.h" />
     <ClInclude Include="src\factory\TextureFactory.h" />
     <ClInclude Include="src\render\actors\TileMap.h" />
-    <ClInclude Include="src\render\transform\Modulatable.h" />
-    <ClInclude Include="src\render\transform\Modulator.h" />
-    <ClInclude Include="src\render\transform\MultiModulator.h" />
+    <ClInclude Include="src\render\transform\Modulate.h" />
     <ClInclude Include="src\render\transform\Transform.h" />
     <ClInclude Include="src\render\transform\Transforms.h" />
     <ClInclude Include="src\Typedefs.h" />

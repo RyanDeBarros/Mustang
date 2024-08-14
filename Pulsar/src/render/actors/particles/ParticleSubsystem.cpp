@@ -9,22 +9,20 @@ template class ParticleSubsystem<unsigned short>;
 
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystemData<ParticleCount>& wave_data, ParticleSubsystemIndex subsystem_index)
-	: m_Shape(wave_data.prototypeShape), m_SpawnFunc(wave_data.spawnFunc), m_LifespanFunc(wave_data.lifespanFunc), m_CharacteristicGen(wave_data.characteristicGen), m_TotalSpawn(m_SpawnFunc(1.0f)), m_SubsystemIndex(subsystem_index), m_Transformer(), m_Modulate(std::make_shared<ModulatableProxy>(Colors::WHITE)), m_Modulator(std::make_shared<MultiModulator>(m_Modulate))
+	: m_Shape(wave_data.prototypeShape), m_SpawnFunc(wave_data.spawnFunc), m_LifespanFunc(wave_data.lifespanFunc), m_CharacteristicGen(wave_data.characteristicGen), m_TotalSpawn(m_SpawnFunc(1.0f)), m_SubsystemIndex(subsystem_index), m_Transformer(), m_Modulator()
 {
 	SetWavePeriod(wave_data.wavePeriod);
 }
 
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystem<ParticleCount>& other)
-	: m_SpawnFunc(other.m_SpawnFunc), m_LifespanFunc(other.m_LifespanFunc), m_CharacteristicGen(other.m_CharacteristicGen), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(other.m_Shape), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Transformer(other.m_Transformer), m_Modulate(std::make_shared<ModulatableProxy>(other.m_Modulate->GetColor())), m_Modulator(std::make_shared<MultiModulator>(m_Modulate))
+	: m_SpawnFunc(other.m_SpawnFunc), m_LifespanFunc(other.m_LifespanFunc), m_CharacteristicGen(other.m_CharacteristicGen), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(other.m_Shape), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Transformer(other.m_Transformer), m_Modulator(other.m_Modulator)
 {
 }
 
-// TODO throughout project, use std::move and r-value function overloads for std::function parameters, unless they are bound to data.
-
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>::ParticleSubsystem(ParticleSubsystem<ParticleCount>&& other) noexcept
-	: m_SpawnFunc(std::move(other.m_SpawnFunc)), m_LifespanFunc(std::move(other.m_LifespanFunc)), m_CharacteristicGen(std::move(other.m_CharacteristicGen)), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(std::move(other.m_Shape)), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Transformer(std::move(other.m_Transformer)), m_Modulate(std::move(other.m_Modulate)), m_Modulator(std::make_shared<MultiModulator>(m_Modulate))
+	: m_SpawnFunc(std::move(other.m_SpawnFunc)), m_LifespanFunc(std::move(other.m_LifespanFunc)), m_CharacteristicGen(std::move(other.m_CharacteristicGen)), m_Period(other.m_Period), m_PeriodInv(other.m_PeriodInv), m_Shape(std::move(other.m_Shape)), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Transformer(std::move(other.m_Transformer)), m_Modulator(std::move(other.m_Modulator))
 {
 }
 
@@ -42,8 +40,7 @@ ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(co
 	m_WaveNum = other.m_WaveNum;
 	m_SubsystemIndex = other.m_SubsystemIndex;
 	m_Transformer = other.m_Transformer;
-	m_Modulate = std::make_shared<ModulatableProxy>(*other.m_Modulate);
-	m_Modulator = std::make_shared<MultiModulator>(*other.m_Modulator);
+	m_Modulator = other.m_Modulator;
 	return *this;
 }
 
@@ -61,7 +58,6 @@ ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(Pa
 	m_WaveNum = other.m_WaveNum;
 	m_SubsystemIndex = other.m_SubsystemIndex;
 	m_Transformer = std::move(other.m_Transformer);
-	m_Modulate = std::move(other.m_Modulate);
 	m_Modulator = std::move(other.m_Modulator);
 	return *this;
 }
@@ -98,8 +94,8 @@ void ParticleSubsystem<ParticleCount>::Spawn(ParticleEffect<ParticleCount>& psys
 {
 	std::shared_ptr<DebugPolygon> shape(std::make_shared<DebugPolygon>(*m_Shape));
 	m_Transformer.Attach(shape->Transformer());
-	m_Modulator->PushBackGlobal(shape->ModulateWeak());
-	m_Particles.push_back(Particle(shape, m_LifespanFunc(seed), m_CharacteristicGen(seed), m_Modulator.get()));
+	m_Modulator.Attach(shape->Modulator());
+	m_Particles.push_back(Particle(shape, m_LifespanFunc(seed), m_CharacteristicGen(seed)));
 	psys.AddParticleShape(m_SubsystemIndex, shape);
 }
 
@@ -113,7 +109,6 @@ void ParticleSubsystem<ParticleCount>::OnParticlesUpdate(ParticleEffect<Particle
 		if (p.m_Invalid)
 		{
 			psys.InvalidateParticleShape(m_SubsystemIndex, p.m_Shape);
-			// TODO does not preserve order. Use boolean to decide whether subsystem should be ordered or not (unordered is faster, but may look weird for slow/low-count systems). Use marking and std::erase_if for ordered subsystems.
 			RemoveUnordered(i);
 			i--;
 		}
@@ -127,6 +122,6 @@ void ParticleSubsystem<ParticleCount>::RemoveUnordered(ParticleCount i)
 	if (m_Particles.size() > 1)
 		std::swap(m_Particles[i], m_Particles.back());
 	m_Particles.pop_back();
-	m_Modulator->SwapPop(i);
 	swap_pop(m_Transformer.children, i);
+	swap_pop(m_Modulator.children, i);
 }

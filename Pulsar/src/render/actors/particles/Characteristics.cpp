@@ -237,7 +237,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[color, di](Particle& p)
 					{
-						p.m_Modulator->SetLocalColor(p.ti(), color(p[di]));
+						p.m_Shape->Modulator()->self.modulate = color(p[di]);
 					}, di + 1
 				};
 			};
@@ -250,7 +250,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[color](Particle& p)
 					{
-						p.m_Modulator->SetLocalColor(p.ti(), color(p.t()));
+						p.m_Shape->Modulator()->self.modulate = color(p.t());
 					}, 0
 				};
 			};
@@ -311,6 +311,8 @@ namespace Particles {
 		CharacteristicGen Sync = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Transformer()->Sync(); }, 0 }; };
 		CharacteristicGen SyncP = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Transformer()->SyncP(); }, 0 }; };
 		CharacteristicGen SyncRS = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Transformer()->SyncRS(); }, 0 }; };
+		CharacteristicGen SyncM = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Modulator()->Sync(); }, 0 }; };
+		CharacteristicGen SyncAll = CombineSequential({ Sync, SyncM });
 
 	}
 

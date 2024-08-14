@@ -9,6 +9,8 @@
 #include "ActorSequencer.h"
 #include "../transform/Transform.h"
 
+// TODO add modulator implementation
+
 class ActorTesselation2D : virtual public ActorSequencer2D
 {
 	ActorRenderBase2D* m_Actor;

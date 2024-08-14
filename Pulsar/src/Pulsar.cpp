@@ -26,7 +26,6 @@
 #include "utils/CommonMath.h"
 #include "utils/Functors.h"
 #include "utils/Strings.h"
-#include "render/transform/Modulator.h"
 
 using namespace Pulsar;
 
@@ -224,7 +223,7 @@ void Pulsar::Run(GLFWwindow* window)
 				}),
 				Particles::CHR::OperateLocalPositionFromVelocityData(0, 1)
 			),
-			Particles::CHR::Sync
+			Particles::CHR::SyncAll
 		})
 	};
 	float p2width = 400.0f;
@@ -264,7 +263,7 @@ void Pulsar::Run(GLFWwindow* window)
 					)
 				})
 			),
-			Particles::CHR::Sync
+			Particles::CHR::SyncAll
 		})
 	};
 
@@ -274,8 +273,8 @@ void Pulsar::Run(GLFWwindow* window)
 	psys.SubsystemRef(1).Transformer()->self->rotation = 0.5f * glm::pi<float>();
 	psys.SubsystemRef(1).Transformer()->SyncRS();
 	//psys.Transformer()->SetLocalScale(1, { 1, _RendererSettings::initial_window_width / static_cast<float>(_RendererSettings::initial_window_height) });
-	psys.Transformer()->self->scale = glm::vec2{ _RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height } *0.75f;
-	psys.Transformer()->SyncRS();
+	psys.TransformerRef()->self->scale = glm::vec2{ _RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height } *0.75f;
+	psys.TransformerRef()->SyncRS();
 	//psys.Transformer()->SyncGlobalWithLocalScales();
 	//psys.Transformer()->SetPosition(300, 0);
 	//psys.Transformer()->SetLocalTransform(2, { {-500, 0}, 0, {2, 2} });
@@ -287,10 +286,11 @@ void Pulsar::Run(GLFWwindow* window)
 	//parr.Transformer().SyncGlobalWithLocalPositions();
 
 	//parr.SubsystemRef(0).SetRotation(1.57f);
-	psys.Modulator()->SetColor(Colors::PSYCHEDELIC_PURPLE);
+	*psys.ModulateRef() = Colors::PSYCHEDELIC_PURPLE;
+	psys.ModulatorRef()->Sync();
 
 	Renderer::AddCanvasLayer(11);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&psys);
+	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
 	//Renderer::GetCanvasLayer(11)->OnAttach(&parr);
 
 	std::shared_ptr<TileMap> tilemap;

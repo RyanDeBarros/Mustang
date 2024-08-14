@@ -39,6 +39,8 @@ namespace Particles {
 		extern CharacteristicGen Sync;
 		extern CharacteristicGen SyncP;
 		extern CharacteristicGen SyncRS;
+		extern CharacteristicGen SyncM;
+		extern CharacteristicGen SyncAll;
 		
 	}
 

@@ -7,7 +7,7 @@
 #include "../../Renderable.h"
 #include "../../ActorRenderBase.h"
 #include "../../transform/Transform.h"
-#include "../../transform/Modulatable.h"
+#include "../../transform/Modulate.h"
 
 typedef std::pair<GLenum, BatchModel> DebugModel;
 
@@ -22,6 +22,8 @@ struct std::hash<DebugModel>
 	}
 };
 
+struct DP_Notification;
+
 class DebugPolygon : public ActorRenderBase2D
 {
 protected:
@@ -31,10 +33,11 @@ protected:
 	friend class CanvasLayer;
 	Renderable m_Renderable;
 	std::vector<glm::vec2> m_Points;
-	std::shared_ptr<class DebugModulatable> m_Color;
 	GLenum m_IndexingMode;
 
+	DP_Notification* m_Notification;
 	Transformer2D m_Transformer;
+	Modulator m_Modulator;
 
 	// 0b ... transform RS | transform P | point positions | color | indexing mode or points vector
 	unsigned char m_Status = 0b11111;
@@ -63,34 +66,24 @@ public:
 	inline void FlagTransform() { m_Status |= 0b11000; }
 	inline void FlagTransformP() { m_Status |= 0b1000; }
 	inline void FlagTransformRS() { m_Status |= 0b10000; }
-
-	inline void FlushColor() { m_Status |= 0b10; }
+	inline void FlagModulate() { m_Status |= 0b10; }
 
 	bool visible = true;
 
 	Transformer2D* Transformer() { return &m_Transformer; }
-	std::shared_ptr<DebugModulatable> Modulate() { return m_Color; }
-	std::weak_ptr<DebugModulatable> ModulateWeak() { return m_Color; }
+	Transform2D* Transform() { return &m_Transformer.self.transform; }
+	Modulator* Modulator() { return &m_Modulator; }
+	Modulate* Modulate() { return &m_Modulator.self.modulate; }
 };
 
-struct DebugPolygon_TN : public TransformNotification
+struct DP_Notification : public TransformNotification, public ModulateNotification
 {
 	DebugPolygon* poly = nullptr;
 
-	DebugPolygon_TN(DebugPolygon* poly) : poly(poly) {}
+	DP_Notification(DebugPolygon* poly) : poly(poly) {}
 
 	void Notify() override { if (poly) poly->FlagTransform(); }
 	void NotifyP() override { if (poly) poly->FlagTransformP(); }
 	void NotifyRS() override { if (poly) poly->FlagTransformRS(); }
-};
-
-class DebugModulatable : public ModulatableProxy
-{
-	friend class DebugPolygon;
-	DebugPolygon* m_Poly = nullptr;
-
-public:
-	DebugModulatable(const glm::vec4& color = Colors::WHITE) : ModulatableProxy(color) {}
-
-	inline virtual void OperateColor(const std::function<void(glm::vec4& color)>& op) override { op(m_Color); m_Poly->FlushColor(); }
+	void NotifyM() override { if (poly) poly->FlagModulate(); }
 };
