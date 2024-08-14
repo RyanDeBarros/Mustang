@@ -33,6 +33,7 @@ struct Particle
 	Particles::DataIndex m_DataSize;
 
 private:
+	bool m_Invalid = false;
 	template<std::unsigned_integral ParticleCount>
 	friend class ParticleEffect;
 	template<std::unsigned_integral ParticleCount>
@@ -40,7 +41,6 @@ private:
 	real m_LifespanInv;
 	real m_T = 0.0f;
 	real m_DT = 0.0f;
-	bool m_Invalid = false;
 
 public:
 	Particle(const std::shared_ptr<DebugPolygon>& shape, const float& lifespan, const Particles::CHRBind& characteristic);
