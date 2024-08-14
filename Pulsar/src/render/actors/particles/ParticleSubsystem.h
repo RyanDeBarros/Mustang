@@ -25,16 +25,11 @@ struct ParticleSubsystemData
 template<std::unsigned_integral ParticleCount>
 class ParticleEffect;
 
-// TODO just use ParticleSubsystemData as a data member of ParticleSubsystem, to avoid all this repeating.
 template<std::unsigned_integral ParticleCount = unsigned short>
 class ParticleSubsystem
 {
-	CumulativeFunc<ParticleCount> m_SpawnFunc;
-	std::function<real(const Particles::CHRSeed&)> m_LifespanFunc;
-	Particles::CharacteristicGen m_CharacteristicGen;
-	real m_Period;
+	ParticleSubsystemData<ParticleCount> m_Data;
 	real m_PeriodInv;
-	std::shared_ptr<DebugPolygon> m_Shape;
 	ParticleCount m_NumSpawned = 0;
 	unsigned int m_TotalSpawn;
 	unsigned int m_WaveNum = 0;
@@ -50,7 +45,7 @@ public:
 	ParticleSubsystem<ParticleCount>& operator=(const ParticleSubsystem<ParticleCount>&);
 	ParticleSubsystem<ParticleCount>& operator=(ParticleSubsystem<ParticleCount>&&) noexcept;
 
-	inline void SetWavePeriod(real wave_period) { m_Period = wave_period; m_PeriodInv = 1.0f / m_Period; }
+	inline void SetWavePeriod(real wave_period) { m_Data.wavePeriod = wave_period; m_PeriodInv = 1.0f / m_Data.wavePeriod; }
 
 	Transformer2D* Transformer() { return &m_Transformer; }
 

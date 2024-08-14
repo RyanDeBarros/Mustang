@@ -40,7 +40,6 @@ Particle& Particle::operator=(const Particle& other)
 	m_T = other.m_T;
 	m_DT = other.m_DT;
 	m_DataSize = other.m_DataSize;
-	// TODO check for memory leaks like this.
 	if (m_Data)
 		delete[] m_Data;
 	if (m_DataSize > 0)
@@ -75,14 +74,11 @@ Particle::~Particle()
 		delete[] m_Data;
 }
 
-void Particle::OnDraw(real delta_time, unsigned short transformer_index)
+void Particle::OnDraw(real delta_time)
 {
 	m_DT = delta_time * m_LifespanInv;
 	if ((m_T += m_DT) > 1.0f)
 		m_Invalid = true;
 	else
-	{
-		m_TI = transformer_index;
 		m_Characteristic(*this);
-	}
 }

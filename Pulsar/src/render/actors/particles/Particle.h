@@ -39,10 +39,8 @@ private:
 	friend class ParticleSubsystem;
 	real m_LifespanInv;
 	real m_T = 0.0f;
-	// TODO use pointer to Subsystem instead of pointer to transformer, and use subsystem's dt instead of having the same dt in every particle.
 	real m_DT = 0.0f;
 	bool m_Invalid = false;
-	unsigned short m_TI = 0;
 
 public:
 	Particle(const std::shared_ptr<DebugPolygon>& shape, const float& lifespan, const Particles::CHRBind& characteristic);
@@ -56,11 +54,8 @@ public:
 	
 	inline real t() const { return m_T; }
 	inline real dt() const { return m_DT; }
-	// TODO remove ti?
-	inline unsigned int ti() const { return m_TI; }
 
 private:
-	// TODO use ParticleCount instead of unsigned short
-	void OnDraw(real delta_time, unsigned short transformer_index);
+	void OnDraw(real delta_time);
 
 };
