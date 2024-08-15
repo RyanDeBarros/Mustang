@@ -1,7 +1,7 @@
 #include "UniformLexiconFactory.h"
 
 #include "Macros.h"
-#include "Logger.h"
+#include "Logger.inl"
 #include "ShaderFactory.h"
 
 UniformLexiconHandle UniformLexiconFactory::handle_cap;

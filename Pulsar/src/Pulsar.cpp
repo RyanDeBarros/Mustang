@@ -4,7 +4,7 @@
 
 #include "Typedefs.h"
 #include "RendererSettings.h"
-#include "Logger.h"
+#include "Logger.inl"
 #include "Macros.h"
 #include "AssetLoader.h"
 #include "render/Renderer.h"

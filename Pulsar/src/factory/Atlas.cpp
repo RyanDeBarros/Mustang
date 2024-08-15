@@ -116,8 +116,7 @@ bool Atlas::Equivalent(const char* texture_filepath, const std::vector<Placement
 
 struct Subsection
 {
-	int x, y;
-	unsigned int w, h, rw = 0, rh = 0;
+	int x, y, w, h, rw = 0, rh = 0;
 
 	Placement insert(TileHandle tile, int rect_w, int rect_h)
 	{
@@ -279,7 +278,7 @@ void Atlas::RectPack(std::vector<TileHandle>& tiles, int width, int height)
 		}
 		if (!fits)
 		{
-			m_Placements.push_back({0, -1, -1, 0, 0, false});
+			m_Placements.push_back({0, -1, -1, -1, -1, false});
 		}
 	}
 }
@@ -294,9 +293,9 @@ void Atlas::PlaceTiles()
 		const auto width = placement.w - m_Border;
 		const auto height = placement.h - m_Border;
 		const auto bpp = TileFactory::GetBPP(placement.tile);
-		for (size_t h = 0; h < height; h++)
+		for (int h = 0; h < height; h++)
 		{
-			for (size_t w = 0; w < width; w++)
+			for (int w = 0; w < width; w++)
 			{
 				for (unsigned char c = 0; c < bpp && c < Atlas::BPP; c++)
 				{

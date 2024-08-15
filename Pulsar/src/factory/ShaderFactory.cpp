@@ -1,7 +1,7 @@
 #include "ShaderFactory.h"
 
 #include "Macros.h"
-#include "Logger.h"
+#include "Logger.inl"
 #include "AssetLoader.h"
 #include "RendererSettings.h"
 

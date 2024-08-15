@@ -4,10 +4,7 @@
 
 struct TileRect
 {
-	int x;
-	int y;
-	unsigned int w;
-	unsigned int h;
+	int x, y, w, h;
 };
 
 class Tile
@@ -31,9 +28,9 @@ public:
 	Tile& operator=(Tile&& tile) noexcept;
 	virtual ~Tile();
 
-	const std::string& GetFilepath() const { return m_Filepath; }
-	unsigned char* const GetImageBuffer() const { return m_ImageBuffer; }
-	int GetWidth() const { return m_Width; }
-	int GetHeight() const { return m_Height; }
-	int GetBPP() const { return m_BPP; }
+	inline const std::string& GetFilepath() const { return m_Filepath; }
+	inline unsigned char* const GetImageBuffer() const { return m_ImageBuffer; }
+	inline int GetWidth() const { return m_Width; }
+	inline int GetHeight() const { return m_Height; }
+	inline int GetBPP() const { return m_BPP; }
 };

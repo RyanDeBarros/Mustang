@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "Macros.h"
+#include "Logger.inl"
 
 static char* read_file(const char* filepath)
 {

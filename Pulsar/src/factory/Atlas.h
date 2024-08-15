@@ -11,8 +11,7 @@
 struct Placement
 {
 	TileHandle tile;
-	int x, y;
-	unsigned int w, h;
+	int x, y, w, h;
 	bool r;
 
 	bool operator==(const Placement& other) const
@@ -53,8 +52,6 @@ public:
 
 	bool operator==(const Atlas& other) const;
 
-	inline int GetWidth() const { return m_Width; }
-	inline int GetHeight() const { return m_Height; }
 	inline int GetBorder() const { return m_Border; }
 	inline const std::vector<Placement>& GetPlacements() const { return m_Placements; }
 	inline const unsigned char* const GetBuffer() const { return m_ImageBuffer; }

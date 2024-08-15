@@ -1,7 +1,7 @@
 #include "TileFactory.h"
 
 #include "Macros.h"
-#include "Logger.h"
+#include "Logger.inl"
 #include "Atlas.h"
 #include "Subtile.h"
 

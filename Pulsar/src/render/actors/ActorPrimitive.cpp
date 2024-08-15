@@ -1,6 +1,6 @@
 #include "ActorPrimitive.h"
 
-#include "Logger.h"
+#include "Logger.inl"
 #include "render/CanvasLayer.h"
 
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, ZIndex z, bool visible)

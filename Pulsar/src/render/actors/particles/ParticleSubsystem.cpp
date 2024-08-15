@@ -1,7 +1,7 @@
 #include "ParticleSubsystem.h"
 
 #include "ParticleSystem.h"
-#include "Logger.h"
+#include "Logger.inl"
 #include "utils/Data.h"
 
 template struct ParticleSubsystemData<unsigned short>;

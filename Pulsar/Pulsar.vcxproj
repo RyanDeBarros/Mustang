@@ -168,6 +168,7 @@
     <ClCompile Include="src\factory\TileFactory.cpp" />
     <ClCompile Include="src\factory\UniformLexicon.cpp" />
     <ClCompile Include="src\factory\UniformLexiconFactory.cpp" />
+    <ClCompile Include="src\Macros.cpp" />
     <ClCompile Include="src\render\actors\ActorDirectory.cpp" />
     <ClCompile Include="src\render\actors\ActorSequencer.cpp" />
     <ClCompile Include="src\render\actors\BatchSlotter.cpp" />
@@ -178,7 +179,6 @@
     <ClCompile Include="src\render\actors\shapes\DebugPolygon.cpp" />
     <ClCompile Include="src\render\actors\RectRender.cpp" />
     <ClCompile Include="src\RendererSettings.cpp" />
-    <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Pulsar.cpp" />
     <ClCompile Include="src\render\actors\ActorComposite.cpp" />
     <ClCompile Include="src\render\actors\ActorPrimitive.cpp" />
@@ -228,7 +228,7 @@
     <ClInclude Include="src\render\actors\shapes\DebugPoint.h" />
     <ClInclude Include="src\render\actors\shapes\DebugPolygon.h" />
     <ClInclude Include="src\render\actors\RectRender.h" />
-    <ClInclude Include="src\Logger.h" />
+    <ClInclude Include="src\Logger.inl" />
     <ClInclude Include="src\Pulsar.h" />
     <ClInclude Include="src\render\actors\ActorComposite.h" />
     <ClInclude Include="src\render\actors\ActorPrimitive.h" />

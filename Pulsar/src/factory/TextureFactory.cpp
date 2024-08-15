@@ -4,7 +4,7 @@
 #include <stb/stb_image_write.h>
 
 #include "Macros.h"
-#include "Logger.h"
+#include "Logger.inl"
 
 TextureHandle TextureFactory::handle_cap;
 std::unordered_map<TextureHandle, Texture*> TextureFactory::factory;

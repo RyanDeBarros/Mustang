@@ -7,7 +7,7 @@
 #include <map>
 #include <fstream>
 
-#include "Logger.h"
+#include "Logger.inl"
 #include "RendererSettings.h"
 #include "factory/ShaderFactory.h"
 #include "factory/TextureFactory.h"

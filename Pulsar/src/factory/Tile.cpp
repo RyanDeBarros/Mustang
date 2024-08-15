@@ -2,7 +2,7 @@
 
 #include <stb/stb_image.h>
 
-#include "Logger.h"
+#include "Logger.inl"
 #include "Atlas.h"
 
 Tile::Tile(const char* filepath)

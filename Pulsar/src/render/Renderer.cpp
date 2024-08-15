@@ -4,7 +4,7 @@
 #include <map>
 
 #include "Macros.h"
-#include "Logger.h"
+#include "Logger.inl"
 #include "factory/ShaderFactory.h"
 #include "factory/TextureFactory.h"
 #include "factory/UniformLexiconFactory.h"
