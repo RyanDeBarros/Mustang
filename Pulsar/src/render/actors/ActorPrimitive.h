@@ -43,6 +43,7 @@ public:
 		FlagModulate();
 	}
 
+	inline void FlagProteate() { m_Status |= 0b1110; }
 	inline void FlagTransform() { m_Status |= 0b110; }
 	inline void FlagTransformP() { m_Status |= 0b10; }
 	inline void FlagTransformRS() { m_Status |= 0b100; }
@@ -62,13 +63,14 @@ protected:
 	void OnDraw(signed char texture_slot);
 };
 
-struct AP2D_Notification : public TransformNotification, public ModulateNotification
+struct AP2D_Notification : public ProteateNotification
 {
 	ActorPrimitive2D* prim = nullptr;
 
 	AP2D_Notification(ActorPrimitive2D* prim) : prim(prim) {}
 
-	void Notify() override { if (prim) prim->FlagTransform(); }
+	void Notify() override { if (prim) prim->FlagProteate(); }
+	void NotifyT() override { if (prim) prim->FlagTransform(); }
 	void NotifyP() override { if (prim) prim->FlagTransformP(); }
 	void NotifyRS() override { if (prim) prim->FlagTransformRS(); }
 	void NotifyM() override { if (prim) prim->FlagModulate(); }

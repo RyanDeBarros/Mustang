@@ -296,13 +296,13 @@ void Pulsar::Run(GLFWwindow* window)
 	std::shared_ptr<TileMap> tilemap;
 	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap) != LOAD_STATUS::OK)
 		ASSERT(false);
-	tilemap->RefTransformer()->self.transform = { {100.0f, 200.0f}, 0.3f, {5.0f, 8.0f} };
-	tilemap->RefTransformer()->Sync();
+	*tilemap->RefTransform() = { {100.0f, 200.0f}, 0.3f, {5.0f, 8.0f} };
+	tilemap->RefProteanLinker()->SyncT();
 	tilemap->Insert(4, 0, 1);
 	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 
 	actor3.RefTransform()->scale *= 2.0f;
-	actor3.RefTransformer()->SyncRS();
+	actor3.RefProteanLinker()->SyncRS();
 
 	TextureFactory::SetSettings(textureFlag, Texture::nearest_settings);
 
@@ -312,26 +312,26 @@ void Pulsar::Run(GLFWwindow* window)
 	RectRender child2(textureSnowman);
 	RectRender grandchild2(textureTux);
 
-	child.RefTransformer()->Attach(grandchild.RefTransformer());
+	child.RefProteanLinker()->Attach(grandchild.RefProteanLinker());
 	grandchild.RefTransform()->scale = { 0.25f, 0.25f };
 	grandchild.RefTransform()->position = { 300.0f, -100.0f };
 	child.RefTransform()->scale = { 0.25f, 0.25f };
-	child.RefTransformer()->Sync();
-	child2.RefTransformer()->Attach(grandchild2.RefTransformer());
+	child.RefProteanLinker()->SyncT();
+	child2.RefProteanLinker()->Attach(grandchild2.RefProteanLinker());
 	grandchild2.RefTransform()->scale = { 0.25f, 0.25f };
 	grandchild2.RefTransform()->position = { 300.0f, -100.0f };
 	child2.RefTransform()->scale = { 0.25f, 0.25f };
-	child2.RefTransformer()->Sync();
+	child2.RefProteanLinker()->SyncT();
 
-	root.RefTransformer()->Attach(child.RefTransformer());
-	root.RefTransformer()->Attach(child2.RefTransformer());
+	root.RefProteanLinker()->Attach(child.RefProteanLinker());
+	root.RefProteanLinker()->Attach(child2.RefProteanLinker());
 	root.RefTransform()->scale = { 10.0f, 10.0f };
-	root.RefTransformer()->Sync();
-	for (const auto& child : root.RefTransformer()->children)
+	root.RefProteanLinker()->SyncT();
+	for (const auto& child : root.RefProteanLinker()->children)
 	{
-		child->self->position = { 0.0f, -30.0f };
-		child->self->scale *= 0.2f;
-		child->Sync();
+		child->self.proteate.transform.position = { 0.0f, -30.0f };
+		child->self.proteate.transform.scale *= 0.2f;
+		child->SyncT();
 	}
 
 	//std::shared_ptr<Modulator> first_mod(std::make_shared<Modulator>(child.ModulateWeak(), grandchild.ModulateWeak()));
@@ -355,18 +355,18 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(11)->OnAttach(&tuxGrid);
 
 	tux.RefTransform()->scale *= 0.1f;
-	tux.RefTransformer()->SyncRS();
+	tux.RefProteanLinker()->SyncRS();
 
 	tuxTessel.PushBackStatic({
-		{ {0, 100} },
-		{ {200, 0} },
-		{ {-200, 0} }
+		{{ {0, 100} }},
+		{{ {200, 0} }},
+		{{ {-200, 0} }}
 	});
 
 	tuxGrid.PushBackStatic({
-		{ {50, 0} },
-		{ {50, 200} },
-		{ {50, -200} }
+		{{ {50, 0} }},
+		{{ {50, 200} }},
+		{{ {50, -200} }}
 	});
 
 	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::TRANSPARENT, Colors::LIGHT_GREEN });
@@ -385,7 +385,7 @@ void Pulsar::Run(GLFWwindow* window)
 		root.RefTransform()->rotation = Pulsar::totalDrawTime;
 		child.RefTransform()->position += 5 * Pulsar::deltaDrawTime;
 		child2.RefTransform()->scale *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime);
-		root.RefTransformer()->Sync();
+		root.RefProteanLinker()->SyncT();
 
 		Renderer::OnDraw();
 		glfwPollEvents();

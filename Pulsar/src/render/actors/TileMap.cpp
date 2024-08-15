@@ -11,9 +11,9 @@ TileMap::TileMap(TileHandle atlas_handle, const TextureSettings& texture_setting
 		throw atlas_cast_error();
 	for (TileMapIndex i = 0; i < m_Atlas->GetPlacements().size(); i++)
 	{
-		std::unique_ptr<RectRender> rect_render(new RectRender(m_Atlas->SampleSubtile(i, texture_settings, shader, 0, visible)));
-		std::shared_ptr<ActorTesselation2D> tessel(new ActorTesselation2D(rect_render.get()));
-		m_Transformer.Attach(tessel->RefTransformer());
+		std::unique_ptr<RectRender> rect_render(std::make_unique<RectRender>(m_Atlas->SampleSubtile(i, texture_settings, shader, 0, visible)));
+		std::shared_ptr<ActorTesselation2D> tessel(std::make_shared<ActorTesselation2D>(rect_render.get()));
+		m_ProteanLinker.Attach(tessel->RefProteanLinker());
 		m_Map.push_back({ std::move(rect_render), std::move(tessel) });
 	}
 	m_Ordering = Permutation(m_Atlas->GetPlacements().size());
@@ -39,7 +39,7 @@ bool TileMap::SetOrdering(const Permutation& permutation)
 
 void TileMap::Insert(TileMapIndex tessel, float posX, float posY)
 {
-	m_Map[tessel].tessel->PushBackStatic({ {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} });
+	m_Map[tessel].tessel->PushBackStatic({ { {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} } });
 }
 
 ActorTesselation2D* const TileMap::TesselationRef(TileMapIndex i) const

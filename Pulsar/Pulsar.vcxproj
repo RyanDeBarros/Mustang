@@ -199,6 +199,7 @@
     <ClCompile Include="src\factory\TextureFactory.cpp" />
     <ClCompile Include="src\render\actors\TileMap.cpp" />
     <ClCompile Include="src\render\transform\Modulate.cpp" />
+    <ClCompile Include="src\render\transform\Protean.cpp" />
     <ClCompile Include="src\render\transform\Transform.cpp" />
     <ClCompile Include="src\render\transform\Transforms.cpp" />
     <ClCompile Include="src\utils\Data.cpp" />
@@ -211,6 +212,7 @@
     <ClCompile Include="vendor\stb\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\render\transform\Protean.h" />
     <ClInclude Include="src\AssetLoader.h" />
     <ClInclude Include="src\factory\Atlas.h" />
     <ClInclude Include="src\factory\Subtile.h" />
@@ -251,7 +253,7 @@
     <ClInclude Include="src\render\actors\TileMap.h" />
     <ClInclude Include="src\render\transform\Modulate.h" />
     <ClInclude Include="src\render\transform\Transform.h" />
-    <ClInclude Include="src\render\transform\Protean.h" />
+    <ClInclude Include="src\render\transform\Wrapper.h" />
     <ClInclude Include="src\render\transform\Transforms.h" />
     <ClInclude Include="src\Typedefs.h" />
     <ClInclude Include="src\Macros.h" />

@@ -6,22 +6,19 @@
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, ZIndex z, bool visible)
 	: ProteanActor2D(z, transform, { 1.0f, 1.0f, 1.0f, 1.0f }), m_Render(render), m_Notification(new AP2D_Notification(this)), m_Status(visible ? 0b111 : 0b110)
 {
-	m_Transformer.notify = m_Notification;
-	m_Modulator.notify = m_Notification;
+	m_ProteanLinker.notify = m_Notification;
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const ActorPrimitive2D& primitive)
 	: ProteanActor2D(primitive), m_Render(primitive.m_Render), m_Notification(new AP2D_Notification(this)), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
 {
-	m_Transformer.notify = m_Notification;
-	m_Modulator.notify = m_Notification;
+	m_ProteanLinker.notify = m_Notification;
 }
 
 ActorPrimitive2D::ActorPrimitive2D(ActorPrimitive2D&& primitive) noexcept
 	: ProteanActor2D(std::move(primitive)), m_Render(std::move(primitive.m_Render)), m_Notification(new AP2D_Notification(this)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors))
 {
-	m_Transformer.notify = m_Notification;
-	m_Modulator.notify = m_Notification;
+	m_ProteanLinker.notify = m_Notification;
 }
 
 ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
@@ -70,7 +67,7 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 	{
 		m_Status &= ~0b10;
 		// TODO use regular position/condensed_rs for parent-independent actors - use bool flag.
-		glm::vec2 position = m_Transformer.self.packedP;
+		glm::vec2 position = m_ProteanLinker.self.packedP;
 		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 		{
 			m_Render.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(position.x);
@@ -81,7 +78,7 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 	if (m_Status & 0b100)
 	{
 		m_Status &= ~0b100;
-		glm::mat2 condensed_rs_matrix = m_Transformer.self.packedRS;
+		glm::mat2 condensed_rs_matrix = m_ProteanLinker.self.packedRS;
 		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 		{
 			m_Render.vertexBufferData[i * stride + 3] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);
@@ -96,7 +93,7 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 		m_Status &= ~0b1000;
 		for (BufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
 		{
-			auto color = m_ModulationColors[i] * m_Modulator.self.packedM;
+			auto color = m_ModulationColors[i] * m_ProteanLinker.self.packedM;
 			m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(color.r);
 			m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(color.g);
 			m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(color.b);

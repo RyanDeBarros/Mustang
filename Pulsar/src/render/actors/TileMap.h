@@ -20,6 +20,8 @@ struct TMElement
 
 typedef size_t TileMapIndex;
 
+// TODO versions of all similar classes for transformable, modulatable, and protean? Or instead of inheritance, it could be an inherited pointer data member.
+
 class TileMap : public ProteanActor2D
 {
 	Atlas* m_Atlas;

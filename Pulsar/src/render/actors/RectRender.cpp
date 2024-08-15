@@ -101,8 +101,8 @@ void RectRender::CropToRelativeRect(glm::vec4 rect)
 
 void RectRender::ResetTransformUVs()
 {
-	m_Transformer.self.transform = {};
-	m_Transformer.Sync();
+	m_ProteanLinker.self.proteate.transform = {};
+	m_ProteanLinker.SyncT();
 	CropToRelativeRect({ 0.0f, 0.0f, 1.0f, 1.0f });
 	SetPivot(0.5f, 0.5f);
 }

@@ -17,6 +17,8 @@ struct Transform2D
 	Scale2D scale = { 1.0f, 1.0f };
 };
 
+// TODO for transform, modulate, and proteate, define external functions that can convert a packed version (global) to the unpacked version (local). That way, the "global" parameters can be set.
+
 struct PackedTransform2D
 {
 	Transform2D transform = {};
@@ -54,10 +56,11 @@ struct Transformer2D
 	Transformer2D* parent = nullptr;
 	std::vector<Transformer2D*> children;
 
-	inline Transformer2D(const Transform2D& transform = {}, TransformNotification* notify = nullptr)
+	inline Transformer2D(const Transform2D& transform = {}, TransformNotification* notify = nullptr, bool sync = true)
 		: self{ transform }, notify(std::move(notify)) 
 	{
-		self.Sync();
+		if (sync)
+			self.Sync();
 	}
 
 	inline Transformer2D(const Transformer2D& transformer)

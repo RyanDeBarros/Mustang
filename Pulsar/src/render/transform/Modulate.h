@@ -7,8 +7,8 @@ typedef glm::vec4 Modulate;
 
 struct PackedModulate
 {
-	Modulate modulate;
-	Modulate packedM;
+	Modulate modulate = { 1.0f, 1.0f, 1.0f, 1.0f };
+	Modulate packedM = { 1.0f, 1.0f, 1.0f, 1.0f };
 	
 	inline Modulate* operator*()
 	{
@@ -36,10 +36,11 @@ struct Modulator
 	Modulator* parent = nullptr;
 	std::vector<Modulator*> children;
 
-	inline Modulator(const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }, ModulateNotification* notify = nullptr)
+	inline Modulator(const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }, ModulateNotification* notify = nullptr, bool sync = true)
 		: self{ modulate }, notify(notify)
 	{
-		self.Sync();
+		if (sync)
+			self.Sync();
 	}
 
 	inline Modulator(const Modulator& modulator)
