@@ -27,8 +27,8 @@ public:
 	inline Modulate* RefModulate() { return &m_Modulator.self.modulate; }
 };
 
-class Protean : public Transformable2D, public Modulatable
+class Protean2D : public Transformable2D, public Modulatable
 {
 public:
-	inline Protean(const Transform2D& transform = {}, const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }) : Transformable2D(transform), Modulatable(modulate) {}
+	inline Protean2D(const Transform2D& transform = {}, const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }) : Transformable2D(transform), Modulatable(modulate) {}
 };

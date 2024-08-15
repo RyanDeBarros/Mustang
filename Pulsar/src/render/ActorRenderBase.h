@@ -1,20 +1,17 @@
 #pragma once
 
 #include "Typedefs.h"
+#include "transform/Protean.h"
 
-class ActorRenderBase2D
+struct ActorRenderBase2D
 {
-protected:
-	ZIndex m_Z;
-
-public:
-	ActorRenderBase2D(ZIndex z = 0) { SetZIndex(z); }
-	ActorRenderBase2D(const ActorRenderBase2D& other) { SetZIndex(other.GetZIndex()); }
-	ActorRenderBase2D(ActorRenderBase2D&& other) noexcept { SetZIndex(other.GetZIndex()); }
-	ActorRenderBase2D& operator=(const ActorRenderBase2D& other) { SetZIndex(other.GetZIndex()); return *this; }
-	ActorRenderBase2D& operator=(ActorRenderBase2D&& other) noexcept { SetZIndex(other.GetZIndex()); return *this; }
-
+	ZIndex z;
+	ActorRenderBase2D(ZIndex z = 0) : z(z) {}
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) = 0;
-	inline virtual ZIndex GetZIndex() const { return m_Z; }
-	inline virtual void SetZIndex(ZIndex z) { m_Z = z; }
+};
+
+class ProteanActor2D : public ActorRenderBase2D, public Protean2D
+{
+public:
+	ProteanActor2D(ZIndex z = 0, const Transform2D& transform = {}, const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }) : ActorRenderBase2D(z), Protean2D(transform, modulate) {}
 };

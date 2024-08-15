@@ -290,17 +290,16 @@ void Pulsar::Run(GLFWwindow* window)
 	psys.ModulatorRef()->Sync();
 
 	Renderer::AddCanvasLayer(11);
-	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&psys);
 	//Renderer::GetCanvasLayer(11)->OnAttach(&parr);
 
 	std::shared_ptr<TileMap> tilemap;
 	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap) != LOAD_STATUS::OK)
 		ASSERT(false);
-
-	tilemap->Transformer()->self.transform = { {100.0f, 200.0f}, 0.3f, {5.0f, 8.0f} };
-	tilemap->Transformer()->Sync();
+	tilemap->RefTransformer()->self.transform = { {100.0f, 200.0f}, 0.3f, {5.0f, 8.0f} };
+	tilemap->RefTransformer()->Sync();
 	tilemap->Insert(4, 0, 1);
-	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
+	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 
 	actor3.RefTransform()->scale *= 2.0f;
 	actor3.RefTransformer()->SyncRS();
@@ -341,14 +340,14 @@ void Pulsar::Run(GLFWwindow* window)
 	//std::shared_ptr<Modulator> root_mod(std::make_shared<Modulator>(root.ModulateWeak(), first_mod));
 	//root_mod->SetColor(glm::vec4{ 1.0f } * 0.5f);
 
-	Renderer::GetCanvasLayer(11)->OnAttach(&root);
-	Renderer::GetCanvasLayer(11)->OnAttach(&child2);
-	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
-	Renderer::GetCanvasLayer(11)->OnAttach(&child);
-	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&root);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&child2);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&child);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
 
 	DebugRect rect(_RendererSettings::initial_window_width * 0.5f, _RendererSettings::initial_window_height, true, { 1.0f, 0.5f }, {}, { 0.5f, 0.5f, 1.0f, 0.3f }, 1);
-	Renderer::GetCanvasLayer(11)->OnAttach(&rect);
+	//Renderer::GetCanvasLayer(11)->OnAttach(&rect);
 
 	RectRender tux(textureTux);
 	ActorTesselation2D tuxTessel(&tux);

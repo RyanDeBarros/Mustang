@@ -5,11 +5,10 @@
 #include "Typedefs.h"
 #include "../ActorRenderBase.h"
 #include "../Renderable.h"
-#include "../transform/Protean.h"
 
 struct AP2D_Notification;
 
-class ActorPrimitive2D : public ActorRenderBase2D, public Protean
+class ActorPrimitive2D : public ProteanActor2D
 {
 	AP2D_Notification* m_Notification;
 

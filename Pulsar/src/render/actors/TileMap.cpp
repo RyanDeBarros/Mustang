@@ -3,7 +3,7 @@
 #include <algorithm>
 
 TileMap::TileMap(TileHandle atlas_handle, const TextureSettings& texture_settings, ShaderHandle shader, ZIndex z, bool visible)
-	: ActorRenderBase2D(z), m_Transformer()
+	: ProteanActor2D(z)
 {
 	Tile* t = TileFactory::GetTileRef(atlas_handle);
 	m_Atlas = dynamic_cast<Atlas*>(t);
@@ -13,7 +13,7 @@ TileMap::TileMap(TileHandle atlas_handle, const TextureSettings& texture_setting
 	{
 		std::unique_ptr<RectRender> rect_render(new RectRender(m_Atlas->SampleSubtile(i, texture_settings, shader, 0, visible)));
 		std::shared_ptr<ActorTesselation2D> tessel(new ActorTesselation2D(rect_render.get()));
-		m_Transformer.Attach(tessel->Transformer());
+		m_Transformer.Attach(tessel->RefTransformer());
 		m_Map.push_back({ std::move(rect_render), std::move(tessel) });
 	}
 	m_Ordering = Permutation(m_Atlas->GetPlacements().size());
@@ -21,14 +21,6 @@ TileMap::TileMap(TileHandle atlas_handle, const TextureSettings& texture_setting
 
 TileMap::~TileMap()
 {
-}
-
-BufferCounter TileMap::PrimitiveCount() const
-{
-	BufferCounter count = 0;
-	for (auto iter = m_Map.begin(); iter != m_Map.end(); iter++)
-		count += iter->tessel->PrimitiveCount();
-	return count;
 }
 
 void TileMap::RequestDraw(CanvasLayer* canvas_layer)

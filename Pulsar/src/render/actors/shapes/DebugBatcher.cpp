@@ -41,7 +41,7 @@ bool DebugBatcher::ChangeZIndex(const DebugModel& model, ZIndex z)
 	auto multi_polygon = m_Slots.find(model);
 	if (multi_polygon == m_Slots.end())
 		return false;
-	multi_polygon->second.SetZIndex(z);
+	multi_polygon->second.z = z;
 	Sort();
 	return true;
 }
@@ -194,6 +194,6 @@ void DebugBatcher::Sort()
 	std::stable_sort(m_OrderedTraversal.begin(), m_OrderedTraversal.end(),
 		[](const DebugMultiPolygon* const first, const DebugMultiPolygon* const second)
 		{
-			return first->GetZIndex() < second->GetZIndex();
+			return first->z < second->z;
 		});
 }

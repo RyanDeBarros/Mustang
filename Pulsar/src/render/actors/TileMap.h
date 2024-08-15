@@ -6,7 +6,6 @@
 
 #include "Typedefs.h"
 #include "utils/Permutation.h"
-#include "ActorSequencer.h"
 #include "ActorPrimitive.h"
 #include "ActorTesselation.h"
 #include "factory/Atlas.h"
@@ -21,12 +20,11 @@ struct TMElement
 
 typedef size_t TileMapIndex;
 
-class TileMap : public ActorRenderBase2D
+class TileMap : public ProteanActor2D
 {
 	Atlas* m_Atlas;
 	std::vector<TMElement> m_Map;
 	Permutation m_Ordering;
-	Transformer2D m_Transformer;
 
 public:
 	TileMap(TileHandle atlas_handle, const TextureSettings& texture_settings = Texture::nearest_settings, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, bool visible = true);
@@ -34,12 +32,10 @@ public:
 	TileMap(TileMap&&) = delete;
 	~TileMap();
 
-	virtual BufferCounter PrimitiveCount() const;
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
 	bool SetOrdering(const Permutation& permutation);
 	void Insert(TileMapIndex tessel, float posX, float posY);
 
 	ActorTesselation2D* const TesselationRef(TileMapIndex tessel) const;
-	Transformer2D* Transformer() { return &m_Transformer; }
 };

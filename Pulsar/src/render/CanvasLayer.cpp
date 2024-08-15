@@ -6,7 +6,6 @@
 #include "factory/TextureFactory.h"
 #include "factory/UniformLexiconFactory.h"
 #include "actors/ActorPrimitive.h"
-#include "actors/ActorSequencer.h"
 #include "actors/shapes/DebugMultiPolygon.h"
 
 // TODO in all drawing cases check if renderable vertex/index buffer data is too large to fit in pools
@@ -53,11 +52,11 @@ CanvasLayer::~CanvasLayer()
 
 void CanvasLayer::OnAttach(ActorRenderBase2D* const actor)
 {
-	auto entry = m_Batcher.find(actor->GetZIndex());
+	auto entry = m_Batcher.find(actor->z);
 	if (entry == m_Batcher.end())
 	{
-		m_Batcher.emplace(actor->GetZIndex(), std::list<ActorRenderBase2D*>());
-		entry = m_Batcher.find(actor->GetZIndex());
+		m_Batcher.emplace(actor->z, std::list<ActorRenderBase2D*>());
+		entry = m_Batcher.find(actor->z);
 	}
 	entry->second.push_back(actor);
 }
@@ -66,14 +65,14 @@ bool CanvasLayer::OnSetZIndex(ActorRenderBase2D* const actor, ZIndex new_val)
 {
 	if (!OnDetach(actor))
 		return false;
-	actor->SetZIndex(new_val);
+	actor->z = new_val;
 	OnAttach(actor);
 	return true;
 }
 
 bool CanvasLayer::OnDetach(ActorRenderBase2D* const actor)
 {
-	auto entry = m_Batcher.find(actor->GetZIndex());
+	auto entry = m_Batcher.find(actor->z);
 	if (entry == m_Batcher.end())
 		return false;
 	entry->second.remove(actor);
@@ -112,16 +111,6 @@ void CanvasLayer::DrawPrimitive(ActorPrimitive2D& primitive)
 	}
 	primitive.OnDraw(GetTextureSlot(render));
 	PoolOver(render);
-}
-
-void CanvasLayer::DrawSequencer(ActorSequencer2D& sequencer)
-{
-	int prim_i = 0;
-	ActorPrimitive2D* primitive = nullptr;
-	sequencer.OnPreDraw();
-	while ((primitive = sequencer[prim_i++]) != nullptr)
-		DrawPrimitive(*primitive);
-	sequencer.OnPostDraw();
 }
 
 void CanvasLayer::DrawArray(const Renderable& renderable, GLenum indexing_mode)

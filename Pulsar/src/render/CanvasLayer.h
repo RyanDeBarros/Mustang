@@ -62,7 +62,6 @@ public:
 	inline CanvasLayerData& GetDataRef() { return m_Data; }
 
 	void DrawPrimitive(class ActorPrimitive2D&);
-	void DrawSequencer(class ActorSequencer2D&);
 	void DrawArray(const Renderable& renderable, GLenum indexing_mode);
 	void DrawMultiArray(const class DebugMultiPolygon&);
 

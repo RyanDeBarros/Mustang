@@ -108,20 +108,20 @@ void DebugMultiPolygon::Sort()
 	std::sort(m_Polygons.begin(), m_Polygons.end(),
 		[](const std::shared_ptr<DebugPolygon>& first, const std::shared_ptr<DebugPolygon>& second)
 		{
-			return first->GetZIndex() < second->GetZIndex();
+			return first->z < second->z;
 		});
 }
 
 void DebugMultiPolygon::ChangeZIndex(const iterator& where, ZIndex z)
 {
-	(*where)->SetZIndex(z);
+	(*where)->z = z;
 	Sort();
 	UpdatePtrs();
 }
 
 void DebugMultiPolygon::ChangeZIndex(size_t i, ZIndex z)
 {
-	m_Polygons[i]->SetZIndex(z);
+	m_Polygons[i]->z = z;
 	Sort();
 	UpdatePtrs();
 }

@@ -170,7 +170,6 @@
     <ClCompile Include="src\factory\UniformLexiconFactory.cpp" />
     <ClCompile Include="src\Macros.cpp" />
     <ClCompile Include="src\render\actors\ActorDirectory.cpp" />
-    <ClCompile Include="src\render\actors\ActorSequencer.cpp" />
     <ClCompile Include="src\render\actors\BatchSlotter.cpp" />
     <ClCompile Include="src\render\actors\shapes\DebugBatcher.cpp" />
     <ClCompile Include="src\render\actors\shapes\DebugCircle.cpp" />
@@ -232,7 +231,6 @@
     <ClInclude Include="src\Pulsar.h" />
     <ClInclude Include="src\render\actors\ActorComposite.h" />
     <ClInclude Include="src\render\actors\ActorPrimitive.h" />
-    <ClInclude Include="src\render\actors\ActorSequencer.h" />
     <ClInclude Include="src\render\actors\ActorTesselation.h" />
     <ClInclude Include="src\render\actors\particles\Characteristics.h" />
     <ClInclude Include="src\render\actors\particles\Particle.h" />
