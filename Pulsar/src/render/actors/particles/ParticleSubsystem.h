@@ -54,4 +54,14 @@ private:
 	void Spawn(ParticleEffect<ParticleCount>& psys, const Particles::CHRSeed& seed);
 	void OnParticlesUpdate(ParticleEffect<ParticleCount>& psys);
 	void RemoveUnordered(ParticleCount i);
+	
+	void BindFickleFunctions();
+	void (ParticleSubsystem<ParticleCount>::*f_AttachFickle)(FickleSelector2D&) = nullptr;
+	void attach_fickle_protean(FickleSelector2D&);
+	void attach_fickle_transformable(FickleSelector2D&);
+	void attach_fickle_modulatable(FickleSelector2D&);
+	void (ParticleSubsystem<ParticleCount>::*f_FicklerSwapPop)(ParticleCount) = nullptr;
+	void fickler_swap_pop_protean(ParticleCount);
+	void fickler_swap_pop_transformable(ParticleCount);
+	void fickler_swap_pop_modulatable(ParticleCount);
 };

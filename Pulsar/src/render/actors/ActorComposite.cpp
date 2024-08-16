@@ -5,12 +5,12 @@
 
 #include "render/CanvasLayer.h"
 
-constexpr ActorPrimitiveCounter STATIC_INCR_AMOUNT = 1;
-constexpr ActorPrimitiveCounter DYNAMIC_INCR_AMOUNT = 5;
-constexpr ActorPrimitiveCounter VOLATILE_INCR_FACTOR = 2;
+constexpr ActorCounter STATIC_INCR_AMOUNT = 1;
+constexpr ActorCounter DYNAMIC_INCR_AMOUNT = 5;
+constexpr ActorCounter VOLATILE_INCR_FACTOR = 2;
 
-ActorComposite2D::ActorComposite2D(CompositeMode mode, ActorPrimitiveCounter initial_size, ZIndex z)
-	: m_Mode(mode), ActorRenderBase2D(z)
+ActorComposite2D::ActorComposite2D(CompositeMode mode, ActorCounter initial_size, ZIndex z, FickleType fickle_type)
+	: FickleActor2D(fickle_type, z), m_Mode(mode)
 {
 	tail = new ActorRenderBase2D*[initial_size];
 	head = tail;
@@ -18,7 +18,7 @@ ActorComposite2D::ActorComposite2D(CompositeMode mode, ActorPrimitiveCounter ini
 }
 
 ActorComposite2D::ActorComposite2D(const ActorComposite2D& other)
-	: m_Mode(other.m_Mode), ActorRenderBase2D(other)
+	: FickleActor2D(other), m_Mode(other.m_Mode)
 {
 	auto initial_size = other.cap - other.tail;
 	tail = new ActorRenderBase2D*[initial_size];
@@ -27,14 +27,14 @@ ActorComposite2D::ActorComposite2D(const ActorComposite2D& other)
 }
 
 ActorComposite2D::ActorComposite2D(ActorComposite2D&& other) noexcept
-	: m_Mode(other.m_Mode), ActorRenderBase2D(std::move(other)), tail(other.tail), head(other.head), cap(other.cap)
+	: FickleActor2D(std::move(other)), m_Mode(other.m_Mode), tail(other.tail), head(other.head), cap(other.cap)
 {
 	other.tail = nullptr;
 }
 
 ActorComposite2D& ActorComposite2D::operator=(const ActorComposite2D& other)
 {
-	ActorRenderBase2D::operator=(other);
+	FickleActor2D::operator=(other);
 	m_Mode = other.m_Mode;
 	if (tail)
 		delete[] tail;
@@ -47,7 +47,7 @@ ActorComposite2D& ActorComposite2D::operator=(const ActorComposite2D& other)
 
 ActorComposite2D& ActorComposite2D::operator=(ActorComposite2D&& other) noexcept
 {
-	ActorRenderBase2D::operator=(std::move(other));
+	FickleActor2D::operator=(std::move(other));
 	m_Mode = other.m_Mode;
 	if (tail)
 		delete[] tail;
@@ -89,13 +89,13 @@ void ActorComposite2D::Push(ActorRenderBase2D* primitive)
 	head++;
 }
 
-ActorRenderBase2D* ActorComposite2D::Get(ActorPrimitiveCounter index)
+ActorRenderBase2D* ActorComposite2D::Get(ActorCounter index)
 {
 	_assert_valid_index(index);
 	return *(tail + index);
 }
 
-ActorPrimitiveCounter ActorComposite2D::Index(ActorRenderBase2D* primitive)
+ActorCounter ActorComposite2D::Index(ActorRenderBase2D* primitive)
 {
 	ActorRenderBase2D** current = tail;
 	while (current != head)
@@ -107,7 +107,7 @@ ActorPrimitiveCounter ActorComposite2D::Index(ActorRenderBase2D* primitive)
 	return -1;
 }
 
-void ActorComposite2D::Insert(ActorRenderBase2D* primitive, ActorPrimitiveCounter index)
+void ActorComposite2D::Insert(ActorRenderBase2D* primitive, ActorCounter index)
 {
 	_assert_valid_index(index);
 	_try_increase_alloc();
@@ -121,7 +121,7 @@ void ActorComposite2D::Insert(ActorRenderBase2D* primitive, ActorPrimitiveCounte
 	head++;
 }
 
-ActorRenderBase2D* ActorComposite2D::Replace(ActorRenderBase2D* primitive, ActorPrimitiveCounter index)
+ActorRenderBase2D* ActorComposite2D::Replace(ActorRenderBase2D* primitive, ActorCounter index)
 {
 	_assert_valid_index(index);
 	ActorRenderBase2D* temp = *(tail + index);
@@ -129,7 +129,7 @@ ActorRenderBase2D* ActorComposite2D::Replace(ActorRenderBase2D* primitive, Actor
 	return temp;
 }
 
-ActorRenderBase2D* ActorComposite2D::Remove(ActorPrimitiveCounter index)
+ActorRenderBase2D* ActorComposite2D::Remove(ActorCounter index)
 {
 	_assert_valid_index(index);
 	ActorRenderBase2D** current = tail + index;
@@ -165,7 +165,7 @@ bool ActorComposite2D::Erase(ActorRenderBase2D* primitive)
 	return false;
 }
 
-void ActorComposite2D::_assert_valid_index(ActorPrimitiveCounter index)
+void ActorComposite2D::_assert_valid_index(ActorCounter index)
 {
 	if (index < 0 || index >= head - tail)
 		throw std::out_of_range(std::string("Index ") + std::to_string(index) + " out of range.");
@@ -175,9 +175,9 @@ void ActorComposite2D::_try_increase_alloc()
 {
 	if (head - cap >= 0)
 	{
-		ActorPrimitiveCounter head_len = head - tail;
-		ActorPrimitiveCounter cap_len = cap - tail;
-		ActorPrimitiveCounter new_size = cap_len;
+		ActorCounter head_len = head - tail;
+		ActorCounter cap_len = cap - tail;
+		ActorCounter new_size = cap_len;
 		switch (m_Mode)
 		{
 		case CompositeMode::STATIC:
@@ -203,9 +203,9 @@ void ActorComposite2D::_try_decrease_alloc()
 {
 	if (_decrease_condition())
 	{
-		ActorPrimitiveCounter head_len = head - tail;
-		ActorPrimitiveCounter cap_len = cap - tail;
-		ActorPrimitiveCounter new_size = cap_len;
+		ActorCounter head_len = head - tail;
+		ActorCounter cap_len = cap - tail;
+		ActorCounter new_size = cap_len;
 		switch (m_Mode)
 		{
 		case CompositeMode::STATIC:

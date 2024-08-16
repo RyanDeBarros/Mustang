@@ -105,7 +105,7 @@ void DebugMultiPolygon::RequestDraw(CanvasLayer* canvas_layer)
 
 void DebugMultiPolygon::Sort()
 {
-	std::sort(m_Polygons.begin(), m_Polygons.end(),
+	std::stable_sort(m_Polygons.begin(), m_Polygons.end(),
 		[](const std::shared_ptr<DebugPolygon>& first, const std::shared_ptr<DebugPolygon>& second)
 		{
 			return first->z < second->z;

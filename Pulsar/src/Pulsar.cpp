@@ -48,7 +48,7 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	// If _RendererSettings::resize_mode is set to SCALE_IGNORE_ASPECT_RATIO, don't add anything.
 	// If it is set to SCALE_KEEP_ASPECT_RATIO, call new Renderer function that will scale objects as usual without stretching their aspect ratios.
 	// If it is set to NO_SCALE_KEEP_SIZE, call new Renderer function that will not scale objects - only display more of the scene.
-	// TODO also update frame in callback. Currently, animation is paused when resizing.
+	// Also update frame in callback. Currently, animation is paused when resizing.
 	TRY(glViewport(0, 0, width, height));
 	Renderer::OnDraw();
 }

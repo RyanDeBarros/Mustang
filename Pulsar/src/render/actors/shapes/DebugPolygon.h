@@ -68,6 +68,24 @@ public:
 	inline void FlagModulate() { m_Status |= 0b10; }
 
 	bool visible = true;
+
+private:
+	void BindBufferFuncs();
+	void (DebugPolygon::*f_BufferPackedP)(Stride) = nullptr;
+	void (DebugPolygon::*f_BufferPackedRS)(Stride) = nullptr;
+	void (DebugPolygon::*f_BufferPackedM)(Stride) = nullptr;
+	void buffer_packed_p_protean(Stride);
+	void buffer_packed_p_transformable(Stride);
+	void buffer_packed_p_modulatable(Stride);
+	void buffer_packed_p_default(Stride);
+	void buffer_packed_rs_protean(Stride);
+	void buffer_packed_rs_transformable(Stride);
+	void buffer_packed_rs_modulatable(Stride);
+	void buffer_packed_rs_default(Stride);
+	void buffer_packed_m_protean(Stride);
+	void buffer_packed_m_transformable(Stride);
+	void buffer_packed_m_modulatable(Stride);
+	void buffer_packed_m_default(Stride);
 };
 
 struct DP_Notification : public FickleNotification

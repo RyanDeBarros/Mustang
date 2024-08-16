@@ -12,7 +12,7 @@ enum class CompositeMode
 
 typedef unsigned short PrimitiveIndex;
 
-class ActorComposite2D : public ActorRenderBase2D
+class ActorComposite2D : public FickleActor2D
 {
 	friend class CanvasLayer;
 	CompositeMode m_Mode;
@@ -21,7 +21,7 @@ class ActorComposite2D : public ActorRenderBase2D
 	ActorRenderBase2D** cap;
 
 public:
-	ActorComposite2D(CompositeMode mode, ActorPrimitiveCounter initial_size = 1, ZIndex z = 0);
+	ActorComposite2D(CompositeMode mode, ActorCounter initial_size = 1, ZIndex z = 0, FickleType fickle_type = FickleType::Protean);
 	ActorComposite2D(const ActorComposite2D&);
 	ActorComposite2D(ActorComposite2D&&) noexcept;
 	ActorComposite2D& operator=(const ActorComposite2D&);
@@ -32,15 +32,15 @@ public:
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
 	void Push(ActorRenderBase2D* primitive);
-	ActorRenderBase2D* Get(ActorPrimitiveCounter index);
-	ActorPrimitiveCounter Index(ActorRenderBase2D* primitive);
-	void Insert(ActorRenderBase2D* primitive, ActorPrimitiveCounter index);
-	ActorRenderBase2D* Replace(ActorRenderBase2D* primitive, ActorPrimitiveCounter index);
-	ActorRenderBase2D* Remove(ActorPrimitiveCounter index);
+	ActorRenderBase2D* Get(ActorCounter index);
+	ActorCounter Index(ActorRenderBase2D* primitive);
+	void Insert(ActorRenderBase2D* primitive, ActorCounter index);
+	ActorRenderBase2D* Replace(ActorRenderBase2D* primitive, ActorCounter index);
+	ActorRenderBase2D* Remove(ActorCounter index);
 	bool Erase(ActorRenderBase2D* primitive);
 
 private:
-	void _assert_valid_index(ActorPrimitiveCounter index);
+	void _assert_valid_index(ActorCounter index);
 	void _try_increase_alloc();
 	void _try_decrease_alloc();
 	bool _decrease_condition();

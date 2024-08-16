@@ -61,6 +61,21 @@ public:
 
 protected:
 	void OnDraw(signed char texture_slot);
+
+private:
+	void BindBufferFuncs();
+	void (ActorPrimitive2D::*f_BufferPackedP)(Stride) = nullptr;
+	void (ActorPrimitive2D::*f_BufferPackedRS)(Stride) = nullptr;
+	void (ActorPrimitive2D::*f_BufferPackedM)(Stride) = nullptr;
+	void buffer_packed_p_protean(Stride);
+	void buffer_packed_p_transformable(Stride);
+	void buffer_packed_p_modulatable(Stride);
+	void buffer_packed_rs_protean(Stride);
+	void buffer_packed_rs_transformable(Stride);
+	void buffer_packed_rs_modulatable(Stride);
+	void buffer_packed_m_protean(Stride);
+	void buffer_packed_m_transformable(Stride);
+	void buffer_packed_m_modulatable(Stride);
 };
 
 struct AP2D_Notification : public FickleNotification

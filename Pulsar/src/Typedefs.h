@@ -22,10 +22,10 @@ typedef GLuint VAO;
 typedef GLint TextureSlot;
 
 #ifdef WIN32
-typedef signed int ActorPrimitiveCounter;
+typedef signed int ActorCounter;
 typedef signed int PointerOffset;
 #else
-typedef signed long long ActorPrimitiveCounter;
+typedef signed long long ActorCounter;
 typedef signed long long PointerOffset;
 #endif
 
