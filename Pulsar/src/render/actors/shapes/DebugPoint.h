@@ -12,7 +12,7 @@ class DebugPoint : public DebugPolygon
 	unsigned char m_PointStatus = 0b111;
 
 public:
-	DebugPoint(const glm::vec2& position = {0.0f, 0.0f}, const glm::vec4& outer_color = Colors::WHITE, float diameter = 2.0f, float inner_radius = 0.0f, const glm::vec4& inner_color = Colors::TRANSPARENT, ZIndex z = 0);
+	DebugPoint(float diameter = 2.0f, float inner_radius = 0.0f, const glm::vec4& inner_color = { 0.0f, 0.0f, 0.0f, 0.0f }, ZIndex z = 0, FickleType fickle_type = FickleType::Protean);
 	DebugPoint(const DebugPoint&);
 	DebugPoint(DebugPoint&&) noexcept;
 	DebugPoint& operator=(const DebugPoint&);

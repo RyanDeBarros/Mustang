@@ -7,8 +7,7 @@
 #include "Typedefs.h"
 #include "utils/CommonMath.h"
 #include "Particle.h"
-#include "../../transform/Transform.h"
-#include "../../transform/Modulate.h"
+#include "../../transform/Fickle.inl"
 
 typedef unsigned char ParticleSubsystemIndex;
 
@@ -35,12 +34,11 @@ class ParticleSubsystem
 	ParticleCount m_TotalSpawn;
 	unsigned int m_WaveNum = 0;
 	ParticleSubsystemIndex m_SubsystemIndex;
-	Transformer2D m_Transformer;
-	Modulator m_Modulator;
+	FickleSelector2D m_Fickler;
 	std::vector<Particle> m_Particles;
 
 public:
-	ParticleSubsystem(const ParticleSubsystemData<ParticleCount>& wave_data, ParticleSubsystemIndex subsystem_index);
+	ParticleSubsystem(const ParticleSubsystemData<ParticleCount>& wave_data, ParticleSubsystemIndex subsystem_index, FickleType fickle_type = FickleType::Protean);
 	ParticleSubsystem(const ParticleSubsystem<ParticleCount>&);
 	ParticleSubsystem(ParticleSubsystem<ParticleCount>&&) noexcept;
 	ParticleSubsystem<ParticleCount>& operator=(const ParticleSubsystem<ParticleCount>&);
@@ -48,7 +46,7 @@ public:
 
 	inline void SetWavePeriod(real wave_period) { m_Data.wavePeriod = wave_period; m_PeriodInv = 1.0f / m_Data.wavePeriod; }
 
-	Transformer2D* Transformer() { return &m_Transformer; }
+	inline FickleSelector2D& Fickler() { return m_Fickler; }
 
 private:
 	friend class ParticleEffect<ParticleCount>;

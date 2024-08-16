@@ -2,6 +2,7 @@
 
 #include "utils/CommonMath.h"
 #include "utils/Strings.h"
+#include "utils/Data.h"
 
 namespace Particles {
 
@@ -237,7 +238,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[color, di](Particle& p)
 					{
-						p.m_Shape->Modulator()->self.modulate = color(p[di]);
+						set_ptr(p.m_Shape->Fickler().Modulate(), color(p[di]));
 					}, di + 1
 				};
 			};
@@ -250,7 +251,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[color](Particle& p)
 					{
-						p.m_Shape->Modulator()->self.modulate = color(p.t());
+						set_ptr(p.m_Shape->Fickler().Modulate(), color(p.t()));
 					}, 0
 				};
 			};
@@ -263,7 +264,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[scale, di](Particle& p)
 					{
-						p.m_Shape->Transformer()->self->scale = scale(p[di]);
+						set_ptr(p.m_Shape->Fickler().Scale(), scale(p[di]));
 					}, di + 1
 				};
 			};
@@ -276,7 +277,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[position, di](Particle& p)
 					{
-						p.m_Shape->Transformer()->self->position = position(p[di]);
+						set_ptr(p.m_Shape->Fickler().Position(), position(p[di]));
 					}, di + 1
 				};
 			};
@@ -289,7 +290,7 @@ namespace Particles {
 				return Particles::CHRBind{
 					[position, di1, di2](Particle& p)
 					{
-						p.m_Shape->Transformer()->self->position = position({p[di1], p[di2]});
+						set_ptr(p.m_Shape->Fickler().Position(), position({p[di1], p[di2]}));
 					}, Max(di1, di2) + 1
 				};
 			};
@@ -302,17 +303,18 @@ namespace Particles {
 				return Particles::CHRBind{
 					[dix, diy](Particle& p)
 					{
-						p.m_Shape->Transformer()->self->position += glm::vec2{p[dix], p[diy]} * p.dt();
+						if (auto posref = p.m_Shape->Fickler().Position())
+							*posref += glm::vec2{p[dix], p[diy]} * p.dt();
 					}, Max(dix, diy) + 1
 				};
 			};
 		}
 
-		CharacteristicGen Sync = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Transformer()->Sync(); }, 0 }; };
-		CharacteristicGen SyncP = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Transformer()->SyncP(); }, 0 }; };
-		CharacteristicGen SyncRS = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Transformer()->SyncRS(); }, 0 }; };
-		CharacteristicGen SyncM = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Modulator()->Sync(); }, 0 }; };
-		CharacteristicGen SyncAll = CombineSequential({ Sync, SyncM });
+		CharacteristicGen SyncAll = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Fickler().Sync(); }, 0 }; };
+		CharacteristicGen SyncT = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Fickler().SyncT(); }, 0 }; };
+		CharacteristicGen SyncP = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Fickler().SyncP(); }, 0 }; };
+		CharacteristicGen SyncRS = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Fickler().SyncRS(); }, 0 }; };
+		CharacteristicGen SyncM = [](const Particles::CHRSeed& seed) { return Particles::CHRBind{ [](Particle& p) { p.m_Shape->Fickler().Sync(); }, 0 }; };
 
 	}
 

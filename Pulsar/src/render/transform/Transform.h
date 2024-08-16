@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+#include "FickleNotification.inl"
+
 typedef glm::vec2 Position2D;
 typedef glm::float32 Rotation2D;
 typedef glm::vec2 Scale2D;
@@ -16,8 +18,6 @@ struct Transform2D
 	Rotation2D rotation = 0.0f;
 	Scale2D scale = { 1.0f, 1.0f };
 };
-
-// TODO for transform, modulate, and proteate, define external functions that can convert a packed version (global) to the unpacked version (local). That way, the "global" parameters can be set.
 
 struct PackedTransform2D
 {
@@ -36,27 +36,21 @@ struct PackedTransform2D
 
 	void Sync();
 	void Sync(const PackedTransform2D& parent);
+	void Sync(const PackedP2D& parentP, const PackedRS2D& parentRS);
 	void SyncP();
 	void SyncP(const PackedTransform2D& parent);
 	void SyncRS();
 	void SyncRS(const PackedTransform2D& parent);
 };
 
-struct TransformNotification
-{
-	virtual void Notify() {}
-	virtual void NotifyP() {}
-	virtual void NotifyRS() {}
-};
-
 struct Transformer2D
 {
 	PackedTransform2D self;
-	TransformNotification* notify = nullptr;
+	FickleNotification* notify = nullptr;
 	Transformer2D* parent = nullptr;
 	std::vector<Transformer2D*> children;
 
-	inline Transformer2D(const Transform2D& transform = {}, TransformNotification* notify = nullptr, bool sync = true)
+	explicit inline Transformer2D(const Transform2D& transform = {}, FickleNotification* notify = nullptr, bool sync = true)
 		: self{ transform }, notify(std::move(notify)) 
 	{
 		if (sync)
@@ -89,16 +83,45 @@ struct Transformer2D
 		return *this;
 	}
 
+	inline Transform2D& Self() { return self.transform; }
+	inline Position2D& Position() { return self->position; }
+	inline Rotation2D& Rotation() { return self->rotation; }
+	inline Scale2D& Scale() { return self->scale; }
+	void SetPackedLocalOf(const PackedP2D& globalPackedP, const PackedRS2D& globalPackedRS);
+	void SetPackedLocalOf(const PackedP2D& globalPackedP);
+	void SetPackedLocalOf(const PackedRS2D& globalPackedRS);
+
+	inline void SyncChildren()
+	{
+		if (notify)
+			notify->Notify(FickleSyncCode::SyncT);
+		for (const auto& c : children)
+			c->Sync();
+	}
+
+	inline void SyncChildrenP()
+	{
+		if (notify)
+			notify->Notify(FickleSyncCode::SyncP);
+		for (const auto& c : children)
+			c->SyncP();
+	}
+
+	inline void SyncChildrenRS()
+	{
+		if (notify)
+			notify->Notify(FickleSyncCode::SyncRS);
+		for (const auto& c : children)
+			c->SyncRS();
+	}
+
 	inline void Sync()
 	{
 		if (parent)
 			self.Sync(parent->self);
 		else
 			self.Sync();
-		if (notify)
-			notify->Notify();
-		for (const auto& c : children)
-			c->Sync();
+		SyncChildren();
 	}
 
 	inline void SyncP()
@@ -107,10 +130,7 @@ struct Transformer2D
 			self.SyncP(parent->self);
 		else
 			self.SyncP();
-		if (notify)
-			notify->NotifyP();
-		for (const auto& c : children)
-			c->SyncP();
+		SyncChildrenP();
 	}
 
 	inline void SyncRS()
@@ -119,10 +139,7 @@ struct Transformer2D
 			self.SyncRS(parent->self);
 		else
 			self.SyncRS();
-		if (notify)
-			notify->NotifyRS();
-		for (const auto& c : children)
-			c->SyncRS();
+		SyncChildrenRS();
 	}
 
 	inline void Attach(Transformer2D* transformer)

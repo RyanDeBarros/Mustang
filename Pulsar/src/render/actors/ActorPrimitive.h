@@ -8,7 +8,7 @@
 
 struct AP2D_Notification;
 
-class ActorPrimitive2D : public ProteanActor2D
+class ActorPrimitive2D : public FickleActor2D
 {
 	AP2D_Notification* m_Notification;
 
@@ -23,7 +23,7 @@ protected:
 	unsigned char m_Status = 0b111;
 
 public:
-	ActorPrimitive2D(const Renderable& render = Renderable(), const Transform2D& transform = {}, ZIndex z = 0, bool visible = true);
+	ActorPrimitive2D(const Renderable& render = Renderable(), ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true);
 	ActorPrimitive2D(const ActorPrimitive2D& primitive);
 	ActorPrimitive2D(ActorPrimitive2D&& primitive) noexcept;
 	ActorPrimitive2D& operator=(const ActorPrimitive2D & primitive);
@@ -63,15 +63,31 @@ protected:
 	void OnDraw(signed char texture_slot);
 };
 
-struct AP2D_Notification : public ProteateNotification
+struct AP2D_Notification : public FickleNotification
 {
 	ActorPrimitive2D* prim = nullptr;
 
-	AP2D_Notification(ActorPrimitive2D* prim) : prim(prim) {}
+	inline AP2D_Notification(ActorPrimitive2D* prim) : prim(prim) {}
 
-	void Notify() override { if (prim) prim->FlagProteate(); }
-	void NotifyT() override { if (prim) prim->FlagTransform(); }
-	void NotifyP() override { if (prim) prim->FlagTransformP(); }
-	void NotifyRS() override { if (prim) prim->FlagTransformRS(); }
-	void NotifyM() override { if (prim) prim->FlagModulate(); }
+	inline void Notify(FickleSyncCode code)
+	{
+		switch (code)
+		{
+		case FickleSyncCode::SyncAll:
+			if (prim) prim->FlagProteate();
+			break;
+		case FickleSyncCode::SyncT:
+			if (prim) prim->FlagTransform();
+			break;
+		case FickleSyncCode::SyncP:
+			if (prim) prim->FlagTransformP();
+			break;
+		case FickleSyncCode::SyncRS:
+			if (prim) prim->FlagTransformRS();
+			break;
+		case FickleSyncCode::SyncM:
+			if (prim) prim->FlagModulate();
+			break;
+		}
+	}
 };

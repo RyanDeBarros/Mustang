@@ -13,7 +13,7 @@ protected:
 	glm::vec2 m_Pivot;
 
 public:
-	RectRender(TextureHandle texture = 0, const Transform2D& transform = {}, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, bool visible = true);
+	RectRender(TextureHandle texture = 0, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true);
 	RectRender(const RectRender&);
 	RectRender(RectRender&&) noexcept;
 	RectRender& operator=(const RectRender&);

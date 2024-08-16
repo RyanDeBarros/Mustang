@@ -3,7 +3,6 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-#include "utils/Constants.h"
 #include "../../Renderable.h"
 #include "../../ActorRenderBase.h"
 #include "../../transform/Transform.h"
@@ -24,7 +23,7 @@ struct std::hash<DebugModel>
 
 struct DP_Notification;
 
-class DebugPolygon : public ActorRenderBase2D
+class DebugPolygon : public FickleActor2D
 {
 protected:
 	friend class DebugMultiPolygon;
@@ -35,8 +34,6 @@ protected:
 	std::vector<glm::vec2> m_Points;
 
 	DP_Notification* m_Notification;
-	Transformer2D m_Transformer;
-	Modulator m_Modulator;
 
 	GLenum m_IndexingMode;
 
@@ -46,7 +43,7 @@ protected:
 	virtual void CheckStatus();
 
 public:
-	DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform = {}, const glm::vec4& color = Colors::WHITE, GLenum indexing_mode = GL_LINE_STRIP, ZIndex z = 0);
+	DebugPolygon(const std::vector<glm::vec2>& points, GLenum indexing_mode = GL_LINE_STRIP, ZIndex z = 0, FickleType fickle_type = FickleType::Protean);
 	DebugPolygon(const DebugPolygon&);
 	DebugPolygon(DebugPolygon&&) noexcept;
 	DebugPolygon& operator=(const DebugPolygon&);
@@ -64,27 +61,41 @@ public:
 	inline GLenum GetIndexingMode() const { return m_IndexingMode; }
 	inline void SetIndexingMode(GLenum indexing_mode) { m_Status |= 0b1; m_IndexingMode = indexing_mode; }
 
+	inline void FlagProteate() { m_Status |= 0b11010; }
 	inline void FlagTransform() { m_Status |= 0b11000; }
 	inline void FlagTransformP() { m_Status |= 0b1000; }
 	inline void FlagTransformRS() { m_Status |= 0b10000; }
 	inline void FlagModulate() { m_Status |= 0b10; }
 
 	bool visible = true;
-
-	Transformer2D* Transformer() { return &m_Transformer; }
-	Transform2D* Transform() { return &m_Transformer.self.transform; }
-	Modulator* Modulator() { return &m_Modulator; }
-	Modulate* Modulate() { return &m_Modulator.self.modulate; }
 };
 
-struct DP_Notification : public TransformNotification, public ModulateNotification
+struct DP_Notification : public FickleNotification
 {
 	DebugPolygon* poly = nullptr;
 
 	DP_Notification(DebugPolygon* poly) : poly(poly) {}
 
-	void Notify() override { if (poly) poly->FlagTransform(); }
-	void NotifyP() override { if (poly) poly->FlagTransformP(); }
-	void NotifyRS() override { if (poly) poly->FlagTransformRS(); }
-	void NotifyM() override { if (poly) poly->FlagModulate(); }
+	void Notify(FickleSyncCode code)
+	{
+		switch (code)
+		{
+		case FickleSyncCode::SyncAll:
+			if (poly) poly->FlagProteate();
+			break;
+		case FickleSyncCode::SyncT:
+			if (poly) poly->FlagTransform();
+			break;
+		case FickleSyncCode::SyncP:
+			if (poly) poly->FlagTransformP();
+			break;
+		case FickleSyncCode::SyncRS:
+			if (poly) poly->FlagTransformRS();
+			break;
+		case FickleSyncCode::SyncM:
+			if (poly) poly->FlagModulate();
+			break;
+		}
+	}
+
 };

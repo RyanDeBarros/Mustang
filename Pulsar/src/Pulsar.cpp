@@ -26,6 +26,8 @@
 #include "utils/CommonMath.h"
 #include "utils/Functors.h"
 #include "utils/Strings.h"
+#include "utils/Data.h"
+#include "utils/Constants.h"
 
 using namespace Pulsar;
 
@@ -124,9 +126,15 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::AddCanvasLayer(0);
 
 	// Create actors
-	RectRender actor1(textureFlag, { {-500.0f, 300.0f}, -1.0f, {0.8f, 1.2f} });
-	RectRender actor2(textureSnowman, { {400.0f, -200.0f}, 0.25f, {0.7f, 0.7f} });
-	RectRender actor3(textureTux, { {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} });
+	RectRender actor1(textureFlag);
+	set_ptr(actor1.Fickler().Transform(), { {-500.0f, 300.0f}, -1.0f, {0.8f, 1.2f} });
+	actor1.Fickler().SyncT();
+	RectRender actor2(textureSnowman);
+	set_ptr(actor2.Fickler().Transform(), { {400.0f, -200.0f}, 0.25f, {0.7f, 0.7f} });
+	actor2.Fickler().SyncT();
+	RectRender actor3(textureTux);
+	set_ptr(actor3.Fickler().Transform(), { {0.0f, 0.0f}, 0.0f, {1.0f, 1.0f} });
+	actor3.Fickler().SyncT();
 
 	Renderer::GetCanvasLayer(0)->OnAttach(&actor1);
 	Renderer::GetCanvasLayer(0)->OnAttach(&actor2);
@@ -137,17 +145,19 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderable renderable;
 	if (Loader::loadRenderable("res/assets/renderable.toml", renderable, true) != LOAD_STATUS::OK)
 		ASSERT(false);
-	std::shared_ptr<ActorPrimitive2D> actor4(new ActorPrimitive2D(renderable, { {-200.0f, 0.0f}, 0.0f, {800.0f, 800.0f} }));
-	Renderer::GetCanvasLayer(-1)->OnAttach(actor4.get());
+	ActorPrimitive2D actor4(renderable);
+	set_ptr(actor4.Fickler().Transform(), { {-200.0f, 0.0f}, 0.0f, {800.0f, 800.0f} });
+	actor4.Fickler().SyncT();
+	Renderer::GetCanvasLayer(-1)->OnAttach(&actor4);
 
-	actor1.RefTransform()->scale = { 16.0f, 16.0f };
-	actor1.FlagTransformRS();
+	set_ptr(actor1.Fickler().Scale(), {16.0f, 16.0f});
+	actor1.Fickler().SyncRS();
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(&actor3, -1);
 
 	actor3.SetPivot(0.0f, 0.0f);
-	actor3.RefTransform()->position = _RendererSettings::initial_window_rel_pos(-0.5f, 0.5f);
-	actor3.RefTransform()->scale = { 0.3f, 0.3f };
-	actor3.FlagTransform();
+	set_ptr(actor3.Fickler().Position(), _RendererSettings::initial_window_rel_pos(-0.5f, 0.5f));
+	set_ptr(actor3.Fickler().Scale(), { 0.3f, 0.3f });
+	actor3.Fickler().SyncT();
 	actor2.SetModulation(glm::vec4(0.7f, 0.7f, 1.0f, 1.0f));
 	actor3.SetModulationPerPoint({
 		glm::vec4(1.0f, 0.5f, 0.5f, 1.0f),
@@ -159,9 +169,9 @@ void Pulsar::Run(GLFWwindow* window)
 	TextureFactory::SetSettings(actor1.GetTextureHandle(), Texture::linear_settings);
 
 	actor3.SetPivot(0.5f, 0.5f);
-	actor3.RefTransform()->position = { 0.0f, 0.0f };
-	actor3.RefTransform()->scale = { 0.1f, 0.1f };
-	actor3.FlagTransform();
+	set_ptr(actor3.Fickler().Position(), { 0.0f, 0.0f });
+	set_ptr(actor3.Fickler().Scale(), { 0.1f, 0.1f });
+	actor3.Fickler().SyncT();
 	Renderer::GetCanvasLayer(0)->OnDetach(&actor3);
 
 	actor2.CropToRelativeRect({ 0.3f, 0.4f, 0.4f, 0.55f });
@@ -190,7 +200,7 @@ void Pulsar::Run(GLFWwindow* window)
 						return Particles::CHRBind{
 							[](Particle& p)
 							{
-								p.m_Shape->Transformer()->self->position = glm::vec2{ glm::cos(p[0] * 2 * glm::pi<float>()), glm::sin(p[0] * 2 * glm::pi<float>()) } *20.0f * p[1];
+								set_ptr(p.m_Shape->Fickler().Position(), glm::vec2{ glm::cos(p[0] * 2 * glm::pi<float>()), glm::sin(p[0] * 2 * glm::pi<float>()) } *20.0f * p[1]);
 							}, 1
 						};
 					},
@@ -230,7 +240,7 @@ void Pulsar::Run(GLFWwindow* window)
 	float p2height = 400.0f;
 	ParticleSubsystemData<> wave2{
 		1.5f,
-		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 2}, {1, 2}, {1, 0} }, {}, Colors::WHITE, GL_TRIANGLE_FAN)),
+		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 2}, {1, 2}, {1, 0} }, GL_TRIANGLE_FAN)),
 		CumulativeFunc<>(LinearFunc(p2height * 0.5f)),
 		[](const Particles::CHRSeed& seed) { return 1.5f; },
 		Particles::CombineSequential({
@@ -270,11 +280,11 @@ void Pulsar::Run(GLFWwindow* window)
 	//ParticleSystem<> psys({ wave2, wave2, wave1 });
 	//ParticleSystem<> psys({ wave1 });
 	ParticleSystem<> psys({ wave2, wave2 });
-	psys.SubsystemRef(1).Transformer()->self->rotation = 0.5f * glm::pi<float>();
-	psys.SubsystemRef(1).Transformer()->SyncRS();
+	set_ptr(psys.SubsystemRef(1).Fickler().Rotation(), 0.5f * glm::pi<float>());
+	psys.SubsystemRef(1).Fickler().SyncRS();
 	//psys.Transformer()->SetLocalScale(1, { 1, _RendererSettings::initial_window_width / static_cast<float>(_RendererSettings::initial_window_height) });
-	psys.TransformerRef()->self->scale = glm::vec2{ _RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height } *0.75f;
-	psys.TransformerRef()->SyncRS();
+	set_ptr(psys.Fickler().Scale(), glm::vec2{_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height} * 0.75f);
+	psys.Fickler().SyncRS();
 	//psys.Transformer()->SyncGlobalWithLocalScales();
 	//psys.Transformer()->SetPosition(300, 0);
 	//psys.Transformer()->SetLocalTransform(2, { {-500, 0}, 0, {2, 2} });
@@ -286,23 +296,23 @@ void Pulsar::Run(GLFWwindow* window)
 	//parr.Transformer().SyncGlobalWithLocalPositions();
 
 	//parr.SubsystemRef(0).SetRotation(1.57f);
-	*psys.ModulateRef() = Colors::PSYCHEDELIC_PURPLE;
-	psys.ModulatorRef()->Sync();
+	set_ptr(psys.Fickler().Modulate(), Colors::PSYCHEDELIC_PURPLE);
+	psys.Fickler().SyncM();
 
 	Renderer::AddCanvasLayer(11);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&psys);
+	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
 	//Renderer::GetCanvasLayer(11)->OnAttach(&parr);
 
 	std::shared_ptr<TileMap> tilemap;
 	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap) != LOAD_STATUS::OK)
 		ASSERT(false);
-	*tilemap->RefTransform() = { {100.0f, 200.0f}, 0.3f, {5.0f, 8.0f} };
-	tilemap->RefProteanLinker()->SyncT();
+	set_ptr(tilemap->Fickler().Transform(), {{100.0f, 200.0f}, 0.3f, {5.0f, 8.0f}});
+	tilemap->Fickler().SyncT();
 	tilemap->Insert(4, 0, 1);
 	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
-
-	actor3.RefTransform()->scale *= 2.0f;
-	actor3.RefProteanLinker()->SyncRS();
+	// dangerous to set scale without checking if non-null, but the fickle type of selector is held constant, so scale is known to be non-null.
+	*actor3.Fickler().Scale() *= 2.0f;
+	actor3.Fickler().SyncRS();
 
 	TextureFactory::SetSettings(textureFlag, Texture::nearest_settings);
 
@@ -312,25 +322,25 @@ void Pulsar::Run(GLFWwindow* window)
 	RectRender child2(textureSnowman);
 	RectRender grandchild2(textureTux);
 
-	child.RefProteanLinker()->Attach(grandchild.RefProteanLinker());
-	grandchild.RefTransform()->scale = { 0.25f, 0.25f };
-	grandchild.RefTransform()->position = { 300.0f, -100.0f };
-	child.RefTransform()->scale = { 0.25f, 0.25f };
-	child.RefProteanLinker()->SyncT();
-	child2.RefProteanLinker()->Attach(grandchild2.RefProteanLinker());
-	grandchild2.RefTransform()->scale = { 0.25f, 0.25f };
-	grandchild2.RefTransform()->position = { 300.0f, -100.0f };
-	child2.RefTransform()->scale = { 0.25f, 0.25f };
-	child2.RefProteanLinker()->SyncT();
+	child.Fickler().ProteanLinker()->Attach(grandchild.Fickler().ProteanLinker());
+	set_ptr(grandchild.Fickler().Scale(), {0.25f, 0.25f});
+	set_ptr(grandchild.Fickler().Position(), {300.0f, -100.0f});
+	set_ptr(child.Fickler().Scale(), {0.25f, 0.25f});
+	child.Fickler().SyncT();
+	child2.Fickler().ProteanLinker()->Attach(grandchild2.Fickler().ProteanLinker());
+	set_ptr(grandchild2.Fickler().Scale(), { 0.25f, 0.25f });
+	set_ptr(grandchild2.Fickler().Position(), { 300.0f, -100.0f });
+	set_ptr(child2.Fickler().Scale(), { 0.25f, 0.25f });
+	child2.Fickler().SyncT();
 
-	root.RefProteanLinker()->Attach(child.RefProteanLinker());
-	root.RefProteanLinker()->Attach(child2.RefProteanLinker());
-	root.RefTransform()->scale = { 10.0f, 10.0f };
-	root.RefProteanLinker()->SyncT();
-	for (const auto& child : root.RefProteanLinker()->children)
+	root.Fickler().ProteanLinker()->Attach(child.Fickler().ProteanLinker());
+	root.Fickler().ProteanLinker()->Attach(child2.Fickler().ProteanLinker());
+	set_ptr(root.Fickler().Scale(), {10.0f, 10.0f});
+	root.Fickler().SyncT();
+	for (const auto& child : root.Fickler().ProteanLinker()->children)
 	{
-		child->self.proteate.transform.position = { 0.0f, -30.0f };
-		child->self.proteate.transform.scale *= 0.2f;
+		child->Position() = { 0.0f, -30.0f };
+		child->Scale() *= 0.2f;
 		child->SyncT();
 	}
 
@@ -340,33 +350,34 @@ void Pulsar::Run(GLFWwindow* window)
 	//std::shared_ptr<Modulator> root_mod(std::make_shared<Modulator>(root.ModulateWeak(), first_mod));
 	//root_mod->SetColor(glm::vec4{ 1.0f } * 0.5f);
 
-	//Renderer::GetCanvasLayer(11)->OnAttach(&root);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&child2);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&child);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
+	Renderer::GetCanvasLayer(11)->OnAttach(&root);
+	Renderer::GetCanvasLayer(11)->OnAttach(&child2);
+	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
+	Renderer::GetCanvasLayer(11)->OnAttach(&child);
+	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
 
-	DebugRect rect(_RendererSettings::initial_window_width * 0.5f, _RendererSettings::initial_window_height, true, { 1.0f, 0.5f }, {}, { 0.5f, 0.5f, 1.0f, 0.3f }, 1);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&rect);
+	DebugRect rect(_RendererSettings::initial_window_width * 0.5f, _RendererSettings::initial_window_height, true, { 1.0f, 0.5f }, 1);
+	set_ptr(rect.Fickler().Modulate(), { 0.5f, 0.5f, 1.0f, 0.3f });
+	rect.Fickler().SyncM();
+	Renderer::GetCanvasLayer(11)->OnAttach(&rect);
 
 	RectRender tux(textureTux);
 	ActorTesselation2D tuxTessel(&tux);
 	ActorTesselation2D tuxGrid(&tuxTessel);
 	Renderer::GetCanvasLayer(11)->OnAttach(&tuxGrid);
 
-	tux.RefTransform()->scale *= 0.1f;
-	tux.RefProteanLinker()->SyncRS();
+	*tux.Fickler().Scale() *= 0.1f;
+	tux.Fickler().SyncRS();
 
 	tuxTessel.PushBackStatic({
-		{{ {0, 100} }},
-		{{ {200, 0} }},
-		{{ {-200, 0} }}
+		{ { 0, 100 } },
+		{ { 200, 0 } },
+		{ { -200, 0 } }
 	});
-
 	tuxGrid.PushBackStatic({
-		{{ {50, 0} }},
-		{{ {50, 200} }},
-		{{ {50, -200} }}
+		{ { 50, 0 } },
+		{ { 50, 200 } },
+		{ { 50, -200 } }
 	});
 
 	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::TRANSPARENT, Colors::LIGHT_GREEN });
@@ -378,14 +389,14 @@ void Pulsar::Run(GLFWwindow* window)
 		prevDrawTime = drawTime;
 		totalDrawTime += deltaDrawTime;
 		
-		child.RefTransform()->rotation = -Pulsar::totalDrawTime;
-		child2.RefTransform()->rotation = -Pulsar::totalDrawTime;
-		grandchild.RefTransform()->rotation = Pulsar::totalDrawTime;
-		grandchild2.RefTransform()->rotation = -Pulsar::totalDrawTime;
-		root.RefTransform()->rotation = Pulsar::totalDrawTime;
-		child.RefTransform()->position += 5 * Pulsar::deltaDrawTime;
-		child2.RefTransform()->scale *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime);
-		root.RefProteanLinker()->SyncT();
+		*child.Fickler().Rotation() = -Pulsar::totalDrawTime;
+		*child2.Fickler().Rotation() = -Pulsar::totalDrawTime;
+		*grandchild.Fickler().Rotation() = Pulsar::totalDrawTime;
+		*grandchild2.Fickler().Rotation() = -Pulsar::totalDrawTime;
+		*root.Fickler().Rotation() = Pulsar::totalDrawTime;
+		*child.Fickler().Position() += 5 * Pulsar::deltaDrawTime;
+		*child2.Fickler().Scale() *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime);
+		root.Fickler().SyncT();
 
 		Renderer::OnDraw();
 		glfwPollEvents();

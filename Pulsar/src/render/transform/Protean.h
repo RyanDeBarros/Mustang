@@ -20,37 +20,30 @@ struct PackedProteate2D
 	void Sync(const PackedProteate2D& parent);
 	void SyncT();
 	void SyncT(const PackedProteate2D& parent);
+	void SyncT(const PackedTransform2D& parent);
 	void SyncP();
 	void SyncP(const PackedProteate2D& parent);
 	void SyncRS();
 	void SyncRS(const PackedProteate2D& parent);
 	void SyncM();
 	void SyncM(const PackedProteate2D& parent);
-};
-
-struct ProteateNotification
-{
-	virtual void Notify() {}
-	virtual void NotifyT() {}
-	virtual void NotifyP() {}
-	virtual void NotifyRS() {}
-	virtual void NotifyM() {}
+	void SyncM(const PackedModulate& parent);
 };
 
 struct ProteanLinker2D
 {
 	PackedProteate2D self;
-	ProteateNotification* notify = nullptr;
+	FickleNotification* notify = nullptr;
 	ProteanLinker2D* parent = nullptr;
 	std::vector<ProteanLinker2D*> children;
 
-	inline ProteanLinker2D(const Proteate2D& proteate = { {}, { 1.0f, 1.0f, 1.0f, 1.0f } }, ProteateNotification* notify = nullptr, bool sync = true)
+	explicit inline ProteanLinker2D(const Proteate2D& proteate = { {}, { 1.0f, 1.0f, 1.0f, 1.0f } }, FickleNotification* notify = nullptr, bool sync = true)
 		: self{ proteate }, notify(std::move(notify))
 	{
 		if (sync)
 			self.Sync();
 	}
-	inline ProteanLinker2D(const Transform2D& transform = {}, const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }, ProteateNotification* notify = nullptr, bool sync = true)
+	inline ProteanLinker2D(const Transform2D& transform = {}, const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }, FickleNotification* notify = nullptr, bool sync = true)
 		: self{ { transform, modulate } }, notify(std::move(notify))
 	{
 		if (sync)
@@ -83,16 +76,64 @@ struct ProteanLinker2D
 		return *this;
 	}
 
+	inline Transform2D& Transform() { return self.proteate.transform; }
+	inline Position2D& Position() { return self.proteate.transform.position; }
+	inline Rotation2D& Rotation() { return self.proteate.transform.rotation; }
+	inline Scale2D& Scale() { return self.proteate.transform.scale; }
+	inline Modulate& Modulate() { return self.proteate.modulate; }
+
+	void SetPackedLocalOf(const PackedP2D& globalPackedP, const PackedRS2D& globalPackedRS);
+	void SetPackedLocalOf(const PackedP2D& globalPackedP);
+	void SetPackedLocalOf(const PackedRS2D& globalPackedRS);
+	void SetPackedLocalOf(const ::Modulate& globalModulate);
+
+	inline void SyncChildren()
+	{
+		if (notify)
+			notify->Notify(FickleSyncCode::SyncAll);
+		for (const auto& c : children)
+			c->Sync();
+	}
+
+	inline void SyncChildrenT()
+	{
+		if (notify)
+			notify->Notify(FickleSyncCode::SyncT);
+		for (const auto& c : children)
+			c->SyncT();
+	}
+
+	inline void SyncChildrenP()
+	{
+		if (notify)
+			notify->Notify(FickleSyncCode::SyncP);
+		for (const auto& c : children)
+			c->SyncP();
+	}
+
+	inline void SyncChildrenRS()
+	{
+		if (notify)
+			notify->Notify(FickleSyncCode::SyncRS);
+		for (const auto& c : children)
+			c->SyncRS();
+	}
+
+	inline void SyncChildrenM()
+	{
+		if (notify)
+			notify->Notify(FickleSyncCode::SyncM);
+		for (const auto& c : children)
+			c->SyncM();
+	}
+
 	inline void Sync()
 	{
 		if (parent)
 			self.Sync(parent->self);
 		else
 			self.Sync();
-		if (notify)
-			notify->Notify();
-		for (const auto& c : children)
-			c->Sync();
+		SyncChildren();
 	}
 	
 	inline void SyncT()
@@ -101,10 +142,7 @@ struct ProteanLinker2D
 			self.SyncT(parent->self);
 		else
 			self.SyncT();
-		if (notify)
-			notify->NotifyT();
-		for (const auto& c : children)
-			c->SyncT();
+		SyncChildrenT();
 	}
 
 	inline void SyncP()
@@ -113,10 +151,7 @@ struct ProteanLinker2D
 			self.SyncP(parent->self);
 		else
 			self.SyncP();
-		if (notify)
-			notify->NotifyP();
-		for (const auto& c : children)
-			c->SyncP();
+		SyncChildrenP();
 	}
 
 	inline void SyncRS()
@@ -125,10 +160,7 @@ struct ProteanLinker2D
 			self.SyncRS(parent->self);
 		else
 			self.SyncRS();
-		if (notify)
-			notify->NotifyRS();
-		for (const auto& c : children)
-			c->SyncRS();
+		SyncChildrenRS();
 	}
 
 	inline void SyncM()
@@ -137,10 +169,7 @@ struct ProteanLinker2D
 			self.SyncM(parent->self);
 		else
 			self.SyncM();
-		if (notify)
-			notify->NotifyM();
-		for (const auto& c : children)
-			c->SyncM();
+		SyncChildrenM();
 	}
 
 	inline void Attach(ProteanLinker2D* transformer)

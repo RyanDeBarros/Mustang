@@ -7,7 +7,7 @@ class DebugCircle : public DebugPolygon
 	float m_Diameter;
 
 public:
-	DebugCircle(float radius = 1.0f, const Transform2D& transform = {}, const glm::vec4& color = Colors::WHITE, ZIndex z = 0);
+	DebugCircle(float radius = 1.0f, ZIndex z = 0, FickleType fickle_type = FickleType::Protean);
 	DebugCircle(const DebugCircle&);
 	DebugCircle(DebugCircle&&) noexcept;
 	DebugCircle& operator=(const DebugCircle&);

@@ -5,11 +5,12 @@
 #include "RendererSettings.h"
 #include "AssetLoader.h"
 #include "Logger.inl"
+#include "utils/Data.h"
 
 Renderable RectRender::rect_renderable;
 
-RectRender::RectRender(TextureHandle texture, const Transform2D& transform, ShaderHandle shader, ZIndex z, bool visible)
-	: ActorPrimitive2D(rect_renderable, transform, z, visible)
+RectRender::RectRender(TextureHandle texture, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible)
+	: ActorPrimitive2D(rect_renderable, z, fickle_type, visible)
 {
 	SetShaderHandle(shader);
 	SetTextureHandle(texture);
@@ -101,8 +102,8 @@ void RectRender::CropToRelativeRect(glm::vec4 rect)
 
 void RectRender::ResetTransformUVs()
 {
-	m_ProteanLinker.self.proteate.transform = {};
-	m_ProteanLinker.SyncT();
+	set_ptr(m_Fickler.Transform(), {});
+	m_Fickler.SyncT();
 	CropToRelativeRect({ 0.0f, 0.0f, 1.0f, 1.0f });
 	SetPivot(0.5f, 0.5f);
 }

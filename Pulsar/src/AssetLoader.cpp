@@ -634,7 +634,24 @@ LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, std::shared_ptr<Tile
 		if (auto vis = tm["visible"].value<bool>())
 			visible = vis.value();
 
-		tilemap = std::shared_ptr<TileMap>(new TileMap(atlas_handle, texture_settings, shader, z, visible));
+		FickleType fickle_type = FickleType::Transformable;
+		if (auto ft = tm["fickle"].value<int64_t>())
+		{
+			switch (ft.value())
+			{
+			case 0:
+				fickle_type = FickleType::Protean;
+				break;
+			case 1:
+				fickle_type = FickleType::Transformable;
+				break;
+			case 2:
+				fickle_type = FickleType::Modulatable;
+				break;
+			}
+		}
+
+		tilemap = std::shared_ptr<TileMap>(new TileMap(atlas_handle, texture_settings, shader, z, fickle_type, visible));
 
 		std::vector<size_t> ordering;
 		if (auto order = tm["ordering"].as_array())

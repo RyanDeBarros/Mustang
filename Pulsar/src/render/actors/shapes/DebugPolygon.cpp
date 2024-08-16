@@ -3,49 +3,44 @@
 #include "render/CanvasLayer.h"
 #include "AssetLoader.h"
 
-DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, const Transform2D& transform, const glm::vec4& color, GLenum indexing_mode, ZIndex z)
-	: ActorRenderBase2D(z), m_Notification(new DP_Notification(this)), m_Transformer(transform, m_Notification), m_Modulator(color, m_Notification)
+DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, GLenum indexing_mode, ZIndex z, FickleType fickle_type)
+	: FickleActor2D(fickle_type, z), m_Notification(new DP_Notification(this))
 {
+	*m_Fickler.Notification() = m_Notification;
 	Loader::loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
 	SetIndexingMode(indexing_mode);
 	PointsRef() = points;
 }
 
 DebugPolygon::DebugPolygon(const DebugPolygon& other)
-	: ActorRenderBase2D(other), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Notification(new DP_Notification(this)), m_Transformer(other.m_Transformer), m_Modulator(other.m_Modulator), m_Status(other.m_Status)
+	: FickleActor2D(other), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Notification(new DP_Notification(this)), m_Status(other.m_Status)
 {
-	m_Transformer.notify = m_Notification;
-	m_Modulator.notify = m_Notification;
+	*m_Fickler.Notification() = m_Notification;
 }
 
 DebugPolygon::DebugPolygon(DebugPolygon&& other) noexcept
-	: ActorRenderBase2D(std::move(other)), m_Renderable(std::move(other.m_Renderable)), m_Points(std::move(other.m_Points)), m_IndexingMode(other.m_IndexingMode), m_Notification(new DP_Notification(this)), m_Transformer(std::move(other.m_Transformer)), m_Modulator(std::move(other.m_Modulator)), m_Status(other.m_Status)
+	: FickleActor2D(std::move(other)), m_Renderable(std::move(other.m_Renderable)), m_Points(std::move(other.m_Points)), m_IndexingMode(other.m_IndexingMode), m_Notification(new DP_Notification(this)), m_Status(other.m_Status)
 {
-	m_Transformer.notify = m_Notification;
-	m_Modulator.notify = m_Notification;
+	*m_Fickler.Notification() = m_Notification;
 }
 
 DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
 {
-	ActorRenderBase2D::operator=(other);
+	FickleActor2D::operator=(other);
 	m_Renderable = other.m_Renderable;
 	m_Points = other.m_Points;
 	m_IndexingMode = other.m_IndexingMode;
 	m_Status = other.m_Status;
-	m_Transformer = other.m_Transformer;
-	m_Modulator = other.m_Modulator;
 	return *this;
 }
 
 DebugPolygon& DebugPolygon::operator=(DebugPolygon&& other) noexcept
 {
-	ActorRenderBase2D::operator=(std::move(other));
+	FickleActor2D::operator=(std::move(other));
 	m_Renderable = std::move(other.m_Renderable);
 	m_Points = std::move(other.m_Points);
 	m_IndexingMode = other.m_IndexingMode;
 	m_Status = other.m_Status;
-	m_Transformer = std::move(other.m_Transformer);
-	m_Modulator = std::move(other.m_Modulator);
 	return *this;
 }
 
@@ -88,14 +83,27 @@ void DebugPolygon::CheckStatus()
 	{
 		m_Status &= ~0b10;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
-		auto color = m_Modulator.self.packedM;
-		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+		if (Modulate* color = m_Fickler.PackedM()) [[likely]]
 		{
-			// TODO buffer overflow?
-			m_Renderable.vertexBufferData[i * stride + 6] = static_cast<GLfloat>(color[0]);
-			m_Renderable.vertexBufferData[i * stride + 7] = static_cast<GLfloat>(color[1]);
-			m_Renderable.vertexBufferData[i * stride + 8] = static_cast<GLfloat>(color[2]);
-			m_Renderable.vertexBufferData[i * stride + 9] = static_cast<GLfloat>(color[3]);
+			for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+			{
+				// TODO buffer overflow?
+				m_Renderable.vertexBufferData[i * stride + 6] = static_cast<GLfloat>((*color)[0]);
+				m_Renderable.vertexBufferData[i * stride + 7] = static_cast<GLfloat>((*color)[1]);
+				m_Renderable.vertexBufferData[i * stride + 8] = static_cast<GLfloat>((*color)[2]);
+				m_Renderable.vertexBufferData[i * stride + 9] = static_cast<GLfloat>((*color)[3]);
+			}
+		}
+		else [[unlikely]]
+		{
+			for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+			{
+				// TODO buffer overflow?
+				m_Renderable.vertexBufferData[i * stride + 6] = 1.0f;
+				m_Renderable.vertexBufferData[i * stride + 7] = 1.0f;
+				m_Renderable.vertexBufferData[i * stride + 8] = 1.0f;
+				m_Renderable.vertexBufferData[i * stride + 9] = 1.0f;
+			}
 		}
 	}
 	// modify point positions
@@ -114,11 +122,21 @@ void DebugPolygon::CheckStatus()
 	{
 		m_Status &= ~0b1000;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
-		glm::vec2 position = m_Transformer.self.packedP;
-		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+		if (PackedP2D* position = m_Fickler.PackedP()) [[likely]]
 		{
-			m_Renderable.vertexBufferData[i * stride	] = static_cast<GLfloat>(position.x);
-			m_Renderable.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(position.y);
+			for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+			{
+				m_Renderable.vertexBufferData[i * stride	] = static_cast<GLfloat>(position->x);
+				m_Renderable.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(position->y);
+			}
+		}
+		else [[unlikely]]
+		{
+			for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+			{
+				m_Renderable.vertexBufferData[i * stride	] = 0.0f;
+				m_Renderable.vertexBufferData[i * stride + 1] = 0.0f;
+			}
 		}
 	}
 	// update TransformRS
@@ -126,13 +144,26 @@ void DebugPolygon::CheckStatus()
 	{
 		m_Status &= ~0b10000;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
-		glm::mat2 condensed_rs_matrix = m_Transformer.self.packedRS;
-		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+		// TODO resolve this conditional at construction
+		if (PackedRS2D* condensed_rs_matrix = m_Fickler.PackedRS()) [[likely]]
 		{
-			m_Renderable.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);
-			m_Renderable.vertexBufferData[i * stride + 3] = static_cast<GLfloat>(condensed_rs_matrix[0][1]);
-			m_Renderable.vertexBufferData[i * stride + 4] = static_cast<GLfloat>(condensed_rs_matrix[1][0]);
-			m_Renderable.vertexBufferData[i * stride + 5] = static_cast<GLfloat>(condensed_rs_matrix[1][1]);
+			for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+			{
+				m_Renderable.vertexBufferData[i * stride + 2] = static_cast<GLfloat>((*condensed_rs_matrix)[0][0]);
+				m_Renderable.vertexBufferData[i * stride + 3] = static_cast<GLfloat>((*condensed_rs_matrix)[0][1]);
+				m_Renderable.vertexBufferData[i * stride + 4] = static_cast<GLfloat>((*condensed_rs_matrix)[1][0]);
+				m_Renderable.vertexBufferData[i * stride + 5] = static_cast<GLfloat>((*condensed_rs_matrix)[1][1]);
+			}
+		}
+		else [[unlikely]]
+		{
+			for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+			{
+				m_Renderable.vertexBufferData[i * stride + 2] = 0.0f;
+				m_Renderable.vertexBufferData[i * stride + 3] = 0.0f;
+				m_Renderable.vertexBufferData[i * stride + 4] = 0.0f;
+				m_Renderable.vertexBufferData[i * stride + 5] = 0.0f;
+			}
 		}
 	}
 }

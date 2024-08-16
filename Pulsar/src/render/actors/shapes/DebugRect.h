@@ -9,7 +9,7 @@ class DebugRect : public DebugPolygon
 	bool m_Filled;
 
 public:
-	DebugRect(float width, float height, bool filled_in = false, const glm::vec2& pivot = { 0.5f, 0.5f }, const Transform2D& transform = {}, const glm::vec4& color = Colors::WHITE, ZIndex z = 0);
+	DebugRect(float width, float height, bool filled_in = false, const glm::vec2& pivot = { 0.5f, 0.5f }, ZIndex z = 0, FickleType ficke_type = FickleType::Protean);
 	DebugRect(const DebugRect&);
 	DebugRect(DebugRect&&) noexcept;
 	DebugRect& operator=(const DebugRect&);

@@ -1,8 +1,8 @@
 #include "DebugRect.h"
 
-DebugRect::DebugRect(float width, float height, bool filled_in, const glm::vec2& pivot, const Transform2D& transform, const glm::vec4& color, ZIndex z)
+DebugRect::DebugRect(float width, float height, bool filled_in, const glm::vec2& pivot, ZIndex z, FickleType fickle_type)
 	: DebugPolygon({ { -pivot.x * width, -pivot.y * height }, { (1 - pivot.x) * width, -pivot.y * height }, { (1 - pivot.x) * width, (1 - pivot.y) * height }, { -pivot.x * width, (1 - pivot.y) * height } },
-		transform, color, filled_in ? GL_TRIANGLE_FAN : GL_LINE_LOOP, z), m_Width(width), m_Height(height), m_Pivot(pivot), m_Filled(filled_in)
+		filled_in ? GL_TRIANGLE_FAN : GL_LINE_LOOP, z, fickle_type), m_Width(width), m_Height(height), m_Pivot(pivot), m_Filled(filled_in)
 {
 }
 

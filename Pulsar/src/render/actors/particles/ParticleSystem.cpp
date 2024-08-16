@@ -5,8 +5,8 @@
 template class ParticleSystem<unsigned short>;
 
 template<std::unsigned_integral ParticleCount>
-ParticleSystem<ParticleCount>::ParticleSystem(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform, const glm::vec4& modulate, ZIndex z, bool visible, bool enabled)
-	: ParticleEffect<ParticleCount>(subsystem_data, transform, modulate, enabled), m_Batcher(z), ActorRenderBase2D(z), visible(visible)
+ParticleSystem<ParticleCount>::ParticleSystem(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, ZIndex z, FickleType fickle_type, bool visible, bool enabled)
+	: ParticleEffect<ParticleCount>(subsystem_data, fickle_type, enabled), m_Batcher(z), ActorRenderBase2D(z), visible(visible)
 {
 }
 

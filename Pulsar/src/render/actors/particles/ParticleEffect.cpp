@@ -8,16 +8,20 @@ template class ParticleEffect<unsigned short>;
 // TODO eventually, create factory for particle effects?
 
 template<std::unsigned_integral ParticleCount>
-ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, const Transform2D& transform, const glm::vec4& modulate, bool enabled)
-	: enabled(enabled), m_Transformer(transform), m_Modulator(modulate)
+ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, FickleType fickle_type, bool enabled)
+	: enabled(enabled), m_Fickler(fickle_type)
 {
 	ParticleSubsystemIndex i = 0;
 	for (const auto& subsys : subsystem_data)
 	{
-		std::shared_ptr<ParticleSubsystem<ParticleCount>> subsystem = std::make_shared<ParticleSubsystem<ParticleCount>>(subsys, i++);
+		std::shared_ptr<ParticleSubsystem<ParticleCount>> subsystem = std::make_shared<ParticleSubsystem<ParticleCount>>(subsys, i++, fickle_type);
 		m_Subsystems.push_back(subsystem);
-		m_Transformer.Attach(&subsystem->m_Transformer);
-		m_Modulator.Attach(&subsystem->m_Modulator);
+		if (m_Fickler.IsProtean())
+			m_Fickler.ProteanLinker()->Attach(subsystem->Fickler().ProteanLinker());
+		else if (m_Fickler.IsTransformable())
+			m_Fickler.Transformer()->Attach(subsystem->Fickler().Transformer());
+		else if (m_Fickler.IsModulatable())
+			m_Fickler.Modulator()->Attach(subsystem->Fickler().Modulator());
 	}
 	Reset();
 }

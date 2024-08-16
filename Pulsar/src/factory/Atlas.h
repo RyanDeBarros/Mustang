@@ -7,6 +7,7 @@
 #include "Tile.h"
 #include "ShaderFactory.h"
 #include "Texture.h"
+#include "render/transform/Fickle.inl"
 
 struct Placement
 {
@@ -56,7 +57,7 @@ public:
 	inline const std::vector<Placement>& GetPlacements() const { return m_Placements; }
 	inline const unsigned char* const GetBuffer() const { return m_ImageBuffer; }
 	
-	class RectRender SampleSubtile(size_t index, const struct TextureSettings& texture_settings = Texture::nearest_settings, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, bool visible = true) const;
+	class RectRender SampleSubtile(size_t index, const struct TextureSettings& texture_settings = Texture::nearest_settings, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true) const;
 
 private:
 	void RectPack(std::vector<TileHandle>& tiles, int width = -1, int height = -1);

@@ -253,7 +253,7 @@
     <ClInclude Include="src\render\actors\TileMap.h" />
     <ClInclude Include="src\render\transform\Modulate.h" />
     <ClInclude Include="src\render\transform\Transform.h" />
-    <ClInclude Include="src\render\transform\Wrapper.h" />
+    <ClInclude Include="src\render\transform\Fickle.inl" />
     <ClInclude Include="src\render\transform\Transforms.h" />
     <ClInclude Include="src\Typedefs.h" />
     <ClInclude Include="src\Macros.h" />
@@ -557,6 +557,7 @@
     <ClInclude Include="vendor\toml\toml.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\render\transform\FickleNotification.inl" />
     <None Include="vendor\glm\detail\func_common.inl" />
     <None Include="vendor\glm\detail\func_common_simd.inl" />
     <None Include="vendor\glm\detail\func_exponential.inl" />

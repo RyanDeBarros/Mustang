@@ -9,3 +9,17 @@ inline void swap_pop(std::vector<T>& vec, size_t i)
 		std::swap(vec[i], vec.back());
 	vec.pop_back();
 }
+
+template<typename T>
+inline void set_ptr(T* ptr, const T& value)
+{
+	if (ptr)
+		*ptr = value;
+}
+
+template<typename T>
+inline void set_ptr(T* ptr, T&& value)
+{
+	if (ptr)
+		*ptr = std::move(value);
+}

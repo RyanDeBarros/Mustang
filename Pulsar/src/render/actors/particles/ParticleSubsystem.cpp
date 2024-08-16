@@ -8,21 +8,22 @@ template struct ParticleSubsystemData<unsigned short>;
 template class ParticleSubsystem<unsigned short>;
 
 template<std::unsigned_integral ParticleCount>
-ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystemData<ParticleCount>& wave_data, ParticleSubsystemIndex subsystem_index)
-	: m_Data(wave_data), m_TotalSpawn(m_Data.spawnFunc(1.0f)), m_SubsystemIndex(subsystem_index), m_Transformer(), m_Modulator()
+ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystemData<ParticleCount>& wave_data, ParticleSubsystemIndex subsystem_index, FickleType fickle_type)
+	: m_Data(wave_data), m_TotalSpawn(m_Data.spawnFunc(1.0f)), m_SubsystemIndex(subsystem_index), m_Fickler(fickle_type)
 {
+	ASSERT(wave_data.prototypeShape->Fickler().Type() == fickle_type);
 	SetWavePeriod(wave_data.wavePeriod);
 }
 
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystem<ParticleCount>& other)
-	: m_Data(other.m_Data), m_PeriodInv(other.m_PeriodInv), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Transformer(other.m_Transformer), m_Modulator(other.m_Modulator)
+	: m_Data(other.m_Data), m_PeriodInv(other.m_PeriodInv), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Fickler(other.m_Fickler)
 {
 }
 
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>::ParticleSubsystem(ParticleSubsystem<ParticleCount>&& other) noexcept
-	: m_Data(std::move(other.m_Data)), m_PeriodInv(other.m_PeriodInv), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Transformer(std::move(other.m_Transformer)), m_Modulator(std::move(other.m_Modulator))
+	: m_Data(std::move(other.m_Data)), m_PeriodInv(other.m_PeriodInv), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Fickler(std::move(other.m_Fickler))
 {
 }
 
@@ -35,8 +36,7 @@ ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(co
 	m_TotalSpawn = other.m_TotalSpawn;
 	m_WaveNum = other.m_WaveNum;
 	m_SubsystemIndex = other.m_SubsystemIndex;
-	m_Transformer = other.m_Transformer;
-	m_Modulator = other.m_Modulator;
+	m_Fickler = other.m_Fickler;
 	return *this;
 }
 
@@ -49,8 +49,7 @@ ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(Pa
 	m_TotalSpawn = other.m_TotalSpawn;
 	m_WaveNum = other.m_WaveNum;
 	m_SubsystemIndex = other.m_SubsystemIndex;
-	m_Transformer = std::move(other.m_Transformer);
-	m_Modulator = std::move(other.m_Modulator);
+	m_Fickler = std::move(other.m_Fickler);
 	return *this;
 }
 
@@ -85,8 +84,12 @@ template<std::unsigned_integral ParticleCount>
 void ParticleSubsystem<ParticleCount>::Spawn(ParticleEffect<ParticleCount>& psys, const Particles::CHRSeed& seed)
 {
 	std::shared_ptr<DebugPolygon> shape(std::make_shared<DebugPolygon>(*m_Data.prototypeShape));
-	m_Transformer.Attach(shape->Transformer());
-	m_Modulator.Attach(shape->Modulator());
+	if (m_Fickler.IsProtean())
+		m_Fickler.ProteanLinker()->Attach(shape->Fickler().ProteanLinker());
+	else if (m_Fickler.IsTransformable())
+		m_Fickler.Transformer()->Attach(shape->Fickler().Transformer());
+	else if (m_Fickler.IsModulatable())
+		m_Fickler.Modulator()->Attach(shape->Fickler().Modulator());
 	m_Particles.push_back(Particle(shape, m_Data.lifespanFunc(seed), m_Data.characteristicGen(seed)));
 	psys.AddParticleShape(m_SubsystemIndex, shape);
 }
@@ -114,6 +117,11 @@ void ParticleSubsystem<ParticleCount>::RemoveUnordered(ParticleCount i)
 	if (m_Particles.size() > 1)
 		std::swap(m_Particles[i], m_Particles.back());
 	m_Particles.pop_back();
-	swap_pop(m_Transformer.children, i);
-	swap_pop(m_Modulator.children, i);
+	// TODO resolve all fickler conditionals at initialization of class
+	if (m_Fickler.IsProtean())
+		swap_pop(m_Fickler.ProteanLinker()->children, i);
+	else if (m_Fickler.IsTransformable())
+		swap_pop(m_Fickler.Transformer()->children, i);
+	else if (m_Fickler.IsModulatable())
+		swap_pop(m_Fickler.Modulator()->children, i);
 }

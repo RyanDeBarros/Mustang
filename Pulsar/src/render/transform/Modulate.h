@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+#include "FickleNotification.inl"
+
 typedef glm::vec4 Modulate;
 
 struct PackedModulate
@@ -21,22 +23,18 @@ struct PackedModulate
 
 	void Sync();
 	void Sync(const PackedModulate& parent);
+	void Sync(const Modulate& parentM);
 
-};
-
-struct ModulateNotification
-{
-	virtual void NotifyM() {}
 };
 
 struct Modulator
 {
 	PackedModulate self;
-	ModulateNotification* notify = nullptr;
+	FickleNotification* notify = nullptr;
 	Modulator* parent = nullptr;
 	std::vector<Modulator*> children;
 
-	inline Modulator(const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }, ModulateNotification* notify = nullptr, bool sync = true)
+	explicit inline Modulator(const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }, FickleNotification* notify = nullptr, bool sync = true)
 		: self{ modulate }, notify(notify)
 	{
 		if (sync)
@@ -69,16 +67,24 @@ struct Modulator
 		return *this;
 	}
 
+	inline Modulate& Self() { return self.modulate; }
+	void SetPackedLocalOf(const Modulate& global);
+
+	inline void SyncChildren()
+	{
+		if (notify)
+			notify->Notify(FickleSyncCode::SyncM);
+		for (const auto& c : children)
+			c->Sync();
+	}
+
 	inline void Sync()
 	{
 		if (parent)
 			self.Sync(parent->self);
 		else
 			self.Sync();
-		if (notify)
-			notify->NotifyM();
-		for (const auto& c : children)
-			c->Sync();
+		SyncChildren();
 	}
 
 	inline void Attach(Modulator* modulator)

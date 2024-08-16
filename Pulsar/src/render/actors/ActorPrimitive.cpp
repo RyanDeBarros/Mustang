@@ -3,27 +3,27 @@
 #include "Logger.inl"
 #include "render/CanvasLayer.h"
 
-ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, const Transform2D& transform, ZIndex z, bool visible)
-	: ProteanActor2D(z, transform, { 1.0f, 1.0f, 1.0f, 1.0f }), m_Render(render), m_Notification(new AP2D_Notification(this)), m_Status(visible ? 0b111 : 0b110)
+ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, ZIndex z, FickleType fickle_type, bool visible)
+	: FickleActor2D(fickle_type, z), m_Render(render), m_Notification(new AP2D_Notification(this)), m_Status(visible ? 0b111 : 0b110)
 {
-	m_ProteanLinker.notify = m_Notification;
+	*m_Fickler.Notification() = m_Notification;
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const ActorPrimitive2D& primitive)
-	: ProteanActor2D(primitive), m_Render(primitive.m_Render), m_Notification(new AP2D_Notification(this)), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
+	: FickleActor2D(primitive), m_Render(primitive.m_Render), m_Notification(new AP2D_Notification(this)), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors)
 {
-	m_ProteanLinker.notify = m_Notification;
+	*m_Fickler.Notification() = m_Notification;
 }
 
 ActorPrimitive2D::ActorPrimitive2D(ActorPrimitive2D&& primitive) noexcept
-	: ProteanActor2D(std::move(primitive)), m_Render(std::move(primitive.m_Render)), m_Notification(new AP2D_Notification(this)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors))
+	: FickleActor2D(std::move(primitive)), m_Render(std::move(primitive.m_Render)), m_Notification(new AP2D_Notification(this)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors))
 {
-	m_ProteanLinker.notify = m_Notification;
+	*m_Fickler.Notification() = m_Notification;
 }
 
 ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
 {
-	ProteanActor2D::operator=(primitive);
+	FickleActor2D::operator=(primitive);
 	m_Render = primitive.m_Render;
 	m_Status = primitive.m_Status;
 	m_ModulationColors = primitive.m_ModulationColors;
@@ -32,7 +32,7 @@ ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
 
 ActorPrimitive2D& ActorPrimitive2D::operator=(ActorPrimitive2D&& primitive) noexcept
 {
-	ProteanActor2D::operator=(std::move(primitive));
+	FickleActor2D::operator=(std::move(primitive));
 	m_Render = std::move(primitive.m_Render);
 	m_Status = primitive.m_Status;
 	m_ModulationColors = std::move(primitive.m_ModulationColors);
@@ -67,37 +67,73 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 	{
 		m_Status &= ~0b10;
 		// TODO use regular position/condensed_rs for parent-independent actors - use bool flag.
-		glm::vec2 position = m_ProteanLinker.self.packedP;
-		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+		if (PackedP2D* position = m_Fickler.PackedP()) [[likely]]
 		{
-			m_Render.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(position.x);
-			m_Render.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(position.y);
+			for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+			{
+				m_Render.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(position->x);
+				m_Render.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(position->y);
+			}
+		}
+		else
+		{
+			for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+			{
+				m_Render.vertexBufferData[i * stride + 1] = 0.0f;
+				m_Render.vertexBufferData[i * stride + 2] = 0.0f;
+			}
 		}
 	}
 	// update TransformRS
 	if (m_Status & 0b100)
 	{
 		m_Status &= ~0b100;
-		glm::mat2 condensed_rs_matrix = m_ProteanLinker.self.packedRS;
-		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+		if (PackedRS2D* condensed_rs_matrix = m_Fickler.PackedRS())
 		{
-			m_Render.vertexBufferData[i * stride + 3] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);
-			m_Render.vertexBufferData[i * stride + 4] = static_cast<GLfloat>(condensed_rs_matrix[0][1]);
-			m_Render.vertexBufferData[i * stride + 5] = static_cast<GLfloat>(condensed_rs_matrix[1][0]);
-			m_Render.vertexBufferData[i * stride + 6] = static_cast<GLfloat>(condensed_rs_matrix[1][1]);
+			for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+			{
+				m_Render.vertexBufferData[i * stride + 3] = static_cast<GLfloat>((*condensed_rs_matrix)[0][0]);
+				m_Render.vertexBufferData[i * stride + 4] = static_cast<GLfloat>((*condensed_rs_matrix)[0][1]);
+				m_Render.vertexBufferData[i * stride + 5] = static_cast<GLfloat>((*condensed_rs_matrix)[1][0]);
+				m_Render.vertexBufferData[i * stride + 6] = static_cast<GLfloat>((*condensed_rs_matrix)[1][1]);
+			}
+		}
+		else
+		{
+			for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+			{
+				m_Render.vertexBufferData[i * stride + 3] = 0.0f;
+				m_Render.vertexBufferData[i * stride + 4] = 0.0f;
+				m_Render.vertexBufferData[i * stride + 5] = 0.0f;
+				m_Render.vertexBufferData[i * stride + 6] = 0.0f;
+			}
 		}
 	}
 	// update ModulationColor
 	if (m_Status & 0b1000)
 	{
 		m_Status &= ~0b1000;
-		for (BufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
+		if (Modulate* global_color = m_Fickler.PackedM())
 		{
-			auto color = m_ModulationColors[i] * m_ProteanLinker.self.packedM;
-			m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(color.r);
-			m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(color.g);
-			m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(color.b);
-			m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(color.a);
+			for (BufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
+			{
+				Modulate color = m_ModulationColors[i] * *global_color;
+				m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(color.r);
+				m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(color.g);
+				m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(color.b);
+				m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(color.a);
+			}
+		}
+		else
+		{
+			for (BufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
+			{
+				Modulate color = m_ModulationColors[i];
+				m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(color.r);
+				m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(color.g);
+				m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(color.b);
+				m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(color.a);
+			}
 		}
 	}
 }

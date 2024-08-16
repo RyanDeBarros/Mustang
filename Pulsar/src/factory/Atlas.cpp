@@ -324,18 +324,21 @@ void Atlas::PlaceTiles()
 	}
 }
 
-RectRender Atlas::SampleSubtile(size_t index, const TextureSettings& texture_settings, ShaderHandle shader, ZIndex z, bool visible) const
+RectRender Atlas::SampleSubtile(size_t index, const TextureSettings& texture_settings, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible) const
 {
 	if (index >= m_Placements.size() || m_Placements[index].x < 0)
-		return { 0, {}, 0, 0, false };
-	RectRender actor(TextureFactory::GetHandle(TileFactory::GetAtlasHandle(this), texture_settings), {}, shader, z, visible);
+		return RectRender(0, 0, 0, fickle_type, false);
+	RectRender actor(TextureFactory::GetHandle(TileFactory::GetAtlasHandle(this), texture_settings), shader, z, fickle_type, visible);
 	const Placement& rect = m_Placements[index];
 	if (rect.r)
 		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.h - m_Border, rect.w - m_Border }, m_Width, m_Height);
 	else
 		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.w - m_Border, rect.h - m_Border }, m_Width, m_Height);
 	actor.SetPivot(0.5, 0.5);
-	actor.RefTransform()->scale = { (rect.w - m_Border) / static_cast<float>(m_Width), (rect.h - m_Border) / static_cast<float>(m_Height) };
-	actor.RefProteanLinker()->SyncRS();
+	if (actor.Fickler().CanTransform())
+	{
+		*actor.Fickler().Scale() = { (rect.w - m_Border) / static_cast<float>(m_Width), (rect.h - m_Border) / static_cast<float>(m_Height) };
+		actor.Fickler().SyncRS();
+	}
 	return actor;
 }

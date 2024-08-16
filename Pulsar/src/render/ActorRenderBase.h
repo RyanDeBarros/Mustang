@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Typedefs.h"
-#include "transform/Wrapper.h"
+#include "transform/Fickle.inl"
 
 struct ActorRenderBase2D
 {
@@ -10,17 +10,12 @@ struct ActorRenderBase2D
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) = 0;
 };
 
-struct TransformableActor2D : public ActorRenderBase2D, public Transformable2D
+struct FickleActor2D : public ActorRenderBase2D
 {
-	TransformableActor2D(ZIndex z = 0, const Transform2D& transform = {}) : ActorRenderBase2D(z), Transformable2D(transform) {}
-};
+	FickleActor2D(FickleType fickle_type, ZIndex z = 0) : ActorRenderBase2D(z), m_Fickler(fickle_type) {}
 
-struct ModulatableActor2D : public ActorRenderBase2D, public Modulatable
-{
-	ModulatableActor2D(ZIndex z = 0, const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }) : ActorRenderBase2D(z), Modulatable(modulate) {}
-};
+	inline FickleSelector2D& Fickler() { return m_Fickler; }
 
-struct ProteanActor2D : public ActorRenderBase2D, public Protean2D
-{
-	ProteanActor2D(ZIndex z = 0, const Transform2D& transform = {}, const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }) : ActorRenderBase2D(z), Protean2D(transform, modulate) {}
+protected:
+	FickleSelector2D m_Fickler;
 };

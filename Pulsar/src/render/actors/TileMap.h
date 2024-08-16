@@ -22,14 +22,14 @@ typedef size_t TileMapIndex;
 
 // TODO versions of all similar classes for transformable, modulatable, and protean? Or instead of inheritance, it could be an inherited pointer data member.
 
-class TileMap : public ProteanActor2D
+class TileMap : public FickleActor2D
 {
 	Atlas* m_Atlas;
 	std::vector<TMElement> m_Map;
 	Permutation m_Ordering;
 
 public:
-	TileMap(TileHandle atlas_handle, const TextureSettings& texture_settings = Texture::nearest_settings, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, bool visible = true);
+	TileMap(TileHandle atlas_handle, const TextureSettings& texture_settings = Texture::nearest_settings, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Transformable, bool visible = true);
 	TileMap(const TileMap&) = delete;
 	TileMap(TileMap&&) = delete;
 	~TileMap();
@@ -37,7 +37,7 @@ public:
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
 	bool SetOrdering(const Permutation& permutation);
-	void Insert(TileMapIndex tessel, float posX, float posY);
+	void Insert(TileMapIndex tessel, float posX, float posY, const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f });
 
 	ActorTesselation2D* const TesselationRef(TileMapIndex tessel) const;
 };
