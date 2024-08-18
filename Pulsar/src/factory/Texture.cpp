@@ -132,7 +132,12 @@ Texture::Texture(Texture&& texture) noexcept
 
 Texture& Texture::operator=(Texture&& texture) noexcept
 {
-	TRY(glDeleteTextures(1, &m_RID));
+	if (this == &texture)
+		return *this;
+	if (m_RID != texture.m_RID)
+	{
+		TRY(glDeleteTextures(1, &m_RID));
+	}
 	m_RID = texture.m_RID;
 	m_Tile = texture.m_Tile;
 	m_Settings = texture.m_Settings;

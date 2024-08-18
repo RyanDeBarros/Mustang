@@ -24,6 +24,8 @@ ActorPrimitive2D::ActorPrimitive2D(ActorPrimitive2D&& primitive) noexcept
 
 ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
 {
+	if (this == &primitive)
+		return *this;
 	FickleActor2D::operator=(primitive);
 	m_Render = primitive.m_Render;
 	m_Status = primitive.m_Status;
@@ -36,6 +38,8 @@ ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
 
 ActorPrimitive2D& ActorPrimitive2D::operator=(ActorPrimitive2D&& primitive) noexcept
 {
+	if (this == &primitive)
+		return *this;
 	FickleActor2D::operator=(std::move(primitive));
 	m_Render = std::move(primitive.m_Render);
 	m_Status = primitive.m_Status;

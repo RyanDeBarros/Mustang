@@ -16,17 +16,21 @@ DebugBatcher::DebugBatcher(DebugBatcher&& other) noexcept
 
 DebugBatcher& DebugBatcher::operator=(const DebugBatcher& other)
 {
+	if (this == &other)
+		return *this;
+	ActorRenderBase2D::operator=(other);
 	m_Slots = other.m_Slots;
 	m_OrderedTraversal = other.m_OrderedTraversal;
-	ActorRenderBase2D::operator=(other);
 	return *this;
 }
 
 DebugBatcher& DebugBatcher::operator=(DebugBatcher&& other) noexcept
 {
+	if (this == &other)
+		return *this;
+	ActorRenderBase2D::operator=(std::move(other));
 	m_Slots = std::move(other.m_Slots);
 	m_OrderedTraversal = std::move(other.m_OrderedTraversal);
-	ActorRenderBase2D::operator=(std::move(other));
 	return *this;
 }
 

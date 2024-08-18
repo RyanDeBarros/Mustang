@@ -44,10 +44,12 @@ Atlas::Atlas(Atlas&& atlas) noexcept
 
 Atlas& Atlas::operator=(Atlas&& atlas) noexcept
 {
+	if (this == &atlas)
+		return *this;
+	Tile::operator=(std::move(atlas));
 	m_Border = atlas.m_Border;
 	m_BufferSize = atlas.m_BufferSize;
 	m_Placements = std::move(atlas.m_Placements);
-	Tile::operator=(std::move(atlas));
 	return *this;
 }
 

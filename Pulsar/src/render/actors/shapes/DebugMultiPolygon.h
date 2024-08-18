@@ -7,13 +7,12 @@
 #include "DebugPolygon.h"
 #include "render/Renderable.h"
 
-// TODO Here, std::shared_ptr is used. It should be used more throughout project.
-
 class DebugMultiPolygon : public ActorRenderBase2D
 {
 	friend class CanvasLayer;
 	friend class DebugBatcher;
 
+	// TODO use regular pointer?
 	std::vector<std::shared_ptr<DebugPolygon>> m_Polygons;
 	BatchModel m_Model;
 	GLenum m_IndexMode;

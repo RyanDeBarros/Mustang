@@ -34,6 +34,8 @@ ActorComposite2D::ActorComposite2D(ActorComposite2D&& other) noexcept
 
 ActorComposite2D& ActorComposite2D::operator=(const ActorComposite2D& other)
 {
+	if (this == &other)
+		return *this;
 	FickleActor2D::operator=(other);
 	m_Mode = other.m_Mode;
 	if (tail)
@@ -47,6 +49,8 @@ ActorComposite2D& ActorComposite2D::operator=(const ActorComposite2D& other)
 
 ActorComposite2D& ActorComposite2D::operator=(ActorComposite2D&& other) noexcept
 {
+	if (this == &other)
+		return *this;
 	FickleActor2D::operator=(std::move(other));
 	m_Mode = other.m_Mode;
 	if (tail)

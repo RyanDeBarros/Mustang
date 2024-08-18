@@ -31,6 +31,8 @@ RectRender::RectRender(RectRender&& other) noexcept
 
 RectRender& RectRender::operator=(const RectRender& other)
 {
+	if (this == &other)
+		return *this;
 	ActorPrimitive2D::operator=(other);
 	m_UVWidth = other.m_UVWidth;
 	m_UVHeight = other.m_UVHeight;
@@ -40,6 +42,8 @@ RectRender& RectRender::operator=(const RectRender& other)
 
 RectRender& RectRender::operator=(RectRender&& other) noexcept
 {
+	if (this == &other)
+		return *this;
 	ActorPrimitive2D::operator=(std::move(other));
 	m_UVWidth = other.m_UVWidth;
 	m_UVHeight = other.m_UVHeight;

@@ -31,6 +31,8 @@ ParticleSubsystem<ParticleCount>::ParticleSubsystem(ParticleSubsystem<ParticleCo
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(const ParticleSubsystem<ParticleCount>& other)
 {
+	if (this == &other)
+		return *this;
 	m_Data = other.m_Data;
 	m_PeriodInv = other.m_PeriodInv;
 	m_NumSpawned = other.m_NumSpawned;
@@ -46,6 +48,8 @@ ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(co
 template<std::unsigned_integral ParticleCount>
 ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(ParticleSubsystem<ParticleCount>&& other) noexcept
 {
+	if (this == &other)
+		return *this;
 	m_Data = std::move(other.m_Data);
 	m_PeriodInv = other.m_PeriodInv;
 	m_NumSpawned = other.m_NumSpawned;

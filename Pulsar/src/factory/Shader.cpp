@@ -99,7 +99,12 @@ Shader::Shader(Shader&& shader) noexcept
 
 Shader& Shader::operator=(Shader&& shader) noexcept
 {
-	TRY(glDeleteProgram(m_RID));
+	if (this == &shader)
+		return *this;
+	if (m_RID != shader.m_RID)
+	{
+		TRY(glDeleteProgram(m_RID));
+	}
 	m_RID = shader.m_RID;
 	m_VertexFilepath = std::move(shader.m_VertexFilepath);
 	m_FragmentFilepath = std::move(shader.m_FragmentFilepath);

@@ -33,6 +33,8 @@ Particle::Particle(Particle&& other) noexcept
 
 Particle& Particle::operator=(const Particle& other)
 {
+	if (this == &other)
+		return *this;
 	m_Shape = std::make_shared<DebugPolygon>(*other.m_Shape);
 	m_Characteristic = other.m_Characteristic;
 	m_LifespanInv = other.m_LifespanInv;
@@ -54,6 +56,8 @@ Particle& Particle::operator=(const Particle& other)
 
 Particle& Particle::operator=(Particle&& other) noexcept
 {
+	if (this == &other)
+		return *this;
 	m_Shape = std::move(other.m_Shape);
 	m_Characteristic = std::move(other.m_Characteristic);
 	m_LifespanInv = other.m_LifespanInv;

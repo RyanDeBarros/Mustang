@@ -31,16 +31,31 @@ public:
 	}
 	inline FickleWrapper& operator=(const FickleWrapper<T>& other)
 	{
-		if (m_Ptr)
-			delete m_Ptr;
+		if (this == &other)
+			return *this;
 		if (other.m_Ptr)
-			m_Ptr = new T(*other.m_Ptr);
-		else
+		{
+			if (m_Ptr)
+			{
+				m_Ptr->~T();
+				new (m_Ptr) T(*other.m_Ptr);
+			}
+			else
+			{
+				m_Ptr = new T(*other.m_Ptr);
+			}
+		}
+		else if (m_Ptr)
+		{
+			delete m_Ptr;
 			m_Ptr = nullptr;
+		}
 		return *this;
 	}
 	inline FickleWrapper& operator=(FickleWrapper<T>&& other) noexcept
 	{
+		if (this == &other)
+			return *this;
 		if (m_Ptr)
 			delete m_Ptr;
 		m_Ptr = other.m_Ptr;
@@ -59,19 +74,34 @@ public:
 	inline void Disengage()
 	{
 		if (m_Ptr)
+		{
 			delete m_Ptr;
+			m_Ptr = nullptr;
+		}
 	}
 	inline void Engage(const T& fickler)
 	{
 		if (m_Ptr)
-			delete m_Ptr;
-		m_Ptr = new T(fickler);
+		{
+			m_Ptr->~T();
+			new (m_Ptr) T(fickler);
+		}
+		else
+		{
+			m_Ptr = new T(fickler);
+		}
 	}
 	inline void Engage(T&& fickler)
 	{
 		if (m_Ptr)
-			delete m_Ptr;
-		m_Ptr = new T(std::move(fickler));
+		{
+			m_Ptr->~T();
+			new (m_Ptr) T(std::move(fickler));
+		}
+		else
+		{
+			m_Ptr = new T(std::move(fickler));
+		}
 	}
 	inline T* Ref()
 	{
@@ -83,8 +113,15 @@ struct Transformable2D : public FickleWrapper<Transformer2D>
 {
 	inline void Emplace(const Transform2D& transform = {})
 	{
-		Disengage();
-		m_Ptr = new Transformer2D(transform);
+		if (m_Ptr)
+		{
+			m_Ptr->~Transformer2D();
+			new (m_Ptr) Transformer2D(transform);
+		}
+		else
+		{
+			m_Ptr = new Transformer2D(transform);
+		}
 	}
 };
 
@@ -92,8 +129,15 @@ struct Modulatable : public FickleWrapper<Modulator>
 {
 	inline void Emplace(const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f })
 	{
-		Disengage();
-		m_Ptr = new Modulator(modulate);
+		if (m_Ptr)
+		{
+			m_Ptr->~Modulator();
+			new (m_Ptr) Modulator(modulate);
+		}
+		else
+		{
+			m_Ptr = new Modulator(modulate);
+		}
 	}
 };
 
@@ -101,8 +145,15 @@ struct Protean2D : public FickleWrapper<ProteanLinker2D>
 {
 	inline void Emplace(const Transform2D& transform = {}, const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f })
 	{
-		Disengage();
-		m_Ptr = new ProteanLinker2D(transform, modulate);
+		if (m_Ptr)
+		{
+			m_Ptr->~ProteanLinker2D();
+			new (m_Ptr) ProteanLinker2D(transform, modulate);
+		}
+		else
+		{
+			m_Ptr = new ProteanLinker2D(transform, modulate);
+		}
 	}
 };
 
@@ -196,7 +247,6 @@ public:
 	}
 	inline FickleSelector2D& operator=(const FickleSelector2D& other)
 	{
-		// TODO ADD SELF-ASSIGNMENT CHECKS TO ALL ASSIGNMENT OPERATORS IF DESTRUCTIVE
 		if (this == &other)
 			return *this;
 		DestroyUnion();
@@ -479,6 +529,8 @@ public:
 	FickleUniqueVector& operator=(const FickleUniqueVector&) = delete;
 	inline FickleUniqueVector& operator=(FickleUniqueVector&& other) noexcept
 	{
+		if (this == &other)
+			return *this;
 		DestroyUnion();
 		type = other.type;
 		switch (type)

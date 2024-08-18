@@ -27,6 +27,8 @@ DebugPolygon::DebugPolygon(DebugPolygon&& other) noexcept
 
 DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
 {
+	if (this == &other)
+		return *this;
 	FickleActor2D::operator=(other);
 	m_Renderable = other.m_Renderable;
 	m_Points = other.m_Points;
@@ -40,6 +42,8 @@ DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
 
 DebugPolygon& DebugPolygon::operator=(DebugPolygon&& other) noexcept
 {
+	if (this == &other)
+		return *this;
 	FickleActor2D::operator=(std::move(other));
 	m_Renderable = std::move(other.m_Renderable);
 	m_Points = std::move(other.m_Points);

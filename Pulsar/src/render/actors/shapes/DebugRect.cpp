@@ -18,6 +18,8 @@ DebugRect::DebugRect(DebugRect&& other) noexcept
 
 DebugRect& DebugRect::operator=(const DebugRect& other)
 {
+	if (this == &other)
+		return *this;
 	DebugPolygon::operator=(other);
 	m_Width = other.m_Width;
 	m_Height = other.m_Height;
@@ -28,6 +30,8 @@ DebugRect& DebugRect::operator=(const DebugRect& other)
 
 DebugRect& DebugRect::operator=(DebugRect&& other) noexcept
 {
+	if (this == &other)
+		return *this;
 	DebugPolygon::operator=(std::move(other));
 	m_Width = other.m_Width;
 	m_Height = other.m_Height;

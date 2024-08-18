@@ -15,7 +15,7 @@ class ActorTesselation2D : public FickleActor2D
 public:
 	ActorTesselation2D(FickleActor2D* actor, FickleType fickle_type = FickleType::Transformable);
 	ActorTesselation2D(const ActorTesselation2D&) = delete;
-	ActorTesselation2D& operator=(const ActorTesselation2D&) = delete;
+	ActorTesselation2D(ActorTesselation2D&&) = delete;
 	
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 	

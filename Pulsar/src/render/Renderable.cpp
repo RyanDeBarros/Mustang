@@ -93,6 +93,8 @@ Renderable::Renderable(const Renderable& other)
 
 Renderable& Renderable::operator=(const Renderable& other)
 {
+	if (this == &other)
+		return *this;
 	model = other.model;
 	textureHandle = other.textureHandle;
 	
@@ -125,6 +127,8 @@ Renderable& Renderable::operator=(const Renderable& other)
 
 Renderable& Renderable::operator=(Renderable&& other) noexcept
 {
+	if (this == &other)
+		return *this;
 	model = other.model;
 	textureHandle = other.textureHandle;
 	if (vertexBufferData)

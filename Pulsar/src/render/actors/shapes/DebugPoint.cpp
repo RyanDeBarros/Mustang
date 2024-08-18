@@ -22,6 +22,8 @@ DebugPoint::DebugPoint(DebugPoint&& other) noexcept
 
 DebugPoint& DebugPoint::operator=(const DebugPoint& other)
 {
+	if (this == &other)
+		return *this;
 	DebugPolygon::operator=(other);
 	m_Diameter = other.m_Diameter;
 	m_InnerRadius = other.m_InnerRadius;
@@ -32,6 +34,8 @@ DebugPoint& DebugPoint::operator=(const DebugPoint& other)
 
 DebugPoint& DebugPoint::operator=(DebugPoint&& other) noexcept
 {
+	if (this == &other)
+		return *this;
 	DebugPolygon::operator=(std::move(other));
 	m_Diameter = other.m_Diameter;
 	m_InnerRadius = other.m_InnerRadius;

@@ -24,6 +24,8 @@ Tile::Tile(Tile&& tile) noexcept
 
 Tile& Tile::operator=(Tile&& tile) noexcept
 {
+	if (this == &tile)
+		return *this;
 	m_Filepath = std::move(tile.m_Filepath);
 	if (m_ImageBuffer)
 		stbi_image_free(m_ImageBuffer);

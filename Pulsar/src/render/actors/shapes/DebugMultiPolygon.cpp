@@ -40,6 +40,9 @@ DebugMultiPolygon::DebugMultiPolygon(DebugMultiPolygon&& other) noexcept
 
 DebugMultiPolygon& DebugMultiPolygon::operator=(const DebugMultiPolygon& other)
 {
+	if (this == &other)
+		return *this;
+	ActorRenderBase2D::operator=(other);
 	draw_count = other.draw_count;
 	m_IndexMode = other.m_IndexMode;
 	m_Model = other.m_Model;
@@ -64,13 +67,14 @@ DebugMultiPolygon& DebugMultiPolygon::operator=(const DebugMultiPolygon& other)
 	}
 	else
 		index_counts_ptr = nullptr;
-
-	ActorRenderBase2D::operator=(other);
 	return *this;
 }
 
 DebugMultiPolygon& DebugMultiPolygon::operator=(DebugMultiPolygon&& other) noexcept
 {
+	if (this == &other)
+		return *this;
+	ActorRenderBase2D::operator=(std::move(other));
 	draw_count = other.draw_count;
 	m_IndexMode = other.m_IndexMode;
 	m_Model = other.m_Model;
@@ -85,8 +89,6 @@ DebugMultiPolygon& DebugMultiPolygon::operator=(DebugMultiPolygon&& other) noexc
 		delete[] index_counts_ptr;
 	index_counts_ptr = other.index_counts_ptr;
 	other.index_counts_ptr = nullptr;
-
-	ActorRenderBase2D::operator=(std::move(other));
 	return *this;
 }
 
