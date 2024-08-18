@@ -116,12 +116,12 @@ void Pulsar::Run(GLFWwindow* window)
 		ASSERT(false);
 	//if (loadTexture("res/assets/atlas.toml", textureAtlas) != LOAD_STATUS::OK)
 	//	ASSERT(false);
-	TextureHandle tex_dirtTL = TextureFactory::GetHandle("res/textures/dirtTL.png");
-	TextureHandle tex_dirtTR = TextureFactory::GetHandle("res/textures/dirtTR.png");
-	TextureHandle tex_grassSingle = TextureFactory::GetHandle("res/textures/grassSingle.png");
-	TextureHandle tex_grassTL = TextureFactory::GetHandle("res/textures/grassTL.png");
-	TextureHandle tex_grassTE = TextureFactory::GetHandle("res/textures/grassTE.png");
-	TextureHandle tex_grassTR = TextureFactory::GetHandle("res/textures/grassTR.png");
+	TextureHandle tex_dirtTL = TextureFactory::GetHandle({ "res/textures/dirtTL.png" });
+	TextureHandle tex_dirtTR = TextureFactory::GetHandle({ "res/textures/dirtTR.png" });
+	TextureHandle tex_grassSingle = TextureFactory::GetHandle({ "res/textures/grassSingle.png" });
+	TextureHandle tex_grassTL = TextureFactory::GetHandle({ "res/textures/grassTL.png" });
+	TextureHandle tex_grassTE = TextureFactory::GetHandle({ "res/textures/grassTE.png" });
+	TextureHandle tex_grassTR = TextureFactory::GetHandle({ "res/textures/grassTR.png" });
 
 	Renderer::AddCanvasLayer(0);
 
@@ -303,13 +303,14 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
 	//Renderer::GetCanvasLayer(11)->OnAttach(&parr);
 
-	std::shared_ptr<TileMap> tilemap;
-	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap) != LOAD_STATUS::OK)
+	TileMap* tilemap_ini;
+	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap_ini) != LOAD_STATUS::OK)
 		ASSERT(false);
+	std::unique_ptr<TileMap> tilemap(tilemap_ini);
 	set_ptr(tilemap->Fickler().Transform(), {{100.0f, 200.0f}, 0.3f, {5.0f, 8.0f}});
 	tilemap->Fickler().SyncT();
 	tilemap->Insert(4, 0, 1);
-	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
+	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 	// dangerous to set scale without checking if non-null, but the fickle type of selector is held constant, so scale is known to be non-null.
 	*actor3.Fickler().Scale() *= 2.0f;
 	actor3.Fickler().SyncRS();
@@ -356,7 +357,7 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(11)->OnAttach(&child);
 	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
 
-	DebugRect rect(_RendererSettings::initial_window_width * 0.5f, _RendererSettings::initial_window_height, true, { 1.0f, 0.5f }, 1);
+	DebugRect rect(_RendererSettings::initial_window_width * 0.5f, _RendererSettings::initial_window_height * 1.0f, true, { 1.0f, 0.5f }, 1);
 	set_ptr(rect.Fickler().Modulate(), { 0.5f, 0.5f, 1.0f, 0.3f });
 	rect.Fickler().SyncM();
 	Renderer::GetCanvasLayer(11)->OnAttach(&rect);

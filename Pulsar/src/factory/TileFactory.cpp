@@ -2,11 +2,10 @@
 
 #include "Macros.h"
 #include "Logger.inl"
-#include "Atlas.h"
-#include "Subtile.h"
 
 TileHandle TileFactory::handle_cap;
 std::unordered_map<TileHandle, Tile*> TileFactory::factory;
+std::unordered_map<TileConstructArgs, TileHandle> TileFactory::lookupMap;
 
 void TileFactory::Init()
 {
@@ -24,9 +23,10 @@ void TileFactory::Terminate()
 		}
 	}
 	factory.clear();
+	lookupMap.clear();
 }
 
-Tile* TileFactory::Get(TileHandle handle)
+Tile const* TileFactory::Get(TileHandle handle)
 {
 	auto iter = factory.find(handle);
 	if (iter != factory.end())
@@ -40,141 +40,53 @@ Tile* TileFactory::Get(TileHandle handle)
 	}
 }
 
-TileHandle TileFactory::GetHandle(const char* filepath)
+TileHandle TileFactory::GetHandle(const TileConstructArgs& args)
 {
-	for (const auto& [handle, tile] : factory)
-	{
-		if (tile->Equivalent(filepath))
-			return handle;
-	}
-	Tile tile(filepath);
+	auto iter = lookupMap.find(args);
+	if (iter != lookupMap.end())
+		return iter->second;
+	Tile tile(args.filepath.c_str());
 	if (tile.IsValid())
 	{
 		TileHandle handle = handle_cap++;
 		factory.emplace(handle, new Tile(std::move(tile)));
+		lookupMap[args] = handle;
 		return handle;
 	}
 	else return 0;
 }
 
-TileHandle TileFactory::GetAtlasHandle(std::vector<TileHandle>& tiles, int width, int height, int border)
+TileHandle TileFactory::RegisterTile(Tile* emplace_tile)
 {
-	for (const auto& [handle, tile] : factory)
-	{
-		auto at = dynamic_cast<Atlas* const>(tile);
-		if (at && at->Equivalent(tiles, width, height, border))
-			return handle;
-	}
-	Atlas tile(tiles, width, height, border);
-	if (tile.IsValid())
+	if (emplace_tile->IsValid())
 	{
 		TileHandle handle = handle_cap++;
-		factory.emplace(handle, new Atlas(std::move(tile)));
+		factory.emplace(handle, emplace_tile);
 		return handle;
 	}
 	else return 0;
 }
 
-TileHandle TileFactory::GetAtlasHandle(const char* texture_filepath, const std::vector<Placement>& placements, int border)
+unsigned char const* TileFactory::GetImageBuffer(TileHandle tile)
 {
-	for (const auto& [handle, tile] : factory)
-	{
-		auto at = dynamic_cast<Atlas* const>(tile);
-		if (at && at->Equivalent(texture_filepath, placements, border))
-			return handle;
-	}
-	Atlas tile(texture_filepath, placements, border);
-	if (tile.IsValid())
-	{
-		TileHandle handle = handle_cap++;
-		factory.emplace(handle, new Atlas(std::move(tile)));
-		return handle;
-	}
-	else return 0;
-}
-
-TileHandle TileFactory::GetAtlasHandle(const char* texture_filepath, std::vector<struct Placement>&& placements, int border)
-{
-	for (const auto& [handle, tile] : factory)
-	{
-		auto at = dynamic_cast<Atlas* const>(tile);
-		if (at && at->Equivalent(texture_filepath, placements, border))
-			return handle;
-	}
-	Atlas tile(texture_filepath, std::move(placements), border);
-	if (tile.IsValid())
-	{
-		TileHandle handle = handle_cap++;
-		factory.emplace(handle, new Atlas(std::move(tile)));
-		return handle;
-	}
-	else return 0;
-}
-
-TileHandle TileFactory::GetAtlasHandle(const Atlas* const atlas)
-{
-	for (const auto& [handle, tile] : factory)
-	{
-		auto at = dynamic_cast<Atlas* const>(tile);
-		if (at && *at == *atlas)
-			return handle;
-	}
-	Atlas tile(atlas);
-	if (tile.IsValid())
-	{
-		TileHandle handle = handle_cap++;
-		factory.emplace(handle, new Atlas(std::move(tile)));
-		return handle;
-	}
-	else return 0;
-}
-
-TileHandle TileFactory::GetSubtileHandle(TileHandle full_handle, int x, int y, int w, int h)
-{
-	Tile* t = Get(full_handle);
-	if (!t)
-		return 0;
-
-	for (const auto& [handle, tile] : factory)
-	{
-		auto sub = dynamic_cast<Subtile* const>(tile);
-		if (sub && sub->m_Filepath == t->m_Filepath && sub->x == x && sub->y == y && sub->w == w && sub->h == h)
-			return handle;
-	}
-
-	TileHandle handle = handle_cap++;
-	factory.emplace(handle, new Subtile(t, x, y, w, h));
-	return handle;
-}
-
-const unsigned char* TileFactory::GetImageBuffer(TileHandle tile)
-{
-	Tile* t = Get(tile);
+	Tile const* t = Get(tile);
 	return t ? t->m_ImageBuffer : nullptr;
 }
 
 int TileFactory::GetWidth(TileHandle tile)
 {
-	Tile* t = Get(tile);
+	Tile const* t = Get(tile);
 	return t ? t->m_Width : 0;
 }
 
 int TileFactory::GetHeight(TileHandle tile)
 {
-	Tile* t = Get(tile);
+	Tile const* t = Get(tile);
 	return t ? t->m_Height : 0;
 }
 
 int TileFactory::GetBPP(TileHandle tile)
 {
-	Tile* t = Get(tile);
+	Tile const* t = Get(tile);
 	return t ? t->m_BPP : 0;
 }
-
-std::string TileFactory::GetFilepath(TileHandle tile)
-{
-	Tile* t = Get(tile);
-	return t ? t->m_Filepath : "";
-}
-
-

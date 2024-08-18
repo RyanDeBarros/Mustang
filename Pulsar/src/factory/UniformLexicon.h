@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <variant>
 #include <algorithm>
 
@@ -17,26 +17,25 @@ typedef std::variant<
 	glm::mat2, glm::mat3, glm::mat4
 > Uniform;
 
+// TODO don't use class for this. Just use unordered_map, and define utility functions like Shares, MergeLexicon, GetValue, etc.
 class UniformLexicon
 {
 	friend class UniformLexiconFactory;
-	std::map<std::string, Uniform> m_Uniforms;
-	inline bool Equivalent(const std::map<std::string, Uniform>& uniforms) const { return m_Uniforms == uniforms; }
-	
+	std::unordered_map<std::string, Uniform> m_Uniforms;
+
 public:
-	UniformLexicon();
+	UniformLexicon(const std::unordered_map<std::string, Uniform>& uniforms = {});
 	UniformLexicon(const UniformLexicon&);
 	UniformLexicon(UniformLexicon&&) noexcept;
 	UniformLexicon& operator=(const UniformLexicon&);
 	UniformLexicon& operator=(UniformLexicon&&) noexcept;
-	UniformLexicon(const std::map<std::string, Uniform>& uniforms);
 	~UniformLexicon();
 
 	void MergeLexicon(const UniformLexiconHandle& lexicon_handle);
 	bool Shares(const UniformLexicon& lexicon);
 
 private:
-	const Uniform* GetValue(const std::string& name);
+	Uniform const* GetValue(const std::string& name) const;
 	bool SetValue(const std::string& name, const Uniform& uniform);
 	bool DefineNewValue(const std::string& name, const Uniform& uniform);
 

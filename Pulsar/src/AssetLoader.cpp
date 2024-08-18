@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <stb/stb_image_write.h>
 
-#include <map>
+#include <unordered_map>
 #include <fstream>
 
 #include "Logger.inl"
@@ -107,7 +107,7 @@ LOAD_STATUS Loader::loadShader(const char* filepath, ShaderHandle& handle)
 		auto fragment_shader = shader["fragment"].value<std::string>();
 		if (!fragment_shader)
 			return LOAD_STATUS::SYNTAX_ERR;
-		handle = ShaderFactory::GetHandle(vertex_shader.value().c_str(), fragment_shader.value().c_str());
+		handle = ShaderFactory::GetHandle({ vertex_shader.value(), fragment_shader.value() });
 		return handle > 0 ? LOAD_STATUS::OK : LOAD_STATUS::ASSET_LOAD_ERR;
 	}
 	catch (const toml::parse_error& err)
@@ -123,32 +123,32 @@ static LOAD_STATUS readTextureSettings(const toml::v3::node_view<toml::v3::node>
 	{
 		if (min_filter.value() < 0 || min_filter.value() >= MinFilterLookupLength)
 			return LOAD_STATUS::SYNTAX_ERR;
-		texture_settings.min_filter = MinFilterLookup[min_filter.value()];
+		texture_settings.minFilter = MinFilterLookup[min_filter.value()];
 	}
 	if (auto mag_filter = settings["mag_filter"].value<int64_t>())
 	{
 		if (mag_filter.value() < 0 || mag_filter.value() >= MagFilterLookupLength)
 			return LOAD_STATUS::SYNTAX_ERR;
-		texture_settings.mag_filter = MagFilterLookup[mag_filter.value()];
+		texture_settings.magFilter = MagFilterLookup[mag_filter.value()];
 	}
 	if (auto wrap_s = settings["wrap_s"].value<int64_t>())
 	{
 		if (wrap_s.value() < 0 || wrap_s.value() >= TextureWrapLookupLength)
 			return LOAD_STATUS::SYNTAX_ERR;
-		texture_settings.wrap_s = TextureWrapLookup[wrap_s.value()];
+		texture_settings.wrapS = TextureWrapLookup[wrap_s.value()];
 	}
 	if (auto wrap_t = settings["wrap_t"].value<int64_t>())
 	{
 		if (wrap_t.value() < 0 || wrap_t.value() >= TextureWrapLookupLength)
 			return LOAD_STATUS::SYNTAX_ERR;
-		texture_settings.wrap_t = TextureWrapLookup[wrap_t.value()];
+		texture_settings.wrapT = TextureWrapLookup[wrap_t.value()];
 	}
 	if (auto lod_level = settings["lod_level"].value<int64_t>())
-		texture_settings.lod_level = static_cast<GLint>(lod_level.value());
+		texture_settings.lodLevel = static_cast<GLint>(lod_level.value());
 	return LOAD_STATUS::OK;
 }
 
-LOAD_STATUS Loader::loadTexture(const char* filepath, TextureHandle& handle, bool new_texture, bool temporary_buffer)
+LOAD_STATUS Loader::loadTexture(const char* filepath, TextureHandle& handle, TextureVersion texture_version, bool temporary_buffer)
 {
 	try
 	{
@@ -167,7 +167,7 @@ LOAD_STATUS Loader::loadTexture(const char* filepath, TextureHandle& handle, boo
 		{
 			VERIFY(readTextureSettings(settings, texture_settings));
 		}
-		handle = TextureFactory::GetHandle(path.value().c_str(), texture_settings, new_texture, temporary_buffer);
+		handle = TextureFactory::GetHandle(TextureConstructArgs_filepath{ path.value(), texture_settings, temporary_buffer, texture_version});
 		return handle > 0 ? LOAD_STATUS::OK : LOAD_STATUS::ASSET_LOAD_ERR;
 	}
 	catch (const toml::parse_error& err)
@@ -187,7 +187,7 @@ LOAD_STATUS Loader::loadUniformLexicon(const char* filepath, UniformLexiconHandl
 		auto array = file["uniform"].as_array();
 		if (!array)
 			return LOAD_STATUS::SYNTAX_ERR;
-		std::map<std::string, Uniform> uniform_map;
+		std::unordered_map<std::string, Uniform> uniform_map;
 		LOAD_STATUS status = LOAD_STATUS::OK;
 		array->for_each([&uniform_map, &status](auto&& uniform)
 		{
@@ -412,7 +412,7 @@ LOAD_STATUS Loader::loadUniformLexicon(const char* filepath, UniformLexiconHandl
 		});
 		if (status != LOAD_STATUS::OK)
 			return status;
-		handle = UniformLexiconFactory::GetHandle(uniform_map);
+		handle = UniformLexiconFactory::GetHandle({ uniform_map });
 		return LOAD_STATUS::OK;
 	}
 	catch (const toml::parse_error& err)
@@ -422,7 +422,7 @@ LOAD_STATUS Loader::loadUniformLexicon(const char* filepath, UniformLexiconHandl
 	}
 }
 
-LOAD_STATUS Loader::loadRenderable(const char* filepath, Renderable& renderable, bool new_texture, bool temporary_buffer)
+LOAD_STATUS Loader::loadRenderable(const char* filepath, Renderable& renderable, TextureVersion texture_version, bool temporary_buffer)
 {
 	try
 	{
@@ -436,7 +436,7 @@ LOAD_STATUS Loader::loadRenderable(const char* filepath, Renderable& renderable,
 		TextureHandle texture_handle = 0;
 		if (auto texture = render["texture"].value<std::string>())
 		{
-			if (loadTexture(texture.value().c_str(), texture_handle, new_texture, temporary_buffer) != LOAD_STATUS::OK)
+			if (loadTexture(texture.value().c_str(), texture_handle, texture_version, temporary_buffer) != LOAD_STATUS::OK)
 				return LOAD_STATUS::REFERENCE_ERROR;
 		}
 		renderable.textureHandle = texture_handle;
@@ -545,7 +545,7 @@ bool Loader::saveAtlas(const Atlas& atlas, const char* texture_filepath, const c
 	return true;
 }
 
-LOAD_STATUS Loader::loadAtlas(const char* asset_filepath, TileHandle& handle)
+LOAD_STATUS Loader::loadAtlas(const char* asset_filepath, Atlas*& atlas_initializer)
 {
 	try
 	{
@@ -585,8 +585,16 @@ LOAD_STATUS Loader::loadAtlas(const char* asset_filepath, TileHandle& handle)
 			i++;
 		}
 
-		handle = TileFactory::GetAtlasHandle(path.value().c_str(), placements, border);
-		return handle > 0 ? LOAD_STATUS::OK : LOAD_STATUS::ASSET_LOAD_ERR;
+		try
+		{
+			atlas_initializer = new Atlas(path.value(), std::move(placements), border);
+			return LOAD_STATUS::OK;
+		}
+		catch (const null_handle_error&)
+		{
+			// no need to delete atlas_initializer. If construction fails, atlas_initializer will still be null.
+			return LOAD_STATUS::ASSET_LOAD_ERR;
+		}
 	}
 	catch (const toml::parse_error& err)
 	{
@@ -595,7 +603,7 @@ LOAD_STATUS Loader::loadAtlas(const char* asset_filepath, TileHandle& handle)
 	}
 }
 
-LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, std::shared_ptr<TileMap>& tilemap)
+LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, TileMap*& tilemap_initializer, TextureVersion texture_version)
 {
 	try
 	{
@@ -606,11 +614,11 @@ LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, std::shared_ptr<Tile
 		if (!tm)
 			return LOAD_STATUS::SYNTAX_ERR;
 
-		TileHandle atlas_handle;
+		Atlas* atlas = nullptr;
 		auto atlas_filepath = tm["atlas"].value<std::string>();
 		if (!atlas_filepath)
 			return LOAD_STATUS::SYNTAX_ERR;
-		if (loadAtlas(atlas_filepath.value().c_str(), atlas_handle) != LOAD_STATUS::OK)
+		if (loadAtlas(atlas_filepath.value().c_str(), atlas) != LOAD_STATUS::OK)
 			return LOAD_STATUS::REFERENCE_ERROR;
 
 		TextureSettings texture_settings = Texture::nearest_settings;
@@ -651,7 +659,7 @@ LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, std::shared_ptr<Tile
 			}
 		}
 
-		tilemap = std::shared_ptr<TileMap>(new TileMap(atlas_handle, texture_settings, shader, z, fickle_type, visible));
+		tilemap_initializer = new TileMap(std::shared_ptr<Atlas>(atlas), texture_settings, texture_version, shader, z, fickle_type, visible);
 
 		std::vector<size_t> ordering;
 		if (auto order = tm["ordering"].as_array())
@@ -663,7 +671,7 @@ LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, std::shared_ptr<Tile
 		{
 			try
 			{
-				if (!tilemap->SetOrdering(ordering))
+				if (!tilemap_initializer->SetOrdering(ordering))
 					return LOAD_STATUS::ASSET_LOAD_ERR;
 			}
 			catch (bad_permutation_error)
@@ -678,7 +686,7 @@ LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, std::shared_ptr<Tile
 			{
 				if (auto tile = tiles->get_as<toml::array>(i))
 				{
-					tilemap->Insert(
+					tilemap_initializer->Insert(
 						static_cast<size_t>(tile->get_as<int64_t>(0)->get()),
 						static_cast<float>(tile->get_as<double>(1) ? tile->get_as<double>(1)->get() : tile->get_as<int64_t>(1)->get()),
 						static_cast<float>(tile->get_as<double>(2) ? tile->get_as<double>(2)->get() : tile->get_as<int64_t>(2)->get())

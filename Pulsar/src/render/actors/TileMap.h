@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include <vector>
+#include <memory>
 
 #include "Typedefs.h"
 #include "utils/Permutation.h"
@@ -22,12 +23,12 @@ typedef size_t TileMapIndex;
 
 class TileMap : public FickleActor2D
 {
-	Atlas* m_Atlas;
+	std::shared_ptr<const Atlas> m_Atlas;
 	std::vector<TMElement> m_Map;
 	Permutation m_Ordering;
 
 public:
-	TileMap(TileHandle atlas_handle, const TextureSettings& texture_settings = Texture::nearest_settings, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Transformable, bool visible = true);
+	TileMap(const std::shared_ptr<const Atlas>& atlas, const TextureSettings& texture_settings = Texture::nearest_settings, TextureVersion texture_version = 0, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Transformable, bool visible = true);
 	TileMap(const TileMap&) = delete;
 	TileMap(TileMap&&) = delete;
 	~TileMap();

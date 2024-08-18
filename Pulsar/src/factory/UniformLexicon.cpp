@@ -2,7 +2,8 @@
 
 #include "UniformLexiconFactory.h"
 
-UniformLexicon::UniformLexicon()
+UniformLexicon::UniformLexicon(const std::unordered_map<std::string, Uniform>& uniform_set)
+	: m_Uniforms(uniform_set)
 {
 }
 
@@ -28,11 +29,6 @@ UniformLexicon& UniformLexicon::operator=(UniformLexicon&& other) noexcept
 	return *this;
 }
 
-UniformLexicon::UniformLexicon(const std::map<std::string, Uniform>& uniform_set)
-	: m_Uniforms(uniform_set)
-{
-}
-
 UniformLexicon::~UniformLexicon()
 {
 }
@@ -41,7 +37,7 @@ void UniformLexicon::MergeLexicon(const UniformLexiconHandle& lexicon_handle)
 {
 	if (lexicon_handle > 0)
 	{
-		UniformLexicon lexicon = *UniformLexiconFactory::GetConstRef(lexicon_handle);
+		UniformLexicon lexicon = *UniformLexiconFactory::Get(lexicon_handle);
 		m_Uniforms.insert(lexicon.m_Uniforms.begin(), lexicon.m_Uniforms.end());
 	}
 }
@@ -64,7 +60,7 @@ bool UniformLexicon::Shares(const UniformLexicon& lexicon)
 	return true;
 }
 
-const Uniform* UniformLexicon::GetValue(const std::string& name)
+Uniform const* UniformLexicon::GetValue(const std::string& name) const
 {
 	auto it = m_Uniforms.find(name);
 	if (it != m_Uniforms.end())

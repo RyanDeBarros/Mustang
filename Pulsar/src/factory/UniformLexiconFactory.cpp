@@ -6,6 +6,7 @@
 
 UniformLexiconHandle UniformLexiconFactory::handle_cap;
 std::unordered_map<UniformLexiconHandle, UniformLexicon*> UniformLexiconFactory::factory;
+std::unordered_map<UniformLexiconConstructArgs, UniformLexiconHandle> UniformLexiconFactory::lookupMap;
 std::unordered_map<UniformLexiconHandle, std::unordered_set<ShaderHandle>> UniformLexiconFactory::shaderCache;
 std::unordered_set<UniformLexiconHandle> UniformLexiconFactory::dynamicLexicons;
 
@@ -22,11 +23,12 @@ void UniformLexiconFactory::Terminate()
 			delete uniformLexicon;
 	}
 	factory.clear();
+	lookupMap.clear();
 	shaderCache.clear();
 	dynamicLexicons.clear();
 }
 
-UniformLexicon* UniformLexiconFactory::Get(UniformLexiconHandle handle)
+UniformLexicon const* UniformLexiconFactory::Get(UniformLexiconHandle handle)
 {
 	auto iter = factory.find(handle);
 	if (iter != factory.end())
@@ -40,15 +42,14 @@ UniformLexicon* UniformLexiconFactory::Get(UniformLexiconHandle handle)
 	}
 }
 
-UniformLexiconHandle UniformLexiconFactory::GetHandle(const std::map<std::string, Uniform>& uniforms)
+UniformLexiconHandle UniformLexiconFactory::GetHandle(const UniformLexiconConstructArgs& args)
 {
-	for (const auto& [handle, uniformLexicon] : factory)
-	{
-		if (uniformLexicon->Equivalent(uniforms))
-			return handle;
-	}
+	auto iter = lookupMap.find(args);
+	if (iter != lookupMap.end())
+		return iter->second;
 	UniformLexiconHandle handle = handle_cap++;
-	factory.emplace(handle, new UniformLexicon(uniforms));
+	factory.emplace(handle, new UniformLexicon(args.uniforms));
+	lookupMap[args] = handle;
 	return handle;
 }
 
@@ -67,12 +68,10 @@ void UniformLexiconFactory::OnApply(UniformLexiconHandle uniformLexicon, ShaderH
 				set->second.insert(shader);
 		}
 		else
-		{
 			shaderCache.insert({ uniformLexicon, { shader } });
-		}
 	}
 
-	UniformLexicon* lex = Get(uniformLexicon);
+	UniformLexicon const* lex = Get(uniformLexicon);
 	if (!lex)
 		return;
 	for (const auto& [name, uniform] : lex->m_Uniforms)
@@ -166,7 +165,7 @@ bool UniformLexiconFactory::Shares(UniformLexiconHandle lexicon1, UniformLexicon
 
 const Uniform* UniformLexiconFactory::GetValue(UniformLexiconHandle lexicon, const std::string& name)
 {
-	UniformLexicon* lex = Get(lexicon);
+	UniformLexicon const* lex = Get(lexicon);
 	if (lex)
 	{
 		return lex->GetValue(name);
@@ -176,14 +175,14 @@ const Uniform* UniformLexiconFactory::GetValue(UniformLexiconHandle lexicon, con
 
 void UniformLexiconFactory::SetValue(UniformLexiconHandle lexicon, const std::string& name, const Uniform& value)
 {
-	UniformLexicon* lex = Get(lexicon);
+	UniformLexicon* lex = const_cast<UniformLexicon*>(Get(lexicon));
 	if (lex && lex->SetValue(name, value))
 		shaderCache.erase(lexicon);
 }
 
 bool UniformLexiconFactory::DefineNewValue(UniformLexiconHandle lexicon, const std::string& name, const Uniform& value)
 {
-	UniformLexicon* lex = Get(lexicon);
+	UniformLexicon* lex = const_cast<UniformLexicon*>(Get(lexicon));
 	if (lex && lex->DefineNewValue(name, value))
 	{
 		shaderCache.erase(lexicon);

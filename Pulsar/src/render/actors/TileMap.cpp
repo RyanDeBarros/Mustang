@@ -2,16 +2,14 @@
 
 #include <algorithm>
 
-TileMap::TileMap(TileHandle atlas_handle, const TextureSettings& texture_settings, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible)
-	: FickleActor2D(fickle_type, z)
+TileMap::TileMap(const std::shared_ptr<const Atlas>& atlas, const TextureSettings& texture_settings, TextureVersion texture_version, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible)
+	: FickleActor2D(fickle_type, z), m_Atlas(atlas)
 {
-	Tile* t = TileFactory::GetTileRef(atlas_handle);
-	m_Atlas = dynamic_cast<Atlas*>(t);
 	if (!m_Atlas)
-		throw atlas_cast_error();
+		throw null_pointer_error();
 	for (TileMapIndex i = 0; i < m_Atlas->GetPlacements().size(); i++)
 	{
-		std::unique_ptr<RectRender> rect_render(std::make_unique<RectRender>(m_Atlas->SampleSubtile(i, texture_settings, shader, 0, fickle_type, visible)));
+		std::unique_ptr<RectRender> rect_render(std::make_unique<RectRender>(m_Atlas->SampleSubtile(i, texture_settings, texture_version, shader, 0, fickle_type, visible)));
 		std::shared_ptr<ActorTesselation2D> tessel(std::make_shared<ActorTesselation2D>(rect_render.get(), fickle_type));
 		if (m_Fickler.IsTransformable()) [[likely]]
 			m_Fickler.Transformer()->Attach(tessel->Fickler().Transformer());

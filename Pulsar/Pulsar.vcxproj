@@ -133,6 +133,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>src;vendor;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,6 +152,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>src;vendor;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -215,7 +217,6 @@
     <ClInclude Include="src\render\transform\Protean.h" />
     <ClInclude Include="src\AssetLoader.h" />
     <ClInclude Include="src\factory\Atlas.h" />
-    <ClInclude Include="src\factory\Subtile.h" />
     <ClInclude Include="src\factory\Tile.h" />
     <ClInclude Include="src\factory\TileFactory.h" />
     <ClInclude Include="src\factory\UniformLexicon.h" />

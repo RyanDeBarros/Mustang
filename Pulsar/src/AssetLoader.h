@@ -19,11 +19,13 @@ struct Loader
 	static bool _LoadRendererSettings();
 
 	static LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle);
-	static LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, bool new_texture = false, bool temporary_buffer = false);
+	static LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, TextureVersion texture_version = 0, bool temporary_buffer = false);
 	static LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handle);
-	static LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable, bool new_texture = false, bool temporary_buffer = false);
+	static LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable, TextureVersion texture_version = 0, bool temporary_buffer = false);
 	
 	static bool saveAtlas(const class Atlas& atlas, const char* texture_filepath, const char* asset_filepath, const char* image_format = "png", unsigned char jpg_quality = 100);
-	static LOAD_STATUS loadAtlas(const char* asset_filepath, TileHandle& handle);
-	static LOAD_STATUS loadTileMap(const char* asset_filepath, std::shared_ptr<class TileMap>& tilemap);
+	/// pass nullptr to atlas parameter, and it will point to memory on the heap.
+	static LOAD_STATUS loadAtlas(const char* asset_filepath, class Atlas*& atlas_initializer);
+	/// pass nullptr to tilemap parameter, and it will point to memory on the heap.
+	static LOAD_STATUS loadTileMap(const char* asset_filepath, class TileMap*& tilemap_initializer, TextureVersion texture_version = 0);
 };

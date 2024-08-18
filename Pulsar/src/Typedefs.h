@@ -6,10 +6,11 @@ typedef unsigned short VertexLayoutMask;
 typedef unsigned int VertexLayout;
 typedef unsigned short Stride;
 
-typedef unsigned int ShaderHandle;
-typedef unsigned int TextureHandle;
-typedef unsigned int UniformLexiconHandle;
-typedef unsigned int TileHandle;
+typedef unsigned short ShaderHandle;
+typedef unsigned short TextureHandle;
+typedef unsigned short UniformLexiconHandle;
+typedef unsigned short TileHandle;
+typedef unsigned short TextureVersion;
 
 typedef signed short ZIndex;
 typedef signed char CanvasIndex;

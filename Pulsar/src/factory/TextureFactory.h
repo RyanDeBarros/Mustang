@@ -5,13 +5,62 @@
 #include "Typedefs.h"
 #include "Texture.h"
 
+struct TextureConstructArgs_filepath
+{
+	std::string filepath;
+	TextureSettings settings = {};
+	bool temporaryBuffer = false;
+	TextureVersion version = 0;
+
+	inline bool operator==(const TextureConstructArgs_filepath& args) const
+	{
+		return filepath == args.filepath && settings == args.settings && temporaryBuffer == args.temporaryBuffer && version == args.version;
+	}
+};
+
+template<>
+struct std::hash<TextureConstructArgs_filepath>
+{
+	inline size_t operator()(const TextureConstructArgs_filepath& args) const
+	{
+		auto hash1 = hash<std::string>{}(args.filepath);
+		auto hash2 = hash<TextureSettings>{}(args.settings);
+		auto hash3 = hash<bool>{}(args.temporaryBuffer);
+		auto hash4 = hash<TextureVersion>{}(args.version);
+		return hash1 ^ (hash2 << 1) ^ (hash3 << 2) ^ (hash4 << 3);
+	}
+};
+
+struct TextureConstructArgs_tile
+{
+	TileHandle tile;
+	TextureVersion version = 0;
+	TextureSettings settings = {};
+
+	inline bool operator==(const TextureConstructArgs_tile& args) const
+	{
+		return tile == args.tile && settings == args.settings && version == args.version;
+	}
+};
+
+template<>
+struct std::hash<TextureConstructArgs_tile>
+{
+	inline size_t operator()(const TextureConstructArgs_tile& args) const
+	{
+		auto hash1 = hash<TileHandle>{}(args.tile);
+		auto hash2 = hash<TextureVersion>{}(args.version);
+		auto hash3 = hash<TextureSettings>{}(args.settings);
+		return hash1 ^ (hash2 << 1) ^ (hash3 < 2);
+	}
+};
+
 class TextureFactory
 {
 	static TextureHandle handle_cap;
 	static std::unordered_map<TextureHandle, Texture*> factory;
-	static Texture* Get(TextureHandle);
-	static TextureHandle CreateHandle(const char* filepath, const TextureSettings& settings, bool temporary_buffer);
-	static TextureHandle CreateHandle(TileHandle tile, const TextureSettings& settings);
+	static std::unordered_map<TextureConstructArgs_filepath, TextureHandle> lookupMap_filepath;
+	static std::unordered_map<TextureConstructArgs_tile, TextureHandle> lookupMap_tile;
 
 	TextureFactory() = delete;
 	TextureFactory(const TextureFactory&) = delete;
@@ -23,13 +72,14 @@ class TextureFactory
 	static void Terminate();
 
 public:
-	static TextureHandle GetHandle(const char* filepath, const TextureSettings& settings = {}, bool new_texture = false, bool temporary_buffer = false);
-	static TextureHandle GetHandle(TileHandle tile, const TextureSettings& settings = {}, bool new_texture = false);
+	static Texture const* Get(TextureHandle);
+	static TextureHandle GetHandle(const TextureConstructArgs_filepath& args);
+	static TextureHandle GetHandle(const TextureConstructArgs_tile& args);
 	static void Bind(TextureHandle handle, TextureSlot slot);
 	static void Unbind(TextureSlot slot);
 	
-	inline static int GetWidth(TextureHandle handle) { Texture* texture = Get(handle); return texture ? texture->GetWidth() : 0; }
-	inline static int GetHeight(TextureHandle handle) { Texture* texture = Get(handle); return texture ? texture->GetHeight() : 0; }
-	inline static TileHandle GetTileHandle(TextureHandle handle) { Texture* texture = Get(handle); return texture ? texture->GetTileHandle() : 0; }
+	inline static int GetWidth(TextureHandle handle) { Texture const* texture = Get(handle); return texture ? texture->GetWidth() : 0; }
+	inline static int GetHeight(TextureHandle handle) { Texture const* texture = Get(handle); return texture ? texture->GetHeight() : 0; }
+	inline static TileHandle GetTileHandle(TextureHandle handle) { Texture const* texture = Get(handle); return texture ? texture->GetTileHandle() : 0; }
 	static void SetSettings(TextureHandle handle, const TextureSettings& settings);
 };

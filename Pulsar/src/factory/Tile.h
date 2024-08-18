@@ -12,23 +12,21 @@ class Tile
 protected:
 	friend class TileFactory;
 	friend class Texture;
-	std::string m_Filepath;
 	unsigned char* m_ImageBuffer;
 	int m_Width, m_Height, m_BPP;
 	
-	inline bool Equivalent(const std::string& filepath) const { return m_Filepath == filepath; }
 	inline bool IsValid() const { return m_ImageBuffer != nullptr; }
 	
 	Tile() : m_Width(0), m_Height(0), m_BPP(0), m_ImageBuffer(nullptr) {}
 
 public:
 	Tile(const char* filepath);
+	Tile(unsigned char* heap_image_buffer, int width, int height, int bpp);
 	Tile(const Tile&) = delete;
 	Tile(Tile&& tile) noexcept;
 	Tile& operator=(Tile&& tile) noexcept;
-	virtual ~Tile();
+	~Tile();
 
-	inline const std::string& GetFilepath() const { return m_Filepath; }
 	inline unsigned char* const GetImageBuffer() const { return m_ImageBuffer; }
 	inline int GetWidth() const { return m_Width; }
 	inline int GetHeight() const { return m_Height; }

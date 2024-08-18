@@ -19,7 +19,7 @@ static char* read_file(const char* filepath)
 		fseek(file, 0, SEEK_SET);
 
 		char* buffer = new char[filesize + 1];
-		fread(buffer, 1, filesize + 1, file);
+		fread(buffer, 1, filesize, file);
 		buffer[filesize] = '\0';
 		return buffer;
 	}
@@ -53,7 +53,7 @@ static GLuint compile_shader(GLenum type, const char* shader, const char*filepat
 }
 
 Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
-	: m_RID(0), m_VertexFilepath(vertex_filepath), m_FragmentFilepath(fragment_filepath)
+	: m_RID(0)
 {
 	const char* vertex_shader = read_file(vertex_filepath);
 	const char* fragment_shader = read_file(fragment_filepath);
@@ -92,7 +92,7 @@ Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
 }
 
 Shader::Shader(Shader&& shader) noexcept
-	: m_RID(shader.m_RID), m_VertexFilepath(std::move(shader.m_VertexFilepath)), m_FragmentFilepath(std::move(shader.m_FragmentFilepath))
+	: m_RID(shader.m_RID)
 {
 	shader.m_RID = 0;
 }
@@ -106,8 +106,6 @@ Shader& Shader::operator=(Shader&& shader) noexcept
 		TRY(glDeleteProgram(m_RID));
 	}
 	m_RID = shader.m_RID;
-	m_VertexFilepath = std::move(shader.m_VertexFilepath);
-	m_FragmentFilepath = std::move(shader.m_FragmentFilepath);
 	shader.m_RID = 0;
 	return *this;
 }

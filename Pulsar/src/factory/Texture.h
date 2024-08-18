@@ -62,15 +62,29 @@ constexpr unsigned int TextureWrapLookupLength = 5;
 
 struct TextureSettings
 {
-	MinFilter min_filter = MinFilter::Linear;
-	MagFilter mag_filter = MagFilter::Linear;
-	TextureWrap wrap_s = TextureWrap::ClampToEdge;
-	TextureWrap wrap_t = TextureWrap::ClampToEdge;
-	GLint lod_level = 0;
+	MinFilter minFilter = MinFilter::Linear;
+	MagFilter magFilter = MagFilter::Linear;
+	TextureWrap wrapS = TextureWrap::ClampToEdge;
+	TextureWrap wrapT = TextureWrap::ClampToEdge;
+	GLint lodLevel = 0;
 
 	bool operator==(const TextureSettings& other) const
 	{
-		return min_filter == other.min_filter && mag_filter == other.mag_filter && wrap_s == other.wrap_s && wrap_t == other.wrap_t && lod_level == other.lod_level;
+		return minFilter == other.minFilter && magFilter == other.magFilter && wrapS == other.wrapS && wrapT == other.wrapT && lodLevel == other.lodLevel;
+	}
+};
+
+template<>
+struct std::hash<TextureSettings>
+{
+	inline size_t operator()(const TextureSettings& settings) const
+	{
+		auto hash1 = hash<MinFilter>{}(settings.minFilter);
+		auto hash2 = hash<MagFilter>{}(settings.magFilter);
+		auto hash3 = hash<TextureWrap>{}(settings.wrapS);
+		auto hash4 = hash<TextureWrap>{}(settings.wrapT);
+		auto hash5 = hash<GLint>{}(settings.lodLevel);
+		return hash1 ^ (hash2 << 1) ^ (hash3 << 2) ^ (hash4 << 3) ^ (hash5 << 4);
 	}
 };
 
@@ -78,11 +92,8 @@ class Texture
 {
 	RID m_RID;
 	TileHandle m_Tile;
-	TextureSettings m_Settings;
 
 	friend class TextureFactory;
-	inline bool Equivalent(const char* filepath, const TextureSettings& settings) const { return TileFactory::GetFilepath(m_Tile) == filepath && m_Settings == settings; }
-	inline bool Equivalent(TileHandle tile, const TextureSettings& settings) const { return m_Tile == tile && m_Settings == settings; }
 	inline bool IsValid() const { return m_RID > 0; }
 
 public:
@@ -96,7 +107,7 @@ public:
 	void Bind(TextureSlot slot = 0) const;
 	void Unbind(TextureSlot slot = 0) const;
 
-	void SetSettings(const TextureSettings& settings);
+	void SetSettings(const TextureSettings& settings) const;
 
 	inline int GetWidth() const { return TileFactory::GetWidth(m_Tile); }
 	inline int GetHeight() const { return TileFactory::GetHeight(m_Tile); }
@@ -104,4 +115,7 @@ public:
 
 	static const TextureSettings linear_settings;
 	static const TextureSettings nearest_settings;
+
+private:
+	void TexImage(Tile const* tile, const TextureSettings& settings, const std::string& err_msg);
 };

@@ -7,11 +7,33 @@
 #include "Typedefs.h"
 #include "Shader.h"
 
+struct ShaderConstructArgs
+{
+	std::string vertexShader;
+	std::string fragmentShader;
+
+	inline bool operator==(const ShaderConstructArgs& args) const
+	{
+		return vertexShader == args.vertexShader && fragmentShader == args.fragmentShader;
+	}
+};
+
+template<>
+struct std::hash<ShaderConstructArgs>
+{
+	inline size_t operator()(const ShaderConstructArgs& args) const
+	{
+		auto hash1 = hash<std::string>{}(args.vertexShader);
+		auto hash2 = hash<std::string>{}(args.fragmentShader);
+		return hash1 ^ (hash2 << 1);
+	}
+};
+
 class ShaderFactory
 {
 	static ShaderHandle handle_cap;
 	static std::unordered_map<ShaderHandle, Shader*> factory;
-	static Shader* Get(ShaderHandle);
+	static std::unordered_map<ShaderConstructArgs, ShaderHandle> lookup_map;
 
 	ShaderFactory() = delete;
 	ShaderFactory(const ShaderFactory&) = delete;
@@ -29,7 +51,8 @@ class ShaderFactory
 	static ShaderHandle standard_shader;
 
 public:
-	static ShaderHandle GetHandle(const char* vertex_shader, const char* fragment_shader);
+	static ShaderHandle GetHandle(const ShaderConstructArgs& args);
+	static Shader const* Get(ShaderHandle);
 	static void Bind(ShaderHandle handle);
 	static void Unbind();
 	inline static ShaderHandle Standard() { return standard_shader; }

@@ -6,11 +6,30 @@
 #include "Typedefs.h"
 #include "Tile.h"
 
+struct TileConstructArgs
+{
+	std::string filepath;
+
+	inline bool operator==(const TileConstructArgs& args) const
+	{
+		return filepath == args.filepath;
+	}
+};
+
+template<>
+struct std::hash<TileConstructArgs>
+{
+	inline size_t operator()(const TileConstructArgs& args) const
+	{
+		return hash<std::string>{}(args.filepath);
+	}
+};
+
 class TileFactory
 {
 	static TileHandle handle_cap;
 	static std::unordered_map<TileHandle, Tile*> factory;
-	static Tile* Get(TileHandle);
+	static std::unordered_map<TileConstructArgs, TileHandle> lookupMap;
 
 	TileFactory() = delete;
 	TileFactory(const TileFactory&) = delete;
@@ -22,18 +41,12 @@ class TileFactory
 	static void Terminate();
 
 public:
-	static TileHandle GetHandle(const char* filepath);
-	static TileHandle GetAtlasHandle(std::vector<TileHandle>& tiles, int width = -1, int height = -1, int border = 0);
-	static TileHandle GetAtlasHandle(const char* texture_filepath, const std::vector<struct Placement>& placements, int border);
-	static TileHandle GetAtlasHandle(const char* texture_filepath, std::vector<struct Placement>&& placements, int border);
-	static TileHandle GetAtlasHandle(const class Atlas* const atlas);
-	static TileHandle GetSubtileHandle(TileHandle full_handle, int x, int y, int w, int h);
+	static TileHandle GetHandle(const TileConstructArgs& args);
+	static Tile const* Get(TileHandle);
 
-	static inline const Tile* GetConstTileRef(TileHandle tile) { return Get(tile); }
-	static inline Tile* GetTileRef(TileHandle tile) { return Get(tile); }
-	static const unsigned char* GetImageBuffer(TileHandle tile);
+	static TileHandle RegisterTile(Tile* emplace_tile);
+	static unsigned char const* GetImageBuffer(TileHandle tile);
 	static int GetWidth(TileHandle tile);
 	static int GetHeight(TileHandle tile);
 	static int GetBPP(TileHandle tile);
-	static std::string GetFilepath(TileHandle tile);
 };

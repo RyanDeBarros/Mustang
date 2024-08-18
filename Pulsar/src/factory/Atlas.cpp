@@ -2,7 +2,6 @@
 
 #include <queue>
 #include <vector>
-#include <unordered_map>
 
 #include "Macros.h"
 #include "TileFactory.h"
@@ -12,33 +11,32 @@
 Atlas::Atlas(std::vector<TileHandle>& tiles, int width, int height, int border)
 	: m_Border(border)
 {
-	m_BPP = Atlas::BPP;
 	RectPack(tiles, width, height);
-	m_BufferSize = Atlas::BPP * m_Width * m_Height;
-	m_ImageBuffer = new unsigned char[m_BufferSize](0);
-	PlaceTiles();
+	unsigned char* image_buffer = new unsigned char[Atlas::BPP * width * height](0);
+	PlaceTiles(image_buffer, width);
+	Tile* tile = new Tile(image_buffer, width, height, Atlas::BPP);
+	m_Tile = TileFactory::RegisterTile(tile);
+	if (m_Tile == 0)
+	{
+		delete tile;
+		throw null_handle_error();
+	}
 }
 
-Atlas::Atlas(const char* texture_filepath, const std::vector<Placement>& placements, int border)
-	: Tile(texture_filepath)
+Atlas::Atlas(const std::string& texture_filepath, const std::vector<Placement>& placements, int border)
+	: m_Placements(placements), m_Border(border)
 {
-	ASSERT(m_BPP == Atlas::BPP);
-	m_BufferSize = Atlas::BPP * m_Width * m_Height;
-	m_Border = border;
-	m_Placements = placements;
+	m_Tile = TileFactory::GetHandle({ texture_filepath });
 }
 
-Atlas::Atlas(const char* texture_filepath, std::vector<Placement>&& placements, int border)
-	: Tile(texture_filepath)
+Atlas::Atlas(const std::string& texture_filepath, std::vector<Placement>&& placements, int border)
+	: m_Placements(std::move(placements)), m_Border(border)
 {
-	ASSERT(m_BPP == Atlas::BPP);
-	m_BufferSize = Atlas::BPP * m_Width * m_Height;
-	m_Border = border;
-	m_Placements = std::move(placements);
+	m_Tile = TileFactory::GetHandle({ texture_filepath });
 }
 
 Atlas::Atlas(Atlas&& atlas) noexcept
-	: Tile(std::move(atlas)), m_Border(atlas.m_Border), m_BufferSize(atlas.m_BufferSize), m_Placements(std::move(atlas.m_Placements))
+	: m_Tile(atlas.m_Tile), m_Border(atlas.m_Border), m_Placements(std::move(atlas.m_Placements))
 {
 }
 
@@ -46,34 +44,15 @@ Atlas& Atlas::operator=(Atlas&& atlas) noexcept
 {
 	if (this == &atlas)
 		return *this;
-	Tile::operator=(std::move(atlas));
+	m_Tile = atlas.m_Tile;
 	m_Border = atlas.m_Border;
-	m_BufferSize = atlas.m_BufferSize;
 	m_Placements = std::move(atlas.m_Placements);
 	return *this;
 }
 
-Atlas::Atlas(const Atlas* const atlas)
-{
-	m_Filepath = atlas->m_Filepath;
-	m_Width = atlas->m_Width;
-	m_Height = atlas->m_Height;
-	m_BPP = atlas->m_BPP;
-	m_Border = atlas->m_Border;
-	m_BufferSize = atlas->m_BufferSize;
-	m_Placements = atlas->m_Placements;
-	m_ImageBuffer = new unsigned char[m_BufferSize](0);
-	memcpy_s(m_ImageBuffer, m_BufferSize, atlas->m_ImageBuffer, m_BufferSize);
-}
-
-Atlas::~Atlas()
-{
-}
-
 bool Atlas::operator==(const Atlas& other) const
 {
-	return m_Filepath == other.m_Filepath && m_Width == other.m_Width && m_Height == other.m_Height && m_BPP == other.m_BPP
-			&& m_Border == other.m_Border && m_BufferSize == other.m_BufferSize && m_BufferSize == m_BufferSize && memcmp(m_ImageBuffer, other.m_ImageBuffer, m_BufferSize);
+	return m_Tile == other.m_Tile;
 }
 
 static int min_bound(const std::vector<TileHandle>& tiles, const int& border)
@@ -82,38 +61,6 @@ static int min_bound(const std::vector<TileHandle>& tiles, const int& border)
 	for (const TileHandle& tile : tiles)
 		bound += std::max(TileFactory::GetWidth(tile), TileFactory::GetHeight(tile)) + border;
 	return bound;
-}
-
-bool Atlas::Equivalent(const std::vector<TileHandle>& tiles, int width, int height, int border) const
-{
-	if (m_Border != border)
-		return false;
-	int bound = min_bound(tiles, m_Border);
-	if (width <= 0)
-		width = bound;
-	if (height <= 0)
-		height = bound;
-	if (m_Width != width || m_Height != height)
-		return false;
-
-	std::unordered_map<TileHandle, int> occurences;
-	for (const auto& tile : tiles)
-		occurences[tile]++;
-
-	for (auto iter = m_Placements.begin(); iter != m_Placements.end(); iter++)
-	{
-		auto leftover = occurences[iter->tile]--;
-		if (leftover < 0)
-			return false;
-		else if (leftover == 0)
-			occurences.erase(iter->tile);
-	}
-	return occurences.empty();
-}
-
-bool Atlas::Equivalent(const char* texture_filepath, const std::vector<Placement>& placements, int border) const
-{
-	return m_Filepath == texture_filepath && m_Border == border && m_Placements == placements;
 }
 
 struct Subsection
@@ -215,9 +162,11 @@ struct Subsection
 void Atlas::RectPack(std::vector<TileHandle>& tiles, int width, int height)
 {
 	int bound = min_bound(tiles, m_Border);
-	m_Width = width > 0 ? width : bound;
-	m_Height = height > 0 ? height : bound;
-	
+	if (width <= 0)
+		width = bound;
+	if (height <= 0)
+		height = bound;
+
 	std::sort(tiles.begin(), tiles.end(), [](const TileHandle& a, const TileHandle& b)
 	{
 		return std::max(TileFactory::GetWidth(a), TileFactory::GetHeight(a))
@@ -225,7 +174,7 @@ void Atlas::RectPack(std::vector<TileHandle>& tiles, int width, int height)
 	});
 
 	m_Placements.reserve(tiles.size());
-	Subsection root{ 0, 0, m_Width, m_Height };
+	Subsection root{ 0, 0, width, height };
 	auto comparator = [](const Subsection& l, const Subsection& r) { return std::max(l.w, l.h) < std::max(r.w, r.h); };
 	std::priority_queue<Subsection, std::vector<Subsection>, decltype(comparator)> subsections(comparator);
 	subsections.push(root);
@@ -275,71 +224,63 @@ void Atlas::RectPack(std::vector<TileHandle>& tiles, int width, int height)
 			}
 		}
 		for (const auto& subsection : tried_subsections)
-		{
 			subsections.push(subsection);
-		}
 		if (!fits)
-		{
 			m_Placements.push_back({0, -1, -1, -1, -1, false});
-		}
 	}
 }
 
-void Atlas::PlaceTiles()
+void Atlas::PlaceTiles(unsigned char* image_buffer, int atlas_width)
 {
 	for (const Placement& placement : m_Placements)
 	{
 		if (placement.tile == 0)
 			continue;
-		const unsigned char* image_buffer = TileFactory::GetImageBuffer(placement.tile);
-		const auto width = placement.w - m_Border;
-		const auto height = placement.h - m_Border;
-		const auto bpp = TileFactory::GetBPP(placement.tile);
-		for (int h = 0; h < height; h++)
+		unsigned char const* p_buffer = TileFactory::GetImageBuffer(placement.tile);
+		if (!p_buffer)
+			continue;
+		const auto p_width = placement.w - m_Border;
+		const auto p_height = placement.h - m_Border;
+		const auto p_bpp = TileFactory::GetBPP(placement.tile);
+		for (int h = 0; h < p_height; h++)
 		{
-			for (int w = 0; w < width; w++)
+			for (int w = 0; w < p_width; w++)
 			{
-				for (unsigned char c = 0; c < bpp && c < Atlas::BPP; c++)
+				for (unsigned char c = 0; c < p_bpp && c < Atlas::BPP; c++)
 				{
 					if (placement.r)
-					{
-						m_ImageBuffer[(placement.x + m_Border + h + (placement.y + m_Border + w) * m_Width) * Atlas::BPP + c] = image_buffer[(w + h * height) * bpp + c];
-					}
+						image_buffer[(placement.x + m_Border + h + (placement.y + m_Border + w) * atlas_width) * Atlas::BPP + c] = p_buffer[(w + h * p_height) * p_bpp + c];
 					else
-					{
-						m_ImageBuffer[(placement.x + m_Border + w + (placement.y + m_Border + h) * m_Width) * Atlas::BPP + c] = image_buffer[(w + h * width) * bpp + c];
-					}
+						image_buffer[(placement.x + m_Border + w + (placement.y + m_Border + h) * atlas_width) * Atlas::BPP + c] = p_buffer[(w + h * p_width) * p_bpp + c];
 				}
-				for (unsigned char c = bpp; c < Atlas::BPP; c++)
+				for (unsigned char c = p_bpp; c < Atlas::BPP; c++)
 				{
 					if (placement.r)
-					{
-						m_ImageBuffer[(placement.x + m_Border + h + (placement.y + m_Border + w) * m_Width) * Atlas::BPP + c] = 255;
-					}
+						image_buffer[(placement.x + m_Border + h + (placement.y + m_Border + w) * atlas_width) * Atlas::BPP + c] = 255;
 					else
-					{
-						m_ImageBuffer[(placement.x + m_Border + w + (placement.y + m_Border + h) * m_Width) * Atlas::BPP + c] = 255;
-					}
+						image_buffer[(placement.x + m_Border + w + (placement.y + m_Border + h) * atlas_width) * Atlas::BPP + c] = 255;
 				}
 			}
 		}
 	}
 }
 
-RectRender Atlas::SampleSubtile(size_t index, const TextureSettings& texture_settings, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible) const
+RectRender Atlas::SampleSubtile(size_t index, const TextureSettings& texture_settings, TextureVersion texture_version, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible) const
 {
 	if (index >= m_Placements.size() || m_Placements[index].x < 0)
 		return RectRender(0, 0, 0, fickle_type, false);
-	RectRender actor(TextureFactory::GetHandle(TileFactory::GetAtlasHandle(this), texture_settings), shader, z, fickle_type, visible);
+	RectRender actor(TextureFactory::GetHandle(TextureConstructArgs_tile{ m_Tile, texture_version, texture_settings }), shader, z, fickle_type, visible);
 	const Placement& rect = m_Placements[index];
+	int width = TileFactory::GetWidth(m_Tile);
+	int height = TileFactory::GetHeight(m_Tile);
 	if (rect.r)
-		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.h - m_Border, rect.w - m_Border }, m_Width, m_Height);
+		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.h - m_Border, rect.w - m_Border }, width, height);
 	else
-		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.w - m_Border, rect.h - m_Border }, m_Width, m_Height);
+		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.w - m_Border, rect.h - m_Border }, width, height);
 	actor.SetPivot(0.5, 0.5);
 	if (actor.Fickler().CanTransform())
 	{
-		*actor.Fickler().Scale() = { (rect.w - m_Border) / static_cast<float>(m_Width), (rect.h - m_Border) / static_cast<float>(m_Height) };
+		*actor.Fickler().Scale() = { (rect.w - m_Border) / static_cast<float>(width), (rect.h - m_Border) / static_cast<float>(height) };
 		actor.Fickler().SyncRS();
 	}
 	return actor;
