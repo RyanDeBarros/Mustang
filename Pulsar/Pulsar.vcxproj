@@ -205,7 +205,6 @@
     <ClCompile Include="src\render\transform\Transform.cpp" />
     <ClCompile Include="src\render\transform\Transforms.cpp" />
     <ClCompile Include="src\utils\Data.cpp" />
-    <ClCompile Include="src\utils\Functors.cpp" />
     <ClCompile Include="src\utils\Permutation.cpp" />
     <ClCompile Include="src\utils\Strings.cpp" />
     <ClCompile Include="src\utils\CommonMath.cpp" />
@@ -261,7 +260,8 @@
     <ClInclude Include="src\utils\BitPacking.h" />
     <ClInclude Include="src\utils\Constants.h" />
     <ClInclude Include="src\utils\Data.h" />
-    <ClInclude Include="src\utils\Functors.h" />
+    <ClInclude Include="src\utils\Functions.inl" />
+    <ClInclude Include="src\utils\Functor.inl" />
     <ClInclude Include="src\utils\Permutation.h" />
     <ClInclude Include="src\utils\Strings.h" />
     <ClInclude Include="src\utils\CommonMath.h" />

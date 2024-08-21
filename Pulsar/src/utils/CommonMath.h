@@ -4,6 +4,8 @@
 #include <functional>
 #include <limits>
 
+#include "Functor.inl"
+
 template<std::floating_point Float = float>
 inline Float rng() { return std::rand() / static_cast<Float>(RAND_MAX); }
 
@@ -25,13 +27,13 @@ inline Float rng() { return std::rand() / static_cast<Float>(RAND_MAX); }
 template<std::unsigned_integral Int = unsigned short>
 struct CumulativeFunc
 {
-	std::function<float(float)> cfunc;
+	FunctorPtr<float, float> cfunc;
 	Int prev = 0;
 
-	CumulativeFunc(const std::function<float(float)>& cf, Int initial = 0) : cfunc(cf), prev(initial) {}
-	CumulativeFunc(const CumulativeFunc& func) : cfunc(func.cfunc), prev(func.prev) {}
+	CumulativeFunc(FunctorPtr<float, float>&& cf, Int initial = 0) : cfunc(std::move(cf)), prev(initial) {}
+	CumulativeFunc(const CumulativeFunc& func) : cfunc(func.cfunc.Clone()), prev(func.prev) {}
 	CumulativeFunc(CumulativeFunc&& func) noexcept : cfunc(std::move(func.cfunc)), prev(func.prev) {}
-	CumulativeFunc& operator=(const CumulativeFunc& func) { cfunc = func.cfunc; prev = func.prev; return *this; }
+	CumulativeFunc& operator=(const CumulativeFunc& func) { cfunc = func.cfunc.Clone(); prev = func.prev; return *this; }
 	CumulativeFunc& operator=(CumulativeFunc&& func) noexcept { cfunc = std::move(func.cfunc); prev = func.prev; return *this; }
 
 	inline Int operator()(float t)

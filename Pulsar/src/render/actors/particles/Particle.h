@@ -6,15 +6,13 @@
 #include <glm/glm.hpp>
 
 #include "../shapes/DebugPolygon.h"
+#include "utils/Functor.inl"
 
 struct Particle;
 namespace Particles {
 
 	typedef unsigned char DataIndex;
 
-	typedef std::function<void(Particle& p)> CHRFunc;
-	typedef std::pair<CHRFunc, DataIndex> CHRBind;
-	
 	struct CHRSeed
 	{
 		real waveT;
@@ -22,7 +20,11 @@ namespace Particles {
 		unsigned int totalSpawn;
 	};
 
-	typedef std::function<CHRBind(const CHRSeed&)> CharacteristicGen;
+	using CHRFunc = FunctorPtr<void, Particle&>;
+
+	using CHRBind = std::pair<CHRFunc, DataIndex>;
+
+	using CharacteristicGen = FunctorPtr<CHRBind, const CHRSeed&>;
 }
 
 struct Particle
@@ -43,10 +45,10 @@ private:
 	real m_DT = 0.0f;
 
 public:
-	Particle(const std::shared_ptr<DebugPolygon>& shape, const float& lifespan, const Particles::CHRBind& characteristic);
-	Particle(const Particle&);
+	Particle(const std::shared_ptr<DebugPolygon>& shape, const float& lifespan, Particles::CHRBind&& characteristic);
+	Particle(const Particle&) = delete;
 	Particle(Particle&&) noexcept;
-	Particle& operator=(const Particle&);
+	Particle& operator=(const Particle&) = delete;
 	Particle& operator=(Particle&&) noexcept;
 	~Particle();
 

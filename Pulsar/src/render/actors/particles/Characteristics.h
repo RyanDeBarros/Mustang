@@ -1,15 +1,20 @@
 #pragma once
 
+#include <tuple>
+
 #include "Particle.h"
 
 namespace Particles {
 
-	extern CharacteristicGen CombineSequential(const std::vector<CharacteristicGen>& characteristics);
-	extern CharacteristicGen GenSetup(const CharacteristicGen& setup);
-	extern CharacteristicGen CombineInitialOverTime(const CharacteristicGen& initial, const CharacteristicGen& over_time);
-	extern CharacteristicGen CombineIntervals(const CharacteristicGen& first, const CharacteristicGen& second, float divider, bool or_equal = false);
-	extern CharacteristicGen CombineConditionalDataLessThan(DataIndex di, float compared_to, const CharacteristicGen& first, const CharacteristicGen& second);
-	extern CharacteristicGen CombineConditionalTimeLessThan(float compared_to, const CharacteristicGen& first, const CharacteristicGen& second);
+	extern CharacteristicGen Characterize(CHRFunc&& f, DataIndex max_index);
+	extern CharacteristicGen Characterize(FunctorPtr<void, const std::tuple<Particle&, const CHRSeed&>&>&& f, DataIndex max_index);
+
+	extern CharacteristicGen CombineSequential(std::vector<CharacteristicGen>&& characteristics);
+	extern CharacteristicGen GenSetup(CharacteristicGen&& setup);
+	extern CharacteristicGen CombineInitialOverTime(CharacteristicGen&& initial, CharacteristicGen&& over_time);
+	extern CharacteristicGen CombineIntervals(CharacteristicGen&& first, CharacteristicGen&& second, float divider, bool or_equal = false);
+	extern CharacteristicGen CombineConditionalDataLessThan(DataIndex di, float compared_to, CharacteristicGen&& first, CharacteristicGen&& second);
+	extern CharacteristicGen CombineConditionalTimeLessThan(float compared_to, CharacteristicGen&& first, CharacteristicGen&& second);
 
 	namespace CHR {
 
@@ -20,26 +25,27 @@ namespace Particles {
 		extern CharacteristicGen FeedDataShiftMod(DataIndex si, DataIndex shiftI, float mod);
 		extern CharacteristicGen FeedDataTime(DataIndex si);
 
-		extern CharacteristicGen OperateData(DataIndex si, const std::function<void(float&)>& func);
-		extern CharacteristicGen OperateData(DataIndex si, const std::function<std::function<void(float&)>(float)>& func, DataIndex di);
-		extern CharacteristicGen OperateData(DataIndex si1, const std::function<void(float&)>& func1, DataIndex si2, const std::function<void(float&)>& func2);
-		extern CharacteristicGen OperateData(DataIndex si1, const std::function<std::function<void(float&)>(float)>& func1, DataIndex di1, DataIndex si2, const std::function<std::function<void(float&)>(float)>& func2, DataIndex di2);
+		extern CharacteristicGen OperateData(DataIndex si, FunctorPtr<void, float&>&& func);
+		extern CharacteristicGen OperateData(DataIndex si, FunctorPtr<void, const std::tuple<float&, float>&>&& func, DataIndex di);
+		extern CharacteristicGen OperateDataUsingSeed(DataIndex si, FunctorPtr<void, const std::tuple<float&, const CHRSeed&>&>&& func);
 
-		extern CharacteristicGen SetColorUsingData(const std::function<glm::vec4(float)>& color, DataIndex di);
-		extern CharacteristicGen SetColorUsingTime(const std::function<glm::vec4(float)>& color);
+		extern CharacteristicGen SetColorUsingData(FunctorPtr<Modulate, float>&& color, DataIndex di);
+		extern CharacteristicGen SetColorUsingTime(FunctorPtr<Modulate, float>&& color);
 		
-		extern CharacteristicGen SetLocalScaleUsingData(const std::function<glm::vec2(float)>& scale, DataIndex di);
+		extern CharacteristicGen SetLocalScaleUsingData(FunctorPtr<Scale2D, float>&& scale, DataIndex di);
 		
-		extern CharacteristicGen SetLocalPositionUsingData(const std::function<glm::vec2(float)>& position, DataIndex di);
-		extern CharacteristicGen SetLocalPositionUsingData(const std::function<glm::vec2(glm::vec2)>& position, DataIndex di1, DataIndex di2);
+		extern CharacteristicGen SetLocalPosition(const Position2D& position);
+		extern CharacteristicGen SetLocalPositionUsingData(FunctorPtr<Position2D, float>&& position, DataIndex di);
+		extern CharacteristicGen SetLocalPositionUsingData(FunctorPtr<Position2D, const glm::vec2&>&& position, DataIndex dix, DataIndex diy);
 		extern CharacteristicGen OperateLocalPositionFromVelocityData(DataIndex dix, DataIndex diy);
 
-		extern CharacteristicGen SyncAll;
-		extern CharacteristicGen SyncT;
-		extern CharacteristicGen SyncP;
-		extern CharacteristicGen SyncRS;
-		extern CharacteristicGen SyncM;
-		
+		extern CharacteristicGen SyncAll();
+		extern CharacteristicGen SyncT();
+		extern CharacteristicGen SyncP();
+		extern CharacteristicGen SyncRS();
+		extern CharacteristicGen SyncM();
+
+		extern FunctorPtr<float, const CHRSeed&> Seed_waveT();
 	}
 
 }
