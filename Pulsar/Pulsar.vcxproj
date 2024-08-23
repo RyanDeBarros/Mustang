@@ -132,7 +132,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;vendor;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;$(ProjectDir);vendor;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -151,7 +151,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;vendor;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;$(ProjectDir);vendor;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -164,6 +164,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="sandbox\CHRS.cpp" />
+    <ClCompile Include="sandbox\Sandbox.cpp" />
     <ClCompile Include="src\AssetLoader.cpp" />
     <ClCompile Include="src\factory\Atlas.cpp" />
     <ClCompile Include="src\factory\Tile.cpp" />
@@ -173,6 +175,7 @@
     <ClCompile Include="src\Macros.cpp" />
     <ClCompile Include="src\render\actors\ActorDirectory.cpp" />
     <ClCompile Include="src\render\actors\BatchSlotter.cpp" />
+    <ClCompile Include="src\render\actors\particles\ParticleSubsystemRegistry.cpp" />
     <ClCompile Include="src\render\actors\shapes\DebugBatcher.cpp" />
     <ClCompile Include="src\render\actors\shapes\DebugCircle.cpp" />
     <ClCompile Include="src\render\actors\shapes\DebugMultiPolygon.cpp" />
@@ -213,6 +216,8 @@
     <ClCompile Include="vendor\stb\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="sandbox\CHRS.h" />
+    <ClInclude Include="src\render\actors\particles\ParticleSubsystemRegistry.h" />
     <ClInclude Include="src\render\transform\Protean.h" />
     <ClInclude Include="src\AssetLoader.h" />
     <ClInclude Include="src\factory\Atlas.h" />
@@ -257,6 +262,7 @@
     <ClInclude Include="src\render\transform\Transforms.h" />
     <ClInclude Include="src\Typedefs.h" />
     <ClInclude Include="src\Macros.h" />
+    <ClInclude Include="src\utils\Array.inl" />
     <ClInclude Include="src\utils\BitPacking.h" />
     <ClInclude Include="src\utils\Constants.h" />
     <ClInclude Include="src\utils\Data.h" />

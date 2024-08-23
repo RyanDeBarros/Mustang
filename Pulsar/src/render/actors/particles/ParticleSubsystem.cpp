@@ -4,11 +4,7 @@
 #include "Logger.inl"
 #include "utils/Data.h"
 
-template struct ParticleSubsystemData<unsigned short>;
-template class ParticleSubsystem<unsigned short>;
-
-template<std::unsigned_integral ParticleCount>
-ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystemData<ParticleCount>& wave_data, ParticleSubsystemIndex subsystem_index, FickleType fickle_type)
+ParticleSubsystem::ParticleSubsystem(const ParticleSubsystemData& wave_data, ParticleSubsystemIndex subsystem_index, FickleType fickle_type)
 	: m_Data(wave_data), m_TotalSpawn(m_Data.spawnFunc(1.0f)), m_SubsystemIndex(subsystem_index), m_Fickler(fickle_type)
 {
 	ASSERT(wave_data.prototypeShape->Fickler().Type() == fickle_type);
@@ -16,20 +12,17 @@ ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystemData<
 	BindFickleFunctions();
 }
 
-template<std::unsigned_integral ParticleCount>
-ParticleSubsystem<ParticleCount>::ParticleSubsystem(const ParticleSubsystem<ParticleCount>& other)
+ParticleSubsystem::ParticleSubsystem(const ParticleSubsystem& other)
 	: m_Data(other.m_Data), m_PeriodInv(other.m_PeriodInv), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Fickler(other.m_Fickler), f_AttachFickle(other.f_AttachFickle), f_FicklerSwapPop(other.f_FicklerSwapPop)
 {
 }
 
-template<std::unsigned_integral ParticleCount>
-ParticleSubsystem<ParticleCount>::ParticleSubsystem(ParticleSubsystem<ParticleCount>&& other) noexcept
+ParticleSubsystem::ParticleSubsystem(ParticleSubsystem&& other) noexcept
 	: m_Data(std::move(other.m_Data)), m_PeriodInv(other.m_PeriodInv), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Fickler(std::move(other.m_Fickler)), f_AttachFickle(other.f_AttachFickle), f_FicklerSwapPop(other.f_FicklerSwapPop)
 {
 }
 
-template<std::unsigned_integral ParticleCount>
-ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(const ParticleSubsystem<ParticleCount>& other)
+ParticleSubsystem& ParticleSubsystem::operator=(const ParticleSubsystem& other)
 {
 	if (this == &other)
 		return *this;
@@ -45,8 +38,7 @@ ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(co
 	return *this;
 }
 
-template<std::unsigned_integral ParticleCount>
-ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(ParticleSubsystem<ParticleCount>&& other) noexcept
+ParticleSubsystem& ParticleSubsystem::operator=(ParticleSubsystem&& other) noexcept
 {
 	if (this == &other)
 		return *this;
@@ -62,8 +54,7 @@ ParticleSubsystem<ParticleCount>& ParticleSubsystem<ParticleCount>::operator=(Pa
 	return *this;
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystem<ParticleCount>::OnSpawnFrame(ParticleEffect<ParticleCount>& psys)
+void ParticleSubsystem::OnSpawnFrame(ParticleEffect& psys)
 {
 	unsigned int wave_num = static_cast<unsigned int>(psys.m_TotalPlayed * m_PeriodInv);
 	real t = (psys.m_TotalPlayed - wave_num * m_Data.wavePeriod) * m_PeriodInv;
@@ -89,8 +80,7 @@ void ParticleSubsystem<ParticleCount>::OnSpawnFrame(ParticleEffect<ParticleCount
 	}
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystem<ParticleCount>::Spawn(ParticleEffect<ParticleCount>& psys, const Particles::CHRSeed& seed)
+void ParticleSubsystem::Spawn(ParticleEffect& psys, const Particles::CHRSeed& seed)
 {
 	std::shared_ptr<DebugPolygon> shape(std::make_shared<DebugPolygon>(*m_Data.prototypeShape));
 	(this->*f_AttachFickle)(shape->Fickler());
@@ -98,8 +88,7 @@ void ParticleSubsystem<ParticleCount>::Spawn(ParticleEffect<ParticleCount>& psys
 	psys.AddParticleShape(m_SubsystemIndex, shape);
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystem<ParticleCount>::OnParticlesUpdate(ParticleEffect<ParticleCount>& psys)
+void ParticleSubsystem::OnParticlesUpdate(ParticleEffect& psys)
 {
 	for (ParticleCount i = 0; i < m_Particles.size(); i++)
 	{
@@ -115,8 +104,7 @@ void ParticleSubsystem<ParticleCount>::OnParticlesUpdate(ParticleEffect<Particle
 	psys.DespawnInvalidParticles();
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystem<ParticleCount>::RemoveUnordered(ParticleCount i)
+void ParticleSubsystem::RemoveUnordered(ParticleCount i)
 {
 	if (m_Particles.size() > 1)
 		std::swap(m_Particles[i], m_Particles.back());
@@ -124,58 +112,51 @@ void ParticleSubsystem<ParticleCount>::RemoveUnordered(ParticleCount i)
 	(this->*f_FicklerSwapPop)(i);
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystem<ParticleCount>::BindFickleFunctions()
+void ParticleSubsystem::BindFickleFunctions()
 {
 	switch (m_Fickler.Type())
 	{
 	case FickleType::Protean:
-		f_AttachFickle = &ParticleSubsystem<ParticleCount>::attach_fickle_protean;
-		f_FicklerSwapPop = &ParticleSubsystem<ParticleCount>::fickler_swap_pop_protean;
+		f_AttachFickle = &ParticleSubsystem::attach_fickle_protean;
+		f_FicklerSwapPop = &ParticleSubsystem::fickler_swap_pop_protean;
 		break;
 	case FickleType::Transformable:
-		f_AttachFickle = &ParticleSubsystem<ParticleCount>::attach_fickle_transformable;
-		f_FicklerSwapPop = &ParticleSubsystem<ParticleCount>::fickler_swap_pop_transformable;
+		f_AttachFickle = &ParticleSubsystem::attach_fickle_transformable;
+		f_FicklerSwapPop = &ParticleSubsystem::fickler_swap_pop_transformable;
 		break;
 	case FickleType::Modulatable:
-		f_AttachFickle = &ParticleSubsystem<ParticleCount>::attach_fickle_modulatable;
-		f_FicklerSwapPop = &ParticleSubsystem<ParticleCount>::fickler_swap_pop_modulatable;
+		f_AttachFickle = &ParticleSubsystem::attach_fickle_modulatable;
+		f_FicklerSwapPop = &ParticleSubsystem::fickler_swap_pop_modulatable;
 		break;
 	}
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystem<ParticleCount>::attach_fickle_protean(FickleSelector2D& fickler)
+void ParticleSubsystem::attach_fickle_protean(FickleSelector2D& fickler)
 {
 	m_Fickler.ProteanLinker()->Attach(fickler.ProteanLinker());
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystem<ParticleCount>::attach_fickle_transformable(FickleSelector2D& fickler)
+void ParticleSubsystem::attach_fickle_transformable(FickleSelector2D& fickler)
 {
 	m_Fickler.Transformer()->Attach(fickler.Transformer());
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystem<ParticleCount>::attach_fickle_modulatable(FickleSelector2D& fickler)
+void ParticleSubsystem::attach_fickle_modulatable(FickleSelector2D& fickler)
 {
 	m_Fickler.Modulator()->Attach(fickler.Modulator());
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystem<ParticleCount>::fickler_swap_pop_protean(ParticleCount i)
+void ParticleSubsystem::fickler_swap_pop_protean(ParticleCount i)
 {
 	swap_pop(m_Fickler.ProteanLinker()->children, i);
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystem<ParticleCount>::fickler_swap_pop_transformable(ParticleCount i)
+void ParticleSubsystem::fickler_swap_pop_transformable(ParticleCount i)
 {
 	swap_pop(m_Fickler.Transformer()->children, i);
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystem<ParticleCount>::fickler_swap_pop_modulatable(ParticleCount i)
+void ParticleSubsystem::fickler_swap_pop_modulatable(ParticleCount i)
 {
 	swap_pop(m_Fickler.Modulator()->children, i);
 }

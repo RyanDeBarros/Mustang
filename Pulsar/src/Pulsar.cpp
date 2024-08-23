@@ -22,6 +22,7 @@
 #include "render/actors/shapes/DebugBatcher.h"
 #include "render/actors/particles/ParticleSystem.h"
 #include "render/actors/particles/ParticleSubsystemArray.h"
+#include "render/actors/particles/ParticleSubsystemRegistry.h"
 #include "render/actors/particles/Characteristics.h"
 #include "utils/CommonMath.h"
 #include "utils/Functor.inl"
@@ -52,15 +53,6 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	// Also update frame in callback. Currently, animation is paused when resizing.
 	TRY(glViewport(0, 0, width, height));
 	Renderer::OnDraw();
-}
-
-int main()
-{
-	GLFWwindow* window = nullptr;
-	int startup = Pulsar::StartUp(window);
-	Run(window);
-	Pulsar::Terminate();
-	return startup;
 }
 
 int Pulsar::StartUp(GLFWwindow*& window)
@@ -102,10 +94,26 @@ void Pulsar::Terminate()
 	glfwTerminate();
 }
 
+static void(*_post_init)() = []() {};
+static void(*_frame_start)() = []() {};
+
+void Pulsar::PostInit(void(*post_init)())
+{
+	if (post_init)
+		_post_init = post_init;
+}
+
+void Pulsar::FrameStart(void(*frame_start)())
+{
+	if (frame_start)
+		_frame_start = frame_start;
+}
+
 void Pulsar::Run(GLFWwindow* window)
 {
 	prevDrawTime = drawTime = static_cast<real>(glfwGetTime());
 	deltaDrawTime = totalDrawTime = 0;
+	_post_init();
 
 	// Load textures
 	TextureHandle textureSnowman, textureTux, textureFlag;
@@ -165,7 +173,7 @@ void Pulsar::Run(GLFWwindow* window)
 		glm::vec4(0.5f, 1.0f, 0.5f, 1.0f),
 		glm::vec4(0.5f, 0.5f, 1.0f, 1.0f),
 		glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)
-		});
+	});
 
 	TextureFactory::SetSettings(actor1.GetTextureHandle(), Texture::linear_settings);
 
@@ -180,132 +188,19 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::RemoveCanvasLayer(0);
 	Renderer::RemoveCanvasLayer(-1);
 
-	const float mt = 0.5f;
-	ParticleSubsystemData<> wave1{
-		1.5f,
-		std::shared_ptr<DebugPolygon>(new DebugCircle(4.0f)),
-		CumulativeFunc<>(func_conditional<float, float>(
-			make_functor_ptr<true>(&less_than, 0.6f),
-			make_functor_ptr(&power_func, std::tuple<float, float>{ 2000.0f, 0.5f }),
-			make_functor_ptr<true>(&constant_func<float>, power_func(0.6f, { 2000.0f, 0.5f })))
-		),
-		func_compose<float, const Particles::CHRSeed&>(Particles::CHR::Seed_waveT(), make_functor_ptr(&linear_func, std::tuple(-0.05f, 0.4f))),
-		Particles::CombineSequential({
-			Particles::CombineConditionalTimeLessThan(mt,
-				Particles::CHR::SetColorUsingTime(make_functor_ptr(&linear_combo_f<4>, std::array<glm::vec4, 2>{
-						glm::vec4{ 1.0f, 0.0f, 0.0f, 1.0f }, glm::vec4{ 0.0f, 1.0f, 0.0f, 0.0f } })),
-				Particles::CHR::SetColorUsingTime(make_functor_ptr(&linear_combo_f<4>, std::array<glm::vec4, 2>{
-						glm::vec4{ 1.0f, 0.0f, 0.0f, 1.0f + mt / (1.0f - mt) }, glm::vec4{ 0.0f, 1.0f, 0.0f, -1.0f / (1.0f - mt)} }))
-			),
-			Particles::CombineInitialOverTime(
-				Particles::CombineSequential({
-					Particles::CHR::FeedDataRNG(0),
-					Particles::CHR::FeedDataRNG(1),
-					Particles::CHR::SetLocalPositionUsingData(make_functor_ptr([](const glm::vec2& ps) -> Position2D {
-						return glm::vec2{ glm::cos(ps.x * 2 * glm::pi<float>()), glm::sin(ps.x * 2 * glm::pi<float>()) } * 20.0f * ps.y;
-					}), 0, 1),
-					Particles::CHR::FeedDataRNG(0),
-					Particles::CHR::FeedDataRNG(1),
-					Particles::Characterize(make_functor_ptr([](Particle& p) {
-						glm::vec2 vel = linear_combo<2, 2>({ p[0], p[1] }, { glm::vec2{ -1.0f, -1.0f }, glm::vec2{ 2.0f, 0.0f }, glm::vec2{ 0.0f, 2.0f } });
-						vel = glm::normalize(vel);
-						vel *= glm::vec2{ 200.0f, 100.0f };
-						p[0] = vel.x;
-						p[1] = vel.y;
-					}), 2),
-					Particles::CHR::FeedDataRNG(2),
-					Particles::CHR::OperateDataUsingSeed(2, make_functor_ptr([](const std::tuple<float&, const Particles::CHRSeed&>& tuple) -> void {
-						std::get<0>(tuple) = (1.0f + std::get<0>(tuple) * 0.25f) * (1.0f - 0.4f * glm::pow(std::get<1>(tuple).waveT, 0.2f + std::get<0>(tuple) * 0.25f));
-					})),
-					Particles::CHR::OperateData(0, make_functor_ptr([](const std::tuple<float&, float>& tuple) { std::get<0>(tuple) *= std::get<1>(tuple); }), 2),
-					Particles::CHR::OperateData(1, make_functor_ptr([](const std::tuple<float&, float>& tuple) { std::get<0>(tuple) *= std::get<1>(tuple); }), 2),
-				}),
-				Particles::CHR::OperateLocalPositionFromVelocityData(0, 1)
-			),
-			Particles::CHR::SyncAll()
-		})
-	};
 	float p2width = 400.0f;
 	float p2height = 400.0f;
-	ParticleSubsystemData<> wave2{
-		1.5f,
-		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 2}, {1, 2}, {1, 0} }, GL_TRIANGLE_FAN)),
-		CumulativeFunc<>(make_functor_ptr(&linear_func, std::tuple<float, float>{ p2height * 0.5f, 0.0f })),
-		make_functor_ptr<true>(&constant_func<float, const Particles::CHRSeed&>, 1.5f),
-		Particles::CombineSequential({
-			Particles::GenSetup(
-				Particles::CombineSequential({
-					Particles::CHR::FeedDataRNG(0),
-					Particles::CHR::FeedDataRandSpawnIndex(1),
-					Particles::CHR::FeedDataRandBinChoice(2, 1, -1)
-				})
-			),
-			Particles::CHR::FeedDataShiftMod(3, 0, 1.0f),
-			Particles::CombineConditionalDataLessThan(
-				3, 0.5f,
-				Particles::CombineSequential({
-					Particles::CHR::SetColorUsingData(make_functor_ptr(&linear_combo_f<4>, std::array<glm::vec4, 2>{
-							glm::vec4{0.0f, 0.0f, 1.0f, 1.0f}, glm::vec4{2.0f, 2.0f, 0.0f, 0.0f} }), 3),
-					Particles::CHR::SetLocalScaleUsingData(make_functor_ptr(&linear_combo_f<2>, std::array<glm::vec2, 2>{
-							glm::vec2{ 0.0f, 1.0f }, glm::vec2{ 2.0f * p2width, 0.0f } }), 3),
-					Particles::CombineConditionalDataLessThan(
-						2, 0.0f,
-						Particles::CHR::SetLocalPositionUsingData(func_compose<Position2D, float>(
-							make_functor_ptr(&cast<float, unsigned int>),
-							make_functor_ptr(&linear_combo_f<2>, std::array<glm::vec2, 2>{
-									glm::vec2{ -0.5f * p2width, -0.5f * p2height}, glm::vec2{ 0.0f, 2.0f } })), 1),
-						Particles::CHR::SetLocalPositionUsingData(func_compose<Position2D, const glm::vec2&>(
-							vec2_compwise<float, float>(make_functor_ptr(&identity<float>), make_functor_ptr(&cast<float, unsigned int>)),
-							make_functor_ptr(&linear_combo<2, 2>, std::array<glm::vec2, 3>{
-									glm::vec2{ 0.5f * p2width, -0.5f * p2height }, glm::vec2{-2.0f * p2width, 0.0f}, glm::vec2{0.0f, 2.0f} })), 3, 1)
-					)
-				}),
-				Particles::CombineSequential({
-					Particles::CHR::SetColorUsingData(make_functor_ptr(&linear_combo_f<4>, std::array<glm::vec4, 2>{
-							glm::vec4{2.0f, 2.0f, 1.0f, 1.0f}, glm::vec4{-2.0f, -2.0f, 0.0f, 0.0f} }), 3),
-					Particles::CHR::SetLocalScaleUsingData(make_functor_ptr(&linear_combo_f<2>, std::array<glm::vec2, 2>{
-							glm::vec2{ 2.0f * p2width, 1.0f }, glm::vec2{ -2.0f * p2width, 0.0f } }), 3),
-					Particles::CombineConditionalDataLessThan(
-						2, 0.0f,
-						Particles::CHR::SetLocalPositionUsingData(func_compose<Position2D, const glm::vec2&>(
-							vec2_compwise<float, float>(make_functor_ptr(&identity<float>), make_functor_ptr(&cast<float, unsigned int>)),
-							make_functor_ptr(&linear_combo<2, 2>, std::array<glm::vec2, 3>{
-									glm::vec2{ -1.5f * p2width, -0.5f * p2height }, glm::vec2{ 2.0f * p2width, 0.0f }, glm::vec2{ 0.0f, 2.0f }})), 3, 1),
-						Particles::CHR::SetLocalPositionUsingData(func_compose<Position2D, float>(
-							make_functor_ptr(&cast<float, unsigned int>),
-							make_functor_ptr(&linear_combo_f<2>, std::array<glm::vec2, 2>{
-									glm::vec2{ -0.5f * p2width, -0.5f * p2height}, glm::vec2{ 0.0f, 2.0f }})), 1)
-					)
-				})
-			),
-			Particles::CHR::SyncAll()
-		})
-	};
-
-	//ParticleSystem<> psys({ wave2, wave2, wave1 });
-	//ParticleSystem<> psys({ wave1 });
-	ParticleSystem<> psys({ wave2, wave2 });
+	ParticleSubsystemData wave1 = ParticleSubsystemRegistry::Instance().Invoke("wave1", { 0.5f });
+	ParticleSubsystemData wave2 = ParticleSubsystemRegistry::Instance().Invoke("wave2", { p2width, p2height });
+	
+	ParticleSystem psys({ wave2, wave2 });
 	set_ptr(psys.SubsystemRef(1).Fickler().Rotation(), 0.5f * glm::pi<float>());
 	psys.SubsystemRef(1).Fickler().SyncRS();
 	set_ptr(psys.Fickler().Scale(), glm::vec2{_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height} * 0.75f);
 	psys.Fickler().SyncRS();
-	//psys.Transformer()->SyncGlobalWithLocalScales();
-	//psys.Transformer()->SetPosition(300, 0);
-	//psys.Transformer()->SetLocalTransform(2, { {-500, 0}, 0, {2, 2} });
-	//ParticleSubsystemArray<> parr({ wave1, wave2 });
-
-	//psys.SetPosition(-400, 0);
-	//psys.Transformer().SyncGlobalWithLocalPositions();
-	//parr.SetPosition(400, 0);
-	//parr.Transformer().SyncGlobalWithLocalPositions();
-
-	//parr.SubsystemRef(0).SetRotation(1.57f);
-	//set_ptr(psys.Fickler().Modulate(), Colors::PSYCHEDELIC_PURPLE);
-	//psys.Fickler().SyncM();
 
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
-	//Renderer::GetCanvasLayer(11)->OnAttach(&parr);
 
 	TileMap* tilemap_ini;
 	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap_ini) != LOAD_STATUS::OK)
@@ -393,6 +288,8 @@ void Pulsar::Run(GLFWwindow* window)
 		deltaDrawTime = drawTime - prevDrawTime;
 		prevDrawTime = drawTime;
 		totalDrawTime += deltaDrawTime;
+
+		_frame_start();
 		
 		*child.Fickler().Rotation() = -Pulsar::totalDrawTime;
 		*child2.Fickler().Rotation() = -Pulsar::totalDrawTime;

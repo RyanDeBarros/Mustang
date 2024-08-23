@@ -6,16 +6,15 @@
 #include "render/actors/shapes/DebugBatcher.h"
 #include "ParticleEffect.h"
 
-template<std::unsigned_integral ParticleCount = unsigned short>
-class ParticleSystem : public ActorRenderBase2D, public ParticleEffect<ParticleCount>
+class ParticleSystem : public ActorRenderBase2D, public ParticleEffect
 {
 	DebugBatcher m_Batcher;
 	std::unordered_map<DebugModel, std::unordered_set<std::shared_ptr<DebugPolygon>>> m_WaitingForDespawn;
 
 public:
-	ParticleSystem(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true, bool enabled = true);
-	ParticleSystem(const ParticleSystem<ParticleCount>&) = delete;
-	ParticleSystem(ParticleSystem<ParticleCount>&&) = delete;
+	ParticleSystem(const std::vector<ParticleSubsystemData>& subsystem_data, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true, bool enabled = true);
+	ParticleSystem(const ParticleSystem&) = delete;
+	ParticleSystem(ParticleSystem&&) = delete;
 
 	/// Whether the particle system should be drawn. This does not affect whether the system is updated every update frame.
 	bool visible;

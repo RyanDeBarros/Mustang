@@ -3,18 +3,15 @@
 #include "Pulsar.h"
 #include "RendererSettings.h"
 
-template class ParticleEffect<unsigned short>;
-
 // TODO eventually, create factory for particle effects?
 
-template<std::unsigned_integral ParticleCount>
-ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, FickleType fickle_type, bool enabled)
+ParticleEffect::ParticleEffect(const std::vector<ParticleSubsystemData>& subsystem_data, FickleType fickle_type, bool enabled)
 	: enabled(enabled), m_Fickler(fickle_type)
 {
 	ParticleSubsystemIndex i = 0;
 	for (const auto& subsys : subsystem_data)
 	{
-		std::shared_ptr<ParticleSubsystem<ParticleCount>> subsystem = std::make_shared<ParticleSubsystem<ParticleCount>>(subsys, i++, fickle_type);
+		std::shared_ptr<ParticleSubsystem> subsystem = std::make_shared<ParticleSubsystem>(subsys, i++, fickle_type);
 		m_Subsystems.push_back(subsystem);
 		if (m_Fickler.IsProtean())
 			m_Fickler.ProteanLinker()->Attach(subsystem->Fickler().ProteanLinker());
@@ -27,8 +24,7 @@ ParticleEffect<ParticleCount>::ParticleEffect(const std::vector<ParticleSubsyste
 }
 
 // TODO some way of skipping frames for intensive actors like particle systems. i.e., instead of updating every draw frame, an intensive actor can update for say, 120FPS, to limit draw/update overhead. Drawing will still happen obviously, but the update will happen every N frames. Maybe separate the two into separate functions.
-template<std::unsigned_integral ParticleCount>
-void ParticleEffect<ParticleCount>::OnUpdate()
+void ParticleEffect::OnUpdate()
 {
 	// TODO perhaps spawning and enabled should be moved to particle subsystem?
 	if (!paused)
@@ -64,8 +60,7 @@ void ParticleEffect<ParticleCount>::OnUpdate()
 	}
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleEffect<ParticleCount>::Pause()
+void ParticleEffect::Pause()
 {
 	if (enabled || spawning)
 	{
@@ -75,8 +70,7 @@ void ParticleEffect<ParticleCount>::Pause()
 	}
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleEffect<ParticleCount>::Resume()
+void ParticleEffect::Resume()
 {
 	if (!enabled || !spawning)
 	{
@@ -86,8 +80,7 @@ void ParticleEffect<ParticleCount>::Resume()
 	}
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleEffect<ParticleCount>::PlayFor(real n)
+void ParticleEffect::PlayFor(real n)
 {
 	m_PlayTime = n;
 	spawning = true;

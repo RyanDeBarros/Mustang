@@ -16,14 +16,12 @@ namespace Logger {
 		std::cout << std::endl;
 	}
 
-	template<typename T>
-	inline void LogInfo(const T& message)
+	inline void LogInfo(const auto& message)
 	{
 		std::cout << message << std::endl;
 	}
 
-	template<typename T>
-	inline void LogWarning(const T& message, const char* source = "", const char* file = "", const char* line = "")
+	inline void LogWarning(const auto& message, const char* source = "", const char* file = "", const char* line = "")
 	{
 		if (source[0] != '\0')
 			std::cout << "[Warning] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
@@ -31,8 +29,7 @@ namespace Logger {
 			std::cout << "[Warning] " << message << std::endl;
 	}
 
-	template<typename T>
-	inline void LogError(const T& message, const char* source = "", const char* file = "", const char* line = "")
+	inline void LogError(const auto& message, const char* source = "", const char* file = "", const char* line = "")
 	{
 		if (source[0] != '\0')
 			std::cout << "[Error] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;
@@ -40,8 +37,7 @@ namespace Logger {
 			std::cout << "[Error] " << message << std::endl;
 	}
 
-	template<typename T>
-	inline void LogErrorFatal(const T& message, const char* source = "", const char* file = "", const char* line = "")
+	inline void LogErrorFatal(const auto& message, const char* source = "", const char* file = "", const char* line = "")
 	{
 		if (source[0] != '\0')
 			std::cout << "[Fatal] " << message << "\tSource (" << source << " " << file << ":" << line << ")" << std::endl;

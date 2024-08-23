@@ -18,5 +18,7 @@ namespace Pulsar
 	extern real prevDrawTime;
 	extern real totalDrawTime;
 
+	void PostInit(void(*post_init)());
 	void Run(GLFWwindow*);
+	void FrameStart(void(*frame_start)());
 }

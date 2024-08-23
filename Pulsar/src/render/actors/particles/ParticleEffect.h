@@ -7,19 +7,18 @@
 #include "../../transform/Transform.h"
 #include "../../transform/Modulate.h"
 
-template<std::unsigned_integral ParticleCount = unsigned short>
 class ParticleEffect
 {
-	friend class ParticleSubsystem<ParticleCount>;
+	friend class ParticleSubsystem;
 	real m_TotalPlayed = 0.0f;
 	real m_DeltaTime = 0.0f;
 	real m_PlayTime = 0.0f;
 	real m_LeftoverDT = 0.0f;
 
 public:
-	ParticleEffect(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, FickleType fickle_type = FickleType::Protean, bool enabled = true);
-	ParticleEffect(const ParticleEffect<ParticleCount>&) = delete;
-	ParticleEffect(ParticleEffect<ParticleCount>&&) = delete;
+	ParticleEffect(const std::vector<ParticleSubsystemData>& subsystem_data, FickleType fickle_type = FickleType::Protean, bool enabled = true);
+	ParticleEffect(const ParticleEffect&) = delete;
+	ParticleEffect(ParticleEffect&&) = delete;
 
 	/// Whether the particle system is updated every update frame. This does not affect whether the system should be drawn.
 	bool enabled;
@@ -34,10 +33,10 @@ public:
 	void PlayFor(real n);
 
 	inline FickleSelector2D& Fickler() { return m_Fickler; }
-	inline ParticleSubsystem<ParticleCount>& SubsystemRef(unsigned int i) { return *m_Subsystems[i]; }
+	inline ParticleSubsystem& SubsystemRef(unsigned int i) { return *m_Subsystems[i]; }
 
 protected:
-	std::vector<std::shared_ptr<ParticleSubsystem<ParticleCount>>> m_Subsystems;
+	std::vector<std::shared_ptr<ParticleSubsystem>> m_Subsystems;
 	FickleSelector2D m_Fickler;
 
 	void OnUpdate();

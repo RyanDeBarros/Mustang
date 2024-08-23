@@ -2,11 +2,8 @@
 
 #include "render/CanvasLayer.h"
 
-template class ParticleSubsystemArray<unsigned short>;
-
-template<std::unsigned_integral ParticleCount>
-ParticleSubsystemArray<ParticleCount>::ParticleSubsystemArray(const std::vector<ParticleSubsystemData<ParticleCount>>& subsystem_data, ZIndex z, FickleType fickle_type, bool visible, bool enabled)
-	: ParticleEffect<ParticleCount>(subsystem_data, fickle_type, enabled), ActorRenderBase2D(z), visible(visible)
+ParticleSubsystemArray::ParticleSubsystemArray(const std::vector<ParticleSubsystemData>& subsystem_data, ZIndex z, FickleType fickle_type, bool visible, bool enabled)
+	: ParticleEffect(subsystem_data, fickle_type, enabled), ActorRenderBase2D(z), visible(visible)
 {
 	for (const auto& _ : subsystem_data)
 	{
@@ -15,10 +12,9 @@ ParticleSubsystemArray<ParticleCount>::ParticleSubsystemArray(const std::vector<
 	}
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystemArray<ParticleCount>::RequestDraw(CanvasLayer* canvas_layer)
+void ParticleSubsystemArray::RequestDraw(CanvasLayer* canvas_layer)
 {
-	ParticleEffect<ParticleCount>::OnUpdate();
+	ParticleEffect::OnUpdate();
 	if (visible)
 	{
 		for (auto& batcher : m_Batchers)
@@ -26,8 +22,7 @@ void ParticleSubsystemArray<ParticleCount>::RequestDraw(CanvasLayer* canvas_laye
 	}
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystemArray<ParticleCount>::InvalidateParticleShape(ParticleSubsystemIndex i, const std::shared_ptr<DebugPolygon>& shape)
+void ParticleSubsystemArray::InvalidateParticleShape(ParticleSubsystemIndex i, const std::shared_ptr<DebugPolygon>& shape)
 {
 	auto iter = m_WaitingForDespawn[i].find(shape->GetDebugModel());
 	if (iter == m_WaitingForDespawn[i].end())
@@ -36,8 +31,7 @@ void ParticleSubsystemArray<ParticleCount>::InvalidateParticleShape(ParticleSubs
 		iter->second.insert(shape);
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystemArray<ParticleCount>::DespawnInvalidParticles()
+void ParticleSubsystemArray::DespawnInvalidParticles()
 {
 	for (ParticleSubsystemIndex i = 0; i < m_Batchers.size(); i++)
 	{
@@ -46,8 +40,7 @@ void ParticleSubsystemArray<ParticleCount>::DespawnInvalidParticles()
 	}
 }
 
-template<std::unsigned_integral ParticleCount>
-void ParticleSubsystemArray<ParticleCount>::AddParticleShape(ParticleSubsystemIndex i, const std::shared_ptr<DebugPolygon>& shape)
+void ParticleSubsystemArray::AddParticleShape(ParticleSubsystemIndex i, const std::shared_ptr<DebugPolygon>& shape)
 {
 	m_Batchers[i].PushBack(shape);
 }

@@ -36,9 +36,7 @@ struct Particle
 
 private:
 	bool m_Invalid = false;
-	template<std::unsigned_integral ParticleCount>
 	friend class ParticleEffect;
-	template<std::unsigned_integral ParticleCount>
 	friend class ParticleSubsystem;
 	real m_LifespanInv;
 	real m_T = 0.0f;
