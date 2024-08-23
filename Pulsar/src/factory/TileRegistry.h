@@ -25,16 +25,16 @@ struct std::hash<TileConstructArgs>
 	}
 };
 
-class TileFactory
+class TileRegistry
 {
 	static TileHandle handle_cap;
-	static std::unordered_map<TileHandle, Tile*> factory;
+	static std::unordered_map<TileHandle, Tile> registry;
 	static std::unordered_map<TileConstructArgs, TileHandle> lookupMap;
 
-	TileFactory() = delete;
-	TileFactory(const TileFactory&) = delete;
-	TileFactory(TileFactory&&) = delete;
-	~TileFactory() = delete;
+	TileRegistry() = delete;
+	TileRegistry(const TileRegistry&) = delete;
+	TileRegistry(TileRegistry&&) = delete;
+	~TileRegistry() = delete;
 
 	friend class Renderer;
 	static void Init();
@@ -42,9 +42,10 @@ class TileFactory
 
 public:
 	static TileHandle GetHandle(const TileConstructArgs& args);
-	static Tile const* Get(TileHandle);
+	static Tile const* Get(TileHandle handle);
+	static bool DestroyTile(TileHandle handle);
 
-	static TileHandle RegisterTile(Tile* emplace_tile);
+	static TileHandle RegisterTile(Tile&& emplace_tile);
 	static unsigned char const* GetImageBuffer(TileHandle tile);
 	static int GetWidth(TileHandle tile);
 	static int GetHeight(TileHandle tile);

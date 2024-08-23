@@ -32,7 +32,7 @@ Shader const* ShaderRegistry::Get(ShaderHandle handle)
 	}
 }
 
-bool ShaderRegistry::DestroyHandle(ShaderHandle handle)
+bool ShaderRegistry::DestroyShader(ShaderHandle handle)
 {
 	auto iter = registry.find(handle);
 	if (iter == registry.end())

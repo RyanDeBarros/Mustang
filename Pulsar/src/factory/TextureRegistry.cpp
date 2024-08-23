@@ -25,7 +25,7 @@ Texture const* TextureRegistry::Get(TextureHandle handle)
 	}
 }
 
-bool TextureRegistry::DestroyHandle(TextureHandle handle)
+bool TextureRegistry::DestroyTexture(TextureHandle handle)
 {
 	auto iter = registry.find(handle);
 	if (iter == registry.end())

@@ -10,7 +10,7 @@ struct TileRect
 class Tile
 {
 protected:
-	friend class TileFactory;
+	friend class TileRegistry;
 	friend class Texture;
 	unsigned char* m_ImageBuffer;
 	int m_Width, m_Height, m_BPP;

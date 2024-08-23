@@ -73,7 +73,7 @@ class TextureRegistry
 
 public:
 	static Texture const* Get(TextureHandle handle);
-	static bool DestroyHandle(TextureHandle handle);
+	static bool DestroyTexture(TextureHandle handle);
 	static TextureHandle GetHandle(const TextureConstructArgs_filepath& args);
 	static TextureHandle GetHandle(const TextureConstructArgs_tile& args);
 	static void Bind(TextureHandle handle, TextureSlot slot);

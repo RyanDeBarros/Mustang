@@ -18,8 +18,8 @@ Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_
 	}
 	else
 	{
-		m_Tile = TileFactory::GetHandle({ filepath });
-		tile_ref = TileFactory::Get(m_Tile);
+		m_Tile = TileRegistry::GetHandle({ filepath });
+		tile_ref = TileRegistry::Get(m_Tile);
 	}
 	if (!tile_ref)
 	{
@@ -35,7 +35,7 @@ Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_
 Texture::Texture(TileHandle tile, TextureSettings settings)
 	: m_RID(0), m_Tile(tile)
 {
-	Tile const* const tile_ref = TileFactory::Get(m_Tile);
+	Tile const* const tile_ref = TileRegistry::Get(m_Tile);
 	if (!tile_ref)
 	{
 		Logger::LogError(std::string("Cannot create texture from tile \"") + std::to_string(tile) + "\": Tile ref is null.");

@@ -53,7 +53,7 @@ class ShaderRegistry
 public:
 	static ShaderHandle GetHandle(const ShaderConstructArgs& args);
 	static Shader const* Get(ShaderHandle handle);
-	static bool DestroyHandle(ShaderHandle handle);
+	static bool DestroyShader(ShaderHandle handle);
 	static void Bind(ShaderHandle handle);
 	static void Unbind();
 	inline static ShaderHandle Standard() { return standard_shader; }

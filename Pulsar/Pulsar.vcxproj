@@ -169,7 +169,7 @@
     <ClCompile Include="src\AssetLoader.cpp" />
     <ClCompile Include="src\factory\Atlas.cpp" />
     <ClCompile Include="src\factory\Tile.cpp" />
-    <ClCompile Include="src\factory\TileFactory.cpp" />
+    <ClCompile Include="src\factory\TileRegistry.cpp" />
     <ClCompile Include="src\factory\UniformLexicon.cpp" />
     <ClCompile Include="src\factory\UniformLexiconFactory.cpp" />
     <ClCompile Include="src\Macros.cpp" />
@@ -222,7 +222,7 @@
     <ClInclude Include="src\AssetLoader.h" />
     <ClInclude Include="src\factory\Atlas.h" />
     <ClInclude Include="src\factory\Tile.h" />
-    <ClInclude Include="src\factory\TileFactory.h" />
+    <ClInclude Include="src\factory\TileRegistry.h" />
     <ClInclude Include="src\factory\UniformLexicon.h" />
     <ClInclude Include="src\factory\UniformLexiconFactory.h" />
     <ClInclude Include="src\render\ActorRenderBase.h" />

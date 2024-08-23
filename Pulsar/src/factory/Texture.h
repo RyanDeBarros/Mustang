@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Typedefs.h"
-#include "TileFactory.h"
+#include "TileRegistry.h"
 
 enum class MinFilter : GLint
 {
@@ -109,8 +109,8 @@ public:
 
 	void SetSettings(const TextureSettings& settings) const;
 
-	inline int GetWidth() const { return TileFactory::GetWidth(m_Tile); }
-	inline int GetHeight() const { return TileFactory::GetHeight(m_Tile); }
+	inline int GetWidth() const { return TileRegistry::GetWidth(m_Tile); }
+	inline int GetHeight() const { return TileRegistry::GetHeight(m_Tile); }
 	inline TileHandle GetTileHandle() const { return m_Tile; }
 
 	static const TextureSettings linear_settings;

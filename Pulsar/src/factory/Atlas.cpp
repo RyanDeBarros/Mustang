@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Macros.h"
-#include "TileFactory.h"
+#include "TileRegistry.h"
 #include "render/actors/RectRender.h"
 #include "render/actors/ActorTesselation.h"
 
@@ -14,25 +14,22 @@ Atlas::Atlas(std::vector<TileHandle>& tiles, int width, int height, int border)
 	RectPack(tiles, width, height);
 	unsigned char* image_buffer = new unsigned char[Atlas::BPP * width * height](0);
 	PlaceTiles(image_buffer, width);
-	Tile* tile = new Tile(image_buffer, width, height, Atlas::BPP);
-	m_Tile = TileFactory::RegisterTile(tile);
+	Tile tile(image_buffer, width, height, Atlas::BPP);
+	m_Tile = TileRegistry::RegisterTile(std::move(tile));
 	if (m_Tile == 0)
-	{
-		delete tile;
 		throw null_handle_error();
-	}
 }
 
 Atlas::Atlas(const std::string& texture_filepath, const std::vector<Placement>& placements, int border)
 	: m_Placements(placements), m_Border(border)
 {
-	m_Tile = TileFactory::GetHandle({ texture_filepath });
+	m_Tile = TileRegistry::GetHandle({ texture_filepath });
 }
 
 Atlas::Atlas(const std::string& texture_filepath, std::vector<Placement>&& placements, int border)
 	: m_Placements(std::move(placements)), m_Border(border)
 {
-	m_Tile = TileFactory::GetHandle({ texture_filepath });
+	m_Tile = TileRegistry::GetHandle({ texture_filepath });
 }
 
 Atlas::Atlas(Atlas&& atlas) noexcept
@@ -59,7 +56,7 @@ static int min_bound(const std::vector<TileHandle>& tiles, const int& border)
 {
 	int bound = border;
 	for (const TileHandle& tile : tiles)
-		bound += std::max(TileFactory::GetWidth(tile), TileFactory::GetHeight(tile)) + border;
+		bound += std::max(TileRegistry::GetWidth(tile), TileRegistry::GetHeight(tile)) + border;
 	return bound;
 }
 
@@ -169,8 +166,8 @@ void Atlas::RectPack(std::vector<TileHandle>& tiles, int width, int height)
 
 	std::sort(tiles.begin(), tiles.end(), [](const TileHandle& a, const TileHandle& b)
 	{
-		return std::max(TileFactory::GetWidth(a), TileFactory::GetHeight(a))
-				> std::max(TileFactory::GetWidth(b), TileFactory::GetHeight(b));
+		return std::max(TileRegistry::GetWidth(a), TileRegistry::GetHeight(a))
+				> std::max(TileRegistry::GetWidth(b), TileRegistry::GetHeight(b));
 	});
 
 	m_Placements.reserve(tiles.size());
@@ -189,7 +186,7 @@ void Atlas::RectPack(std::vector<TileHandle>& tiles, int width, int height)
 		{
 			Subsection subsection = subsections.top();
 			subsections.pop();
-			Placement result = subsection.insert(tile, TileFactory::GetWidth(tile) + m_Border, TileFactory::GetHeight(tile) + m_Border);
+			Placement result = subsection.insert(tile, TileRegistry::GetWidth(tile) + m_Border, TileRegistry::GetHeight(tile) + m_Border);
 			if (result.tile > 0)
 			{
 				m_Placements.push_back(result);
@@ -236,12 +233,12 @@ void Atlas::PlaceTiles(unsigned char* image_buffer, int atlas_width)
 	{
 		if (placement.tile == 0)
 			continue;
-		unsigned char const* p_buffer = TileFactory::GetImageBuffer(placement.tile);
+		unsigned char const* p_buffer = TileRegistry::GetImageBuffer(placement.tile);
 		if (!p_buffer)
 			continue;
 		const auto p_width = placement.w - m_Border;
 		const auto p_height = placement.h - m_Border;
-		const auto p_bpp = TileFactory::GetBPP(placement.tile);
+		const auto p_bpp = TileRegistry::GetBPP(placement.tile);
 		for (int h = 0; h < p_height; h++)
 		{
 			for (int w = 0; w < p_width; w++)
@@ -271,8 +268,8 @@ RectRender Atlas::SampleSubtile(size_t index, const TextureSettings& texture_set
 		return RectRender(0, 0, 0, fickle_type, false);
 	RectRender actor(TextureRegistry::GetHandle(TextureConstructArgs_tile{ m_Tile, texture_version, texture_settings }), shader, z, fickle_type, visible);
 	const Placement& rect = m_Placements[index];
-	int width = TileFactory::GetWidth(m_Tile);
-	int height = TileFactory::GetHeight(m_Tile);
+	int width = TileRegistry::GetWidth(m_Tile);
+	int height = TileRegistry::GetHeight(m_Tile);
 	if (rect.r)
 		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.h - m_Border, rect.w - m_Border }, width, height);
 	else

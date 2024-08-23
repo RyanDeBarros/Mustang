@@ -8,7 +8,7 @@
 #include "factory/ShaderRegistry.h"
 #include "factory/TextureRegistry.h"
 #include "factory/UniformLexiconFactory.h"
-#include "factory/TileFactory.h"
+#include "factory/TileRegistry.h"
 #include "render/actors/RectRender.h"
 
 #if PULSAR_ASSUME_INITIALIZED
@@ -33,7 +33,7 @@ void Renderer::Init()
 	ShaderRegistry::Init();
 	TextureRegistry::Init();
 	UniformLexiconFactory::Init();
-	TileFactory::Init();
+	TileRegistry::Init();
 	RectRender::DefineRectRenderable();
 	TRY(glEnable(GL_PROGRAM_POINT_SIZE));
 }
@@ -45,7 +45,7 @@ void Renderer::Terminate()
 	uninitialized = true;
 #endif
 	layers.clear();
-	TileFactory::Terminate();
+	TileRegistry::Terminate();
 	UniformLexiconFactory::Terminate();
 	TextureRegistry::Terminate();
 	ShaderRegistry::Terminate();
