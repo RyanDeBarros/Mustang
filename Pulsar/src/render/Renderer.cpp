@@ -6,7 +6,7 @@
 #include "Macros.h"
 #include "Logger.inl"
 #include "factory/ShaderRegistry.h"
-#include "factory/TextureFactory.h"
+#include "factory/TextureRegistry.h"
 #include "factory/UniformLexiconFactory.h"
 #include "factory/TileFactory.h"
 #include "render/actors/RectRender.h"
@@ -31,7 +31,7 @@ void Renderer::Init()
 	uninitialized = false;
 #endif
 	ShaderRegistry::Init();
-	TextureFactory::Init();
+	TextureRegistry::Init();
 	UniformLexiconFactory::Init();
 	TileFactory::Init();
 	RectRender::DefineRectRenderable();
@@ -47,7 +47,7 @@ void Renderer::Terminate()
 	layers.clear();
 	TileFactory::Terminate();
 	UniformLexiconFactory::Terminate();
-	TextureFactory::Terminate();
+	TextureRegistry::Terminate();
 	ShaderRegistry::Terminate();
 }
 

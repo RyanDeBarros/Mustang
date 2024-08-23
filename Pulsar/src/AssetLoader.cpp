@@ -10,7 +10,7 @@
 #include "Logger.inl"
 #include "RendererSettings.h"
 #include "factory/ShaderRegistry.h"
-#include "factory/TextureFactory.h"
+#include "factory/TextureRegistry.h"
 #include "factory/UniformLexiconFactory.h"
 #include "factory/UniformLexicon.h"
 #include "factory/Atlas.h"
@@ -173,7 +173,7 @@ LOAD_STATUS Loader::loadTexture(const char* filepath, TextureHandle& handle, Tex
 		{
 			VERIFY(readTextureSettings(settings, texture_settings));
 		}
-		handle = TextureFactory::GetHandle(TextureConstructArgs_filepath{ path.value(), texture_settings, temporary_buffer, texture_version});
+		handle = TextureRegistry::GetHandle(TextureConstructArgs_filepath{ path.value(), texture_settings, temporary_buffer, texture_version});
 		return handle > 0 ? LOAD_STATUS::OK : LOAD_STATUS::ASSET_LOAD_ERR;
 	}
 	catch (const toml::parse_error& err)

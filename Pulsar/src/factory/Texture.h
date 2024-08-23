@@ -93,7 +93,7 @@ class Texture
 	RID m_RID;
 	TileHandle m_Tile;
 
-	friend class TextureFactory;
+	friend class TextureRegistry;
 	inline bool IsValid() const { return m_RID > 0; }
 
 public:

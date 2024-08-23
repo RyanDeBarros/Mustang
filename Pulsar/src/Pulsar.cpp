@@ -124,12 +124,12 @@ void Pulsar::Run(GLFWwindow* window)
 		ASSERT(false);
 	//if (loadTexture("res/assets/atlas.toml", textureAtlas) != LOAD_STATUS::OK)
 	//	ASSERT(false);
-	TextureHandle tex_dirtTL = TextureFactory::GetHandle({ "res/textures/dirtTL.png" });
-	TextureHandle tex_dirtTR = TextureFactory::GetHandle({ "res/textures/dirtTR.png" });
-	TextureHandle tex_grassSingle = TextureFactory::GetHandle({ "res/textures/grassSingle.png" });
-	TextureHandle tex_grassTL = TextureFactory::GetHandle({ "res/textures/grassTL.png" });
-	TextureHandle tex_grassTE = TextureFactory::GetHandle({ "res/textures/grassTE.png" });
-	TextureHandle tex_grassTR = TextureFactory::GetHandle({ "res/textures/grassTR.png" });
+	TextureHandle tex_dirtTL = TextureRegistry::GetHandle({ "res/textures/dirtTL.png" });
+	TextureHandle tex_dirtTR = TextureRegistry::GetHandle({ "res/textures/dirtTR.png" });
+	TextureHandle tex_grassSingle = TextureRegistry::GetHandle({ "res/textures/grassSingle.png" });
+	TextureHandle tex_grassTL = TextureRegistry::GetHandle({ "res/textures/grassTL.png" });
+	TextureHandle tex_grassTE = TextureRegistry::GetHandle({ "res/textures/grassTE.png" });
+	TextureHandle tex_grassTR = TextureRegistry::GetHandle({ "res/textures/grassTR.png" });
 
 	Renderer::AddCanvasLayer(0);
 
@@ -174,7 +174,7 @@ void Pulsar::Run(GLFWwindow* window)
 		glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)
 	});
 
-	TextureFactory::SetSettings(actor1.GetTextureHandle(), Texture::linear_settings);
+	TextureRegistry::SetSettings(actor1.GetTextureHandle(), Texture::linear_settings);
 
 	actor3.SetPivot(0.5f, 0.5f);
 	set_ptr(actor3.Fickler().Position(), { 0.0f, 0.0f });
@@ -218,7 +218,7 @@ void Pulsar::Run(GLFWwindow* window)
 	*actor3.Fickler().Scale() *= 2.0f;
 	actor3.Fickler().SyncRS();
 
-	TextureFactory::SetSettings(textureFlag, Texture::nearest_settings);
+	TextureRegistry::SetSettings(textureFlag, Texture::nearest_settings);
 
 	RectRender root(textureFlag);
 	RectRender child(textureSnowman);

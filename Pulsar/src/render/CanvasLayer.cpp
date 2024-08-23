@@ -3,7 +3,7 @@
 #include "Macros.h"
 #include "Renderer.h"
 #include "factory/ShaderRegistry.h"
-#include "factory/TextureFactory.h"
+#include "factory/TextureRegistry.h"
 #include "factory/UniformLexiconFactory.h"
 #include "actors/ActorPrimitive.h"
 #include "actors/shapes/DebugMultiPolygon.h"
@@ -224,8 +224,8 @@ void CanvasLayer::FlushAndReset()
 	BindAllExceptIndexes();
 	for (auto it = m_TextureSlotBatch.begin(); it != m_TextureSlotBatch.end(); it++)
 	{
-		// Note: due to the abstraction of glDrawElements and glBufferSubData behind CanvasLayer, there is currently no need to actually call TextureFactory::Unbind on anything.
-		TextureFactory::Bind(*it, (TextureSlot)(it - m_TextureSlotBatch.begin()));
+		// Note: due to the abstraction of glDrawElements and glBufferSubData behind CanvasLayer, there is currently no need to actually call TextureRegistry::Unbind on anything.
+		TextureRegistry::Bind(*it, (TextureSlot)(it - m_TextureSlotBatch.begin()));
 	}
 	TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
 	if (indexPos - m_IndexPool > 0)

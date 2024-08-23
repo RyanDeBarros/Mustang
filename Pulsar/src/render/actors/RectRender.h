@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ActorPrimitive.h"
-#include "factory/TextureFactory.h"
+#include "factory/TextureRegistry.h"
 
 class RectRender : public ActorPrimitive2D
 {
@@ -21,8 +21,8 @@ public:
 	
 	static void DefineRectRenderable();
 
-	inline int GetWidth() const { return TextureFactory::GetWidth(m_Render.textureHandle); }
-	inline int GetHeight() const { return TextureFactory::GetHeight(m_Render.textureHandle); }
+	inline int GetWidth() const { return TextureRegistry::GetWidth(m_Render.textureHandle); }
+	inline int GetHeight() const { return TextureRegistry::GetHeight(m_Render.textureHandle); }
 	// TODO when rect is cropped, width/height when setting scale is not accurate. Also, define SetWidth and SetHeight so that scale is not necessary.
 	inline float GetUVWidth() const { return m_UVWidth; }
 	inline float GetUVHeight() const { return m_UVHeight; }

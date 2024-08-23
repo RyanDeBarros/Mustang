@@ -269,7 +269,7 @@ RectRender Atlas::SampleSubtile(size_t index, const TextureSettings& texture_set
 {
 	if (index >= m_Placements.size() || m_Placements[index].x < 0)
 		return RectRender(0, 0, 0, fickle_type, false);
-	RectRender actor(TextureFactory::GetHandle(TextureConstructArgs_tile{ m_Tile, texture_version, texture_settings }), shader, z, fickle_type, visible);
+	RectRender actor(TextureRegistry::GetHandle(TextureConstructArgs_tile{ m_Tile, texture_version, texture_settings }), shader, z, fickle_type, visible);
 	const Placement& rect = m_Placements[index];
 	int width = TileFactory::GetWidth(m_Tile);
 	int height = TileFactory::GetHeight(m_Tile);

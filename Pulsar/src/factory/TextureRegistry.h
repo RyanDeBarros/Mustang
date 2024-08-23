@@ -55,24 +55,25 @@ struct std::hash<TextureConstructArgs_tile>
 	}
 };
 
-class TextureFactory
+class TextureRegistry
 {
 	static TextureHandle handle_cap;
-	static std::unordered_map<TextureHandle, Texture*> factory;
+	static std::unordered_map<TextureHandle, Texture> registry;
 	static std::unordered_map<TextureConstructArgs_filepath, TextureHandle> lookupMap_filepath;
 	static std::unordered_map<TextureConstructArgs_tile, TextureHandle> lookupMap_tile;
 
-	TextureFactory() = delete;
-	TextureFactory(const TextureFactory&) = delete;
-	TextureFactory(TextureFactory&&) = delete;
-	~TextureFactory() = delete;
+	TextureRegistry() = delete;
+	TextureRegistry(const TextureRegistry&) = delete;
+	TextureRegistry(TextureRegistry&&) = delete;
+	~TextureRegistry() = delete;
 
 	friend class Renderer;
 	static void Init();
 	static void Terminate();
 
 public:
-	static Texture const* Get(TextureHandle);
+	static Texture const* Get(TextureHandle handle);
+	static bool DestroyHandle(TextureHandle handle);
 	static TextureHandle GetHandle(const TextureConstructArgs_filepath& args);
 	static TextureHandle GetHandle(const TextureConstructArgs_tile& args);
 	static void Bind(TextureHandle handle, TextureSlot slot);
