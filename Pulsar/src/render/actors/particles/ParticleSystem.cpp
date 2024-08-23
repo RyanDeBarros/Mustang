@@ -3,7 +3,7 @@
 #include "render/CanvasLayer.h"
 
 ParticleSystem::ParticleSystem(const std::vector<ParticleSubsystemData>& subsystem_data, ZIndex z, FickleType fickle_type, bool visible, bool enabled)
-	: ParticleEffect(subsystem_data, fickle_type, enabled), m_Batcher(z), ActorRenderBase2D(z), visible(visible)
+	: ParticleEffect(subsystem_data, z, fickle_type, enabled), m_Batcher(z), visible(visible)
 {
 }
 

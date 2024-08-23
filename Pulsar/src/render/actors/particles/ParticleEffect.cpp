@@ -5,8 +5,8 @@
 
 // TODO eventually, create factory for particle effects?
 
-ParticleEffect::ParticleEffect(const std::vector<ParticleSubsystemData>& subsystem_data, FickleType fickle_type, bool enabled)
-	: enabled(enabled), m_Fickler(fickle_type)
+ParticleEffect::ParticleEffect(const std::vector<ParticleSubsystemData>& subsystem_data, ZIndex z, FickleType fickle_type, bool enabled)
+	: FickleActor2D(fickle_type, z), enabled(enabled)
 {
 	ParticleSubsystemIndex i = 0;
 	for (const auto& subsys : subsystem_data)

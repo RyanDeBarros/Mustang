@@ -7,7 +7,7 @@
 #include "../../transform/Transform.h"
 #include "../../transform/Modulate.h"
 
-class ParticleEffect
+class ParticleEffect : public FickleActor2D
 {
 	friend class ParticleSubsystem;
 	real m_TotalPlayed = 0.0f;
@@ -16,7 +16,7 @@ class ParticleEffect
 	real m_LeftoverDT = 0.0f;
 
 public:
-	ParticleEffect(const std::vector<ParticleSubsystemData>& subsystem_data, FickleType fickle_type = FickleType::Protean, bool enabled = true);
+	ParticleEffect(const std::vector<ParticleSubsystemData>& subsystem_data, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool enabled = true);
 	ParticleEffect(const ParticleEffect&) = delete;
 	ParticleEffect(ParticleEffect&&) = delete;
 
@@ -32,12 +32,10 @@ public:
 	inline void Reset() { m_TotalPlayed = 0.0f; m_DeltaTime = 0.0f; m_PlayTime = 0.0f; }
 	void PlayFor(real n);
 
-	inline FickleSelector2D& Fickler() { return m_Fickler; }
 	inline ParticleSubsystem& SubsystemRef(unsigned int i) { return *m_Subsystems[i]; }
 
 protected:
 	std::vector<std::shared_ptr<ParticleSubsystem>> m_Subsystems;
-	FickleSelector2D m_Fickler;
 
 	void OnUpdate();
 	virtual void DespawnInvalidParticles() {}

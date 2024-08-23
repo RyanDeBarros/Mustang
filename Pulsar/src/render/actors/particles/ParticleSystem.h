@@ -6,7 +6,7 @@
 #include "render/actors/shapes/DebugBatcher.h"
 #include "ParticleEffect.h"
 
-class ParticleSystem : public ActorRenderBase2D, public ParticleEffect
+class ParticleSystem : public ParticleEffect
 {
 	DebugBatcher m_Batcher;
 	std::unordered_map<DebugModel, std::unordered_set<std::shared_ptr<DebugPolygon>>> m_WaitingForDespawn;

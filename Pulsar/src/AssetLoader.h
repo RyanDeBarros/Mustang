@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include "Typedefs.h"
 
@@ -28,4 +29,6 @@ struct Loader
 	static LOAD_STATUS loadAtlas(const char* asset_filepath, class Atlas*& atlas_initializer);
 	/// pass nullptr to tilemap parameter, and it will point to memory on the heap.
 	static LOAD_STATUS loadTileMap(const char* asset_filepath, class TileMap*& tilemap_initializer, TextureVersion texture_version = 0);
+
+	static LOAD_STATUS loadParticleEffect(const char* filepath, class ParticleEffect*& peffect_initializer, std::string ptype = "", bool auto_enable = false);
 };

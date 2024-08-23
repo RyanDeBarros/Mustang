@@ -16,6 +16,10 @@
 #include "factory/Atlas.h"
 #include "render/Renderable.h"
 #include "render/actors/TileMap.h"
+#include "render/actors/particles/ParticleSubsystemArray.h"
+#include "render/actors/particles/ParticleSystem.h"
+#include "render/actors/particles/ParticleSubsystemRegistry.h"
+#include "utils/Data.h"
 
 // TODO rename all macros to have PULSAR_ prefix
 #define VERIFY(loadFunc) \
@@ -24,6 +28,8 @@
 		return verif;
 
 // TODO instead of simply returning invalid LOAD_STATUS, also print reason for the invalidity
+
+// TODO fickle type for all assets
 
 static LOAD_STATUS verify_header(const toml::v3::ex::parse_result& file, const char* header_name)
 {
@@ -700,6 +706,122 @@ LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, TileMap*& tilemap_in
 	catch (const toml::parse_error& err)
 	{
 		Logger::LogErrorFatal("Cannot parse tilemap asset file \"" + std::string(asset_filepath) + "\": " + std::string(err.description()));
+		return LOAD_STATUS::READ_ERR;
+	}
+}
+
+LOAD_STATUS Loader::loadParticleEffect(const char* filepath, ParticleEffect*& peffect_initializer, std::string ptype, bool auto_enable)
+{
+	try
+	{
+		auto file = toml::parse_file(filepath);
+		auto verif = verify_header(file, "peffect");
+		if (verif != LOAD_STATUS::OK)
+			return verif;
+
+		auto peffect = file["peffect"];
+		if (!peffect)
+			return LOAD_STATUS::SYNTAX_ERR;
+		if (ptype == "")
+		{
+			auto ptype_default = peffect["ptype"].value<std::string>();
+			if (ptype_default)
+				ptype = ptype_default.value();
+			if (ptype == "")
+				ptype = "array";
+		}
+		// TODO extract this into separate function, like what was done with texture settings.
+		FickleType fickle_type = FickleType::Protean;
+		if (auto fickle = peffect["fickle"].value<std::string>())
+		{
+			const std::string& ft = fickle.value();
+			if (ft == "protean")
+				fickle_type = FickleType::Protean;
+			else if (ft == "transformable")
+				fickle_type = FickleType::Transformable;
+			else if (ft == "modulatable")
+				fickle_type = FickleType::Modulatable;
+		}
+
+		auto subsys_arr = peffect["subsys"].as_array();
+		std::vector<ParticleSubsystemData> subsystems;
+		std::vector<std::pair<unsigned int, Transform2D>> transforms;
+		std::vector<std::pair<unsigned int, Modulate>> modulates;
+		size_t i = 0;
+		while (auto table = subsys_arr->get_as<toml::table>(i))
+		{
+			auto fid = (*table)["fid"].value<std::string>();
+			auto params = (*table)["args"].as_array();
+			if (!fid || !params)
+				return LOAD_STATUS::SYNTAX_ERR;
+			Array<float> params_arr(params->size());
+			for (size_t i = 0; i < params_arr.Size(); i++)
+				params_arr[i] = static_cast<float>(params->get_as<double>(i)->get());
+			subsystems.push_back(ParticleSubsystemRegistry::Instance().Invoke(fid.value(), params_arr));
+
+			if (auto transform = (*table)["transform"].as_array())
+			{
+				auto position = transform->get_as<toml::v3::array>(0);
+				if (!position)
+					return LOAD_STATUS::SYNTAX_ERR;
+				auto posX = position->get_as<double>(0);
+				auto posY = position->get_as<double>(1);
+				if (!posX || !posY)
+					return LOAD_STATUS::SYNTAX_ERR;
+				auto rotation = transform->get_as<double>(1);
+				if (!rotation)
+					return LOAD_STATUS::SYNTAX_ERR;
+				auto scale = transform->get_as<toml::v3::array>(2);
+				if (!scale)
+					return LOAD_STATUS::SYNTAX_ERR;
+				auto scX = scale->get_as<double>(0);
+				auto scY = scale->get_as<double>(1);
+				if (!scX || !scY)
+					return LOAD_STATUS::SYNTAX_ERR;
+				
+				transforms.push_back({ static_cast<unsigned int>(i), {{ static_cast<float>(posX->get()), static_cast<float>(posY->get()) }, static_cast<float>(rotation->get()), { static_cast<float>(scX->get()), static_cast<float>(scY->get()) }}});
+			}
+			if (auto modulate = (*table)["modulate"].as_array())
+			{
+				auto mod = modulate->get_as<toml::v3::array>(0);
+				if (!mod)
+					return LOAD_STATUS::SYNTAX_ERR;
+				auto modR = mod->get_as<double>(0);
+				auto modG = mod->get_as<double>(1);
+				auto modB = mod->get_as<double>(2);
+				auto modA = mod->get_as<double>(3);
+				if (!modR || !modG || !modB || !modA)
+					return LOAD_STATUS::SYNTAX_ERR;
+
+				modulates.push_back({ static_cast<unsigned int>(i), { static_cast<float>(modR->get()), static_cast<float>(modG->get()), static_cast<float>(modB->get()), static_cast<float>(modA->get()) } });
+			}
+
+			i++;
+		}
+
+		if (ptype == "array")
+			peffect_initializer = new ParticleSubsystemArray(subsystems, 0, fickle_type, true, auto_enable);
+		else if (ptype == "system")
+			peffect_initializer = new ParticleSystem(subsystems, 0, fickle_type, true, auto_enable);
+		else
+			return LOAD_STATUS::ASSET_LOAD_ERR;
+
+		for (const auto& tr : transforms)
+		{
+			set_ptr(peffect_initializer->SubsystemRef(tr.first).Fickler().Transform(), tr.second);
+			peffect_initializer->SubsystemRef(tr.first).Fickler().SyncT();
+		}
+		for (const auto& mo : modulates)
+		{
+			set_ptr(peffect_initializer->SubsystemRef(mo.first).Fickler().Modulate(), mo.second);
+			peffect_initializer->SubsystemRef(mo.first).Fickler().SyncM();
+		}
+
+		return LOAD_STATUS::OK;
+	}
+	catch (const toml::parse_error& err)
+	{
+		Logger::LogErrorFatal("Cannot parse particle effect asset file \"" + std::string(filepath) + "\": " + std::string(err.description()));
 		return LOAD_STATUS::READ_ERR;
 	}
 }

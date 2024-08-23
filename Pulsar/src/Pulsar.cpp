@@ -190,17 +190,22 @@ void Pulsar::Run(GLFWwindow* window)
 
 	float p2width = 400.0f;
 	float p2height = 400.0f;
-	ParticleSubsystemData wave1 = ParticleSubsystemRegistry::Instance().Invoke("wave1", { 0.5f });
-	ParticleSubsystemData wave2 = ParticleSubsystemRegistry::Instance().Invoke("wave2", { p2width, p2height });
+	//ParticleSubsystemData wave1 = ParticleSubsystemRegistry::Instance().Invoke("wave1", { 0.5f });
+	//ParticleSubsystemData wave2 = ParticleSubsystemRegistry::Instance().Invoke("wave2", { p2width, p2height });
 	
-	ParticleSystem psys({ wave2, wave2 });
-	set_ptr(psys.SubsystemRef(1).Fickler().Rotation(), 0.5f * glm::pi<float>());
-	psys.SubsystemRef(1).Fickler().SyncRS();
-	set_ptr(psys.Fickler().Scale(), glm::vec2{_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height} * 0.75f);
-	psys.Fickler().SyncRS();
+	//ParticleSystem psys({ wave2, wave2 });
+	//set_ptr(psys.SubsystemRef(1).Fickler().Rotation(), 0.5f * glm::pi<float>());
+	//psys.SubsystemRef(1).Fickler().SyncRS();
+	ParticleEffect* psys_raw = nullptr;
+	if (Loader::loadParticleEffect("res/assets/psys.toml", psys_raw, "system", true) != LOAD_STATUS::OK)
+		ASSERT(false);
+	std::unique_ptr<ParticleEffect> psys(psys_raw);
+
+	set_ptr(psys->Fickler().Scale(), glm::vec2{_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height} * 0.75f);
+	psys->Fickler().SyncRS();
 
 	Renderer::AddCanvasLayer(11);
-	Renderer::GetCanvasLayer(11)->OnAttach(&psys);
+	Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
 	TileMap* tilemap_ini;
 	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap_ini) != LOAD_STATUS::OK)
