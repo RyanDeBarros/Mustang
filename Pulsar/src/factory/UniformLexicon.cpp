@@ -1,6 +1,6 @@
 #include "UniformLexicon.h"
 
-#include "UniformLexiconFactory.h"
+#include "UniformLexiconRegistry.h"
 
 UniformLexicon::UniformLexicon(const std::unordered_map<std::string, Uniform>& uniform_set)
 	: m_Uniforms(uniform_set)
@@ -37,7 +37,7 @@ void UniformLexicon::MergeLexicon(const UniformLexiconHandle& lexicon_handle)
 {
 	if (lexicon_handle > 0)
 	{
-		UniformLexicon lexicon = *UniformLexiconFactory::Get(lexicon_handle);
+		UniformLexicon lexicon = *UniformLexiconRegistry::Get(lexicon_handle);
 		m_Uniforms.insert(lexicon.m_Uniforms.begin(), lexicon.m_Uniforms.end());
 	}
 }

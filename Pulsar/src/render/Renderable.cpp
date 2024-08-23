@@ -1,7 +1,7 @@
 #include "Renderable.h"
 
 #include "Macros.h"
-#include "factory/UniformLexiconFactory.h"
+#include "factory/UniformLexiconRegistry.h"
 
 BatchModel::BatchModel(VertexLayout layout, VertexLayoutMask layoutMask, ShaderHandle shader, UniformLexiconHandle uniformLexicon)
 	: layout(layout), layoutMask(layoutMask), shader(shader), uniformLexicon(uniformLexicon)
@@ -10,7 +10,7 @@ BatchModel::BatchModel(VertexLayout layout, VertexLayoutMask layoutMask, ShaderH
 
 bool BatchModel::operator==(const BatchModel& m) const
 {
-	return layout == m.layout && layoutMask == m.layoutMask && shader == m.shader && UniformLexiconFactory::Shares(uniformLexicon, m.uniformLexicon);
+	return layout == m.layout && layoutMask == m.layoutMask && shader == m.shader && UniformLexiconRegistry::Shares(uniformLexicon, m.uniformLexicon);
 }
 
 

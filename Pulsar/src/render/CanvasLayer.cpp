@@ -4,7 +4,7 @@
 #include "Renderer.h"
 #include "factory/ShaderRegistry.h"
 #include "factory/TextureRegistry.h"
-#include "factory/UniformLexiconFactory.h"
+#include "factory/UniformLexiconRegistry.h"
 #include "actors/ActorPrimitive.h"
 #include "actors/shapes/DebugMultiPolygon.h"
 
@@ -265,7 +265,7 @@ void CanvasLayer::BindAllExceptIndexes()
 	BindBuffers();
 	ShaderRegistry::Bind(currentModel.shader);
 	m_LayerView.PassVPUniform(currentModel.shader);
-	UniformLexiconFactory::OnApply(currentModel.uniformLexicon, currentModel.shader);
+	UniformLexiconRegistry::OnApply(currentModel.uniformLexicon, currentModel.shader);
 	TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
 }
 

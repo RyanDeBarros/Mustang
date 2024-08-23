@@ -10,7 +10,6 @@
 #include "render/Renderer.h"
 #include "render/actors/ActorPrimitive.h"
 #include "render/actors/RectRender.h"
-#include "factory/UniformLexiconFactory.h"
 #include "render/actors/ActorTesselation.h"
 #include "factory/Atlas.h"
 #include "render/actors/TileMap.h"

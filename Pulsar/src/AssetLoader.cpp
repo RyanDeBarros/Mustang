@@ -11,7 +11,7 @@
 #include "RendererSettings.h"
 #include "factory/ShaderRegistry.h"
 #include "factory/TextureRegistry.h"
-#include "factory/UniformLexiconFactory.h"
+#include "factory/UniformLexiconRegistry.h"
 #include "factory/UniformLexicon.h"
 #include "factory/Atlas.h"
 #include "render/Renderable.h"
@@ -418,7 +418,7 @@ LOAD_STATUS Loader::loadUniformLexicon(const char* filepath, UniformLexiconHandl
 		});
 		if (status != LOAD_STATUS::OK)
 			return status;
-		handle = UniformLexiconFactory::GetHandle({ uniform_map });
+		handle = UniformLexiconRegistry::GetHandle({ uniform_map });
 		return LOAD_STATUS::OK;
 	}
 	catch (const toml::parse_error& err)

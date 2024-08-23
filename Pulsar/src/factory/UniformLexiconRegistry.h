@@ -38,18 +38,18 @@ struct std::hash<UniformLexiconConstructArgs>
 	}
 };
 
-class UniformLexiconFactory
+class UniformLexiconRegistry
 {
 	static UniformLexiconHandle handle_cap;
-	static std::unordered_map<UniformLexiconHandle, UniformLexicon*> factory;
+	static std::unordered_map<UniformLexiconHandle, UniformLexicon> registry;
 	static std::unordered_map<UniformLexiconConstructArgs, UniformLexiconHandle> lookupMap;
 	static std::unordered_map<UniformLexiconHandle, std::unordered_set<ShaderHandle>> shaderCache;
 	static std::unordered_set<UniformLexiconHandle> dynamicLexicons;
 
-	UniformLexiconFactory() = delete;
-	UniformLexiconFactory(const UniformLexiconFactory&) = delete;
-	UniformLexiconFactory(UniformLexiconFactory&&) = delete;
-	~UniformLexiconFactory() = delete;
+	UniformLexiconRegistry() = delete;
+	UniformLexiconRegistry(const UniformLexiconRegistry&) = delete;
+	UniformLexiconRegistry(UniformLexiconRegistry&&) = delete;
+	~UniformLexiconRegistry() = delete;
 
 	friend class Renderer;
 	static void Init();
@@ -57,7 +57,8 @@ class UniformLexiconFactory
 
 public:
 	static UniformLexiconHandle GetHandle(const UniformLexiconConstructArgs& args);
-	static UniformLexicon const* Get(UniformLexiconHandle);
+	static UniformLexicon const* Get(UniformLexiconHandle handle);
+	static bool DestroyUniformLexicon(UniformLexiconHandle handle);
 	static void OnApply(UniformLexiconHandle uniformLexicon, ShaderHandle shader);
 	static bool Shares(UniformLexiconHandle lexicon1, UniformLexiconHandle lexicon2);
 	static const Uniform* GetValue(UniformLexiconHandle lexicon, const std::string& name);

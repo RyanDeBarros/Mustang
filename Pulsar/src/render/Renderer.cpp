@@ -7,7 +7,7 @@
 #include "Logger.inl"
 #include "factory/ShaderRegistry.h"
 #include "factory/TextureRegistry.h"
-#include "factory/UniformLexiconFactory.h"
+#include "factory/UniformLexiconRegistry.h"
 #include "factory/TileRegistry.h"
 #include "render/actors/RectRender.h"
 
@@ -32,7 +32,7 @@ void Renderer::Init()
 #endif
 	ShaderRegistry::Init();
 	TextureRegistry::Init();
-	UniformLexiconFactory::Init();
+	UniformLexiconRegistry::Init();
 	TileRegistry::Init();
 	RectRender::DefineRectRenderable();
 	TRY(glEnable(GL_PROGRAM_POINT_SIZE));
@@ -46,7 +46,7 @@ void Renderer::Terminate()
 #endif
 	layers.clear();
 	TileRegistry::Terminate();
-	UniformLexiconFactory::Terminate();
+	UniformLexiconRegistry::Terminate();
 	TextureRegistry::Terminate();
 	ShaderRegistry::Terminate();
 }

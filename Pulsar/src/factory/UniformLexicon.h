@@ -20,7 +20,7 @@ typedef std::variant<
 // TODO don't use class for this. Just use unordered_map, and define utility functions like Shares, MergeLexicon, GetValue, etc.
 class UniformLexicon
 {
-	friend class UniformLexiconFactory;
+	friend class UniformLexiconRegistry;
 	std::unordered_map<std::string, Uniform> m_Uniforms;
 
 public:

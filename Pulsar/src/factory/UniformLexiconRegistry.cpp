@@ -1,59 +1,63 @@
-#include "UniformLexiconFactory.h"
+#include "UniformLexiconRegistry.h"
 
 #include "Macros.h"
 #include "Logger.inl"
 #include "ShaderRegistry.h"
 
-UniformLexiconHandle UniformLexiconFactory::handle_cap;
-std::unordered_map<UniformLexiconHandle, UniformLexicon*> UniformLexiconFactory::factory;
-std::unordered_map<UniformLexiconConstructArgs, UniformLexiconHandle> UniformLexiconFactory::lookupMap;
-std::unordered_map<UniformLexiconHandle, std::unordered_set<ShaderHandle>> UniformLexiconFactory::shaderCache;
-std::unordered_set<UniformLexiconHandle> UniformLexiconFactory::dynamicLexicons;
+UniformLexiconHandle UniformLexiconRegistry::handle_cap;
+std::unordered_map<UniformLexiconHandle, UniformLexicon> UniformLexiconRegistry::registry;
+std::unordered_map<UniformLexiconConstructArgs, UniformLexiconHandle> UniformLexiconRegistry::lookupMap;
+std::unordered_map<UniformLexiconHandle, std::unordered_set<ShaderHandle>> UniformLexiconRegistry::shaderCache;
+std::unordered_set<UniformLexiconHandle> UniformLexiconRegistry::dynamicLexicons;
 
-void UniformLexiconFactory::Init()
+void UniformLexiconRegistry::Init()
 {
 	handle_cap = 1;
 }
 
-void UniformLexiconFactory::Terminate()
+void UniformLexiconRegistry::Terminate()
 {
-	for (const auto& [handle, uniformLexicon] : factory)
-	{
-		if (uniformLexicon)
-			delete uniformLexicon;
-	}
-	factory.clear();
+	registry.clear();
 	lookupMap.clear();
 	shaderCache.clear();
 	dynamicLexicons.clear();
 }
 
-UniformLexicon const* UniformLexiconFactory::Get(UniformLexiconHandle handle)
+UniformLexicon const* UniformLexiconRegistry::Get(UniformLexiconHandle handle)
 {
-	auto iter = factory.find(handle);
-	if (iter != factory.end())
-		return iter->second;
+	auto iter = registry.find(handle);
+	if (iter != registry.end())
+		return &iter->second;
 	else
 	{
 #if !PULSAR_IGNORE_WARNINGS_NULL_UNIFORM_LEXICON
-		Logger::LogWarning("UniformLexicon handle (" + std::to_string(handle) + ") does not exist in UniformLexiconFactory.");
+		Logger::LogWarning("UniformLexicon handle (" + std::to_string(handle) + ") does not exist in UniformLexiconRegistry.");
 #endif
 		return nullptr;
 	}
 }
 
-UniformLexiconHandle UniformLexiconFactory::GetHandle(const UniformLexiconConstructArgs& args)
+bool UniformLexiconRegistry::DestroyUniformLexicon(UniformLexiconHandle handle)
+{
+	auto iter = registry.find(handle);
+	if (iter == registry.end())
+		return false;
+	registry.erase(iter);
+	return true;
+}
+
+UniformLexiconHandle UniformLexiconRegistry::GetHandle(const UniformLexiconConstructArgs& args)
 {
 	auto iter = lookupMap.find(args);
 	if (iter != lookupMap.end())
 		return iter->second;
 	UniformLexiconHandle handle = handle_cap++;
-	factory.emplace(handle, new UniformLexicon(args.uniforms));
+	registry.emplace(handle, args.uniforms);
 	lookupMap[args] = handle;
 	return handle;
 }
 
-void UniformLexiconFactory::OnApply(UniformLexiconHandle uniformLexicon, ShaderHandle shader)
+void UniformLexiconRegistry::OnApply(UniformLexiconHandle uniformLexicon, ShaderHandle shader)
 {
 	if (uniformLexicon == 0 || shader == 0)
 		return;
@@ -127,18 +131,18 @@ void UniformLexiconFactory::OnApply(UniformLexiconHandle uniformLexicon, ShaderH
 	}
 }
 
-bool UniformLexiconFactory::Shares(UniformLexiconHandle lexicon1, UniformLexiconHandle lexicon2)
+bool UniformLexiconRegistry::Shares(UniformLexiconHandle lexicon1, UniformLexiconHandle lexicon2)
 {
 	if (lexicon1 == lexicon2)
 		return true;
 	UniformLexicon* lex1 = nullptr;
 	UniformLexicon* lex2 = nullptr;
-	for (const auto& [handle, lexicon] : factory)
+	for (auto& [handle, lexicon] : registry)
 	{
 		if (handle == lexicon1)
-			lex1 = lexicon;
+			lex1 = &lexicon;
 		else if (handle == lexicon2)
-			lex2 = lexicon;
+			lex2 = &lexicon;
 	}
 	if (lex1)
 	{
@@ -149,7 +153,7 @@ bool UniformLexiconFactory::Shares(UniformLexiconHandle lexicon1, UniformLexicon
 		else
 		{
 #if !PULSAR_IGNORE_WARNINGS_NULL_UNIFORM_LEXICON
-			Logger::LogWarning("UniformLexicon handle (" + std::to_string(lexicon2) + ") does not exist in UniformLexiconFactory.");
+			Logger::LogWarning("UniformLexicon handle (" + std::to_string(lexicon2) + ") does not exist in UniformLexiconRegistry.");
 #endif
 			return true;
 		}
@@ -157,13 +161,13 @@ bool UniformLexiconFactory::Shares(UniformLexiconHandle lexicon1, UniformLexicon
 	else
 	{
 #if !PULSAR_IGNORE_WARNINGS_NULL_UNIFORM_LEXICON
-		Logger::LogWarning("UniformLexicon handle (" + std::to_string(lexicon1) + ") does not exist in UniformLexiconFactory.");
+		Logger::LogWarning("UniformLexicon handle (" + std::to_string(lexicon1) + ") does not exist in UniformLexiconRegistry.");
 #endif
 		return true;
 	}
 }
 
-const Uniform* UniformLexiconFactory::GetValue(UniformLexiconHandle lexicon, const std::string& name)
+const Uniform* UniformLexiconRegistry::GetValue(UniformLexiconHandle lexicon, const std::string& name)
 {
 	UniformLexicon const* lex = Get(lexicon);
 	if (lex)
@@ -173,14 +177,14 @@ const Uniform* UniformLexiconFactory::GetValue(UniformLexiconHandle lexicon, con
 	else return nullptr;
 }
 
-void UniformLexiconFactory::SetValue(UniformLexiconHandle lexicon, const std::string& name, const Uniform& value)
+void UniformLexiconRegistry::SetValue(UniformLexiconHandle lexicon, const std::string& name, const Uniform& value)
 {
 	UniformLexicon* lex = const_cast<UniformLexicon*>(Get(lexicon));
 	if (lex && lex->SetValue(name, value))
 		shaderCache.erase(lexicon);
 }
 
-bool UniformLexiconFactory::DefineNewValue(UniformLexiconHandle lexicon, const std::string& name, const Uniform& value)
+bool UniformLexiconRegistry::DefineNewValue(UniformLexiconHandle lexicon, const std::string& name, const Uniform& value)
 {
 	UniformLexicon* lex = const_cast<UniformLexicon*>(Get(lexicon));
 	if (lex && lex->DefineNewValue(name, value))
@@ -191,12 +195,12 @@ bool UniformLexiconFactory::DefineNewValue(UniformLexiconHandle lexicon, const s
 	else return false;
 }
 
-void UniformLexiconFactory::MarkStatic(UniformLexiconHandle lexicon)
+void UniformLexiconRegistry::MarkStatic(UniformLexiconHandle lexicon)
 {
 	dynamicLexicons.insert(lexicon);
 }
 
-void UniformLexiconFactory::MarkDynamic(UniformLexiconHandle lexicon)
+void UniformLexiconRegistry::MarkDynamic(UniformLexiconHandle lexicon)
 {
 	dynamicLexicons.erase(lexicon);
 }
