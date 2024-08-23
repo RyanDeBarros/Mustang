@@ -199,7 +199,7 @@
     <ClCompile Include="src\render\Renderable.cpp" />
     <ClCompile Include="src\render\Renderer.cpp" />
     <ClCompile Include="src\factory\Shader.cpp" />
-    <ClCompile Include="src\factory\ShaderFactory.cpp" />
+    <ClCompile Include="src\factory\ShaderRegistry.cpp" />
     <ClCompile Include="src\factory\Texture.cpp" />
     <ClCompile Include="src\factory\TextureFactory.cpp" />
     <ClCompile Include="src\render\actors\TileMap.cpp" />
@@ -252,7 +252,7 @@
     <ClInclude Include="src\render\Renderer.h" />
     <ClInclude Include="src\RendererSettings.h" />
     <ClInclude Include="src\factory\Shader.h" />
-    <ClInclude Include="src\factory\ShaderFactory.h" />
+    <ClInclude Include="src\factory\ShaderRegistry.h" />
     <ClInclude Include="src\factory\Texture.h" />
     <ClInclude Include="src\factory\TextureFactory.h" />
     <ClInclude Include="src\render\actors\TileMap.h" />

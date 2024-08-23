@@ -12,7 +12,6 @@
 #include "render/actors/RectRender.h"
 #include "factory/UniformLexiconFactory.h"
 #include "render/actors/ActorTesselation.h"
-#include "factory/ShaderFactory.h"
 #include "factory/Atlas.h"
 #include "render/actors/TileMap.h"
 #include "render/actors/shapes/DebugPolygon.h"

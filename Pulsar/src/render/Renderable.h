@@ -4,7 +4,7 @@
 #include <toml/toml.hpp>
 
 #include "Typedefs.h"
-#include "factory/ShaderFactory.h"
+#include "factory/ShaderRegistry.h"
 
 struct BatchModel
 {
@@ -13,7 +13,7 @@ struct BatchModel
 	ShaderHandle shader;
 	UniformLexiconHandle uniformLexicon;
 
-	BatchModel(VertexLayout layout = 0, VertexLayoutMask layoutMask = 0, ShaderHandle shader = ShaderFactory::standard_shader, UniformLexiconHandle uniformLexicon = 0);
+	BatchModel(VertexLayout layout = 0, VertexLayoutMask layoutMask = 0, ShaderHandle shader = ShaderRegistry::standard_shader, UniformLexiconHandle uniformLexicon = 0);
 	bool operator==(const BatchModel&) const;
 };
 

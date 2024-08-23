@@ -5,7 +5,7 @@
 
 #include "Macros.h"
 #include "Logger.inl"
-#include "factory/ShaderFactory.h"
+#include "factory/ShaderRegistry.h"
 #include "factory/TextureFactory.h"
 #include "factory/UniformLexiconFactory.h"
 #include "factory/TileFactory.h"
@@ -30,7 +30,7 @@ void Renderer::Init()
 #if !PULSAR_ASSUME_INITIALIZED
 	uninitialized = false;
 #endif
-	ShaderFactory::Init();
+	ShaderRegistry::Init();
 	TextureFactory::Init();
 	UniformLexiconFactory::Init();
 	TileFactory::Init();
@@ -48,7 +48,7 @@ void Renderer::Terminate()
 	TileFactory::Terminate();
 	UniformLexiconFactory::Terminate();
 	TextureFactory::Terminate();
-	ShaderFactory::Terminate();
+	ShaderRegistry::Terminate();
 }
 
 void Renderer::OnDraw()

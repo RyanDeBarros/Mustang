@@ -9,7 +9,7 @@
 
 #include "Logger.inl"
 #include "RendererSettings.h"
-#include "factory/ShaderFactory.h"
+#include "factory/ShaderRegistry.h"
 #include "factory/TextureFactory.h"
 #include "factory/UniformLexiconFactory.h"
 #include "factory/UniformLexicon.h"
@@ -113,7 +113,7 @@ LOAD_STATUS Loader::loadShader(const char* filepath, ShaderHandle& handle)
 		auto fragment_shader = shader["fragment"].value<std::string>();
 		if (!fragment_shader)
 			return LOAD_STATUS::SYNTAX_ERR;
-		handle = ShaderFactory::GetHandle({ vertex_shader.value(), fragment_shader.value() });
+		handle = ShaderRegistry::GetHandle({ vertex_shader.value(), fragment_shader.value() });
 		return handle > 0 ? LOAD_STATUS::OK : LOAD_STATUS::ASSET_LOAD_ERR;
 	}
 	catch (const toml::parse_error& err)
@@ -633,7 +633,7 @@ LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, TileMap*& tilemap_in
 			VERIFY(readTextureSettings(settings, texture_settings));
 		}
 
-		ShaderHandle shader = ShaderFactory::Standard();
+		ShaderHandle shader = ShaderRegistry::Standard();
 		if (auto sh = tm["shader"].value<std::string>())
 		{
 			if (loadShader(sh.value().c_str(), shader) != LOAD_STATUS::OK)

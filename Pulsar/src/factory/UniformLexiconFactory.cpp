@@ -2,7 +2,7 @@
 
 #include "Macros.h"
 #include "Logger.inl"
-#include "ShaderFactory.h"
+#include "ShaderRegistry.h"
 
 UniformLexiconHandle UniformLexiconFactory::handle_cap;
 std::unordered_map<UniformLexiconHandle, UniformLexicon*> UniformLexiconFactory::factory;
@@ -79,49 +79,49 @@ void UniformLexiconFactory::OnApply(UniformLexiconHandle uniformLexicon, ShaderH
 		switch (uniform.index())
 		{
 		case 0:
-			ShaderFactory::SetUniform1i(shader, name.c_str(), std::get<GLint>(uniform));
+			ShaderRegistry::SetUniform1i(shader, name.c_str(), std::get<GLint>(uniform));
 			break;
 		case 1:
-			ShaderFactory::SetUniform2iv(shader, name.c_str(), &std::get<glm::ivec2>(uniform)[0]);
+			ShaderRegistry::SetUniform2iv(shader, name.c_str(), &std::get<glm::ivec2>(uniform)[0]);
 			break;
 		case 2:
-			ShaderFactory::SetUniform3iv(shader, name.c_str(), &std::get<glm::ivec3>(uniform)[0]);
+			ShaderRegistry::SetUniform3iv(shader, name.c_str(), &std::get<glm::ivec3>(uniform)[0]);
 			break;
 		case 3:
-			ShaderFactory::SetUniform4iv(shader, name.c_str(), &std::get<glm::ivec4>(uniform)[0]);
+			ShaderRegistry::SetUniform4iv(shader, name.c_str(), &std::get<glm::ivec4>(uniform)[0]);
 			break;
 		case 4:
-			ShaderFactory::SetUniform1ui(shader, name.c_str(), std::get<GLuint>(uniform));
+			ShaderRegistry::SetUniform1ui(shader, name.c_str(), std::get<GLuint>(uniform));
 			break;
 		case 5:
-			ShaderFactory::SetUniform2uiv(shader, name.c_str(), &std::get<glm::uvec2>(uniform)[0]);
+			ShaderRegistry::SetUniform2uiv(shader, name.c_str(), &std::get<glm::uvec2>(uniform)[0]);
 			break;
 		case 6:
-			ShaderFactory::SetUniform3uiv(shader, name.c_str(), &std::get<glm::uvec3>(uniform)[0]);
+			ShaderRegistry::SetUniform3uiv(shader, name.c_str(), &std::get<glm::uvec3>(uniform)[0]);
 			break;
 		case 7:
-			ShaderFactory::SetUniform4uiv(shader, name.c_str(), &std::get<glm::uvec4>(uniform)[0]);
+			ShaderRegistry::SetUniform4uiv(shader, name.c_str(), &std::get<glm::uvec4>(uniform)[0]);
 			break;
 		case 8:
-			ShaderFactory::SetUniform1f(shader, name.c_str(), std::get<GLfloat>(uniform));
+			ShaderRegistry::SetUniform1f(shader, name.c_str(), std::get<GLfloat>(uniform));
 			break;
 		case 9:
-			ShaderFactory::SetUniform2fv(shader, name.c_str(), &std::get<glm::vec2>(uniform)[0]);
+			ShaderRegistry::SetUniform2fv(shader, name.c_str(), &std::get<glm::vec2>(uniform)[0]);
 			break;
 		case 10:
-			ShaderFactory::SetUniform3fv(shader, name.c_str(), &std::get<glm::vec3>(uniform)[0]);
+			ShaderRegistry::SetUniform3fv(shader, name.c_str(), &std::get<glm::vec3>(uniform)[0]);
 			break;
 		case 11:
-			ShaderFactory::SetUniform4fv(shader, name.c_str(), &std::get<glm::vec4>(uniform)[0]);
+			ShaderRegistry::SetUniform4fv(shader, name.c_str(), &std::get<glm::vec4>(uniform)[0]);
 			break;
 		case 12:
-			ShaderFactory::SetUniformMatrix2fv(shader, name.c_str(), &std::get<glm::mat2>(uniform)[0][0]);
+			ShaderRegistry::SetUniformMatrix2fv(shader, name.c_str(), &std::get<glm::mat2>(uniform)[0][0]);
 			break;
 		case 13:
-			ShaderFactory::SetUniformMatrix3fv(shader, name.c_str(), &std::get<glm::mat3>(uniform)[0][0]);
+			ShaderRegistry::SetUniformMatrix3fv(shader, name.c_str(), &std::get<glm::mat3>(uniform)[0][0]);
 			break;
 		case 14:
-			ShaderFactory::SetUniformMatrix4fv(shader, name.c_str(), &std::get<glm::mat4>(uniform)[0][0]);
+			ShaderRegistry::SetUniformMatrix4fv(shader, name.c_str(), &std::get<glm::mat4>(uniform)[0][0]);
 			break;
 		}
 	}

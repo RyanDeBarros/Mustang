@@ -5,7 +5,7 @@
 
 #include "Typedefs.h"
 #include "Tile.h"
-#include "ShaderFactory.h"
+#include "ShaderRegistry.h"
 #include "Texture.h"
 #include "render/transform/Fickle.inl"
 
@@ -54,7 +54,7 @@ public:
 	inline const std::vector<Placement>& GetPlacements() const { return m_Placements; }
 	inline unsigned char const* const GetBuffer() const { return TileFactory::GetImageBuffer(m_Tile); }
 	
-	class RectRender SampleSubtile(size_t index, const struct TextureSettings& texture_settings = Texture::nearest_settings, TextureVersion texture_version = 0, ShaderHandle shader = ShaderFactory::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true) const;
+	class RectRender SampleSubtile(size_t index, const struct TextureSettings& texture_settings = Texture::nearest_settings, TextureVersion texture_version = 0, ShaderHandle shader = ShaderRegistry::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true) const;
 	inline TileHandle GetTileHandle() const { return m_Tile; }
 	inline int GetWidth() const { return TileFactory::GetWidth(m_Tile); }
 	inline int GetHeight() const { return TileFactory::GetHeight(m_Tile); }

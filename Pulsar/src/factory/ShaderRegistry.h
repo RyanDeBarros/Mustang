@@ -29,17 +29,17 @@ struct std::hash<ShaderConstructArgs>
 	}
 };
 
-class ShaderFactory
+class ShaderRegistry
 {
 	static ShaderHandle handle_cap;
-	static std::unordered_map<ShaderHandle, Shader*> factory;
+	static std::unordered_map<ShaderHandle, Shader> registry;
 	static std::unordered_map<ShaderConstructArgs, ShaderHandle> lookup_map;
 
-	ShaderFactory() = delete;
-	ShaderFactory(const ShaderFactory&) = delete;
-	ShaderFactory(ShaderFactory&&) = delete;
-	~ShaderFactory() = delete;
-
+	ShaderRegistry() = delete;
+	ShaderRegistry(const ShaderRegistry&) = delete;
+	ShaderRegistry(ShaderRegistry&&) = delete;
+	~ShaderRegistry() = delete;
+	
 	friend class Renderer;
 	static void Init();
 	static void Terminate();
@@ -52,7 +52,8 @@ class ShaderFactory
 
 public:
 	static ShaderHandle GetHandle(const ShaderConstructArgs& args);
-	static Shader const* Get(ShaderHandle);
+	static Shader const* Get(ShaderHandle handle);
+	static bool DestroyHandle(ShaderHandle handle);
 	static void Bind(ShaderHandle handle);
 	static void Unbind();
 	inline static ShaderHandle Standard() { return standard_shader; }

@@ -2,7 +2,7 @@
 
 #include "Macros.h"
 #include "Renderer.h"
-#include "factory/ShaderFactory.h"
+#include "factory/ShaderRegistry.h"
 #include "factory/TextureFactory.h"
 #include "factory/UniformLexiconFactory.h"
 #include "actors/ActorPrimitive.h"
@@ -263,7 +263,7 @@ void CanvasLayer::BindAllExceptIndexes()
 {
 	TRY(glBindVertexArray(m_VAOs[currentModel]));
 	BindBuffers();
-	ShaderFactory::Bind(currentModel.shader);
+	ShaderRegistry::Bind(currentModel.shader);
 	m_LayerView.PassVPUniform(currentModel.shader);
 	UniformLexiconFactory::OnApply(currentModel.uniformLexicon, currentModel.shader);
 	TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
@@ -271,7 +271,7 @@ void CanvasLayer::BindAllExceptIndexes()
 
 void CanvasLayer::UnbindAll()
 {
-	ShaderFactory::Unbind();
+	ShaderRegistry::Unbind();
 	UnbindBuffers();
 	TRY(glBindVertexArray(0));
 	vertexPos = m_VertexPool;

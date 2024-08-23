@@ -1,4 +1,4 @@
-#include "ShaderFactory.h"
+#include "ShaderRegistry.h"
 
 #include "Macros.h"
 #include "Logger.inl"
@@ -13,26 +13,35 @@
 #endif
 
 
-ShaderHandle ShaderFactory::handle_cap;
-std::unordered_map<ShaderHandle, Shader*> ShaderFactory::factory;
-std::unordered_map<ShaderConstructArgs, ShaderHandle> ShaderFactory::lookup_map;
-ShaderHandle ShaderFactory::standard_shader;
+ShaderHandle ShaderRegistry::handle_cap;
+std::unordered_map<ShaderHandle, Shader> ShaderRegistry::registry;
+std::unordered_map<ShaderConstructArgs, ShaderHandle> ShaderRegistry::lookup_map;
+ShaderHandle ShaderRegistry::standard_shader;
 
-Shader const* ShaderFactory::Get(ShaderHandle handle)
+Shader const* ShaderRegistry::Get(ShaderHandle handle)
 {
-	auto iter = factory.find(handle);
-	if (iter != factory.end())
-		return iter->second;
+	auto iter = registry.find(handle);
+	if (iter != registry.end())
+		return &iter->second;
 	else
 	{
 #if !PULSAR_IGNORE_WARNINGS_NULL_SHADER
-		Logger::LogWarning("Shader handle (" + std::to_string(handle) + ") does not exist in ShaderFactory.");
+		Logger::LogWarning("Shader handle (" + std::to_string(handle) + ") does not exist in ShaderRegistry.");
 #endif
 		return nullptr;
 	}
 }
 
-void ShaderFactory::Init()
+bool ShaderRegistry::DestroyHandle(ShaderHandle handle)
+{
+	auto iter = registry.find(handle);
+	if (iter == registry.end())
+		return false;
+	registry.erase(iter);
+	return true;
+}
+
+void ShaderRegistry::Init()
 {
 	handle_cap = 1;
 	auto status = Loader::loadShader(_RendererSettings::standard_shader_assetfile.c_str(), standard_shader);
@@ -40,18 +49,13 @@ void ShaderFactory::Init()
 		Logger::LogErrorFatal("Standard shader could not be loaded (error code " + std::to_string(static_cast<int>(status)) + "): " + _RendererSettings::standard_shader_assetfile);
 }
 
-void ShaderFactory::Terminate()
+void ShaderRegistry::Terminate()
 {
-	for (const auto& [handle, shader] : factory)
-	{
-		if (shader)
-			delete shader;
-	}
-	factory.clear();
+	registry.clear();
 	lookup_map.clear();
 }
 
-ShaderHandle ShaderFactory::GetHandle(const ShaderConstructArgs& args)
+ShaderHandle ShaderRegistry::GetHandle(const ShaderConstructArgs& args)
 {
 	auto iter = lookup_map.find(args);
 	if (iter != lookup_map.end())
@@ -60,14 +64,14 @@ ShaderHandle ShaderFactory::GetHandle(const ShaderConstructArgs& args)
 	if (shader.IsValid())
 	{
 		ShaderHandle handle = handle_cap++;
-		factory.emplace(handle, new Shader(std::move(shader)));
+		registry.emplace(handle, std::move(shader));
 		lookup_map[args] = handle;
 		return handle;
 	}
 	else return 0;
 }
 
-void ShaderFactory::Bind(ShaderHandle handle)
+void ShaderRegistry::Bind(ShaderHandle handle)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -78,12 +82,12 @@ void ShaderFactory::Bind(ShaderHandle handle)
 #endif
 }
 
-void ShaderFactory::Unbind()
+void ShaderRegistry::Unbind()
 {
 	TRY(glUseProgram(0));
 }
 
-void ShaderFactory::SetUniform1i(ShaderHandle handle, const char* uniform_name, const GLint value)
+void ShaderRegistry::SetUniform1i(ShaderHandle handle, const char* uniform_name, const GLint value)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -93,7 +97,7 @@ void ShaderFactory::SetUniform1i(ShaderHandle handle, const char* uniform_name, 
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniform2iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
+void ShaderRegistry::SetUniform2iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -103,7 +107,7 @@ void ShaderFactory::SetUniform2iv(ShaderHandle handle, const char* uniform_name,
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniform3iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
+void ShaderRegistry::SetUniform3iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -113,7 +117,7 @@ void ShaderFactory::SetUniform3iv(ShaderHandle handle, const char* uniform_name,
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniform4iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
+void ShaderRegistry::SetUniform4iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -123,7 +127,7 @@ void ShaderFactory::SetUniform4iv(ShaderHandle handle, const char* uniform_name,
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniform1ui(ShaderHandle handle, const char* uniform_name, const GLuint value)
+void ShaderRegistry::SetUniform1ui(ShaderHandle handle, const char* uniform_name, const GLuint value)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -133,7 +137,7 @@ void ShaderFactory::SetUniform1ui(ShaderHandle handle, const char* uniform_name,
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniform2uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
+void ShaderRegistry::SetUniform2uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -143,7 +147,7 @@ void ShaderFactory::SetUniform2uiv(ShaderHandle handle, const char* uniform_name
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniform3uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
+void ShaderRegistry::SetUniform3uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -153,7 +157,7 @@ void ShaderFactory::SetUniform3uiv(ShaderHandle handle, const char* uniform_name
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniform4uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
+void ShaderRegistry::SetUniform4uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -163,7 +167,7 @@ void ShaderFactory::SetUniform4uiv(ShaderHandle handle, const char* uniform_name
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniform1f(ShaderHandle handle, const char* uniform_name, const GLfloat value)
+void ShaderRegistry::SetUniform1f(ShaderHandle handle, const char* uniform_name, const GLfloat value)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -173,7 +177,7 @@ void ShaderFactory::SetUniform1f(ShaderHandle handle, const char* uniform_name, 
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniform2fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
+void ShaderRegistry::SetUniform2fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -183,7 +187,7 @@ void ShaderFactory::SetUniform2fv(ShaderHandle handle, const char* uniform_name,
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniform3fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
+void ShaderRegistry::SetUniform3fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -193,7 +197,7 @@ void ShaderFactory::SetUniform3fv(ShaderHandle handle, const char* uniform_name,
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniform4fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
+void ShaderRegistry::SetUniform4fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -203,7 +207,7 @@ void ShaderFactory::SetUniform4fv(ShaderHandle handle, const char* uniform_name,
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniformMatrix2fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
+void ShaderRegistry::SetUniformMatrix2fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -213,7 +217,7 @@ void ShaderFactory::SetUniformMatrix2fv(ShaderHandle handle, const char* uniform
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniformMatrix3fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
+void ShaderRegistry::SetUniformMatrix3fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
@@ -223,7 +227,7 @@ void ShaderFactory::SetUniformMatrix3fv(ShaderHandle handle, const char* uniform
 	ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
-void ShaderFactory::SetUniformMatrix4fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
+void ShaderRegistry::SetUniformMatrix4fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
 {
 	Shader const* shader = Get(handle);
 	if (shader)
