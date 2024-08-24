@@ -46,7 +46,7 @@ TileHandle TileRegistry::GetHandle(const TileConstructArgs& args)
 	auto iter = lookupMap.find(args);
 	if (iter != lookupMap.end())
 		return iter->second;
-	Tile tile(args.filepath.c_str());
+	Tile tile(args.filepath.c_str(), args.svg_scale);
 	if (tile.IsValid())
 	{
 		TileHandle handle = handle_cap++;

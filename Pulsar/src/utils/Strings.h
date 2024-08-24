@@ -26,3 +26,5 @@ extern std::string STR(const glm::vec2& vec2);
 extern std::string STR(const glm::vec3& vec3);
 extern std::string STR(const glm::vec4& vec4);
 extern std::string STR(const struct Transform2D& tr);
+
+extern std::string file_extension_of(const std::string& filepath);

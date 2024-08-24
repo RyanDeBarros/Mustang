@@ -97,7 +97,7 @@ class Texture
 	inline bool IsValid() const { return m_RID > 0; }
 
 public:
-	Texture(const char* filepath, TextureSettings settings = {}, bool temporary_buffer = false);
+	Texture(const char* filepath, TextureSettings settings = {}, bool temporary_buffer = false, float svg_scale = 1.0f);
 	Texture(TileHandle tile, TextureSettings settings = {});
 	Texture(const Texture& texture) = delete;
 	Texture(Texture&& texture) noexcept;

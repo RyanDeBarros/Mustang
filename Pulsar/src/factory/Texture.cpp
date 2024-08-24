@@ -8,17 +8,17 @@
 #include "Logger.inl"
 #include "Macros.h"
 
-Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_buffer)
+Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_buffer, float svg_scale)
 	: m_RID(0), m_Tile(0)
 {
 	Tile const* tile_ref = nullptr;
 	if (temporary_buffer)
 	{
-		tile_ref = new Tile(filepath);
+		tile_ref = new Tile(filepath, svg_scale);
 	}
 	else
 	{
-		m_Tile = TileRegistry::GetHandle({ filepath });
+		m_Tile = TileRegistry::GetHandle({ filepath, svg_scale });
 		tile_ref = TileRegistry::Get(m_Tile);
 	}
 	if (!tile_ref)

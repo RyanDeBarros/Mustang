@@ -154,7 +154,7 @@ static LOAD_STATUS readTextureSettings(const toml::v3::node_view<toml::v3::node>
 	return LOAD_STATUS::OK;
 }
 
-LOAD_STATUS Loader::loadTexture(const char* filepath, TextureHandle& handle, TextureVersion texture_version, bool temporary_buffer)
+LOAD_STATUS Loader::loadTexture(const char* filepath, TextureHandle& handle, TextureVersion texture_version, bool temporary_buffer, float svg_scale)
 {
 	try
 	{
@@ -173,7 +173,11 @@ LOAD_STATUS Loader::loadTexture(const char* filepath, TextureHandle& handle, Tex
 		{
 			VERIFY(readTextureSettings(settings, texture_settings));
 		}
-		handle = TextureRegistry::GetHandle(TextureConstructArgs_filepath{ path.value(), texture_settings, temporary_buffer, texture_version});
+
+		if (auto svg_scale_ = texture["svg_scale"].value<double>())
+			svg_scale = static_cast<float>(svg_scale_.value());
+
+		handle = TextureRegistry::GetHandle(TextureConstructArgs_filepath{ path.value(), texture_settings, temporary_buffer, texture_version, svg_scale });
 		return handle > 0 ? LOAD_STATUS::OK : LOAD_STATUS::ASSET_LOAD_ERR;
 	}
 	catch (const toml::parse_error& err)

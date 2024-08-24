@@ -285,6 +285,14 @@ void Pulsar::Run(GLFWwindow* window)
 
 	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::TRANSPARENT, Colors::LIGHT_GREEN });
 
+	TextureHandle texGodot;
+	if (Loader::loadTexture("res/assets/godot.toml", texGodot) != LOAD_STATUS::OK)
+		ASSERT(false);
+	RectRender godot(texGodot, ShaderRegistry::Standard(), 10);
+	Renderer::RemoveCanvasLayer(11);
+	Renderer::AddCanvasLayer(11);
+	Renderer::GetCanvasLayer(11)->OnAttach(&godot);
+
 	for (;;)
 	{
 		drawTime = static_cast<real>(glfwGetTime());

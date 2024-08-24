@@ -53,7 +53,7 @@ TextureHandle TextureRegistry::GetHandle(const TextureConstructArgs_filepath& ar
 	auto iter = lookupMap_filepath.find(args);
 	if (iter != lookupMap_filepath.end())
 		return iter->second;
-	Texture texture(args.filepath.c_str(), args.settings, args.temporaryBuffer);
+	Texture texture(args.filepath.c_str(), args.settings, args.temporaryBuffer, args.svg_scale);
 	if (texture.IsValid())
 	{
 		TextureHandle handle = handle_cap++;

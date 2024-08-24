@@ -23,3 +23,8 @@ std::string STR(const Transform2D& tr)
 {
 	return Concat("", "[P", STR(tr.position), " R<", tr.rotation, "> S", STR(tr.scale), "]");
 }
+
+std::string file_extension_of(const std::string& filepath)
+{
+	return filepath.substr(filepath.find_last_of('.') + 1);
+}

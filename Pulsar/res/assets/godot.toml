@@ -1,0 +1,5 @@
+header = "texture"
+
+[texture]
+path = "res/textures/godot.svg"
+svg_scale = 2.0

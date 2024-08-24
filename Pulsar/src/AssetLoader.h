@@ -20,7 +20,7 @@ struct Loader
 	static bool _LoadRendererSettings();
 
 	static LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle);
-	static LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, TextureVersion texture_version = 0, bool temporary_buffer = false);
+	static LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, TextureVersion texture_version = 0, bool temporary_buffer = false, float svg_scale = 1.0f);
 	static LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handle);
 	static LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable, TextureVersion texture_version = 0, bool temporary_buffer = false);
 	
