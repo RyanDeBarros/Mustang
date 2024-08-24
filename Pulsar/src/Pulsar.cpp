@@ -28,6 +28,7 @@
 #include "utils/Strings.h"
 #include "utils/Data.h"
 #include "utils/Constants.h"
+#include "render/actors/anim/FramesArray.h"
 
 using namespace Pulsar;
 
@@ -293,6 +294,11 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(&godot);
 
+	FramesArray frames("res/textures/serotonin.gif");
+	godot.SetTextureHandle(frames.CurrentTexture());
+	real test_frames = 0;
+	real test_frames_interval = 1.0f / frames.Size();
+
 	for (;;)
 	{
 		drawTime = static_cast<real>(glfwGetTime());
@@ -310,6 +316,14 @@ void Pulsar::Run(GLFWwindow* window)
 		*child.Fickler().Position() += 5 * Pulsar::deltaDrawTime;
 		*child2.Fickler().Scale() *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime);
 		root.Fickler().SyncT();
+
+		test_frames += deltaDrawTime;
+		if (test_frames > test_frames_interval)
+		{
+			test_frames = std::fmod(test_frames, test_frames_interval);
+			frames.Select((frames.CurrentIndex() + 1) % frames.Size());
+			godot.SetTextureHandle(frames.CurrentTexture());
+		}
 
 		Renderer::OnDraw();
 		glfwPollEvents();

@@ -12,7 +12,7 @@ class Array
 	T* m_Array = nullptr;
 
 public:
-	inline explicit Array(size_t size) : m_Size(size) { if (m_Size > 0) m_Array = new T[m_Size]; }
+	inline explicit Array(size_t size = 0) : m_Size(size) { if (m_Size > 0) m_Array = new T[m_Size]; }
 	inline Array(std::initializer_list<T> l) : m_Size(l.size())
 	{
 		if (m_Size > 0)
@@ -66,6 +66,7 @@ public:
 		return *this;
 	}
 	inline ~Array() { if (m_Array) delete[] m_Array; }
+	inline operator bool() const { return m_Size > 0; }
 
 	inline T& operator[](size_t index) { if (index < m_Size) return m_Array[index]; else throw std::out_of_range("Index out of range"); }
 	inline const T& operator[](size_t index) const { if (index < m_Size) return m_Array[index]; else throw std::out_of_range("Index out of range"); }
