@@ -21,12 +21,12 @@ DebugMultiPolygon::DebugMultiPolygon(const DebugMultiPolygon& other)
 	if (other.indexes_ptr)
 	{
 		indexes_ptr = new GLint[draw_count];
-		memcpy_s(indexes_ptr, draw_count, other.indexes_ptr, draw_count);
+		memcpy_s(indexes_ptr, draw_count * sizeof(GLint), other.indexes_ptr, draw_count * sizeof(GLint));
 	}
 	if (other.index_counts_ptr)
 	{
 		index_counts_ptr = new GLsizei[draw_count];
-		memcpy_s(index_counts_ptr, draw_count, other.index_counts_ptr, draw_count);
+		memcpy_s(index_counts_ptr, draw_count * sizeof(GLint), other.index_counts_ptr, draw_count * sizeof(GLint));
 	}
 }
 
@@ -53,7 +53,7 @@ DebugMultiPolygon& DebugMultiPolygon::operator=(const DebugMultiPolygon& other)
 	if (other.indexes_ptr)
 	{
 		indexes_ptr = new GLint[draw_count];
-		memcpy_s(indexes_ptr, draw_count, other.indexes_ptr, draw_count);
+		memcpy_s(indexes_ptr, draw_count * sizeof(GLint), other.indexes_ptr, draw_count * sizeof(GLint));
 	}
 	else
 		indexes_ptr = nullptr;
@@ -63,7 +63,7 @@ DebugMultiPolygon& DebugMultiPolygon::operator=(const DebugMultiPolygon& other)
 	if (other.index_counts_ptr)
 	{
 		index_counts_ptr = new GLsizei[draw_count];
-		memcpy_s(index_counts_ptr, draw_count, other.index_counts_ptr, draw_count);
+		memcpy_s(index_counts_ptr, draw_count * sizeof(GLint), other.index_counts_ptr, draw_count * sizeof(GLint));
 	}
 	else
 		index_counts_ptr = nullptr;

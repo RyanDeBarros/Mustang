@@ -18,7 +18,7 @@ Particle::Particle(const std::shared_ptr<DebugPolygon>& shape, const float& life
 //	if (m_DataSize > 0)
 //	{
 //		m_Data = new float[m_DataSize];
-//		memcpy_s(m_Data, m_DataSize, other.m_Data, m_DataSize);
+//		memcpy_s(m_Data, m_DataSize * sizeof(float), other.m_Data, m_DataSize * sizeof(float));
 //	}
 //	(*m_Characteristic)(*this);
 //}
@@ -47,7 +47,7 @@ Particle::Particle(Particle&& other) noexcept
 //	if (m_DataSize > 0)
 //	{
 //		m_Data = new float[m_DataSize];
-//		memcpy_s(m_Data, m_DataSize, other.m_Data, m_DataSize);
+//		memcpy_s(m_Data, m_DataSize * sizeof(float), other.m_Data, m_DataSize * sizeof(float));
 //	}
 //	else
 //		m_Data = nullptr;

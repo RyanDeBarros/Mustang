@@ -29,6 +29,7 @@
 #include "utils/Data.h"
 #include "utils/Constants.h"
 #include "render/actors/anim/FramesArray.h"
+#include "render/actors/anim/AnimActorPrimitive.h"
 
 using namespace Pulsar;
 
@@ -189,12 +190,6 @@ void Pulsar::Run(GLFWwindow* window)
 
 	float p2width = 400.0f;
 	float p2height = 400.0f;
-	//ParticleSubsystemData wave1 = ParticleSubsystemRegistry::Instance().Invoke("wave1", { 0.5f });
-	//ParticleSubsystemData wave2 = ParticleSubsystemRegistry::Instance().Invoke("wave2", { p2width, p2height });
-	
-	//ParticleSystem psys({ wave2, wave2 });
-	//set_ptr(psys.SubsystemRef(1).Fickler().Rotation(), 0.5f * glm::pi<float>());
-	//psys.SubsystemRef(1).Fickler().SyncRS();
 	ParticleEffect* psys_raw = nullptr;
 	if (Loader::loadParticleEffect("res/assets/psys.toml", psys_raw, "system", true) != LOAD_STATUS::OK)
 		ASSERT(false);
@@ -248,12 +243,6 @@ void Pulsar::Run(GLFWwindow* window)
 		child->SyncT();
 	}
 
-	//std::shared_ptr<Modulator> first_mod(std::make_shared<Modulator>(child.ModulateWeak(), grandchild.ModulateWeak()));
-	//first_mod->SetColor({ 1.0f, 1.0f, 0.0f, 1.0f });
-	//first_mod->SetGlobalColor({ 1.0f, 0.0f, 1.0f, 1.0f });
-	//std::shared_ptr<Modulator> root_mod(std::make_shared<Modulator>(root.ModulateWeak(), first_mod));
-	//root_mod->SetColor(glm::vec4{ 1.0f } * 0.5f);
-
 	Renderer::GetCanvasLayer(11)->OnAttach(&root);
 	Renderer::GetCanvasLayer(11)->OnAttach(&child2);
 	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
@@ -286,18 +275,13 @@ void Pulsar::Run(GLFWwindow* window)
 
 	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::TRANSPARENT, Colors::LIGHT_GREEN });
 
-	TextureHandle texGodot;
-	if (Loader::loadTexture("res/assets/godot.toml", texGodot) != LOAD_STATUS::OK)
-		ASSERT(false);
-	RectRender godot(texGodot, ShaderRegistry::Standard(), 10);
-	Renderer::RemoveCanvasLayer(11);
-	Renderer::AddCanvasLayer(11);
-	Renderer::GetCanvasLayer(11)->OnAttach(&godot);
-
-	FramesArray frames("res/textures/serotonin.gif");
-	godot.SetTextureHandle(frames.CurrentTexture());
 	real test_frames = 0;
-	real test_frames_interval = 1.0f / frames.Size();
+	real test_frames_interval = 1.0f / 60.0f;
+
+	AnimActorPrimitive2D serotonin(new RectRender(0, ShaderRegistry::Standard(), 10), { FramesArray("res/textures/serotonin.gif") });
+	//Renderer::RemoveCanvasLayer(11);
+	//Renderer::AddCanvasLayer(11);
+	Renderer::GetCanvasLayer(11)->OnAttach(serotonin.Primitive());
 
 	for (;;)
 	{
@@ -321,8 +305,7 @@ void Pulsar::Run(GLFWwindow* window)
 		if (test_frames > test_frames_interval)
 		{
 			test_frames = std::fmod(test_frames, test_frames_interval);
-			frames.Select((frames.CurrentIndex() + 1) % frames.Size());
-			godot.SetTextureHandle(frames.CurrentTexture());
+			serotonin.SelectFrame((serotonin.CurrentAnim()->CurrentIndex() + 1) % serotonin.CurrentAnim()->Size());
 		}
 
 		Renderer::OnDraw();

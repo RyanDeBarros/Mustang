@@ -24,7 +24,7 @@ public:
 		if (m_Size > 0)
 		{
 			m_Array = new T[m_Size];
-			memcpy_s(m_Array, m_Size, other.m_Array, other.m_Size);
+			memcpy_s(m_Array, m_Size * sizeof(T), other.m_Array, other.m_Size * sizeof(T));
 		}
 	}
 	inline Array(Array<T>&& other) noexcept : m_Size(other.m_Size), m_Array(other.m_Array) { other.m_Size = 0; other.m_Array = nullptr; }
@@ -46,7 +46,7 @@ public:
 			if (other.m_Array)
 			{
 				m_Array = new T[m_Size];
-				memcpy_s(m_Array, m_Size, other.m_Array, other.m_Size);
+				memcpy_s(m_Array, m_Size * sizeof(T), other.m_Array, other.m_Size * sizeof(T));
 			}
 			else
 			{

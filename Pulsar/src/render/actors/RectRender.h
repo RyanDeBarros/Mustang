@@ -33,4 +33,6 @@ public:
 	void CropToRect(glm::vec4 rect, int atlas_width, int atlas_height);
 	void CropToRelativeRect(glm::vec4 rect);
 	void ResetTransformUVs();
+
+	inline void SetTextureHandle(TextureHandle handle) override { ActorPrimitive2D::SetTextureHandle(handle); SetPivot(m_Pivot); }
 };

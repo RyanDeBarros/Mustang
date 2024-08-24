@@ -7,7 +7,6 @@
 #include "factory/TextureRegistry.h"
 
 FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settings, float framelength, unsigned short starting_index)
-	: m_Framelength(framelength)
 {
 	std::ifstream file(gif_filepath, std::ios::binary | std::ios::ate);
 	if (!file)
@@ -29,7 +28,7 @@ FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settin
 
 	int width, height, num_frames, bpp;
 	int* delays;
-	unsigned char* stbi_buffer = stbi_load_gif_from_memory(full_buffer, size, &delays, &width, &height, &num_frames, &bpp, 0);
+	unsigned char* stbi_buffer = stbi_load_gif_from_memory(full_buffer, static_cast<int>(size), &delays, &width, &height, &num_frames, &bpp, 0);
 	delete[] full_buffer;
 	if (!stbi_buffer)
 	{
@@ -54,7 +53,7 @@ FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settin
 }
 
 FramesArray::FramesArray(Array<TextureHandle>&& frames, float framelength, unsigned short starting_index)
-	: m_Frames(std::move(frames)), m_Framelength(framelength)
+	: m_Frames(std::move(frames))
 {
 	Select(starting_index);
 }
