@@ -66,6 +66,11 @@ constexpr T Max(const T& first, const Args&... args)
 	return std::max(first, static_cast<T>(Max(args...)));
 }
 
+inline auto unsigned_mod(auto x, auto y)
+{
+	return (x % y + y) % y;
+}
+
 template<typename T = float>
 inline bool SafeToDivide(T denominator)
 {

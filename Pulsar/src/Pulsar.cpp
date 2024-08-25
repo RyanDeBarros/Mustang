@@ -1,3 +1,4 @@
+#include "VendorInclude.h"
 #include "Pulsar.h"
 
 #include <glm/ext/scalar_constants.hpp>
@@ -275,12 +276,9 @@ void Pulsar::Run(GLFWwindow* window)
 
 	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::TRANSPARENT, Colors::LIGHT_GREEN });
 
-	real test_frames = 0;
-	real test_frames_interval = 1.0f / 60.0f;
-
-	AnimActorPrimitive2D serotonin(new RectRender(0, ShaderRegistry::Standard(), 10), { FramesArray("res/textures/serotonin.gif") });
-	//Renderer::RemoveCanvasLayer(11);
-	//Renderer::AddCanvasLayer(11);
+	AnimActorPrimitive2D serotonin(new RectRender(0, ShaderRegistry::Standard(), 10), { FramesArray("res/textures/serotonin.gif") }, 1.0f / 60.0f, false, 0.5f);
+	Renderer::RemoveCanvasLayer(11);
+	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(serotonin.Primitive());
 
 	for (;;)
@@ -301,12 +299,7 @@ void Pulsar::Run(GLFWwindow* window)
 		*child2.Fickler().Scale() *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime);
 		root.Fickler().SyncT();
 
-		test_frames += deltaDrawTime;
-		if (test_frames > test_frames_interval)
-		{
-			test_frames = std::fmod(test_frames, test_frames_interval);
-			serotonin.SelectFrame((serotonin.CurrentAnim()->CurrentIndex() + 1) % serotonin.CurrentAnim()->Size());
-		}
+		serotonin.OnUpdate();
 
 		Renderer::OnDraw();
 		glfwPollEvents();

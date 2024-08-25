@@ -46,6 +46,7 @@ FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settin
 		memcpy_s(image, image_size, stbi_buffer + image_size * i, image_size);
 		TileHandle tile = TileRegistry::RegisterTile(Tile(image, width, height, bpp));
 		m_Frames[i] = TextureRegistry::GetHandle(TextureConstructArgs_tile{ tile, 0, settings });
+		// TODO instead of array of texture handles, use array of texture pointers. That way, there could be a temporary buffer version of FramesArray constructor that doesn't save the buffer in a tile. Instead of using TextureRegistry in that case, use heap pointers with a bool that remembers to delete them in FramesArray destructor. In that case, custom copy/move constructor/assignment operators will need to be implemented.
 	}
 
 	stbi_image_free(stbi_buffer);

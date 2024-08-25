@@ -1,10 +1,13 @@
 #include "AnimActorPrimitive.h"
 
-#include "Logger.inl"
+#include "Pulsar.h"
+#include "utils/CommonMath.h"
 
-AnimActorPrimitive2D::AnimActorPrimitive2D(ActorPrimitive2D* heap_primitive, Array<FramesArray>&& anims)
-	: m_Primitive(heap_primitive), m_Anims(std::move(anims))
+AnimActorPrimitive2D::AnimActorPrimitive2D(ActorPrimitive2D* heap_primitive, Array<FramesArray>&& anims, float frame_length, bool play_in_reverse, float speed_scale)
+	: m_Primitive(heap_primitive), m_Anims(std::move(anims)), m_PlayInReverse(play_in_reverse)
 {
+	SetFrameLength(frame_length);
+	SetSpeedScale(speed_scale);
 	SyncTexture();
 }
 
@@ -14,35 +17,39 @@ AnimActorPrimitive2D::~AnimActorPrimitive2D()
 		delete m_Primitive;
 }
 
-void AnimActorPrimitive2D::SetAnimIndex(size_t anim)
+void AnimActorPrimitive2D::SetAnimIndex(unsigned short anim)
 {
 	if (anim < m_Anims.Size())
-		m_CurrentAnim = anim;
+		m_CurrentAnimIndex = anim;
 	SyncTexture();
-}
-
-void AnimActorPrimitive2D::SetFrameLength(float frame_length)
-{
-	m_FrameLength = frame_length >= 0.0f ? frame_length : -frame_length;
-	if (m_FrameLength == 0.0f)
-	{
-		// TODO set func pointer for update?
-	}
 }
 
 void AnimActorPrimitive2D::SelectFrame(unsigned short frame_index)
 {
-	m_Anims[m_CurrentAnim].Select(frame_index);
+	m_Anims[m_CurrentAnimIndex].Select(frame_index);
 	SyncTexture();
 }
 
 void AnimActorPrimitive2D::OnUpdate()
 {
-	// TODO
+	if (m_FrameLength > 0.0f)
+	{
+		m_TimeElapsed += m_SpeedScale * Pulsar::deltaDrawTime;
+		if (m_TimeElapsed > m_FrameLength)
+		{
+			auto& currentAnim = m_Anims[m_CurrentAnimIndex];
+			if (m_PlayInReverse)
+				currentAnim.Select(unsigned_mod(currentAnim.CurrentIndex() - static_cast<short>(m_TimeElapsed / m_FrameLength), currentAnim.Size()));
+			else
+				currentAnim.Select(unsigned_mod(currentAnim.CurrentIndex() + static_cast<short>(m_TimeElapsed / m_FrameLength), currentAnim.Size()));
+			SyncTexture();
+			m_TimeElapsed = std::fmod(m_TimeElapsed, m_FrameLength);
+		}
+	}
 }
 
 void AnimActorPrimitive2D::SyncTexture()
 {
 	if (m_Primitive)
-		m_Primitive->SetTextureHandle(m_Anims[m_CurrentAnim].CurrentTexture());
+		m_Primitive->SetTextureHandle(m_Anims[m_CurrentAnimIndex].CurrentTexture());
 }
