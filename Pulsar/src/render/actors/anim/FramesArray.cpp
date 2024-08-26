@@ -6,7 +6,7 @@
 #include "Logger.inl"
 #include "factory/TextureRegistry.h"
 
-FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settings, float framelength, unsigned short starting_index)
+FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settings, unsigned short starting_index, bool temporary_buffer)
 {
 	std::ifstream file(gif_filepath, std::ios::binary | std::ios::ate);
 	if (!file)
@@ -39,22 +39,34 @@ FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settin
 	size_t stride = static_cast<size_t>(width) * bpp;
 	size_t image_size = stride * height;
 	size_t full_size = image_size * num_frames;
-	m_Frames = Array<TextureHandle>(num_frames);
-	for (size_t i = 0; i < num_frames; i++)
+	m_Frames = Array<TileHandle>(num_frames, 0);
+	
+	if (temporary_buffer)
 	{
-		unsigned char* image = new unsigned char[image_size];
-		memcpy_s(image, image_size, stbi_buffer + image_size * i, image_size);
-		TileHandle tile = TileRegistry::RegisterTile(Tile(image, width, height, bpp));
-		m_Frames[i] = TextureRegistry::GetHandle(TextureConstructArgs_tile{ tile, 0, settings });
-		// TODO instead of array of texture handles, use array of texture pointers. That way, there could be a temporary buffer version of FramesArray constructor that doesn't save the buffer in a tile. Instead of using TextureRegistry in that case, use heap pointers with a bool that remembers to delete them in FramesArray destructor. In that case, custom copy/move constructor/assignment operators will need to be implemented.
+		for (size_t i = 0; i < num_frames; i++)
+		{
+			unsigned char* image = new unsigned char[image_size];
+			memcpy_s(image, image_size, stbi_buffer + image_size * i, image_size);
+			m_Frames[i] = TextureRegistry::RegisterTexture(Texture(Tile(image, width, height, bpp), settings));
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < num_frames; i++)
+		{
+			unsigned char* image = new unsigned char[image_size];
+			memcpy_s(image, image_size, stbi_buffer + image_size * i, image_size);
+			TileHandle tile = TileRegistry::RegisterTile(Tile(image, width, height, bpp));
+			m_Frames[i] = TextureRegistry::GetHandle(TextureConstructArgs_tile{ tile, 0, settings });
+		}
 	}
 
 	stbi_image_free(stbi_buffer);
 	Select(starting_index);
 }
 
-FramesArray::FramesArray(Array<TextureHandle>&& frames, float framelength, unsigned short starting_index)
-	: m_Frames(std::move(frames))
+FramesArray::FramesArray(Array<TextureHandle>&& frames, unsigned short starting_index)
+	: m_Frames(frames)
 {
 	Select(starting_index);
 }

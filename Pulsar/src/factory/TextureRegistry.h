@@ -78,6 +78,7 @@ public:
 	static bool DestroyTexture(TextureHandle handle);
 	static TextureHandle GetHandle(const TextureConstructArgs_filepath& args);
 	static TextureHandle GetHandle(const TextureConstructArgs_tile& args);
+	static TextureHandle RegisterTexture(Texture&& texture);
 	static void Bind(TextureHandle handle, TextureSlot slot);
 	static void Unbind(TextureSlot slot);
 	

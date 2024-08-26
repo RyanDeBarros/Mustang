@@ -13,6 +13,7 @@ class Array
 
 public:
 	inline explicit Array(size_t size = 0) : m_Size(size) { if (m_Size > 0) m_Array = new T[m_Size]; }
+	inline explicit Array(size_t size, T&& initial_value) : m_Size(size) { if (m_Size > 0) m_Array = new T[m_Size](initial_value); }
 	inline Array(std::initializer_list<T> l) : m_Size(l.size())
 	{
 		if (m_Size > 0)
@@ -24,7 +25,8 @@ public:
 		if (m_Size > 0)
 		{
 			m_Array = new T[m_Size];
-			memcpy_s(m_Array, m_Size * sizeof(T), other.m_Array, other.m_Size * sizeof(T));
+			for (size_t i = 0; i < m_Size; i++)
+				new (m_Array + i) T(other.m_Array[i]);
 		}
 	}
 	inline Array(Array<T>&& other) noexcept : m_Size(other.m_Size), m_Array(other.m_Array) { other.m_Size = 0; other.m_Array = nullptr; }
@@ -46,12 +48,11 @@ public:
 			if (other.m_Array)
 			{
 				m_Array = new T[m_Size];
-				memcpy_s(m_Array, m_Size * sizeof(T), other.m_Array, other.m_Size * sizeof(T));
+				for (size_t i = 0; i < m_Size; i++)
+					new (m_Array + i) T(other.m_Array[i]);
 			}
 			else
-			{
 				m_Array = nullptr;
-			}
 		}
 		return *this;
 	}

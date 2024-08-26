@@ -122,7 +122,7 @@ void Pulsar::Run(GLFWwindow* window)
 		ASSERT(false);
 	if (Loader::loadTexture("res/assets/tux.toml", textureTux) != LOAD_STATUS::OK)
 		ASSERT(false);
-	if (Loader::loadTexture("res/assets/flag.toml", textureFlag, true) != LOAD_STATUS::OK)
+	if (Loader::loadTexture("res/assets/flag.toml", textureFlag) != LOAD_STATUS::OK)
 		ASSERT(false);
 	//if (loadTexture("res/assets/atlas.toml", textureAtlas) != LOAD_STATUS::OK)
 	//	ASSERT(false);
@@ -153,7 +153,7 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::AddCanvasLayer(-1);
 
 	Renderable renderable;
-	if (Loader::loadRenderable("res/assets/renderable.toml", renderable, true) != LOAD_STATUS::OK)
+	if (Loader::loadRenderable("res/assets/renderable.toml", renderable) != LOAD_STATUS::OK)
 		ASSERT(false);
 	ActorPrimitive2D actor4(renderable);
 	set_ptr(actor4.Fickler().Transform(), { {-200.0f, 0.0f}, 0.0f, {800.0f, 800.0f} });
