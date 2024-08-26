@@ -27,10 +27,12 @@
 #include "utils/Functor.inl"
 #include "utils/Functions.inl"
 #include "utils/Strings.h"
-#include "utils/Data.h"
+#include "utils/Data.inl"
 #include "utils/Constants.h"
 #include "render/actors/anim/FramesArray.h"
 #include "render/actors/anim/AnimActorPrimitive.h"
+#include "render/actors/anim/AnimationPlayer.h"
+#include "render/actors/anim/KeyFrames.inl"
 
 using namespace Pulsar;
 
@@ -281,6 +283,15 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(serotonin.Primitive());
 
+	ProteanLinker2D* serotoninPRL = serotonin.Primitive()->Fickler().ProteanLinker();
+	AnimationTrack animTrack1(2.0f);
+	FunctorPtr<void, void> syncSeroP(make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncP(); }, serotoninPRL));
+	animTrack1.Insert(std::make_shared<KF_Callback<Position2D>>(0.0f, &serotoninPRL->Position(), Position2D{ 0.0f, 0.0f }, syncSeroP));
+	animTrack1.Insert(std::make_shared<KF_Callback<Position2D>>(0.5f, &serotoninPRL->Position(), Position2D{ 100.0f, 0.0f }, syncSeroP));
+	animTrack1.Insert(std::make_shared<KF_Callback<Position2D>>(1.0f, &serotoninPRL->Position(), Position2D{ 0.0f, 0.0f }, syncSeroP));
+	animTrack1.Insert(std::make_shared<KF_Callback<Position2D>>(1.5f, &serotoninPRL->Position(), Position2D{ -100.0f, 0.0f }, syncSeroP));
+	animTrack1.Insert(std::make_shared<KF_Callback<Position2D>>(2.0f, &serotoninPRL->Position(), Position2D{ 0.0f, 0.0f }, syncSeroP));
+
 	for (;;)
 	{
 		drawTime = static_cast<real>(glfwGetTime());
@@ -300,6 +311,7 @@ void Pulsar::Run(GLFWwindow* window)
 		root.Fickler().SyncT();
 
 		serotonin.OnUpdate();
+		animTrack1.OnUpdate();
 
 		Renderer::OnDraw();
 		glfwPollEvents();

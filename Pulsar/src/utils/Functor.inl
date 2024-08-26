@@ -186,17 +186,6 @@ struct Functor<Ret, void, void, CopyClosure> : public FunctorInterface<Ret, void
 	func_signature function;
 };
 
-template<typename T1, typename T2>
-struct check_void
-{
-	static constexpr unsigned char value =
-		std::is_void_v<T1> ? (std::is_void_v<T2> ? 3 : 2)
-		: (std::is_void_v<T2> ? 1 : 0);
-};
-
-template<typename T1, typename T2>
-inline constexpr unsigned char check_void_v = check_void<T1, T2>::value;
-
 template<typename Ret, typename Arg>
 class FunctorPtr
 {
@@ -242,10 +231,67 @@ public:
 	}
 
 	// TODO dangerous to dereference. Define macro that can check if f is null first.
-	inline Ret operator()(Arg arg) const	requires (check_void_v<Ret, Arg> == 0) { return (*f)(arg); }
-	inline Ret operator()()	const			requires (check_void_v<Ret, Arg> == 1) { return (*f)(); }
-	inline void operator()(Arg arg) const	requires (check_void_v<Ret, Arg> == 2) { (*f)(arg); }
-	inline void operator()() const			requires (check_void_v<Ret, Arg> == 3) { (*f)(); }
+	inline Ret operator()(Arg arg) const
+	{
+		if constexpr (std::is_void_v<Ret>)
+			(*f)(arg);
+		else
+			return (*f)(arg);
+	}
+};
+
+template<typename Ret>
+class FunctorPtr<Ret, void>
+{
+	FunctorInterface<Ret, void>* f = nullptr;
+
+public:
+	using RetType = Ret;
+	using ArgType = void;
+
+	template<typename Cls>
+	inline FunctorPtr(Functor<Ret, void, Cls>* f) : f(f) {}
+	inline FunctorPtr(FunctorInterface<Ret, void>* f) : f(f) {}
+	inline FunctorPtr(const FunctorPtr<Ret, void>& other)
+	{
+		if (other.f)
+			f = other.f->Clone();
+	}
+	inline FunctorPtr(FunctorPtr<Ret, void>&& other) noexcept : f(other.f) { other.f = nullptr; }
+	inline FunctorPtr& operator=(const FunctorPtr<Ret, void>& other)
+	{
+		if (f)
+			delete f;
+		if (other.f)
+			f = other.f->Clone();
+		else
+			f = nullptr;
+		return *this;
+	}
+	inline FunctorPtr& operator=(FunctorPtr&& other) noexcept
+	{
+		if (this == &other)
+			return *this;
+		if (f)
+			delete f;
+		f = other.f;
+		other.f = nullptr;
+		return *this;
+	}
+	inline ~FunctorPtr() { if (f) delete f; }
+	inline FunctorPtr<Ret, void> Clone() const
+	{
+		return f ? FunctorPtr<Ret, void>(f->Clone()) : nullptr;
+	}
+
+	// TODO dangerous to dereference. Define macro that can check if f is null first.
+	inline Ret operator()() const
+	{
+		if constexpr (std::is_void_v<Ret>)
+			(*f)();
+		else
+			return (*f)();
+	}
 };
 
 template<typename T>

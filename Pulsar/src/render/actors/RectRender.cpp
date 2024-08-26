@@ -5,7 +5,7 @@
 #include "RendererSettings.h"
 #include "AssetLoader.h"
 #include "Logger.inl"
-#include "utils/Data.h"
+#include "utils/Data.inl"
 
 Renderable RectRender::rect_renderable;
 

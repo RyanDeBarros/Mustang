@@ -19,7 +19,7 @@
 #include "render/actors/particles/ParticleSubsystemArray.h"
 #include "render/actors/particles/ParticleSystem.h"
 #include "render/actors/particles/ParticleSubsystemRegistry.h"
-#include "utils/Data.h"
+#include "utils/Data.inl"
 
 // TODO rename all macros to have PULSAR_ prefix
 #define VERIFY(loadFunc) \

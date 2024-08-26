@@ -2,7 +2,7 @@
 
 #include "utils/CommonMath.h"
 #include "utils/Strings.h"
-#include "utils/Data.h"
+#include "utils/Data.inl"
 
 namespace Particles {
 
