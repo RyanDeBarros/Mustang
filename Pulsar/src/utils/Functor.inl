@@ -404,3 +404,5 @@ inline auto make_functor_ptr(auto f)
 		return FunctorPtr<Ret, void>(new Functor<Ret, void, void>(f));
 	}
 }
+
+inline FunctorPtr<void, void> VoidFunctorPtr = make_functor_ptr([]() -> void {});

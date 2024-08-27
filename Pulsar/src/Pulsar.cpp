@@ -284,13 +284,14 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::GetCanvasLayer(11)->OnAttach(serotonin.Primitive());
 
 	ProteanLinker2D* serotoninPRL = serotonin.Primitive()->Fickler().ProteanLinker();
-	AnimationTrack animTrack1(2.0f);
-	FunctorPtr<void, void> syncSeroP(make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncP(); }, serotoninPRL));
-	animTrack1.Insert(std::make_shared<KF_Callback<Position2D>>(0.0f, &serotoninPRL->Position(), Position2D{ 0.0f, 0.0f }, syncSeroP));
-	animTrack1.Insert(std::make_shared<KF_Callback<Position2D>>(0.5f, &serotoninPRL->Position(), Position2D{ 100.0f, 0.0f }, syncSeroP));
-	animTrack1.Insert(std::make_shared<KF_Callback<Position2D>>(1.0f, &serotoninPRL->Position(), Position2D{ 0.0f, 0.0f }, syncSeroP));
-	animTrack1.Insert(std::make_shared<KF_Callback<Position2D>>(1.5f, &serotoninPRL->Position(), Position2D{ -100.0f, 0.0f }, syncSeroP));
-	animTrack1.Insert(std::make_shared<KF_Callback<Position2D>>(2.0f, &serotoninPRL->Position(), Position2D{ 0.0f, 0.0f }, syncSeroP));
+	AnimationTrack<Position2D, KF_Assign<Position2D>> animTrack1(2.0f);
+	animTrack1.target = &serotoninPRL->Position();
+	animTrack1.callback = make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncP(); }, serotoninPRL);
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.0f, Position2D{ 0.0f, 0.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.5f, Position2D{ 100.0f, 0.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.0f, Position2D{ 0.0f, 0.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.5f, Position2D{ -100.0f, 0.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(2.0f, Position2D{ 0.0f, 0.0f }));
 
 	for (;;)
 	{
