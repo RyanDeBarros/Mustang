@@ -175,7 +175,6 @@
     <ClCompile Include="src\Macros.cpp" />
     <ClCompile Include="src\render\actors\ActorDirectory.cpp" />
     <ClCompile Include="src\render\actors\anim\AnimActorPrimitive.cpp" />
-    <ClCompile Include="src\render\actors\anim\AnimationPlayer.cpp" />
     <ClCompile Include="src\render\actors\anim\FramesArray.cpp" />
     <ClCompile Include="src\render\actors\BatchSlotter.cpp" />
     <ClCompile Include="src\render\actors\particles\ParticleSubsystemRegistry.cpp" />
@@ -221,7 +220,7 @@
   <ItemGroup>
     <ClInclude Include="sandbox\CHRS.h" />
     <ClInclude Include="src\render\actors\anim\AnimActorPrimitive.h" />
-    <ClInclude Include="src\render\actors\anim\AnimationPlayer.h" />
+    <ClInclude Include="src\render\actors\anim\AnimationPlayer.inl" />
     <ClInclude Include="src\render\actors\anim\AnimationTrack.inl" />
     <ClInclude Include="src\render\actors\anim\FramesArray.h" />
     <ClInclude Include="src\render\actors\particles\ParticleSubsystemRegistry.h" />

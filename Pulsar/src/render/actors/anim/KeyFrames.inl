@@ -4,56 +4,56 @@
 
 #include "AnimationTrack.inl"
 
-template<typename _Target>
-struct KF_Assign : public KeyFrame<_Target>
+template<typename _Property>
+struct KF_Assign : public KeyFrame<_Property>
 {
 	static constexpr bool progressive = false;
-	_Target value;
-	inline KF_Assign(float timepoint, const _Target& value) : KeyFrame<_Target>(timepoint), value(value) {}
-	inline KF_Assign(float timepoint, _Target&& value) : KeyFrame<_Target>(timepoint), value(std::move(value)) {}
+	_Property value;
+	inline KF_Assign(float timepoint, const _Property& value) : KeyFrame<_Property>(timepoint), value(value) {}
+	inline KF_Assign(float timepoint, _Property&& value) : KeyFrame<_Property>(timepoint), value(std::move(value)) {}
 };
 
-template<typename _Target, unsigned int _InterpMethod, bool _InOrder>
-struct interpexec<_Target, KF_Assign<_Target>, _InterpMethod, _InOrder>
+template<typename _Property, unsigned int _InterpMethod, bool _InOrder>
+struct interpexec<_Property, KF_Assign<_Property>, _InterpMethod, _InOrder>
 {
-	inline static void _(_Target* target, KF_Assign<_Target>& a, KF_Assign<_Target>& b, float t, float period)
+	inline static void _(_Property* target, KF_Assign<_Property>& a, KF_Assign<_Property>& b, float t, float period)
 	{
 		if (target)
-			*target = interpolate<_Target, _InterpMethod, _InOrder>::_(a.value, a.timepoint, b.value, b.timepoint, t, period);
+			*target = interpolate<_Property, _InterpMethod, _InOrder>::_(a.value, a.timepoint, b.value, b.timepoint, t, period);
 	}
 };
 
-template<typename _Target>
-struct KF_Assign_Unsafe : public KeyFrame<_Target>
+template<typename _Property>
+struct KF_Assign_Unsafe : public KeyFrame<_Property>
 {
 	static constexpr bool progressive = false;
-	_Target value;
-	inline KF_Assign_Unsafe(float timepoint, const _Target& value) : KeyFrame<_Target>(timepoint), value(value) {}
-	inline KF_Assign_Unsafe(float timepoint, _Target&& value) : KeyFrame<_Target>(timepoint), value(std::move(value)) {}
+	_Property value;
+	inline KF_Assign_Unsafe(float timepoint, const _Property& value) : KeyFrame<_Property>(timepoint), value(value) {}
+	inline KF_Assign_Unsafe(float timepoint, _Property&& value) : KeyFrame<_Property>(timepoint), value(std::move(value)) {}
 };
 
-template<typename _Target, unsigned int _InterpMethod, bool _InOrder>
-struct interpexec<_Target, KF_Assign_Unsafe<_Target>, _InterpMethod, _InOrder>
+template<typename _Property, unsigned int _InterpMethod, bool _InOrder>
+struct interpexec<_Property, KF_Assign_Unsafe<_Property>, _InterpMethod, _InOrder>
 {
-	inline static void _(_Target* target, KF_Assign_Unsafe<_Target>& a, KF_Assign_Unsafe<_Target>& b, float t, float period)
+	inline static void _(_Property* target, KF_Assign_Unsafe<_Property>& a, KF_Assign_Unsafe<_Property>& b, float t, float period)
 	{
-		*target = interpolate<_Target, _InterpMethod, _InOrder>::_(a.value, a.timepoint, b.value, b.timepoint, t, period);
+		*target = interpolate<_Property, _InterpMethod, _InOrder>::_(a.value, a.timepoint, b.value, b.timepoint, t, period);
 	}
 };
 
-template<typename _Target>
-struct KF_Event : public KeyFrame<_Target>
+template<typename _Property>
+struct KF_Event : public KeyFrame<_Property>
 {
 	static constexpr bool progressive = true;
-	FunctorPtr<void, _Target*> event;
-	inline KF_Event(float timepoint, const FunctorPtr<void, _Target*>& event) : KeyFrame<_Target>(timepoint), event(event) {}
-	inline KF_Event(float timepoint, FunctorPtr<void, _Target*>&& event) : KeyFrame<_Target>(timepoint), event(std::move(event)) {}
+	FunctorPtr<void, _Property*> event;
+	inline KF_Event(float timepoint, const FunctorPtr<void, _Property*>& event) : KeyFrame<_Property>(timepoint), event(event) {}
+	inline KF_Event(float timepoint, FunctorPtr<void, _Property*>&& event) : KeyFrame<_Property>(timepoint), event(std::move(event)) {}
 };
 
-template<typename _Target, unsigned int _InterpMethod, bool _InOrder>
-struct interpexec<_Target, KF_Event<_Target>, _InterpMethod, _InOrder>
+template<typename _Property, unsigned int _InterpMethod, bool _InOrder>
+struct interpexec<_Property, KF_Event<_Property>, _InterpMethod, _InOrder>
 {
-	inline static void _(_Target* target, KF_Event<_Target>& a, KF_Event<_Target>& b, float t, float period)
+	inline static void _(_Property* target, KF_Event<_Property>& a, KF_Event<_Property>& b, float t, float period)
 	{
 		a.event(target);
 	}

@@ -31,7 +31,7 @@
 #include "utils/Constants.h"
 #include "render/actors/anim/FramesArray.h"
 #include "render/actors/anim/AnimActorPrimitive.h"
-#include "render/actors/anim/AnimationPlayer.h"
+#include "render/actors/anim/AnimationPlayer.inl"
 #include "render/actors/anim/KeyFrames.inl"
 
 using namespace Pulsar;
@@ -283,15 +283,17 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(serotonin.Primitive());
 
-	AnimationPlayer animPlayer1;
+	AnimationPlayer<AnimActorPrimitive2D> animPlayer1;
+	animPlayer1.SetTarget(&serotonin);
 	animPlayer1.SetPeriod(2.0f);
 	animPlayer1.SetSpeed(0.5f);
 	float ap1frames = 0.0f;
 	serotonin.SetFrameLength(0.0f);
 
 	ProteanLinker2D* serotoninPRL = serotonin.Primitive()->Fickler().ProteanLinker();
-	std::unique_ptr<AnimationTrack<Position2D, KF_Assign<Position2D>, Interp::Linear>> animTrack1(new AnimationTrack<Position2D, KF_Assign<Position2D>, Interp::Linear>());
-	animTrack1->target = &serotoninPRL->Position();
+	using AnimTrack1T = AnimationTrack<AnimActorPrimitive2D, Position2D, KF_Assign<Position2D>, Interp::Linear>;
+	std::unique_ptr<AnimTrack1T> animTrack1(new AnimTrack1T());
+	animTrack1->getProperty = make_functor_ptr([](AnimActorPrimitive2D* anim) { return &anim->Primitive()->Fickler().ProteanLinker()->Position(); });
 	animTrack1->callback = make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncP(); }, serotoninPRL);
 	animTrack1->SetOrInsert(KF_Assign<Position2D>(0.0f, { 0.0f, 100.0f }));
 	animTrack1->SetOrInsert(KF_Assign<Position2D>(0.5f, { 300.0f, 0.0f }));
@@ -300,8 +302,9 @@ void Pulsar::Run(GLFWwindow* window)
 	animTrack1->SetOrInsert(KF_Assign<Position2D>(2.0f, { 0.0f, 100.0f }));
 	animPlayer1.tracks.push_back(std::move(animTrack1));
 
-	std::unique_ptr<AnimationTrack<Modulate, KF_Assign<Modulate>, Interp::Linear>> animTrack2(new AnimationTrack<Modulate, KF_Assign<Modulate>, Interp::Linear>());
-	animTrack2->target = &serotoninPRL->Modulate();
+	using AnimTrack2T = AnimationTrack<AnimActorPrimitive2D, Modulate, KF_Assign<Modulate>, Interp::Linear>;
+	std::unique_ptr<AnimTrack2T> animTrack2(new AnimTrack2T());
+	animTrack2->getProperty = make_functor_ptr([](AnimActorPrimitive2D* anim) { return &anim->Primitive()->Fickler().ProteanLinker()->Modulate(); });
 	animTrack2->callback = make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncM(); }, serotoninPRL);
 	animTrack2->SetOrInsert(KF_Assign<Modulate>(0.0f, Colors::WHITE));
 	animTrack2->SetOrInsert(KF_Assign<Modulate>(0.5f, Colors::BLUE));
@@ -309,12 +312,14 @@ void Pulsar::Run(GLFWwindow* window)
 	animTrack2->SetOrInsert(KF_Assign<Modulate>(1.5f, Colors::RED));
 	animTrack2->SetOrInsert(KF_Assign<Modulate>(2.0f, Colors::WHITE));
 	animPlayer1.tracks.push_back(std::move(animTrack2));
+	animPlayer1.SyncTracks();
 
-	AnimationPlayer animPlayerEvents;
+	AnimationPlayer<void> animPlayerEvents;
 	animPlayerEvents.SetPeriod(2.0f);
 	animPlayerEvents.SetSpeed(1.3f);
-
-	std::unique_ptr<AnimationTrack<void, KF_Event<void>, Interp::Constant>> animEventTrack(new AnimationTrack<void, KF_Event<void>, Interp::Constant>());
+	
+	using AnimEventTrackT = AnimationTrack<void, void, KF_Event<void>, Interp::Constant>;
+	std::unique_ptr<AnimEventTrackT> animEventTrack(new AnimEventTrackT());
 	animEventTrack->SetOrInsert(KF_Event<void>(0.0f, make_functor_ptr([](void*) { Logger::LogInfo("0 seconds!"); })));
 	animEventTrack->SetOrInsert(KF_Event<void>(0.5f, make_functor_ptr([](void*) { Logger::LogInfo("0.5 seconds!"); })));
 	animEventTrack->SetOrInsert(KF_Event<void>(1.0f, make_functor_ptr([](void*) { Logger::LogInfo("1 seconds!"); })));
