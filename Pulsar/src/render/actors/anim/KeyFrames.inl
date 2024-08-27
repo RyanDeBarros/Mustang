@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include "AnimationPlayer.h"
+#include "AnimationTrack.inl"
 
 template<typename _Target>
 struct KF_Assign : public KeyFrame<_Target>

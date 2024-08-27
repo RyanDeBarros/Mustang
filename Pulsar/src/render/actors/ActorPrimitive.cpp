@@ -208,13 +208,23 @@ void ActorPrimitive2D::buffer_packed_rs_modulatable(Stride stride)
 void ActorPrimitive2D::buffer_packed_m_protean(Stride stride)
 {
 	const Modulate& modulate = m_Fickler.ProteanLinker()->self.packedM;
-	for (BufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
+	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
-		Modulate color = m_ModulationColors[i] * modulate;
-		m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(color.r);
-		m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(color.g);
-		m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(color.b);
-		m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(color.a);
+		if (i < m_ModulationColors.size())
+		{
+			Modulate color = m_ModulationColors[i] * modulate;
+			m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(color.r);
+			m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(color.g);
+			m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(color.b);
+			m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(color.a);
+		}
+		else
+		{
+			m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(modulate.r);
+			m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(modulate.g);
+			m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(modulate.b);
+			m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(modulate.a);
+		}
 	}
 }
 
@@ -233,12 +243,22 @@ void ActorPrimitive2D::buffer_packed_m_transformable(Stride stride)
 void ActorPrimitive2D::buffer_packed_m_modulatable(Stride stride)
 {
 	const Modulate& modulate = m_Fickler.Modulator()->self.packedM;
-	for (BufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
+	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
-		Modulate color = m_ModulationColors[i] * modulate;
-		m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(color.r);
-		m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(color.g);
-		m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(color.b);
-		m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(color.a);
+		if (i < m_ModulationColors.size())
+		{
+			Modulate color = m_ModulationColors[i] * modulate;
+			m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(color.r);
+			m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(color.g);
+			m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(color.b);
+			m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(color.a);
+		}
+		else
+		{
+			m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(modulate.r);
+			m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(modulate.g);
+			m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(modulate.b);
+			m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(modulate.a);
+		}
 	}
 }

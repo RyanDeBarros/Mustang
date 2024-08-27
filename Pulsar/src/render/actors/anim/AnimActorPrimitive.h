@@ -24,10 +24,10 @@ public:
 	inline unsigned short CurrentAnimIndex() const { return m_CurrentAnimIndex; }
 	void SetAnimIndex(unsigned short anim);
 	inline float FrameLength() const { return m_FrameLength; }
-	inline void SetFrameLength(float frame_length) { if (frame_length > 0.0f) m_FrameLength = frame_length; }
+	inline void SetFrameLength(float frame_length) { if (frame_length >= 0.0f) m_FrameLength = frame_length; }
 	void SelectFrame(unsigned short frame_index);
 	inline float SpeedScale() const { return m_SpeedScale; }
-	inline void SetSpeedScale(float speed_scale) { if (speed_scale > 0.0f) m_SpeedScale = speed_scale; }
+	inline void SetSpeedScale(float speed_scale) { if (speed_scale >= 0.0f) m_SpeedScale = speed_scale; }
 
 	void OnUpdate();
 	

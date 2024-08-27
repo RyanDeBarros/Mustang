@@ -276,32 +276,51 @@ void Pulsar::Run(GLFWwindow* window)
 		{ { 50, -200 } }
 	});
 
-	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::TRANSPARENT, Colors::LIGHT_GREEN });
+	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::RED * Colors::HALF_TRANSPARENT_WHITE, Colors::LIGHT_GREEN });
 
 	AnimActorPrimitive2D serotonin(new RectRender(0, ShaderRegistry::Standard(), 10), { FramesArray("res/textures/serotonin.gif") }, 1.0f / 60.0f, false, 1.5f);
 	Renderer::RemoveCanvasLayer(11);
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(serotonin.Primitive());
 
-	ProteanLinker2D* serotoninPRL = serotonin.Primitive()->Fickler().ProteanLinker();
-	AnimationTrack<Position2D, KF_Assign<Position2D>, Interp::Linear> animTrack1(2.0f);
-	animTrack1.target = &serotoninPRL->Position();
-	animTrack1.callback = make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncP(); }, serotoninPRL);
-	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.0f, Position2D{ 0.0f, 100.0f }));
-	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.5f, Position2D{ 300.0f, 0.0f }));
-	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.0f, Position2D{ 0.0f, -100.0f }));
-	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.5f, Position2D{ -300.0f, 0.0f }));
-	animTrack1.SetOrInsert(KF_Assign<Position2D>(2.0f, Position2D{ 0.0f, 100.0f }));
-	animTrack1.SetSpeed(0.5f);
-	float at1frames = 0.0f;
+	AnimationPlayer animPlayer1;
+	animPlayer1.SetPeriod(2.0f);
+	animPlayer1.SetSpeed(0.5f);
+	float ap1frames = 0.0f;
+	serotonin.SetFrameLength(0.0f);
 
-	AnimationTrack<void, KF_Event<void>, Interp::Constant> animEventTrack(2.0f);
-	animEventTrack.SetOrInsert(KF_Event<void>(0.0f, make_functor_ptr([](void*) { Logger::LogInfo("0 seconds!"); })));
-	animEventTrack.SetOrInsert(KF_Event<void>(0.5f, make_functor_ptr([](void*) { Logger::LogInfo("0.5 seconds!"); })));
-	animEventTrack.SetOrInsert(KF_Event<void>(1.0f, make_functor_ptr([](void*) { Logger::LogInfo("1 seconds!"); })));
-	animEventTrack.SetOrInsert(KF_Event<void>(1.5f, make_functor_ptr([](void*) { Logger::LogInfo("1.5 seconds!"); })));
-	animEventTrack.SetOrInsert(KF_Event<void>(2.0f, make_functor_ptr([](void*) { Logger::LogInfo("2 seconds!"); })));
-	animEventTrack.SetSpeed(1.3f);
+	ProteanLinker2D* serotoninPRL = serotonin.Primitive()->Fickler().ProteanLinker();
+	std::unique_ptr<AnimationTrack<Position2D, KF_Assign<Position2D>, Interp::Linear>> animTrack1(new AnimationTrack<Position2D, KF_Assign<Position2D>, Interp::Linear>());
+	animTrack1->target = &serotoninPRL->Position();
+	animTrack1->callback = make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncP(); }, serotoninPRL);
+	animTrack1->SetOrInsert(KF_Assign<Position2D>(0.0f, { 0.0f, 100.0f }));
+	animTrack1->SetOrInsert(KF_Assign<Position2D>(0.5f, { 300.0f, 0.0f }));
+	animTrack1->SetOrInsert(KF_Assign<Position2D>(1.0f, { 0.0f, -100.0f }));
+	animTrack1->SetOrInsert(KF_Assign<Position2D>(1.5f, { -300.0f, 0.0f }));
+	animTrack1->SetOrInsert(KF_Assign<Position2D>(2.0f, { 0.0f, 100.0f }));
+	animPlayer1.tracks.push_back(std::move(animTrack1));
+
+	std::unique_ptr<AnimationTrack<Modulate, KF_Assign<Modulate>, Interp::Linear>> animTrack2(new AnimationTrack<Modulate, KF_Assign<Modulate>, Interp::Linear>());
+	animTrack2->target = &serotoninPRL->Modulate();
+	animTrack2->callback = make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncM(); }, serotoninPRL);
+	animTrack2->SetOrInsert(KF_Assign<Modulate>(0.0f, Colors::WHITE));
+	animTrack2->SetOrInsert(KF_Assign<Modulate>(0.5f, Colors::BLUE));
+	animTrack2->SetOrInsert(KF_Assign<Modulate>(1.0f, Colors::GREEN));
+	animTrack2->SetOrInsert(KF_Assign<Modulate>(1.5f, Colors::RED));
+	animTrack2->SetOrInsert(KF_Assign<Modulate>(2.0f, Colors::WHITE));
+	animPlayer1.tracks.push_back(std::move(animTrack2));
+
+	AnimationPlayer animPlayerEvents;
+	animPlayerEvents.SetPeriod(2.0f);
+	animPlayerEvents.SetSpeed(1.3f);
+
+	std::unique_ptr<AnimationTrack<void, KF_Event<void>, Interp::Constant>> animEventTrack(new AnimationTrack<void, KF_Event<void>, Interp::Constant>());
+	animEventTrack->SetOrInsert(KF_Event<void>(0.0f, make_functor_ptr([](void*) { Logger::LogInfo("0 seconds!"); })));
+	animEventTrack->SetOrInsert(KF_Event<void>(0.5f, make_functor_ptr([](void*) { Logger::LogInfo("0.5 seconds!"); })));
+	animEventTrack->SetOrInsert(KF_Event<void>(1.0f, make_functor_ptr([](void*) { Logger::LogInfo("1 seconds!"); })));
+	animEventTrack->SetOrInsert(KF_Event<void>(1.5f, make_functor_ptr([](void*) { Logger::LogInfo("1.5 seconds!"); })));
+	animEventTrack->SetOrInsert(KF_Event<void>(2.0f, make_functor_ptr([](void*) { Logger::LogInfo("2 seconds!"); })));
+	animPlayerEvents.tracks.push_back(std::move(animEventTrack));
 
 	// small delay
 	while (totalDrawTime < 0.01f)
@@ -331,24 +350,24 @@ void Pulsar::Run(GLFWwindow* window)
 		root.Fickler().SyncT();
 
 		serotonin.OnUpdate();
-		animTrack1.OnUpdate();
-		animEventTrack.OnUpdate();
+		animPlayer1.OnUpdate();
+		animPlayerEvents.OnUpdate();
 
-		at1frames += deltaDrawTime;
-		if (animTrack1.isInReverse)
+		ap1frames += deltaDrawTime;
+		if (animPlayer1.isInReverse)
 		{
-			if (at1frames > 3.0f)
+			if (ap1frames > 3.0f)
 			{
-				at1frames = unsigned_fmod(at1frames, 3.0f);
-				animTrack1.isInReverse = !animTrack1.isInReverse;
+				ap1frames = unsigned_fmod(ap1frames, 3.0f);
+				animPlayer1.isInReverse = !animPlayer1.isInReverse;
 			}
 		}
 		else
 		{
-			if (at1frames > 2.0f)
+			if (ap1frames > 2.0f)
 			{
-				at1frames = unsigned_fmod(at1frames, 2.0f);
-				animTrack1.isInReverse = !animTrack1.isInReverse;
+				ap1frames = unsigned_fmod(ap1frames, 2.0f);
+				animPlayer1.isInReverse = !animPlayer1.isInReverse;
 			}
 		}
 

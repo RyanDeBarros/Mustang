@@ -222,6 +222,7 @@
     <ClInclude Include="sandbox\CHRS.h" />
     <ClInclude Include="src\render\actors\anim\AnimActorPrimitive.h" />
     <ClInclude Include="src\render\actors\anim\AnimationPlayer.h" />
+    <ClInclude Include="src\render\actors\anim\AnimationTrack.inl" />
     <ClInclude Include="src\render\actors\anim\FramesArray.h" />
     <ClInclude Include="src\render\actors\particles\ParticleSubsystemRegistry.h" />
     <ClInclude Include="src\render\transform\Protean.h" />
