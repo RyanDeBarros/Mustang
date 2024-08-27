@@ -293,6 +293,7 @@ void Pulsar::Run(GLFWwindow* window)
 	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.5f, Position2D{ -300.0f, 0.0f }));
 	animTrack1.SetOrInsert(KF_Assign<Position2D>(2.0f, Position2D{ 0.0f, 100.0f }));
 	animTrack1.SetSpeed(0.5f);
+	float at1frames = 0.0f;
 
 	AnimationTrack<void, KF_Event<void>, Interp::Constant> animEventTrack(2.0f);
 	animEventTrack.SetOrInsert(KF_Event<void>(0.0f, make_functor_ptr([](void*) { Logger::LogInfo("0 seconds!"); })));
@@ -332,6 +333,24 @@ void Pulsar::Run(GLFWwindow* window)
 		serotonin.OnUpdate();
 		animTrack1.OnUpdate();
 		animEventTrack.OnUpdate();
+
+		at1frames += deltaDrawTime;
+		if (animTrack1.isInReverse)
+		{
+			if (at1frames > 3.0f)
+			{
+				at1frames = unsigned_fmod(at1frames, 3.0f);
+				animTrack1.isInReverse = !animTrack1.isInReverse;
+			}
+		}
+		else
+		{
+			if (at1frames > 2.0f)
+			{
+				at1frames = unsigned_fmod(at1frames, 2.0f);
+				animTrack1.isInReverse = !animTrack1.isInReverse;
+			}
+		}
 
 		Renderer::OnDraw();
 		glfwPollEvents();

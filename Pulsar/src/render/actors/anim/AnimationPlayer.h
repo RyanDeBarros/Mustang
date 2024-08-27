@@ -35,10 +35,12 @@ struct interpexec
 	inline static void _(_Target* target, _KeyFrame& a, _KeyFrame& b, float t, float period) {}
 };
 
-/// Progressive track executes every keyframe (ex: event track). Non-progressive track only executes interpolated keyframe (ex: property callback track).
+/// Progressive track executes every keyframe (ex: event track). Non-progressive track only executes interpolated keyframe (ex: property callback track). As a corollary, progressive track interpolation does not depend on time - i.e., constant.
 template<typename _Target, std::derived_from<KeyFrame<_Target>> _KeyFrame, unsigned int _InterpMethod>
 struct AnimationTrack
 {
+	static_assert(!_KeyFrame::progressive || _InterpMethod == Interp::Constant, "Progressive animation track must only use constant interpolation method.");
+
 	static constexpr auto comparator = [](const _KeyFrame& a, const _KeyFrame& b) -> bool { return a.timepoint < b.timepoint; };
 	static constexpr auto equalitor = [](const _KeyFrame& a, const _KeyFrame& b) -> bool { return a.timepoint == b.timepoint; };
 
@@ -63,12 +65,14 @@ struct AnimationTrack
 private:
 	float period = 1.0f;
 	float time = 0.0f;
-	unsigned int lastIndex = 0;
 	float speed = 1.0f;
-	// TODO implement reverse
-	bool isInReverse = false;
+	unsigned short lastIndex = 0;
 
-	void Interpolate(float newtime);
+	void AdvanceForward(float newtime);
+	void AdvanceBackward(float newtime);
+
+public:
+	bool isInReverse = false;
 };
 
 template<typename _Target, std::derived_from<KeyFrame<_Target>> _KeyFrame, unsigned int _InterpMethod>
@@ -98,29 +102,42 @@ void AnimationTrack<_Target, _KeyFrame, _InterpMethod>::SetOrInsert(_KeyFrame&& 
 template<typename _Target, std::derived_from<KeyFrame<_Target>> _KeyFrame, unsigned int _InterpMethod>
 void AnimationTrack<_Target, _KeyFrame, _InterpMethod>::OnUpdate()
 {
-	if (keyFrames.empty())
-		time = unsigned_fmod(time + speed * Pulsar::deltaDrawTime, period);
+	if (isInReverse)
+	{
+		if (keyFrames.empty())
+			time = unsigned_fmod(time - speed * Pulsar::deltaDrawTime, period);
+		else
+		{
+			AdvanceBackward(time - speed * Pulsar::deltaDrawTime);
+			callback();
+		}
+	}
 	else
 	{
-		Interpolate(time + speed * Pulsar::deltaDrawTime);
-		callback();
+		if (keyFrames.empty())
+			time = unsigned_fmod(time + speed * Pulsar::deltaDrawTime, period);
+		else
+		{
+			AdvanceForward(time + speed * Pulsar::deltaDrawTime);
+			callback();
+		}
 	}
 }
 
 template<typename _Target, std::derived_from<KeyFrame<_Target>> _KeyFrame, unsigned int _InterpMethod>
-void AnimationTrack<_Target, _KeyFrame, _InterpMethod>::Interpolate(float newtime)
+void AnimationTrack<_Target, _KeyFrame, _InterpMethod>::AdvanceForward(float newtime)
 {
 	if constexpr (_KeyFrame::progressive)
 	{
-		static constexpr unsigned int loopLimit = 3;
-		unsigned int loopCount = 1;
+		static constexpr unsigned char loopLimit = 3;
+		unsigned char loopCount = 1;
 		while (keyFrames[lastIndex].timepoint <= newtime)
 		{
-			unsigned int nextIndex = (lastIndex + 1) % keyFrames.size();
+			unsigned short nextIndex = (lastIndex + 1) % keyFrames.size();
 			if (nextIndex == 0)
-				interpexec<_Target, _KeyFrame, _InterpMethod, false>::_(target, keyFrames[lastIndex], keyFrames[nextIndex], time, period);
+				interpexec<_Target, _KeyFrame, _InterpMethod, false>::_(target, keyFrames[lastIndex], keyFrames[nextIndex], 0, 0);
 			else
-				interpexec<_Target, _KeyFrame, _InterpMethod, true>::_(target, keyFrames[lastIndex], keyFrames[nextIndex], time, period);
+				interpexec<_Target, _KeyFrame, _InterpMethod, true>::_(target, keyFrames[lastIndex], keyFrames[nextIndex], 0, 0);
 			lastIndex = nextIndex;
 			if (lastIndex == 0)
 			{
@@ -148,11 +165,11 @@ void AnimationTrack<_Target, _KeyFrame, _InterpMethod>::Interpolate(float newtim
 			lastIndex = 0;
 			if (keyFrames[lastIndex].timepoint > time)
 			{
-				interpexec<_Target, _KeyFrame, _InterpMethod, false>::_(target, keyFrames[keyFrames.size() - 1], keyFrames[0], time, period);
+				interpexec<_Target, _KeyFrame, _InterpMethod, false>::_(target, keyFrames[keyFrames.size() - 1], keyFrames[0], time + period, period);
 				return;
 			}
 		}
-		unsigned int nextIndex = lastIndex + 1;
+		unsigned short nextIndex = lastIndex + 1;
 		while (nextIndex < keyFrames.size() && keyFrames[nextIndex].timepoint <= time)
 			nextIndex++;
 		if (nextIndex == keyFrames.size()) [[unlikely]]
@@ -164,6 +181,67 @@ void AnimationTrack<_Target, _KeyFrame, _InterpMethod>::Interpolate(float newtim
 		{
 			lastIndex = nextIndex;
 			interpexec<_Target, _KeyFrame, _InterpMethod, true>::_(target, keyFrames[lastIndex - 1], keyFrames[lastIndex], time, period);
+		}
+	}
+}
+
+template<typename _Target, std::derived_from<KeyFrame<_Target>> _KeyFrame, unsigned int _InterpMethod>
+void AnimationTrack<_Target, _KeyFrame, _InterpMethod>::AdvanceBackward(float newtime)
+{
+	if constexpr (_KeyFrame::progressive)
+	{
+		static constexpr unsigned char loopLimit = 3;
+		unsigned char loopCount = 1;
+		while (keyFrames[lastIndex].timepoint <= newtime)
+		{
+			unsigned short nextIndex = (lastIndex + 1) % keyFrames.size();
+			if (nextIndex == 0)
+				interpexec<_Target, _KeyFrame, _InterpMethod, false>::_(target, keyFrames[lastIndex], keyFrames[nextIndex], 0, 0);
+			else
+				interpexec<_Target, _KeyFrame, _InterpMethod, true>::_(target, keyFrames[lastIndex], keyFrames[nextIndex], 0, 0);
+			lastIndex = nextIndex;
+			if (lastIndex == 0)
+			{
+				if (newtime >= period)
+				{
+					loopCount++;
+					newtime -= period;
+					if (loopCount >= loopLimit)
+					{
+						newtime = unsigned_fmod(newtime, period);
+						break;
+					}
+				}
+				else
+					break;
+			}
+		}
+		time = newtime;
+	}
+	else
+	{
+		time = unsigned_fmod(newtime, period);
+		if (keyFrames[lastIndex].timepoint < time)
+		{
+			lastIndex = static_cast<unsigned short>(keyFrames.size() - 1);
+			if (keyFrames[lastIndex].timepoint < time)
+			{
+				interpexec<_Target, _KeyFrame, _InterpMethod, false>::_(target, keyFrames[keyFrames.size() - 1], keyFrames[0], time, period);
+				return;
+			}
+		}
+		short nextIndex = lastIndex - 1;
+		while (nextIndex >= 0 && keyFrames[nextIndex].timepoint >= time)
+			nextIndex--;
+		if (nextIndex == -1) [[unlikely]]
+		{
+			lastIndex = static_cast<unsigned short>(keyFrames.size() - 1);
+			interpexec<_Target, _KeyFrame, _InterpMethod, false>::_(target, keyFrames[keyFrames.size() - 1], keyFrames[0], time + period, period);
+		}
+		else [[likely]]
+		{
+			lastIndex = nextIndex;
+			interpexec<_Target, _KeyFrame, _InterpMethod, true>::_(target, keyFrames[lastIndex], keyFrames[lastIndex + 1], time, period);
 		}
 	}
 }
