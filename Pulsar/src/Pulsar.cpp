@@ -278,21 +278,39 @@ void Pulsar::Run(GLFWwindow* window)
 
 	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::TRANSPARENT, Colors::LIGHT_GREEN });
 
-	AnimActorPrimitive2D serotonin(new RectRender(0, ShaderRegistry::Standard(), 10), { FramesArray("res/textures/serotonin.gif") }, 1.0f / 60.0f, false, 0.5f);
+	AnimActorPrimitive2D serotonin(new RectRender(0, ShaderRegistry::Standard(), 10), { FramesArray("res/textures/serotonin.gif") }, 1.0f / 60.0f, false, 1.5f);
 	Renderer::RemoveCanvasLayer(11);
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(serotonin.Primitive());
 
 	ProteanLinker2D* serotoninPRL = serotonin.Primitive()->Fickler().ProteanLinker();
-	AnimationTrack<Position2D, KF_Assign<Position2D>> animTrack1(2.0f);
+	AnimationTrack<Position2D, KF_Assign<Position2D>, Interp::Linear> animTrack1(2.0f);
 	animTrack1.target = &serotoninPRL->Position();
 	animTrack1.callback = make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncP(); }, serotoninPRL);
-	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.0f, Position2D{ 0.0f, 0.0f }));
-	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.5f, Position2D{ 100.0f, 0.0f }));
-	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.0f, Position2D{ 0.0f, 0.0f }));
-	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.5f, Position2D{ -100.0f, 0.0f }));
-	animTrack1.SetOrInsert(KF_Assign<Position2D>(2.0f, Position2D{ 0.0f, 0.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.0f, Position2D{ 0.0f, 100.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.5f, Position2D{ 300.0f, 0.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.0f, Position2D{ 0.0f, -100.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.5f, Position2D{ -300.0f, 0.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(2.0f, Position2D{ 0.0f, 100.0f }));
+	animTrack1.SetSpeed(0.5f);
 
+	AnimationTrack<void, KF_Event<void>, Interp::Constant> animEventTrack(2.0f);
+	animEventTrack.SetOrInsert(KF_Event<void>(0.0f, make_functor_ptr([](void*) { Logger::LogInfo("0 seconds!"); })));
+	animEventTrack.SetOrInsert(KF_Event<void>(0.5f, make_functor_ptr([](void*) { Logger::LogInfo("0.5 seconds!"); })));
+	animEventTrack.SetOrInsert(KF_Event<void>(1.0f, make_functor_ptr([](void*) { Logger::LogInfo("1 seconds!"); })));
+	animEventTrack.SetOrInsert(KF_Event<void>(1.5f, make_functor_ptr([](void*) { Logger::LogInfo("1.5 seconds!"); })));
+	animEventTrack.SetOrInsert(KF_Event<void>(2.0f, make_functor_ptr([](void*) { Logger::LogInfo("2 seconds!"); })));
+	animEventTrack.SetSpeed(1.3f);
+
+	// small delay
+	while (totalDrawTime < 0.01f)
+	{
+		drawTime = static_cast<real>(glfwGetTime());
+		deltaDrawTime = drawTime - prevDrawTime;
+		prevDrawTime = drawTime;
+		totalDrawTime += deltaDrawTime;
+		Renderer::_ForceRefresh();
+	}
 	for (;;)
 	{
 		drawTime = static_cast<real>(glfwGetTime());
@@ -313,6 +331,7 @@ void Pulsar::Run(GLFWwindow* window)
 
 		serotonin.OnUpdate();
 		animTrack1.OnUpdate();
+		animEventTrack.OnUpdate();
 
 		Renderer::OnDraw();
 		glfwPollEvents();

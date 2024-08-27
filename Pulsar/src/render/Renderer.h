@@ -8,7 +8,6 @@
 class Renderer
 {
 	static std::map<CanvasIndex, CanvasLayer> layers;
-	static void ForceRefresh();
 public:
 	static void Init();
 	static void FocusWindow(struct GLFWwindow*);
@@ -18,4 +17,5 @@ public:
 	static CanvasLayer* GetCanvasLayer(CanvasIndex);
 	static void ChangeCanvasLayerIndex(CanvasIndex old_index, CanvasIndex new_index);
 	static void Terminate();
+	static void _ForceRefresh();
 };
