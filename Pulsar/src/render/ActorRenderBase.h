@@ -6,6 +6,7 @@
 struct ActorRenderBase2D
 {
 	ZIndex z;
+	// TODO y-sort mechanism
 	ActorRenderBase2D(ZIndex z = 0) : z(z) {}
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) = 0;
 };

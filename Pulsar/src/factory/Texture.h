@@ -91,14 +91,17 @@ struct std::hash<TextureSettings>
 class Texture
 {
 	RID m_RID;
+	int m_Width;
+	int m_Height;
 	TileHandle m_Tile;
 
 	friend class TextureRegistry;
 	inline bool IsValid() const { return m_RID > 0; }
 
 public:
-	Texture(const char* filepath, TextureSettings settings = {}, bool temporary_buffer = false, float svg_scale = 1.0f);
+	Texture(const char* filepath, TextureSettings settings = {}, bool temporary_buffer = true, float svg_scale = 1.0f);
 	Texture(TileHandle tile, TextureSettings settings = {});
+	Texture(Tile&& tile, TextureSettings settings = {});
 	Texture(const Texture& texture) = delete;
 	Texture(Texture&& texture) noexcept;
 	Texture& operator=(Texture&& texture) noexcept;
@@ -109,8 +112,8 @@ public:
 
 	void SetSettings(const TextureSettings& settings) const;
 
-	inline int GetWidth() const { return TileRegistry::GetWidth(m_Tile); }
-	inline int GetHeight() const { return TileRegistry::GetHeight(m_Tile); }
+	inline int GetWidth() const { return m_Width; }
+	inline int GetHeight() const { return m_Height; }
 	inline TileHandle GetTileHandle() const { return m_Tile; }
 
 	static const TextureSettings linear_settings;

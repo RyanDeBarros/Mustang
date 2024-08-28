@@ -1,6 +1,5 @@
 #pragma once
 
-#include "VendorInclude.h"
 #include "Typedefs.h"
 
 struct GLFWwindow;

@@ -27,6 +27,8 @@ Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_
 		return;
 	}
 
+	m_Width = tile_ref->GetWidth();
+	m_Height = tile_ref->GetHeight();
 	TexImage(tile_ref, settings, std::string("Cannot create texture \"") + filepath + "\": BPP is not 4, 3, 2, or 1.");
 	if (temporary_buffer)
 		delete tile_ref;
@@ -35,18 +37,28 @@ Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_
 Texture::Texture(TileHandle tile, TextureSettings settings)
 	: m_RID(0), m_Tile(tile)
 {
-	Tile const* const tile_ref = TileRegistry::Get(m_Tile);
+	Tile const* tile_ref = TileRegistry::Get(m_Tile);
 	if (!tile_ref)
 	{
 		Logger::LogError(std::string("Cannot create texture from tile \"") + std::to_string(tile) + "\": Tile ref is null.");
 		return;
 	}
 	
+	m_Width = tile_ref->GetWidth();
+	m_Height = tile_ref->GetHeight();
 	TexImage(tile_ref, settings, std::string("Cannot create texture from tile  \"") + std::to_string(tile) + "\": BPP is not 4, 3, 2, or 1.");
 }
 
+Texture::Texture(Tile&& tile, TextureSettings settings)
+	: m_RID(0), m_Tile(0)
+{
+	m_Width = tile.GetWidth();
+	m_Height = tile.GetHeight();
+	TexImage(&tile, settings, std::string("Cannot create texture from tile r-value ref: BPP is not 4, 3, 2, or 1."));
+}
+
 Texture::Texture(Texture&& texture) noexcept
-	: m_RID(texture.m_RID), m_Tile(texture.m_Tile)
+	: m_RID(texture.m_RID), m_Width(texture.m_Width), m_Height(texture.m_Height), m_Tile(texture.m_Tile)
 {
 	texture.m_RID = 0;
 }
@@ -60,6 +72,8 @@ Texture& Texture::operator=(Texture&& texture) noexcept
 		TRY(glDeleteTextures(1, &m_RID));
 	}
 	m_RID = texture.m_RID;
+	m_Width = texture.m_Width;
+	m_Height = texture.m_Height;
 	m_Tile = texture.m_Tile;
 	texture.m_RID = 0;
 	return *this;

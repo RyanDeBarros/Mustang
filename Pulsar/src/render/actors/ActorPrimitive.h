@@ -33,7 +33,7 @@ public:
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
 	inline void SetShaderHandle(ShaderHandle handle) { m_Render.model.shader = handle; }
-	inline void SetTextureHandle(TextureHandle handle) { m_Render.textureHandle = handle; }
+	inline virtual void SetTextureHandle(TextureHandle handle) { m_Render.textureHandle = handle; }
 
 	inline void SetVisible(bool visible) { m_Status = (visible ? m_Status |= 1 : m_Status &= ~1); }
 	inline void FillModulationPoints(const glm::vec4& default_value = { 1.0f, 1.0f, 1.0f, 1.0f })

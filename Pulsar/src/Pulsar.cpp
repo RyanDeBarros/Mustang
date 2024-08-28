@@ -1,3 +1,4 @@
+#include "VendorInclude.h"
 #include "Pulsar.h"
 
 #include <glm/ext/scalar_constants.hpp>
@@ -26,8 +27,12 @@
 #include "utils/Functor.inl"
 #include "utils/Functions.inl"
 #include "utils/Strings.h"
-#include "utils/Data.h"
+#include "utils/Data.inl"
 #include "utils/Constants.h"
+#include "render/actors/anim/FramesArray.h"
+#include "render/actors/anim/AnimActorPrimitive.h"
+#include "render/actors/anim/AnimationPlayer.inl"
+#include "render/actors/anim/KeyFrames.inl"
 
 using namespace Pulsar;
 
@@ -119,7 +124,7 @@ void Pulsar::Run(GLFWwindow* window)
 		ASSERT(false);
 	if (Loader::loadTexture("res/assets/tux.toml", textureTux) != LOAD_STATUS::OK)
 		ASSERT(false);
-	if (Loader::loadTexture("res/assets/flag.toml", textureFlag, true) != LOAD_STATUS::OK)
+	if (Loader::loadTexture("res/assets/flag.toml", textureFlag) != LOAD_STATUS::OK)
 		ASSERT(false);
 	//if (loadTexture("res/assets/atlas.toml", textureAtlas) != LOAD_STATUS::OK)
 	//	ASSERT(false);
@@ -150,7 +155,7 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::AddCanvasLayer(-1);
 
 	Renderable renderable;
-	if (Loader::loadRenderable("res/assets/renderable.toml", renderable, true) != LOAD_STATUS::OK)
+	if (Loader::loadRenderable("res/assets/renderable.toml", renderable) != LOAD_STATUS::OK)
 		ASSERT(false);
 	ActorPrimitive2D actor4(renderable);
 	set_ptr(actor4.Fickler().Transform(), { {-200.0f, 0.0f}, 0.0f, {800.0f, 800.0f} });
@@ -188,12 +193,6 @@ void Pulsar::Run(GLFWwindow* window)
 
 	float p2width = 400.0f;
 	float p2height = 400.0f;
-	//ParticleSubsystemData wave1 = ParticleSubsystemRegistry::Instance().Invoke("wave1", { 0.5f });
-	//ParticleSubsystemData wave2 = ParticleSubsystemRegistry::Instance().Invoke("wave2", { p2width, p2height });
-	
-	//ParticleSystem psys({ wave2, wave2 });
-	//set_ptr(psys.SubsystemRef(1).Fickler().Rotation(), 0.5f * glm::pi<float>());
-	//psys.SubsystemRef(1).Fickler().SyncRS();
 	ParticleEffect* psys_raw = nullptr;
 	if (Loader::loadParticleEffect("res/assets/psys.toml", psys_raw, "system", true) != LOAD_STATUS::OK)
 		ASSERT(false);
@@ -247,12 +246,6 @@ void Pulsar::Run(GLFWwindow* window)
 		child->SyncT();
 	}
 
-	//std::shared_ptr<Modulator> first_mod(std::make_shared<Modulator>(child.ModulateWeak(), grandchild.ModulateWeak()));
-	//first_mod->SetColor({ 1.0f, 1.0f, 0.0f, 1.0f });
-	//first_mod->SetGlobalColor({ 1.0f, 0.0f, 1.0f, 1.0f });
-	//std::shared_ptr<Modulator> root_mod(std::make_shared<Modulator>(root.ModulateWeak(), first_mod));
-	//root_mod->SetColor(glm::vec4{ 1.0f } * 0.5f);
-
 	Renderer::GetCanvasLayer(11)->OnAttach(&root);
 	Renderer::GetCanvasLayer(11)->OnAttach(&child2);
 	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild2);
@@ -283,16 +276,66 @@ void Pulsar::Run(GLFWwindow* window)
 		{ { 50, -200 } }
 	});
 
-	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::TRANSPARENT, Colors::LIGHT_GREEN });
+	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::RED * Colors::HALF_TRANSPARENT_WHITE, Colors::LIGHT_GREEN });
 
-	TextureHandle texGodot;
-	if (Loader::loadTexture("res/assets/godot.toml", texGodot) != LOAD_STATUS::OK)
-		ASSERT(false);
-	RectRender godot(texGodot, ShaderRegistry::Standard(), 10);
+	AnimActorPrimitive2D serotonin(new RectRender(0, ShaderRegistry::Standard(), 10), { FramesArray("res/textures/serotonin.gif") }, 1.0f / 60.0f, false, 1.5f);
 	Renderer::RemoveCanvasLayer(11);
 	Renderer::AddCanvasLayer(11);
-	Renderer::GetCanvasLayer(11)->OnAttach(&godot);
+	Renderer::GetCanvasLayer(11)->OnAttach(serotonin.Primitive());
 
+	AnimationPlayer<AnimActorPrimitive2D> animPlayer1;
+	animPlayer1.SetTarget(&serotonin);
+	animPlayer1.SetPeriod(2.0f);
+	animPlayer1.SetSpeed(0.5f);
+	float ap1frames = 0.0f;
+	serotonin.SetFrameLength(0.0f);
+
+	ProteanLinker2D* serotoninPRL = serotonin.Primitive()->Fickler().ProteanLinker();
+	using AnimTrack1T = AnimationTrack<AnimActorPrimitive2D, Position2D, KF_Assign<Position2D>, Interp::Linear>;
+	AnimTrack1T animTrack1;
+	animTrack1.getProperty = make_functor_ptr([](AnimActorPrimitive2D* anim) { return &anim->Primitive()->Fickler().ProteanLinker()->Position(); });
+	animTrack1.callback = make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncP(); }, serotoninPRL);
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.0f, { 0.0f, 100.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.5f, { 300.0f, 0.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.0f, { 0.0f, -100.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.5f, { -300.0f, 0.0f }));
+	animTrack1.SetOrInsert(KF_Assign<Position2D>(2.0f, { 0.0f, 100.0f }));
+	animPlayer1.tracks.push_back(CopyPtr(animTrack1));
+
+	using AnimTrack2T = AnimationTrack<AnimActorPrimitive2D, Modulate, KF_Assign<Modulate>, Interp::Linear>;
+	AnimTrack2T animTrack2;
+	animTrack2.getProperty = make_functor_ptr([](AnimActorPrimitive2D* anim) { return &anim->Primitive()->Fickler().ProteanLinker()->Modulate(); });
+	animTrack2.callback = make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncM(); }, serotoninPRL);
+	animTrack2.SetOrInsert(KF_Assign<Modulate>(0.0f, Colors::WHITE));
+	animTrack2.SetOrInsert(KF_Assign<Modulate>(0.5f, Colors::BLUE));
+	animTrack2.SetOrInsert(KF_Assign<Modulate>(1.0f, Colors::GREEN));
+	animTrack2.SetOrInsert(KF_Assign<Modulate>(1.5f, Colors::RED));
+	animTrack2.SetOrInsert(KF_Assign<Modulate>(2.0f, Colors::WHITE));
+	animPlayer1.tracks.push_back(CopyPtr(animTrack2));
+	animPlayer1.SyncTracks();
+
+	AnimationPlayer<void> animPlayerEvents;
+	animPlayerEvents.SetPeriod(2.0f);
+	animPlayerEvents.SetSpeed(1.3f);
+	
+	using AnimEventTrackT = AnimationTrack<void, void, KF_Event<void>, Interp::Constant>;
+	AnimEventTrackT animEventTrack;
+	animEventTrack.SetOrInsert(KF_Event<void>(0.0f, make_functor_ptr([](void*) { Logger::LogInfo("0 seconds!"); })));
+	animEventTrack.SetOrInsert(KF_Event<void>(0.5f, make_functor_ptr([](void*) { Logger::LogInfo("0.5 seconds!"); })));
+	animEventTrack.SetOrInsert(KF_Event<void>(1.0f, make_functor_ptr([](void*) { Logger::LogInfo("1 seconds!"); })));
+	animEventTrack.SetOrInsert(KF_Event<void>(1.5f, make_functor_ptr([](void*) { Logger::LogInfo("1.5 seconds!"); })));
+	animEventTrack.SetOrInsert(KF_Event<void>(2.0f, make_functor_ptr([](void*) { Logger::LogInfo("2 seconds!"); })));
+	animPlayerEvents.tracks.push_back(CopyPtr(animEventTrack));
+
+	// small delay
+	while (totalDrawTime < 0.01f)
+	{
+		drawTime = static_cast<real>(glfwGetTime());
+		deltaDrawTime = drawTime - prevDrawTime;
+		prevDrawTime = drawTime;
+		totalDrawTime += deltaDrawTime;
+		Renderer::_ForceRefresh();
+	}
 	for (;;)
 	{
 		drawTime = static_cast<real>(glfwGetTime());
@@ -310,6 +353,28 @@ void Pulsar::Run(GLFWwindow* window)
 		*child.Fickler().Position() += 5 * Pulsar::deltaDrawTime;
 		*child2.Fickler().Scale() *= 1.0f / (1.0f + 0.1f * Pulsar::deltaDrawTime);
 		root.Fickler().SyncT();
+
+		serotonin.OnUpdate();
+		animPlayer1.OnUpdate();
+		animPlayerEvents.OnUpdate();
+
+		ap1frames += deltaDrawTime;
+		if (animPlayer1.isInReverse)
+		{
+			if (ap1frames > 3.0f)
+			{
+				ap1frames = unsigned_fmod(ap1frames, 3.0f);
+				animPlayer1.isInReverse = !animPlayer1.isInReverse;
+			}
+		}
+		else
+		{
+			if (ap1frames > 2.0f)
+			{
+				ap1frames = unsigned_fmod(ap1frames, 2.0f);
+				animPlayer1.isInReverse = !animPlayer1.isInReverse;
+			}
+		}
 
 		Renderer::OnDraw();
 		glfwPollEvents();

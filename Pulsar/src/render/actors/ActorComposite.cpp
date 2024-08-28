@@ -195,7 +195,7 @@ void ActorComposite2D::_try_increase_alloc()
 			break;
 		}
 		ActorRenderBase2D** temp = new ActorRenderBase2D*[new_size];
-		memcpy_s(temp, new_size, tail, cap_len);
+		memcpy_s(temp, new_size * sizeof(ActorRenderBase2D*), tail, cap_len * sizeof(ActorRenderBase2D*));
 		delete[] tail;
 		tail = temp;
 		head = tail + head_len;
@@ -223,7 +223,7 @@ void ActorComposite2D::_try_decrease_alloc()
 			break;
 		}
 		ActorRenderBase2D** temp = new ActorRenderBase2D*[new_size];
-		memcpy_s(temp, new_size, tail, cap_len);
+		memcpy_s(temp, new_size * sizeof(ActorRenderBase2D*), tail, cap_len * sizeof(ActorRenderBase2D*));
 		delete[] tail;
 		tail = temp;
 		head = tail + head_len;

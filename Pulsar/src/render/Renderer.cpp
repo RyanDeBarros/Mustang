@@ -56,7 +56,7 @@ void Renderer::OnDraw()
 	CHECK_INITIALIZED
 	for (auto& [z, layer] : layers)
 		layer.OnDraw();
-	ForceRefresh();
+	_ForceRefresh();
 }
 
 void Renderer::FocusWindow(GLFWwindow* window)
@@ -64,10 +64,11 @@ void Renderer::FocusWindow(GLFWwindow* window)
 	focused_window = window;
 }
 
-void Renderer::ForceRefresh()
+void Renderer::_ForceRefresh()
 {
 	glfwSwapBuffers(focused_window);
 	TRY(glClear(GL_COLOR_BUFFER_BIT));
+	// TODO setting to not clear color, in order to save performance. most scenes will have a background anyways.
 	TRY(glClearColor(_RendererSettings::gl_clear_color[0], _RendererSettings::gl_clear_color[1], _RendererSettings::gl_clear_color[2], _RendererSettings::gl_clear_color[3]));
 }
 

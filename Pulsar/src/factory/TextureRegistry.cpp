@@ -80,6 +80,17 @@ TextureHandle TextureRegistry::GetHandle(const TextureConstructArgs_tile& args)
 	else return 0;
 }
 
+TextureHandle TextureRegistry::RegisterTexture(Texture&& texture)
+{
+	if (texture.IsValid())
+	{
+		TextureHandle handle = handle_cap++;
+		registry.emplace(handle, std::move(texture));
+		return handle;
+	}
+	else return 0;
+}
+
 void TextureRegistry::Bind(TextureHandle handle, TextureSlot slot)
 {
 	Texture const* texture = Get(handle);
