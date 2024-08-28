@@ -269,6 +269,7 @@ public:
 	}
 
 	// TODO dangerous to dereference. Define macro that can check if f is null first. OR use func pointer assignment in constructor or whenever f could be set null. In which case, operator()() should throw.
+	// Also, even if f is non-null, f.function may be null.
 	inline Ret operator()(Arg arg) const
 	{
 		if constexpr (std::is_void_v<Ret>)

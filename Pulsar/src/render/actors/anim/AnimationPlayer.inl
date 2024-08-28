@@ -1,13 +1,50 @@
 #pragma once
 
-#include <memory>
-
 #include "AnimationTrack.inl"
+#include "utils/CopyPtr.inl"
 
 template<typename _Target>
 struct AnimationPlayer
 {
-	std::vector<std::unique_ptr<AnimationTrackBase<_Target>>> tracks;
+	std::vector<CopyPtr<AnimationTrackBase<_Target>>> tracks;
+
+	inline AnimationPlayer() = default;
+	inline AnimationPlayer(const AnimationPlayer<_Target>& other)
+		: tracks(other.tracks), target(other.target), period(other.period), time(other.time), speed(other.speed), isInReverse(other.isInReverse)
+	{
+		SyncTracks();
+	}
+	inline AnimationPlayer(AnimationPlayer<_Target>&& other) noexcept
+		: tracks(std::move(other.tracks)), target(other.target), period(other.period), time(other.time), speed(other.speed), isInReverse(other.isInReverse)
+	{
+		SyncTracks();
+	}
+	inline AnimationPlayer<_Target>& operator=(const AnimationPlayer<_Target>& other)
+	{
+		if (this == &other)
+			return *this;
+		tracks = other.tracks;
+		target = other.target;
+		period = other.period;
+		time = other.time;
+		speed = other.speed;
+		isInReverse = other.isInReverse;
+		SyncTracks();
+		return *this;
+	}
+	inline AnimationPlayer<_Target>& operator=(AnimationPlayer<_Target>&& other) noexcept
+	{
+		if (this == &other)
+			return *this;
+		tracks = std::move(other.tracks);
+		target = other.target;
+		period = other.period;
+		time = other.time;
+		speed = other.speed;
+		isInReverse = other.isInReverse;
+		SyncTracks();
+		return *this;
+	}
 
 	inline _Target* GetTarget() { return target; }
 	inline void SetTarget(_Target* t)
@@ -22,7 +59,7 @@ struct AnimationPlayer
 
 	inline void SyncTracks()
 	{
-		for (auto& track : tracks)
+		for (const auto& track : tracks)
 			track->SyncTarget(target);
 	}
 	void OnUpdate();
@@ -38,7 +75,7 @@ public:
 };
 
 template<typename _Target>
-void AnimationPlayer<_Target>::OnUpdate()
+inline void AnimationPlayer<_Target>::OnUpdate()
 {
 	if (isInReverse)
 	{

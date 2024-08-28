@@ -209,6 +209,7 @@
     <ClCompile Include="src\render\transform\Protean.cpp" />
     <ClCompile Include="src\render\transform\Transform.cpp" />
     <ClCompile Include="src\render\transform\Transforms.cpp" />
+    <ClCompile Include="src\utils\CopyPtr.inl" />
     <ClCompile Include="src\utils\Permutation.cpp" />
     <ClCompile Include="src\utils\Strings.cpp" />
     <ClCompile Include="src\utils\CommonMath.cpp" />
