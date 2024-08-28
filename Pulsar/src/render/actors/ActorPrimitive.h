@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include "Typedefs.h"
 #include "../ActorRenderBase.h"
 #include "../Renderable.h"
 

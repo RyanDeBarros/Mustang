@@ -5,12 +5,14 @@
 #include "AssetLoader.h"
 #include "RendererSettings.h"
 
+#ifndef PULSAR_ELSE_CHECK_BAD_UNIFORM
 #if PULSAR_IGNORE_WARNINGS_NULL_SHADER
-#define ELSE_CHECK_BAD_UNIFORM(handle)
+#define PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 #else
-#define ELSE_CHECK_BAD_UNIFORM(handle) else\
+#define PULSAR_ELSE_CHECK_BAD_UNIFORM(handle) else\
 	Logger::LogWarning("Failed to set uniform for shader at handle (" + std::to_string(handle) + ").");
 #endif
+#endif // PULSAR_ELSE_CHECK_BAD_UNIFORM
 
 
 ShaderHandle ShaderRegistry::handle_cap;
@@ -84,7 +86,7 @@ void ShaderRegistry::Bind(ShaderHandle handle)
 
 void ShaderRegistry::Unbind()
 {
-	TRY(glUseProgram(0));
+	PULSAR_TRY(glUseProgram(0));
 }
 
 void ShaderRegistry::SetUniform1i(ShaderHandle handle, const char* uniform_name, const GLint value)
@@ -92,9 +94,9 @@ void ShaderRegistry::SetUniform1i(ShaderHandle handle, const char* uniform_name,
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform1i(shader->GetUniformLocation(uniform_name), value));
+		PULSAR_TRY(glUniform1i(shader->GetUniformLocation(uniform_name), value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniform2iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
@@ -102,9 +104,9 @@ void ShaderRegistry::SetUniform2iv(ShaderHandle handle, const char* uniform_name
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform2iv(shader->GetUniformLocation(uniform_name), array_count, value));
+		PULSAR_TRY(glUniform2iv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniform3iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
@@ -112,9 +114,9 @@ void ShaderRegistry::SetUniform3iv(ShaderHandle handle, const char* uniform_name
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform3iv(shader->GetUniformLocation(uniform_name), array_count, value));
+		PULSAR_TRY(glUniform3iv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniform4iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count)
@@ -122,9 +124,9 @@ void ShaderRegistry::SetUniform4iv(ShaderHandle handle, const char* uniform_name
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform4iv(shader->GetUniformLocation(uniform_name), array_count, value));
+		PULSAR_TRY(glUniform4iv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniform1ui(ShaderHandle handle, const char* uniform_name, const GLuint value)
@@ -132,9 +134,9 @@ void ShaderRegistry::SetUniform1ui(ShaderHandle handle, const char* uniform_name
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform1ui(shader->GetUniformLocation(uniform_name), value));
+		PULSAR_TRY(glUniform1ui(shader->GetUniformLocation(uniform_name), value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniform2uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
@@ -142,9 +144,9 @@ void ShaderRegistry::SetUniform2uiv(ShaderHandle handle, const char* uniform_nam
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform2uiv(shader->GetUniformLocation(uniform_name), array_count, value));
+		PULSAR_TRY(glUniform2uiv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniform3uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
@@ -152,9 +154,9 @@ void ShaderRegistry::SetUniform3uiv(ShaderHandle handle, const char* uniform_nam
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform3uiv(shader->GetUniformLocation(uniform_name), array_count, value));
+		PULSAR_TRY(glUniform3uiv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniform4uiv(ShaderHandle handle, const char* uniform_name, const GLuint* value, GLsizei array_count)
@@ -162,9 +164,9 @@ void ShaderRegistry::SetUniform4uiv(ShaderHandle handle, const char* uniform_nam
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform4uiv(shader->GetUniformLocation(uniform_name), array_count, value));
+		PULSAR_TRY(glUniform4uiv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniform1f(ShaderHandle handle, const char* uniform_name, const GLfloat value)
@@ -172,9 +174,9 @@ void ShaderRegistry::SetUniform1f(ShaderHandle handle, const char* uniform_name,
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform1f(shader->GetUniformLocation(uniform_name), value));
+		PULSAR_TRY(glUniform1f(shader->GetUniformLocation(uniform_name), value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniform2fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
@@ -182,9 +184,9 @@ void ShaderRegistry::SetUniform2fv(ShaderHandle handle, const char* uniform_name
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform2fv(shader->GetUniformLocation(uniform_name), array_count, value));
+		PULSAR_TRY(glUniform2fv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniform3fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
@@ -192,9 +194,9 @@ void ShaderRegistry::SetUniform3fv(ShaderHandle handle, const char* uniform_name
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform3fv(shader->GetUniformLocation(uniform_name), array_count, value));
+		PULSAR_TRY(glUniform3fv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniform4fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
@@ -202,9 +204,9 @@ void ShaderRegistry::SetUniform4fv(ShaderHandle handle, const char* uniform_name
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniform4fv(shader->GetUniformLocation(uniform_name), array_count, value));
+		PULSAR_TRY(glUniform4fv(shader->GetUniformLocation(uniform_name), array_count, value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniformMatrix2fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
@@ -212,9 +214,9 @@ void ShaderRegistry::SetUniformMatrix2fv(ShaderHandle handle, const char* unifor
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniformMatrix2fv(shader->GetUniformLocation(uniform_name), array_count, GL_FALSE, value));
+		PULSAR_TRY(glUniformMatrix2fv(shader->GetUniformLocation(uniform_name), array_count, GL_FALSE, value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniformMatrix3fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
@@ -222,9 +224,9 @@ void ShaderRegistry::SetUniformMatrix3fv(ShaderHandle handle, const char* unifor
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniformMatrix3fv(shader->GetUniformLocation(uniform_name), array_count, GL_FALSE, value));
+		PULSAR_TRY(glUniformMatrix3fv(shader->GetUniformLocation(uniform_name), array_count, GL_FALSE, value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }
 
 void ShaderRegistry::SetUniformMatrix4fv(ShaderHandle handle, const char* uniform_name, const GLfloat* value, GLsizei array_count)
@@ -232,7 +234,7 @@ void ShaderRegistry::SetUniformMatrix4fv(ShaderHandle handle, const char* unifor
 	Shader const* shader = Get(handle);
 	if (shader)
 	{
-		TRY(glUniformMatrix4fv(shader->GetUniformLocation(uniform_name), array_count, GL_FALSE, value));
+		PULSAR_TRY(glUniformMatrix4fv(shader->GetUniformLocation(uniform_name), array_count, GL_FALSE, value));
 	}
-	ELSE_CHECK_BAD_UNIFORM(handle)
+	PULSAR_ELSE_CHECK_BAD_UNIFORM(handle)
 }

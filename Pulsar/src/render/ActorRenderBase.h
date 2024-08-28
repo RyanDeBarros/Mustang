@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Typedefs.h"
 #include "transform/Fickle.inl"
+
+typedef signed short ZIndex;
 
 struct ActorRenderBase2D
 {

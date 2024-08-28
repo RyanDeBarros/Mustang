@@ -3,8 +3,12 @@
 #include <GL/glew.h>
 #include <toml/toml.hpp>
 
-#include "Typedefs.h"
 #include "factory/ShaderRegistry.h"
+
+typedef unsigned short VertexLayoutMask;
+typedef unsigned int VertexLayout;
+typedef unsigned int BufferCounter;
+typedef unsigned short Stride;
 
 struct BatchModel
 {

@@ -2,7 +2,6 @@
 
 #include <unordered_map>
 
-#include "Typedefs.h"
 #include "CanvasLayer.h"
 
 class Renderer

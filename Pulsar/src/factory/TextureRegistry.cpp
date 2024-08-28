@@ -104,8 +104,8 @@ void TextureRegistry::Bind(TextureHandle handle, TextureSlot slot)
 
 void TextureRegistry::Unbind(TextureSlot slot)
 {
-	TRY(glActiveTexture(GL_TEXTURE0 + slot));
-	TRY(glBindTexture(GL_TEXTURE_2D, 0));
+	PULSAR_TRY(glActiveTexture(GL_TEXTURE0 + slot));
+	PULSAR_TRY(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
 void TextureRegistry::SetSettings(TextureHandle handle, const TextureSettings& settings)

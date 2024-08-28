@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "Typedefs.h"
+#include "Pulsar.h"
 #include "TileRegistry.h"
 
 enum class MinFilter : GLint
@@ -88,9 +88,11 @@ struct std::hash<TextureSettings>
 	}
 };
 
+typedef GLuint Texture_RID;
+
 class Texture
 {
-	RID m_RID;
+	Texture_RID m_RID;
 	int m_Width;
 	int m_Height;
 	TileHandle m_Tile;

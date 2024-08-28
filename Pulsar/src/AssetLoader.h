@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-#include "Typedefs.h"
+#include "Handles.inl"
 
 enum class LOAD_STATUS
 {

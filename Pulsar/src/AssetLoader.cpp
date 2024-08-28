@@ -21,11 +21,12 @@
 #include "render/actors/particles/ParticleSubsystemRegistry.h"
 #include "utils/Data.inl"
 
-// TODO rename all macros to have PULSAR_ prefix
-#define VERIFY(loadFunc) \
+#ifndef PULSAR_VERIFY
+#define PULSAR_VERIFY(loadFunc) \
 	auto verif = loadFunc;\
 	if (verif != LOAD_STATUS::OK)\
 		return verif;
+#endif // PULSAR_VERIFY
 
 // TODO instead of simply returning invalid LOAD_STATUS, also print reason for the invalidity
 
@@ -68,11 +69,11 @@ bool Loader::_LoadRendererSettings()
 		if (auto rendering = file["rendering"])
 		{
 			if (auto max_texture_slots = rendering["max_texture_slots"].value<int64_t>())
-				_RendererSettings::max_texture_slots = (TextureSlot)max_texture_slots.value();
+				_RendererSettings::max_texture_slots = static_cast<TextureSlot>(max_texture_slots.value());
 			if (auto standard_vertex_pool_size = rendering["standard_vertex_pool_size"].value<int64_t>())
-				_RendererSettings::standard_vertex_pool_size = (VertexSize)standard_vertex_pool_size.value();
+				_RendererSettings::standard_vertex_pool_size = static_cast<VertexSize>(standard_vertex_pool_size.value());
 			if (auto standard_index_pool_size = rendering["standard_index_pool_size"].value<int64_t>())
-				_RendererSettings::standard_index_pool_size = (VertexSize)standard_index_pool_size.value();
+				_RendererSettings::standard_index_pool_size = static_cast<VertexSize>(standard_index_pool_size.value());
 			if (auto standard_shader_filepath = rendering["standard_shader"].value<std::string>())
 				_RendererSettings::standard_shader_assetfile = standard_shader_filepath.value();
 			if (auto solid_polygon_shader = rendering["solid_polygon_shader"].value<std::string>())
@@ -102,7 +103,7 @@ LOAD_STATUS Loader::loadShader(const char* filepath, ShaderHandle& handle)
 	try
 	{
 		auto file = toml::parse_file(filepath);
-		VERIFY(verify_header(file, "shader"));
+		PULSAR_VERIFY(verify_header(file, "shader"));
 
 		auto shader = file["shader"];
 		if (!shader)
@@ -159,7 +160,7 @@ LOAD_STATUS Loader::loadTexture(const char* filepath, TextureHandle& handle, Tex
 	try
 	{
 		auto file = toml::parse_file(filepath);
-		VERIFY(verify_header(file, "texture"));
+		PULSAR_VERIFY(verify_header(file, "texture"));
 
 		auto texture = file["texture"];
 		if (!texture)
@@ -171,7 +172,7 @@ LOAD_STATUS Loader::loadTexture(const char* filepath, TextureHandle& handle, Tex
 		TextureSettings texture_settings;
 		if (auto settings = texture["settings"])
 		{
-			VERIFY(readTextureSettings(settings, texture_settings));
+			PULSAR_VERIFY(readTextureSettings(settings, texture_settings));
 		}
 
 		if (auto svg_scale_ = texture["svg_scale"].value<double>())
@@ -192,7 +193,7 @@ LOAD_STATUS Loader::loadUniformLexicon(const char* filepath, UniformLexiconHandl
 	try
 	{
 		auto file = toml::parse_file(filepath);
-		VERIFY(verify_header(file, "uniform_lexicon"));
+		PULSAR_VERIFY(verify_header(file, "uniform_lexicon"));
 
 		auto array = file["uniform"].as_array();
 		if (!array)
@@ -437,7 +438,7 @@ LOAD_STATUS Loader::loadRenderable(const char* filepath, Renderable& renderable,
 	try
 	{
 		auto file = toml::parse_file(filepath);
-		VERIFY(verify_header(file, "renderable"));
+		PULSAR_VERIFY(verify_header(file, "renderable"));
 
 		auto render = file["renderable"];
 		if (!render)
@@ -618,7 +619,7 @@ LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, TileMap*& tilemap_in
 	try
 	{
 		auto file = toml::parse_file(asset_filepath);
-		VERIFY(verify_header(file, "tilemap"));
+		PULSAR_VERIFY(verify_header(file, "tilemap"));
 
 		auto tm = file["tilemap"];
 		if (!tm)
@@ -634,7 +635,7 @@ LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, TileMap*& tilemap_in
 		TextureSettings texture_settings = Texture::nearest_settings;
 		if (auto settings = tm["texture_settings"])
 		{
-			VERIFY(readTextureSettings(settings, texture_settings));
+			PULSAR_VERIFY(readTextureSettings(settings, texture_settings));
 		}
 
 		ShaderHandle shader = ShaderRegistry::Standard();

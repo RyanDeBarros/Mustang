@@ -5,11 +5,11 @@
 #include <unordered_map>
 #include <string>
 
-#include "Typedefs.h"
+typedef GLuint Shader_RID;
 
 class Shader
 {
-	RID m_RID;
+	Shader_RID m_RID;
 	mutable std::unordered_map<const char*, GLint> m_UniformLocationCache;
 
 public:

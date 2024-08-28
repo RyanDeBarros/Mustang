@@ -15,11 +15,11 @@ static char* read_file(const char* filepath)
 	if (file)
 	{
 		fseek(file, 0, SEEK_END);
-		const long filesize = ftell(file);
+		const size_t filesize = ftell(file);
 		fseek(file, 0, SEEK_SET);
 
 		char* buffer = new char[filesize + 1];
-		fread(buffer, 1, filesize, file);
+		fread(buffer, sizeof(char), filesize + 1, file);
 		buffer[filesize] = '\0';
 		return buffer;
 	}
@@ -32,21 +32,21 @@ static char* read_file(const char* filepath)
 
 static GLuint compile_shader(GLenum type, const char* shader, const char*filepath)
 {
-	TRY(GLuint id = glCreateShader(type));
-	TRY(glShaderSource(id, 1, &shader, nullptr));
-	TRY(glCompileShader(id));
+	PULSAR_TRY(GLuint id = glCreateShader(type));
+	PULSAR_TRY(glShaderSource(id, 1, &shader, nullptr));
+	PULSAR_TRY(glCompileShader(id));
 
 	int result;
-	TRY(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
+	PULSAR_TRY(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
 	if (result == GL_FALSE)
 	{
 		int length;
-		TRY(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
+		PULSAR_TRY(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
 		GLchar* message = new GLchar[length];
-		TRY(glGetShaderInfoLog(id, length, &length, message));
+		PULSAR_TRY(glGetShaderInfoLog(id, length, &length, message));
 		Logger::LogError(std::string("Failed to compile ") + (type == GL_VERTEX_SHADER ? "vertex" : "fragment") + " shader: \"" + filepath + "\"\n" + message);
 		delete[] message;
-		TRY(glDeleteShader(id));
+		PULSAR_TRY(glDeleteShader(id));
 		return 0;
 	}
 	return id;
@@ -59,11 +59,11 @@ Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
 	const char* fragment_shader = read_file(fragment_filepath);
 	if (vertex_shader && fragment_shader)
 	{
-		TRY(m_RID = glCreateProgram());
+		PULSAR_TRY(m_RID = glCreateProgram());
 		GLuint vs = compile_shader(GL_VERTEX_SHADER, vertex_shader, vertex_filepath);
 		if (vs == 0)
 		{
-			TRY(glDeleteProgram(m_RID));
+			PULSAR_TRY(glDeleteProgram(m_RID));
 			m_RID = 0;
 		}
 		else
@@ -71,19 +71,19 @@ Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
 			GLuint fs = compile_shader(GL_FRAGMENT_SHADER, fragment_shader, fragment_filepath);
 			if (fs == 0)
 			{
-				TRY(glDeleteProgram(m_RID));
-				TRY(glDeleteShader(vs));
+				PULSAR_TRY(glDeleteProgram(m_RID));
+				PULSAR_TRY(glDeleteShader(vs));
 				m_RID = 0;
 			}
 			else
 			{
-				TRY(glAttachShader(m_RID, vs));
-				TRY(glAttachShader(m_RID, fs));
-				TRY(glLinkProgram(m_RID));
-				TRY(glValidateProgram(m_RID));
+				PULSAR_TRY(glAttachShader(m_RID, vs));
+				PULSAR_TRY(glAttachShader(m_RID, fs));
+				PULSAR_TRY(glLinkProgram(m_RID));
+				PULSAR_TRY(glValidateProgram(m_RID));
 
-				TRY(glDeleteShader(vs));
-				TRY(glDeleteShader(fs));
+				PULSAR_TRY(glDeleteShader(vs));
+				PULSAR_TRY(glDeleteShader(fs));
 			}
 		}
 	}
@@ -103,7 +103,7 @@ Shader& Shader::operator=(Shader&& shader) noexcept
 		return *this;
 	if (m_RID != shader.m_RID)
 	{
-		TRY(glDeleteProgram(m_RID));
+		PULSAR_TRY(glDeleteProgram(m_RID));
 	}
 	m_RID = shader.m_RID;
 	shader.m_RID = 0;
@@ -112,25 +112,25 @@ Shader& Shader::operator=(Shader&& shader) noexcept
 
 Shader::~Shader()
 {
-	TRY(glDeleteProgram(m_RID));
+	PULSAR_TRY(glDeleteProgram(m_RID));
 	m_RID = 0;
 }
 
 void Shader::Bind() const
 {
-	TRY(glUseProgram(m_RID));
+	PULSAR_TRY(glUseProgram(m_RID));
 }
 
 void Shader::Unbind() const
 {
-	TRY(glUseProgram(0));
+	PULSAR_TRY(glUseProgram(0));
 }
 
 GLint Shader::GetUniformLocation(const char* uniform_name) const
 {
 	if (m_UniformLocationCache.find(uniform_name) != m_UniformLocationCache.end())
 		return m_UniformLocationCache[uniform_name];
-	TRY(GLint location = glGetUniformLocation(m_RID, uniform_name));
+	PULSAR_TRY(GLint location = glGetUniformLocation(m_RID, uniform_name));
 #if !PULSAR_IGNORE_WARNINGS_NULL_SHADER
 	if (location == -1)
 		Logger::LogWarning(std::string("No uniform exists or is in use under the name: ") + uniform_name);

@@ -7,7 +7,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/hash.hpp"
 
-#include "Typedefs.h"
 #include "UniformLexicon.h"
 
 struct UniformLexiconConstructArgs

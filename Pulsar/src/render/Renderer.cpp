@@ -11,12 +11,14 @@
 #include "factory/TileRegistry.h"
 #include "render/actors/RectRender.h"
 
+#ifndef PULSAR_CHECK_INITIALIZED
 #if PULSAR_ASSUME_INITIALIZED
-#define CHECK_INITIALIZED
+#define PULSAR_CHECK_INITIALIZED
 #else
-#define CHECK_INITIALIZED if (uninitialized)\
+#define PULSAR_CHECK_INITIALIZED if (uninitialized)\
 	Logger::LogErrorFatal("Renderer is not initialized. Call Renderer::Init() before application loop.");
 #endif
+#endif // PULSAR_CHECK_INITIALIZED
 
 std::map<CanvasIndex, CanvasLayer> Renderer::layers;
 GLFWwindow* focused_window;
@@ -35,12 +37,12 @@ void Renderer::Init()
 	UniformLexiconRegistry::Init();
 	TileRegistry::Init();
 	RectRender::DefineRectRenderable();
-	TRY(glEnable(GL_PROGRAM_POINT_SIZE));
+	PULSAR_TRY(glEnable(GL_PROGRAM_POINT_SIZE));
 }
 
 void Renderer::Terminate()
 {
-	CHECK_INITIALIZED
+	PULSAR_CHECK_INITIALIZED
 #if !PULSAR_ASSUME_INITIALIZED
 	uninitialized = true;
 #endif
@@ -53,7 +55,7 @@ void Renderer::Terminate()
 
 void Renderer::OnDraw()
 {
-	CHECK_INITIALIZED
+	PULSAR_CHECK_INITIALIZED
 	for (auto& [z, layer] : layers)
 		layer.OnDraw();
 	_ForceRefresh();
@@ -67,14 +69,14 @@ void Renderer::FocusWindow(GLFWwindow* window)
 void Renderer::_ForceRefresh()
 {
 	glfwSwapBuffers(focused_window);
-	TRY(glClear(GL_COLOR_BUFFER_BIT));
+	PULSAR_TRY(glClear(GL_COLOR_BUFFER_BIT));
 	// TODO setting to not clear color, in order to save performance. most scenes will have a background anyways.
-	TRY(glClearColor(_RendererSettings::gl_clear_color[0], _RendererSettings::gl_clear_color[1], _RendererSettings::gl_clear_color[2], _RendererSettings::gl_clear_color[3]));
+	PULSAR_TRY(glClearColor(_RendererSettings::gl_clear_color[0], _RendererSettings::gl_clear_color[1], _RendererSettings::gl_clear_color[2], _RendererSettings::gl_clear_color[3]));
 }
 
 void Renderer::AddCanvasLayer(const CanvasLayerData& data)
 {
-	CHECK_INITIALIZED
+	PULSAR_CHECK_INITIALIZED
 	if (layers.find(data.ci) == layers.end())
 		layers.emplace(data.ci, data);
 	else
@@ -83,7 +85,7 @@ void Renderer::AddCanvasLayer(const CanvasLayerData& data)
 
 void Renderer::RemoveCanvasLayer(CanvasIndex ci)
 {
-	CHECK_INITIALIZED
+	PULSAR_CHECK_INITIALIZED
 	auto layer_it = layers.find(ci);
 	if (layer_it != layers.end())
 		layers.erase(layer_it);
@@ -93,7 +95,7 @@ void Renderer::RemoveCanvasLayer(CanvasIndex ci)
 
 CanvasLayer* Renderer::GetCanvasLayer(CanvasIndex ci)
 {
-	CHECK_INITIALIZED
+	PULSAR_CHECK_INITIALIZED
 	auto layer = layers.find(ci);
 	if (layer != layers.end())
 		return &layer->second;

@@ -3,8 +3,8 @@
 #include <unordered_map>
 #include <string>
 
-#include "Typedefs.h"
 #include "Tile.h"
+#include "Handles.inl"
 
 struct TileConstructArgs
 {

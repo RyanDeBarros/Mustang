@@ -267,7 +267,6 @@
     <ClInclude Include="src\render\transform\Transform.h" />
     <ClInclude Include="src\render\transform\Fickle.inl" />
     <ClInclude Include="src\render\transform\Transforms.h" />
-    <ClInclude Include="src\Typedefs.h" />
     <ClInclude Include="src\Macros.h" />
     <ClInclude Include="src\utils\Array.inl" />
     <ClInclude Include="src\utils\BitPacking.h" />
@@ -573,6 +572,7 @@
     <ClInclude Include="vendor\toml\toml.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\Handles.inl" />
     <None Include="src\render\actors\anim\KeyFrames.inl" />
     <None Include="src\render\transform\FickleNotification.inl" />
     <None Include="src\VendorInclude.h" />

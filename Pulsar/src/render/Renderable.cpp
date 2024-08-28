@@ -53,10 +53,10 @@ namespace Render
 		unsigned char num_attribs = 0;
 		while (mask >> num_attribs != 0)
 		{
-			TRY(glEnableVertexAttribArray(num_attribs));
+			PULSAR_TRY(glEnableVertexAttribArray(num_attribs));
 			auto shift = 2 * num_attribs;
 			unsigned char attrib = ((layout & (3 << shift)) >> shift) + 1;
-			TRY(glVertexAttribPointer(num_attribs, attrib, GL_FLOAT, GL_FALSE, Render::StrideCountOf(layout, mask) * sizeof(GLfloat), (const GLvoid*)offset));
+			PULSAR_TRY(glVertexAttribPointer(num_attribs, attrib, GL_FLOAT, GL_FALSE, Render::StrideCountOf(layout, mask) * sizeof(GLfloat), (const GLvoid*)offset));
 			offset += attrib * sizeof(GLfloat);
 			num_attribs++;
 		}

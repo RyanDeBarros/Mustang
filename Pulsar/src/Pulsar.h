@@ -1,6 +1,15 @@
 #pragma once
 
-#include "Typedefs.h"
+// TODO rename real to something more intuitive. Currently, it is used for time and delta time values.
+#if PULSAR_DELTA_USE_DOUBLE_PRECISION == 1
+typedef double real;
+#else
+typedef float real;
+#endif
+
+#include <GL/glew.h>
+
+typedef GLint TextureSlot;
 
 struct GLFWwindow;
 

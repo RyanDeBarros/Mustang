@@ -3,7 +3,9 @@
 #include <glm/glm.hpp>
 #include <string>
 
-#include "Typedefs.h"
+#include "Pulsar.h"
+
+typedef unsigned int VertexSize;
 
 namespace _RendererSettings
 {

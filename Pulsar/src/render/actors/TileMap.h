@@ -5,7 +5,6 @@
 #include <vector>
 #include <memory>
 
-#include "Typedefs.h"
 #include "utils/Permutation.h"
 #include "ActorPrimitive.h"
 #include "ActorTesselation.h"

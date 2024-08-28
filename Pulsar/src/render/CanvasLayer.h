@@ -8,12 +8,14 @@
 
 #include <glm/glm.hpp>
 
-#include "Typedefs.h"
 #include "RendererSettings.h"
 #include "ActorRenderBase.h"
 #include "LayerView.h"
 #include "Renderable.h"
-#include "factory/UniformLexicon.h"
+#include "factory/TextureRegistry.h"
+#include "factory/UniformLexiconRegistry.h"
+
+typedef signed char CanvasIndex;
 
 struct CanvasLayerData
 {
@@ -28,6 +30,8 @@ struct CanvasLayerData
 		maxVertexPoolSize(max_vertex_pool_size), maxIndexPoolSize(max_index_pool_size)
 	{}
 };
+
+typedef GLuint VAO;
 
 class CanvasLayer
 {

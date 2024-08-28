@@ -8,7 +8,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-#include "Typedefs.h"
+#include "Handles.inl"
 
 typedef std::variant<
 	GLint, glm::ivec2, glm::ivec3, glm::ivec4,

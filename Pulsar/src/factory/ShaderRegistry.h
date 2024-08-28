@@ -4,8 +4,8 @@
 
 #include <unordered_map>
 
-#include "Typedefs.h"
 #include "Shader.h"
+#include "Handles.inl"
 
 struct ShaderConstructArgs
 {

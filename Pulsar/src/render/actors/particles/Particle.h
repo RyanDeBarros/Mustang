@@ -5,6 +5,7 @@
 #include <functional>
 #include <glm/glm.hpp>
 
+#include "Pulsar.h"
 #include "../shapes/DebugPolygon.h"
 #include "utils/Functor.inl"
 

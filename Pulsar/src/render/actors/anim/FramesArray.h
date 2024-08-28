@@ -1,8 +1,8 @@
 #pragma once
 
-#include "typedefs.h"
 #include "utils/Array.inl"
 #include "factory/Texture.h"
+#include "Handles.inl"
 
 class FramesArray
 {

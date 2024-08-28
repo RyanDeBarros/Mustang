@@ -69,7 +69,7 @@ Texture& Texture::operator=(Texture&& texture) noexcept
 		return *this;
 	if (m_RID != texture.m_RID)
 	{
-		TRY(glDeleteTextures(1, &m_RID));
+		PULSAR_TRY(glDeleteTextures(1, &m_RID));
 	}
 	m_RID = texture.m_RID;
 	m_Width = texture.m_Width;
@@ -81,60 +81,60 @@ Texture& Texture::operator=(Texture&& texture) noexcept
 
 Texture::~Texture()
 {
-	TRY(glDeleteTextures(1, &m_RID));
+	PULSAR_TRY(glDeleteTextures(1, &m_RID));
 	m_RID = 0;
 }
 
 void Texture::TexImage(Tile const* tile, const TextureSettings& settings, const std::string& err_msg)
 {
-	TRY(glGenTextures(1, &m_RID));
-	TRY(glBindTexture(GL_TEXTURE_2D, m_RID));
+	PULSAR_TRY(glGenTextures(1, &m_RID));
+	PULSAR_TRY(glBindTexture(GL_TEXTURE_2D, m_RID));
 
-	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)settings.minFilter));
-	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)settings.magFilter));
-	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.wrapS));
-	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrapT));
+	PULSAR_TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)settings.minFilter));
+	PULSAR_TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)settings.magFilter));
+	PULSAR_TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.wrapS));
+	PULSAR_TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrapT));
 
 	switch (tile->m_BPP)
 	{
 	case 4:
-		TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lodLevel, GL_RGBA8, tile->m_Width, tile->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tile->m_ImageBuffer));
+		PULSAR_TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lodLevel, GL_RGBA8, tile->m_Width, tile->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tile->m_ImageBuffer));
 		break;
 	case 3:
-		TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lodLevel, GL_RGB8, tile->m_Width, tile->m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, tile->m_ImageBuffer));
+		PULSAR_TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lodLevel, GL_RGB8, tile->m_Width, tile->m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, tile->m_ImageBuffer));
 		break;
 	case 2:
-		TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lodLevel, GL_RG8, tile->m_Width, tile->m_Height, 0, GL_RG, GL_UNSIGNED_BYTE, tile->m_ImageBuffer));
+		PULSAR_TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lodLevel, GL_RG8, tile->m_Width, tile->m_Height, 0, GL_RG, GL_UNSIGNED_BYTE, tile->m_ImageBuffer));
 		break;
 	case 1:
-		TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lodLevel, GL_R8, tile->m_Width, tile->m_Height, 0, GL_RED, GL_UNSIGNED_BYTE, tile->m_ImageBuffer));
+		PULSAR_TRY(glTexImage2D(GL_TEXTURE_2D, (GLint)settings.lodLevel, GL_R8, tile->m_Width, tile->m_Height, 0, GL_RED, GL_UNSIGNED_BYTE, tile->m_ImageBuffer));
 		break;
 	default:
 		Logger::LogError(err_msg);
 	}
 
-	TRY(glBindTexture(GL_TEXTURE_2D, 0));
+	PULSAR_TRY(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
 void Texture::Bind(TextureSlot slot) const
 {
-	TRY(glActiveTexture(GL_TEXTURE0 + slot));
-	TRY(glBindTexture(GL_TEXTURE_2D, m_RID));
+	PULSAR_TRY(glActiveTexture(GL_TEXTURE0 + slot));
+	PULSAR_TRY(glBindTexture(GL_TEXTURE_2D, m_RID));
 }
 
 void Texture::Unbind(TextureSlot slot) const
 {
-	TRY(glActiveTexture(GL_TEXTURE0 + slot));
-	TRY(glBindTexture(GL_TEXTURE_2D, 0));
+	PULSAR_TRY(glActiveTexture(GL_TEXTURE0 + slot));
+	PULSAR_TRY(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
 void Texture::SetSettings(const TextureSettings& settings) const
 {
 	Bind();
-	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)settings.minFilter));
-	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)settings.magFilter));
-	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.wrapS));
-	TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrapT));
+	PULSAR_TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)settings.minFilter));
+	PULSAR_TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)settings.magFilter));
+	PULSAR_TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.wrapS));
+	PULSAR_TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrapT));
 	// TODO lod level?
 	Unbind();
 }

@@ -2,8 +2,8 @@
 
 #include <unordered_map>
 
-#include "Typedefs.h"
 #include "Texture.h"
+#include "Handles.inl"
 
 struct TextureConstructArgs_filepath
 {

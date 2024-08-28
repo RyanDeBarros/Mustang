@@ -4,7 +4,7 @@
 #include <memory>
 #include <functional>
 
-#include "Typedefs.h"
+#include "Pulsar.h"
 #include "utils/CommonMath.h"
 #include "Particle.h"
 #include "../../transform/Fickle.inl"

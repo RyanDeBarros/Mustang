@@ -3,7 +3,6 @@
 
 #include <glm/ext/scalar_constants.hpp>
 
-#include "Typedefs.h"
 #include "RendererSettings.h"
 #include "Logger.inl"
 #include "Macros.h"
@@ -44,7 +43,7 @@ real Pulsar::totalDrawTime;
 static void window_refresh_callback(GLFWwindow* window)
 {
 	Renderer::OnDraw();
-	TRY(glFinish()); // important, this waits until rendering result is actually visible, thus making resizing less ugly
+	PULSAR_TRY(glFinish()); // important, this waits until rendering result is actually visible, thus making resizing less ugly
 }
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -54,7 +53,7 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	// If it is set to SCALE_KEEP_ASPECT_RATIO, call new Renderer function that will scale objects as usual without stretching their aspect ratios.
 	// If it is set to NO_SCALE_KEEP_SIZE, call new Renderer function that will not scale objects - only display more of the scene.
 	// Also update frame in callback. Currently, animation is paused when resizing.
-	TRY(glViewport(0, 0, width, height));
+	PULSAR_TRY(glViewport(0, 0, width, height));
 	Renderer::OnDraw();
 }
 
@@ -84,7 +83,7 @@ int Pulsar::StartUp(GLFWwindow*& window)
 		return -1;
 	}
 	Logger::LogInfo("Welcome to Pulsar Renderer! GL_VERSION:");
-	TRY(Logger::LogInfo(reinterpret_cast<const char*>(glGetString(GL_VERSION))));
+	PULSAR_TRY(Logger::LogInfo(reinterpret_cast<const char*>(glGetString(GL_VERSION))));
 	std::srand(static_cast<unsigned int>(time(0)));
 	Renderer::Init();
 	Renderer::FocusWindow(window);
@@ -121,13 +120,13 @@ void Pulsar::Run(GLFWwindow* window)
 	// Load textures
 	TextureHandle textureSnowman, textureTux, textureFlag;
 	if (Loader::loadTexture("res/assets/snowman.toml", textureSnowman) != LOAD_STATUS::OK)
-		ASSERT(false);
+		PULSAR_ASSERT(false);
 	if (Loader::loadTexture("res/assets/tux.toml", textureTux) != LOAD_STATUS::OK)
-		ASSERT(false);
+		PULSAR_ASSERT(false);
 	if (Loader::loadTexture("res/assets/flag.toml", textureFlag) != LOAD_STATUS::OK)
-		ASSERT(false);
+		PULSAR_ASSERT(false);
 	//if (loadTexture("res/assets/atlas.toml", textureAtlas) != LOAD_STATUS::OK)
-	//	ASSERT(false);
+	//	PULSAR_ASSERT(false);
 	TextureHandle tex_dirtTL = TextureRegistry::GetHandle({ "res/textures/dirtTL.png" });
 	TextureHandle tex_dirtTR = TextureRegistry::GetHandle({ "res/textures/dirtTR.png" });
 	TextureHandle tex_grassSingle = TextureRegistry::GetHandle({ "res/textures/grassSingle.png" });
@@ -156,7 +155,7 @@ void Pulsar::Run(GLFWwindow* window)
 
 	Renderable renderable;
 	if (Loader::loadRenderable("res/assets/renderable.toml", renderable) != LOAD_STATUS::OK)
-		ASSERT(false);
+		PULSAR_ASSERT(false);
 	ActorPrimitive2D actor4(renderable);
 	set_ptr(actor4.Fickler().Transform(), { {-200.0f, 0.0f}, 0.0f, {800.0f, 800.0f} });
 	actor4.Fickler().SyncT();
@@ -195,7 +194,7 @@ void Pulsar::Run(GLFWwindow* window)
 	float p2height = 400.0f;
 	ParticleEffect* psys_raw = nullptr;
 	if (Loader::loadParticleEffect("res/assets/psys.toml", psys_raw, "system", true) != LOAD_STATUS::OK)
-		ASSERT(false);
+		PULSAR_ASSERT(false);
 	std::unique_ptr<ParticleEffect> psys(psys_raw);
 
 	set_ptr(psys->Fickler().Scale(), glm::vec2{_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height} * 0.75f);
@@ -206,7 +205,7 @@ void Pulsar::Run(GLFWwindow* window)
 
 	TileMap* tilemap_ini;
 	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap_ini) != LOAD_STATUS::OK)
-		ASSERT(false);
+		PULSAR_ASSERT(false);
 	std::unique_ptr<TileMap> tilemap(tilemap_ini);
 	set_ptr(tilemap->Fickler().Transform(), {{100.0f, 200.0f}, 0.3f, {5.0f, 8.0f}});
 	tilemap->Fickler().SyncT();

@@ -1,5 +1,6 @@
 #include "DebugPolygon.h"
 
+#include "Macros.h"
 #include "render/CanvasLayer.h"
 #include "AssetLoader.h"
 
@@ -88,7 +89,7 @@ void DebugPolygon::CheckStatus()
 			delete[] m_Renderable.vertexBufferData;
 		m_Renderable.vertexBufferData = new GLfloat[Render::VertexBufferLayoutCount(m_Renderable)];
 	}
-	ASSERT(m_Points.size() == m_Renderable.vertexCount);
+	PULSAR_ASSERT(m_Points.size() == m_Renderable.vertexCount);
 	// modify color of vertices
 	if (m_Status & 0b10)
 	{
