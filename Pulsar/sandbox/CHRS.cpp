@@ -16,15 +16,15 @@ ParticleSubsystemData Sandbox::wave1(const Array<float>& mt_1)
 		std::shared_ptr<DebugPolygon>(new DebugCircle(4.0f)),
 		CumulativeFunc<ParticleCount>(func_conditional<float, float>(
 			make_functor_ptr<true>(&less_than, 0.6f),
-			make_functor_ptr(&power_func, std::tuple<float, float>{ 2000.0f, 0.5f }),
+			make_functor_ptr<false>(&power_func, std::tuple<float, float>{ 2000.0f, 0.5f }),
 			make_functor_ptr<true>(&constant_func<float>, power_func(0.6f, { 2000.0f, 0.5f })))
 		),
-		func_compose<float, const Particles::CHRSeed&>(Particles::CHR::Seed_waveT(), make_functor_ptr(&linear_func, std::tuple(-0.05f, 0.4f))),
+		func_compose<float, const Particles::CHRSeed&>(Particles::CHR::Seed_waveT(), make_functor_ptr<false>(&linear_func, std::tuple(-0.05f, 0.4f))),
 		Particles::CombineSequential({
 			Particles::CombineConditionalTimeLessThan(mt_1[0],
-				Particles::CHR::SetColorUsingTime(make_functor_ptr(&linear_combo_f<4>, std::array<glm::vec4, 2>{
+				Particles::CHR::SetColorUsingTime(make_functor_ptr<false>(&linear_combo_f<4>, std::array<glm::vec4, 2>{
 						glm::vec4{ 1.0f, 0.0f, 0.0f, 1.0f }, glm::vec4{ 0.0f, 1.0f, 0.0f, 0.0f } })),
-				Particles::CHR::SetColorUsingTime(make_functor_ptr(&linear_combo_f<4>, std::array<glm::vec4, 2>{
+				Particles::CHR::SetColorUsingTime(make_functor_ptr<false>(&linear_combo_f<4>, std::array<glm::vec4, 2>{
 						glm::vec4{ 1.0f, 0.0f, 0.0f, 1.0f + mt_1[0] / (1.0f - mt_1[0]) }, glm::vec4{ 0.0f, 1.0f, 0.0f, -1.0f / (1.0f - mt_1[0])} }))
 			),
 			Particles::CombineInitialOverTime(
@@ -64,7 +64,7 @@ ParticleSubsystemData Sandbox::wave2(const Array<float>& p2size)
 	return {
 		1.5f,
 		std::shared_ptr<DebugPolygon>(new DebugPolygon({ {0, 0}, {0, 2}, {1, 2}, {1, 0} }, GL_TRIANGLE_FAN)),
-		CumulativeFunc<ParticleCount>(make_functor_ptr(&linear_func, std::tuple<float, float>{ p2size[1] * 0.5f, 0.0f })),
+		CumulativeFunc<ParticleCount>(make_functor_ptr<false>(&linear_func, std::tuple<float, float>{ p2size[1] * 0.5f, 0.0f })),
 		make_functor_ptr<true>(&constant_func<float, const Particles::CHRSeed&>, 1.5f),
 		Particles::CombineSequential({
 			Particles::GenSetup(
@@ -78,36 +78,36 @@ ParticleSubsystemData Sandbox::wave2(const Array<float>& p2size)
 			Particles::CombineConditionalDataLessThan(
 				3, 0.5f,
 				Particles::CombineSequential({
-					Particles::CHR::SetColorUsingData(make_functor_ptr(&linear_combo_f<4>, std::array<glm::vec4, 2>{
+					Particles::CHR::SetColorUsingData(make_functor_ptr<false>(&linear_combo_f<4>, std::array<glm::vec4, 2>{
 							glm::vec4{0.0f, 0.0f, 1.0f, 1.0f}, glm::vec4{2.0f, 2.0f, 0.0f, 0.0f} }), 3),
-					Particles::CHR::SetLocalScaleUsingData(make_functor_ptr(&linear_combo_f<2>, std::array<glm::vec2, 2>{
+					Particles::CHR::SetLocalScaleUsingData(make_functor_ptr<false>(&linear_combo_f<2>, std::array<glm::vec2, 2>{
 							glm::vec2{ 0.0f, 1.0f }, glm::vec2{ 2.0f * p2size[0], 0.0f} }), 3),
 					Particles::CombineConditionalDataLessThan(
 						2, 0.0f,
 						Particles::CHR::SetLocalPositionUsingData(func_compose<Position2D, float>(
 							make_functor_ptr(&cast<float, unsigned int>),
-							make_functor_ptr(&linear_combo_f<2>, std::array<glm::vec2, 2>{
+							make_functor_ptr<false>(&linear_combo_f<2>, std::array<glm::vec2, 2>{
 									glm::vec2{ -0.5f * p2size[0], -0.5f * p2size[1]}, glm::vec2{ 0.0f, 2.0f } })), 1),
 						Particles::CHR::SetLocalPositionUsingData(func_compose<Position2D, const glm::vec2&>(
 							vec2_compwise<float, float>(make_functor_ptr(&identity<float>), make_functor_ptr(&cast<float, unsigned int>)),
-							make_functor_ptr(&linear_combo<2, 2>, std::array<glm::vec2, 3>{
+							make_functor_ptr<false>(&linear_combo<2, 2>, std::array<glm::vec2, 3>{
 									glm::vec2{ 0.5f * p2size[0], -0.5f * p2size[1] }, glm::vec2{-2.0f * p2size[0], 0.0f}, glm::vec2{0.0f, 2.0f} })), 3, 1)
 					)
 				}),
 				Particles::CombineSequential({
-					Particles::CHR::SetColorUsingData(make_functor_ptr(&linear_combo_f<4>, std::array<glm::vec4, 2>{
+					Particles::CHR::SetColorUsingData(make_functor_ptr<false>(&linear_combo_f<4>, std::array<glm::vec4, 2>{
 							glm::vec4{2.0f, 2.0f, 1.0f, 1.0f}, glm::vec4{-2.0f, -2.0f, 0.0f, 0.0f} }), 3),
-					Particles::CHR::SetLocalScaleUsingData(make_functor_ptr(&linear_combo_f<2>, std::array<glm::vec2, 2>{
+					Particles::CHR::SetLocalScaleUsingData(make_functor_ptr<false>(&linear_combo_f<2>, std::array<glm::vec2, 2>{
 							glm::vec2{ 2.0f * p2size[0], 1.0f }, glm::vec2{ -2.0f * p2size[0], 0.0f } }), 3),
 					Particles::CombineConditionalDataLessThan(
 						2, 0.0f,
 						Particles::CHR::SetLocalPositionUsingData(func_compose<Position2D, const glm::vec2&>(
 							vec2_compwise<float, float>(make_functor_ptr(&identity<float>), make_functor_ptr(&cast<float, unsigned int>)),
-							make_functor_ptr(&linear_combo<2, 2>, std::array<glm::vec2, 3>{
+							make_functor_ptr<false>(&linear_combo<2, 2>, std::array<glm::vec2, 3>{
 									glm::vec2{ -1.5f * p2size[0], -0.5f * p2size[1] }, glm::vec2{ 2.0f * p2size[0], 0.0f }, glm::vec2{ 0.0f, 2.0f }})), 3, 1),
 						Particles::CHR::SetLocalPositionUsingData(func_compose<Position2D, float>(
 							make_functor_ptr(&cast<float, unsigned int>),
-							make_functor_ptr(&linear_combo_f<2>, std::array<glm::vec2, 2>{
+							make_functor_ptr<false>(&linear_combo_f<2>, std::array<glm::vec2, 2>{
 									glm::vec2{ -0.5f * p2size[0], -0.5f * p2size[1]}, glm::vec2{ 0.0f, 2.0f }})), 1)
 					)
 				})
