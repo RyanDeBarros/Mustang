@@ -201,7 +201,7 @@ void Pulsar::Run(GLFWwindow* window)
 	psys->Fickler().SyncRS();
 
 	Renderer::AddCanvasLayer(11);
-	Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
+	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
 	TileMap* tilemap_ini;
 	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap_ini) != LOAD_STATUS::OK)
@@ -223,26 +223,26 @@ void Pulsar::Run(GLFWwindow* window)
 	RectRender child2(textureSnowman);
 	RectRender grandchild2(textureTux);
 
-	child.Fickler().ProteanLinker()->Attach(grandchild.Fickler().ProteanLinker());
+	child.Fickler().AttachUnsafe(grandchild.Fickler());
 	set_ptr(grandchild.Fickler().Scale(), {0.25f, 0.25f});
 	set_ptr(grandchild.Fickler().Position(), {300.0f, -100.0f});
 	set_ptr(child.Fickler().Scale(), {0.25f, 0.25f});
 	child.Fickler().SyncT();
-	child2.Fickler().ProteanLinker()->Attach(grandchild2.Fickler().ProteanLinker());
+	child2.Fickler().AttachUnsafe(grandchild2.Fickler());
 	set_ptr(grandchild2.Fickler().Scale(), { 0.25f, 0.25f });
 	set_ptr(grandchild2.Fickler().Position(), { 300.0f, -100.0f });
 	set_ptr(child2.Fickler().Scale(), { 0.25f, 0.25f });
 	child2.Fickler().SyncT();
 
-	root.Fickler().ProteanLinker()->Attach(child.Fickler().ProteanLinker());
-	root.Fickler().ProteanLinker()->Attach(child2.Fickler().ProteanLinker());
+	root.Fickler().AttachUnsafe(child.Fickler());
+	root.Fickler().AttachUnsafe(child2.Fickler());
 	set_ptr(root.Fickler().Scale(), {10.0f, 10.0f});
 	root.Fickler().SyncT();
-	for (const auto& child : root.Fickler().ProteanLinker()->children)
+	for (const auto& child : root.Fickler().Transformer()->children)
 	{
 		child->Position() = { 0.0f, -30.0f };
 		child->Scale() *= 0.2f;
-		child->SyncT();
+		child->Sync();
 	}
 
 	Renderer::GetCanvasLayer(11)->OnAttach(&root);
@@ -278,8 +278,8 @@ void Pulsar::Run(GLFWwindow* window)
 	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::RED * Colors::HALF_TRANSPARENT_WHITE, Colors::LIGHT_GREEN });
 
 	AnimActorPrimitive2D serotonin(new RectRender(0, ShaderRegistry::Standard(), 10), { FramesArray("res/textures/serotonin.gif") }, 1.0f / 60.0f, false, 1.5f);
-	Renderer::RemoveCanvasLayer(11);
-	Renderer::AddCanvasLayer(11);
+	//Renderer::RemoveCanvasLayer(11);
+	//Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(serotonin.Primitive());
 
 	AnimationPlayer<AnimActorPrimitive2D> animPlayer1;
@@ -289,11 +289,11 @@ void Pulsar::Run(GLFWwindow* window)
 	float ap1frames = 0.0f;
 	serotonin.SetFrameLength(0.0f);
 
-	ProteanLinker2D* serotoninPRL = serotonin.Primitive()->Fickler().ProteanLinker();
+	Fickler2D* serotoninPRL = &serotonin.Primitive()->Fickler();
 	using AnimTrack1T = AnimationTrack<AnimActorPrimitive2D, Position2D, KF_Assign<Position2D>, Interp::Linear>;
 	AnimTrack1T animTrack1;
-	animTrack1.getProperty = make_functor_ptr([](AnimActorPrimitive2D* anim) { return &anim->Primitive()->Fickler().ProteanLinker()->Position(); });
-	animTrack1.callback = make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncP(); }, serotoninPRL);
+	animTrack1.getProperty = make_functor_ptr([](AnimActorPrimitive2D* anim) { return anim->Primitive()->Fickler().Position(); });
+	animTrack1.callback = make_functor_ptr<true>([](Fickler2D* trf) { trf->SyncP(); }, serotoninPRL);
 	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.0f, { 0.0f, 100.0f }));
 	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.5f, { 300.0f, 0.0f }));
 	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.0f, { 0.0f, -100.0f }));
@@ -303,8 +303,8 @@ void Pulsar::Run(GLFWwindow* window)
 
 	using AnimTrack2T = AnimationTrack<AnimActorPrimitive2D, Modulate, KF_Assign<Modulate>, Interp::Linear>;
 	AnimTrack2T animTrack2;
-	animTrack2.getProperty = make_functor_ptr([](AnimActorPrimitive2D* anim) { return &anim->Primitive()->Fickler().ProteanLinker()->Modulate(); });
-	animTrack2.callback = make_functor_ptr<true>([](ProteanLinker2D* trf) { trf->SyncM(); }, serotoninPRL);
+	animTrack2.getProperty = make_functor_ptr([](AnimActorPrimitive2D* anim) { return anim->Primitive()->Fickler().Modulate(); });
+	animTrack2.callback = make_functor_ptr<true>([](Fickler2D* trf) { trf->SyncM(); }, serotoninPRL);
 	animTrack2.SetOrInsert(KF_Assign<Modulate>(0.0f, Colors::WHITE));
 	animTrack2.SetOrInsert(KF_Assign<Modulate>(0.5f, Colors::BLUE));
 	animTrack2.SetOrInsert(KF_Assign<Modulate>(1.0f, Colors::GREEN));
@@ -325,6 +325,10 @@ void Pulsar::Run(GLFWwindow* window)
 	animEventTrack.SetOrInsert(KF_Event<void>(1.5f, make_functor_ptr([](void*) { Logger::LogInfo("1.5 seconds!"); })));
 	animEventTrack.SetOrInsert(KF_Event<void>(2.0f, make_functor_ptr([](void*) { Logger::LogInfo("2 seconds!"); })));
 	animPlayerEvents.tracks.push_back(CopyPtr(animEventTrack));
+
+	//Renderer::RemoveCanvasLayer(11);
+	//Renderer::AddCanvasLayer(11);
+	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
 	// small delay
 	while (totalDrawTime < 0.01f)

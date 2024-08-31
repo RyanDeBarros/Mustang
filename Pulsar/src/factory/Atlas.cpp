@@ -275,7 +275,7 @@ RectRender Atlas::SampleSubtile(size_t index, const TextureSettings& texture_set
 	else
 		actor.CropToRect({ rect.x + m_Border, rect.y + m_Border, rect.w - m_Border, rect.h - m_Border }, width, height);
 	actor.SetPivot(0.5, 0.5);
-	if (actor.Fickler().CanTransform())
+	if (actor.Fickler().transformable)
 	{
 		*actor.Fickler().Scale() = { (rect.w - m_Border) / static_cast<float>(width), (rect.h - m_Border) / static_cast<float>(height) };
 		actor.Fickler().SyncRS();

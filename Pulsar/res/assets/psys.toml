@@ -8,11 +8,11 @@ fickle = "protean"
 	fid = "wave1"
 	args = [0.75]
 
-	[[peffect.subsys]]
-	fid = "wave2"
-	args = [400.0, 400.0]
-
-	[[peffect.subsys]]
-	fid = "wave2"
-	args = [400.0, 400.0]
-	transform = [[0.0, 0.0], 1.5708, [1.0, 1.0]]
+#	[[peffect.subsys]]
+#	fid = "wave2"
+#	args = [400.0, 400.0]
+#
+#	[[peffect.subsys]]
+#	fid = "wave2"
+#	args = [400.0, 400.0]
+#	transform = [[0.0, 0.0], 1.5708, [1.0, 1.0]]

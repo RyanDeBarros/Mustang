@@ -13,12 +13,7 @@ ParticleEffect::ParticleEffect(const std::vector<ParticleSubsystemData>& subsyst
 	{
 		std::shared_ptr<ParticleSubsystem> subsystem = std::make_shared<ParticleSubsystem>(subsys, i++, fickle_type);
 		m_Subsystems.push_back(subsystem);
-		if (m_Fickler.IsProtean())
-			m_Fickler.ProteanLinker()->Attach(subsystem->Fickler().ProteanLinker());
-		else if (m_Fickler.IsTransformable())
-			m_Fickler.Transformer()->Attach(subsystem->Fickler().Transformer());
-		else if (m_Fickler.IsModulatable())
-			m_Fickler.Modulator()->Attach(subsystem->Fickler().Modulator());
+		m_Fickler.Attach(subsystem->Fickler());
 	}
 	Reset();
 }

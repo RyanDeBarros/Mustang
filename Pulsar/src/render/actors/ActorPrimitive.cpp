@@ -6,20 +6,20 @@
 ActorPrimitive2D::ActorPrimitive2D(const Renderable& render, ZIndex z, FickleType fickle_type, bool visible)
 	: FickleActor2D(fickle_type, z), m_Render(render), m_Notification(new AP2D_Notification(this)), m_Status(visible ? 0b111 : 0b110)
 {
-	*m_Fickler.Notification() = m_Notification;
+	m_Fickler.SetNotification(m_Notification);
 	BindBufferFuncs();
 }
 
 ActorPrimitive2D::ActorPrimitive2D(const ActorPrimitive2D& primitive)
 	: FickleActor2D(primitive), m_Render(primitive.m_Render), m_Notification(new AP2D_Notification(this)), m_Status(primitive.m_Status), m_ModulationColors(primitive.m_ModulationColors), f_BufferPackedP(primitive.f_BufferPackedP), f_BufferPackedRS(primitive.f_BufferPackedRS), f_BufferPackedM(primitive.f_BufferPackedM)
 {
-	*m_Fickler.Notification() = m_Notification;
+	m_Fickler.SetNotification(m_Notification);
 }
 
 ActorPrimitive2D::ActorPrimitive2D(ActorPrimitive2D&& primitive) noexcept
 	: FickleActor2D(std::move(primitive)), m_Render(std::move(primitive.m_Render)), m_Notification(new AP2D_Notification(this)), m_Status(primitive.m_Status), m_ModulationColors(std::move(primitive.m_ModulationColors)), f_BufferPackedP(primitive.f_BufferPackedP), f_BufferPackedRS(primitive.f_BufferPackedRS), f_BufferPackedM(primitive.f_BufferPackedM)
 {
-	*m_Fickler.Notification() = m_Notification;
+	m_Fickler.SetNotification(m_Notification);
 }
 
 ActorPrimitive2D& ActorPrimitive2D::operator=(const ActorPrimitive2D& primitive)
@@ -120,19 +120,19 @@ void ActorPrimitive2D::BindBufferFuncs()
 	switch (m_Fickler.Type())
 	{
 	case FickleType::Protean:
-		f_BufferPackedP = &ActorPrimitive2D::buffer_packed_p_protean;
-		f_BufferPackedRS = &ActorPrimitive2D::buffer_packed_rs_protean;
-		f_BufferPackedM = &ActorPrimitive2D::buffer_packed_m_protean;
+		f_BufferPackedP = &ActorPrimitive2D::buffer_packed_p;
+		f_BufferPackedRS = &ActorPrimitive2D::buffer_packed_rs;
+		f_BufferPackedM = &ActorPrimitive2D::buffer_packed_m;
 		break;
 	case FickleType::Transformable:
-		f_BufferPackedP = &ActorPrimitive2D::buffer_packed_p_transformable;
-		f_BufferPackedRS = &ActorPrimitive2D::buffer_packed_rs_transformable;
-		f_BufferPackedM = &ActorPrimitive2D::buffer_packed_m_transformable;
+		f_BufferPackedP = &ActorPrimitive2D::buffer_packed_p;
+		f_BufferPackedRS = &ActorPrimitive2D::buffer_packed_rs;
+		f_BufferPackedM = &ActorPrimitive2D::buffer_packed_m_default;
 		break;
 	case FickleType::Modulatable:
-		f_BufferPackedP = &ActorPrimitive2D::buffer_packed_p_modulatable;
-		f_BufferPackedRS = &ActorPrimitive2D::buffer_packed_rs_modulatable;
-		f_BufferPackedM = &ActorPrimitive2D::buffer_packed_m_modulatable;
+		f_BufferPackedP = &ActorPrimitive2D::buffer_packed_p_default;
+		f_BufferPackedRS = &ActorPrimitive2D::buffer_packed_rs_default;
+		f_BufferPackedM = &ActorPrimitive2D::buffer_packed_m;
 		break;
 	default:
 		f_BufferPackedP = nullptr;
@@ -141,9 +141,9 @@ void ActorPrimitive2D::BindBufferFuncs()
 	}
 }
 
-void ActorPrimitive2D::buffer_packed_p_protean(Stride stride)
+void ActorPrimitive2D::buffer_packed_p(Stride stride)
 {
-	const PackedP2D& position = m_Fickler.ProteanLinker()->self.packedP;
+	const PackedP2D& position = *m_Fickler.PackedP();
 	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
 		m_Render.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(position.x);
@@ -151,17 +151,7 @@ void ActorPrimitive2D::buffer_packed_p_protean(Stride stride)
 	}
 }
 
-void ActorPrimitive2D::buffer_packed_p_transformable(Stride stride)
-{
-	const PackedP2D& position = m_Fickler.Transformer()->self.packedP;
-	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
-	{
-		m_Render.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(position.x);
-		m_Render.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(position.y);
-	}
-}
-
-void ActorPrimitive2D::buffer_packed_p_modulatable(Stride stride)
+void ActorPrimitive2D::buffer_packed_p_default(Stride stride)
 {
 	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
@@ -170,9 +160,9 @@ void ActorPrimitive2D::buffer_packed_p_modulatable(Stride stride)
 	}
 }
 
-void ActorPrimitive2D::buffer_packed_rs_protean(Stride stride)
+void ActorPrimitive2D::buffer_packed_rs(Stride stride)
 {
-	const PackedRS2D& condensed_rs_matrix = m_Fickler.ProteanLinker()->self.packedRS;
+	const PackedRS2D& condensed_rs_matrix = *m_Fickler.PackedRS();
 	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
 		m_Render.vertexBufferData[i * stride + 3] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);
@@ -182,19 +172,7 @@ void ActorPrimitive2D::buffer_packed_rs_protean(Stride stride)
 	}
 }
 
-void ActorPrimitive2D::buffer_packed_rs_transformable(Stride stride)
-{
-	const PackedRS2D& condensed_rs_matrix = m_Fickler.Transformer()->self.packedRS;
-	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
-	{
-		m_Render.vertexBufferData[i * stride + 3] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);
-		m_Render.vertexBufferData[i * stride + 4] = static_cast<GLfloat>(condensed_rs_matrix[0][1]);
-		m_Render.vertexBufferData[i * stride + 5] = static_cast<GLfloat>(condensed_rs_matrix[1][0]);
-		m_Render.vertexBufferData[i * stride + 6] = static_cast<GLfloat>(condensed_rs_matrix[1][1]);
-	}
-}
-
-void ActorPrimitive2D::buffer_packed_rs_modulatable(Stride stride)
+void ActorPrimitive2D::buffer_packed_rs_default(Stride stride)
 {
 	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
@@ -205,9 +183,9 @@ void ActorPrimitive2D::buffer_packed_rs_modulatable(Stride stride)
 	}
 }
 
-void ActorPrimitive2D::buffer_packed_m_protean(Stride stride)
+void ActorPrimitive2D::buffer_packed_m(Stride stride)
 {
-	const Modulate& modulate = m_Fickler.ProteanLinker()->self.packedM;
+	const Modulate& modulate = *m_Fickler.PackedM();
 	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
 		if (i < m_ModulationColors.size())
@@ -228,7 +206,7 @@ void ActorPrimitive2D::buffer_packed_m_protean(Stride stride)
 	}
 }
 
-void ActorPrimitive2D::buffer_packed_m_transformable(Stride stride)
+void ActorPrimitive2D::buffer_packed_m_default(Stride stride)
 {
 	for (BufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
 	{
@@ -237,28 +215,5 @@ void ActorPrimitive2D::buffer_packed_m_transformable(Stride stride)
 		m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(color.g);
 		m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(color.b);
 		m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(color.a);
-	}
-}
-
-void ActorPrimitive2D::buffer_packed_m_modulatable(Stride stride)
-{
-	const Modulate& modulate = m_Fickler.Modulator()->self.packedM;
-	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
-	{
-		if (i < m_ModulationColors.size())
-		{
-			Modulate color = m_ModulationColors[i] * modulate;
-			m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(color.r);
-			m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(color.g);
-			m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(color.b);
-			m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(color.a);
-		}
-		else
-		{
-			m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(modulate.r);
-			m_Render.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(modulate.g);
-			m_Render.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(modulate.b);
-			m_Render.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(modulate.a);
-		}
 	}
 }

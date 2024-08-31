@@ -142,8 +142,12 @@ struct Transformer2D
 		SyncChildrenRS();
 	}
 
+	// use inheritance to define parent transformer that doesn't use vector of children, or possibly parent. that way, one can attach simpler transforms/modulates, such as in ActorTesselation.
+
 	inline void Attach(Transformer2D* transformer)
 	{
+		if (!transformer)
+			return;
 		children.push_back(transformer);
 		if (transformer->parent)
 			transformer->parent->Detach(transformer);
@@ -152,6 +156,8 @@ struct Transformer2D
 
 	inline void Detach(Transformer2D* transformer)
 	{
+		if (!transformer)
+			return;
 		if (transformer->parent != this)
 			return;
 		auto iter = std::find(children.begin(), children.end(), transformer);

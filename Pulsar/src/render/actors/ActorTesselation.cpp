@@ -3,85 +3,77 @@
 #include "render/CanvasLayer.h"
 #include "Logger.inl"
 
-static void protean_request_draw_for_protean(CanvasLayer* layer, ActorTesselation2D* tessel, FickleActor2D* actor)
+template<int _TesselFickle, int _ActorFickle>
+static void request_draw(CanvasLayer* layer, ActorTesselation2D* tessel, FickleActor2D* actor)
 {
-	ProteanLinker2D* linker = actor->Fickler().ProteanLinker();
-	for (const auto& pr : tessel->Fickler().ProteanLinker()->children)
+	if constexpr (_TesselFickle == FickleType::Protean)
 	{
-		linker->self.Sync(pr->self);
-		linker->Sync();
-		actor->RequestDraw(layer);
+		if constexpr (_ActorFickle == FickleType::Protean)
+		{
+			auto tessel_children = tessel->Fickler().ProteanChildren();
+			auto actor_linker = actor->Fickler().ProteanLinker();
+			for (size_t i = 0; i < tessel_children.size(); i++)
+			{
+				actor_linker.SyncAll(tessel_children, i);
+				actor_linker.SyncChildrenAll();
+				actor->RequestDraw(layer);
+			}
+		}
+		else if constexpr (_ActorFickle == FickleType::Transformable)
+		{
+			auto tessel_children = tessel->Fickler().ProteanChildren();
+			auto actor_transformer = actor->Fickler().Transformer();
+			for (size_t i = 0; i < tessel_children.size(); i++)
+			{
+				actor_transformer->self.Sync(tessel_children.at<Transformer2D>(i)->self);
+				actor_transformer->SyncChildren();
+				actor->RequestDraw(layer);
+			}
+		}
+		else if constexpr (_ActorFickle == FickleType::Modulatable)
+		{
+			auto tessel_children = tessel->Fickler().ProteanChildren();
+			auto actor_modulator = actor->Fickler().Modulator();
+			for (size_t i = 0; i < tessel_children.size(); i++)
+			{
+				actor_modulator->self.Sync(tessel_children.at<Modulator>(i)->self);
+				actor_modulator->SyncChildren();
+				actor->RequestDraw(layer);
+			}
+		}
 	}
-}
-
-static void protean_request_draw_for_transformable(CanvasLayer* layer, ActorTesselation2D* tessel, FickleActor2D* actor)
-{
-	Transformer2D* transformer = actor->Fickler().Transformer();
-	for (const auto& pr : tessel->Fickler().ProteanLinker()->children)
+	else if constexpr (_TesselFickle == FickleType::Transformable)
 	{
-		transformer->self.Sync(pr->self.packedP, pr->self.packedRS);
-		transformer->SyncChildren();
-		actor->RequestDraw(layer);
+		if constexpr (_ActorFickle == FickleType::Protean || _ActorFickle == FickleType::Transformable)
+		{
+			auto tessel_transformer = tessel->Fickler().Transformer();
+			auto actor_transformer = actor->Fickler().Transformer();
+			for (size_t i = 0; i < tessel_transformer->children.size(); i++)
+			{
+				actor_transformer->self.Sync(tessel_transformer->children[i]->self);
+				actor_transformer->SyncChildren();
+				actor->RequestDraw(layer);
+			}
+		}
 	}
-}
-
-static void protean_request_draw_for_modulatable(CanvasLayer* layer, ActorTesselation2D* tessel, FickleActor2D* actor)
-{
-	Modulator* modulator = actor->Fickler().Modulator();
-	for (const auto& pr : tessel->Fickler().ProteanLinker()->children)
+	else if constexpr (_TesselFickle == FickleType::Modulatable)
 	{
-		modulator->self.Sync(pr->self.packedM);
-		modulator->SyncChildren();
-		actor->RequestDraw(layer);
-	}
-}
-
-static void transformable_request_draw_for_protean(CanvasLayer* layer, ActorTesselation2D* tessel, FickleActor2D* actor)
-{
-	ProteanLinker2D* linker = actor->Fickler().ProteanLinker();
-	for (const auto& tr : tessel->Fickler().Transformer()->children)
-	{
-		linker->self.SyncT(tr->self);
-		linker->SyncChildren();
-		actor->RequestDraw(layer);
-	}
-}
-
-static void transformable_request_draw_for_transformable(CanvasLayer* layer, ActorTesselation2D* tessel, FickleActor2D* actor)
-{
-	Transformer2D* transformer = actor->Fickler().Transformer();
-	for (const auto& tr : tessel->Fickler().Transformer()->children)
-	{
-		transformer->self.Sync(tr->self);
-		transformer->SyncChildren();
-		actor->RequestDraw(layer);
-	}
-}
-
-static void modulatable_request_draw_for_protean(CanvasLayer* layer, ActorTesselation2D* tessel, FickleActor2D* actor)
-{
-	ProteanLinker2D* linker = actor->Fickler().ProteanLinker();
-	for (const auto& mo : tessel->Fickler().Modulator()->children)
-	{
-		linker->self.SyncM(mo->self);
-		linker->Sync();
-		actor->RequestDraw(layer);
-	}
-}
-
-static void modulatable_request_draw_for_modulatable(CanvasLayer* layer, ActorTesselation2D* tessel, FickleActor2D* actor)
-{
-	Modulator* modulator = actor->Fickler().Modulator();
-	for (const auto& mo : tessel->Fickler().Modulator()->children)
-	{
-		modulator->self.Sync(mo->self);
-		modulator->SyncChildren();
-		actor->RequestDraw(layer);
+		if (_ActorFickle == FickleType::Protean || _ActorFickle == FickleType::Modulatable)
+		{
+			auto tessel_modulator = tessel->Fickler().Modulator();
+			auto actor_modulator = actor->Fickler().Modulator();
+			for (size_t i = 0; i < tessel_modulator->children.size(); i++)
+			{
+				actor_modulator->self.Sync(tessel_modulator->children[i]->self);
+				actor_modulator->SyncChildren();
+				actor->RequestDraw(layer);
+			}
+		}
 	}
 }
 
 ActorTesselation2D::ActorTesselation2D(FickleActor2D* actor, FickleType fickle_type)
-	: FickleActor2D(fickle_type), m_Actor(actor), m_InternalPlacements(fickle_type)
+	: FickleActor2D(fickle_type), m_Actor(actor)
 {
 	if (!actor)
 		Logger::LogErrorFatal("Null actor in tesselation.");
@@ -91,13 +83,13 @@ ActorTesselation2D::ActorTesselation2D(FickleActor2D* actor, FickleType fickle_t
 		switch (actor->Fickler().Type())
 		{
 		case FickleType::Protean:
-			f_RequestDraw = &protean_request_draw_for_protean;
+			f_RequestDraw = &request_draw<FickleType::Protean, FickleType::Protean>;
 			break;
-		[[likely]] case FickleType::Transformable:
-			f_RequestDraw = &protean_request_draw_for_transformable;
+		case FickleType::Transformable:
+			f_RequestDraw = &request_draw<FickleType::Protean, FickleType::Transformable>;
 			break;
-		[[unlikely]] case FickleType::Modulatable:
-			f_RequestDraw = &protean_request_draw_for_modulatable;
+		case FickleType::Modulatable:
+			f_RequestDraw = &request_draw<FickleType::Protean, FickleType::Modulatable>;
 			break;
 		}
 		break;
@@ -105,13 +97,13 @@ ActorTesselation2D::ActorTesselation2D(FickleActor2D* actor, FickleType fickle_t
 		switch (actor->Fickler().Type())
 		{
 		case FickleType::Protean:
-			f_RequestDraw = &transformable_request_draw_for_protean;
+			f_RequestDraw = &request_draw<FickleType::Transformable, FickleType::Protean>;
 			break;
-		[[likely]] case FickleType::Transformable:
-			f_RequestDraw = &transformable_request_draw_for_transformable;
+		case FickleType::Transformable:
+			f_RequestDraw = &request_draw<FickleType::Transformable, FickleType::Transformable>;
 			break;
-		[[unlikely]] case FickleType::Modulatable:
-			throw BadFickleSelect(fickle_type, m_Actor->Fickler().Type());
+		case FickleType::Modulatable:
+			f_RequestDraw = &request_draw<FickleType::Transformable, FickleType::Modulatable>;
 			break;
 		}
 		break;
@@ -119,17 +111,23 @@ ActorTesselation2D::ActorTesselation2D(FickleActor2D* actor, FickleType fickle_t
 		switch (actor->Fickler().Type())
 		{
 		case FickleType::Protean:
-			f_RequestDraw = &modulatable_request_draw_for_protean;
+			f_RequestDraw = &request_draw<FickleType::Modulatable, FickleType::Protean>;
 			break;
-		[[likely]] case FickleType::Transformable:
-			throw BadFickleSelect(fickle_type, m_Actor->Fickler().Type());
+		case FickleType::Transformable:
+			f_RequestDraw = &request_draw<FickleType::Modulatable, FickleType::Transformable>;
 			break;
-		[[unlikely]] case FickleType::Modulatable:
-			f_RequestDraw = &modulatable_request_draw_for_modulatable;
+		case FickleType::Modulatable:
+			f_RequestDraw = &request_draw<FickleType::Modulatable, FickleType::Modulatable>;
 			break;
 		}
 		break;
 	}
+}
+
+ActorTesselation2D::~ActorTesselation2D()
+{
+	for (auto ptr : m_InternalPlacements)
+		delete ptr;
 }
 
 void ActorTesselation2D::RequestDraw(CanvasLayer* canvas_layer)
@@ -139,60 +137,85 @@ void ActorTesselation2D::RequestDraw(CanvasLayer* canvas_layer)
 
 void ActorTesselation2D::PushBackStatic(const Transform2D& transform, bool sync_on_attach)
 {
-	if (!m_Fickler.IsTransformable())
+	if (m_Fickler.Type() != FickleType::Transformable)
 		return;
-	auto transformer = std::make_unique<Transformer2D>(transform);
-	m_Fickler.Transformer()->Attach(transformer.get());
+	auto new_fickler = new Fickler2D(FickleType::Transformable);
+	new_fickler->transformable->self.transform = transform;
 	if (sync_on_attach)
-		transformer->Sync();
-	m_InternalPlacements.Transformers()->push_back(std::move(transformer));
+	{
+		m_Fickler.AttachTransformer(new_fickler->Transformer());
+		new_fickler->Transformer()->Sync();
+	}
+	else
+	{
+		new_fickler->Transformer()->Sync();
+		m_Fickler.AttachTransformer(new_fickler->Transformer());
+	}
+	m_InternalPlacements.push_back(new_fickler);
 }
 
 void ActorTesselation2D::PushBackStatic(const std::vector<Transform2D>& transforms, bool sync_on_attach)
 {
-	if (!m_Fickler.IsTransformable())
+	if (m_Fickler.Type() != FickleType::Transformable)
 		return;
-	m_InternalPlacements.Transformers()->reserve(m_InternalPlacements.Transformers()->capacity() + transforms.size());
+	m_InternalPlacements.reserve(m_InternalPlacements.capacity() + transforms.size());
 	for (const auto& transform : transforms)
 		PushBackStatic(transform, sync_on_attach);
 }
 
-void ActorTesselation2D::PushBackStatic(const Proteate2D& proteate, bool sync_on_attach)
+void ActorTesselation2D::PushBackStatic(const Transform2D& transform, const Modulate& modulate, bool sync_on_attach)
 {
-	if (!m_Fickler.IsProtean())
+	if (m_Fickler.Type() != FickleType::Protean)
 		return;
-	auto linker = std::make_unique<ProteanLinker2D>(proteate);
-	m_Fickler.ProteanLinker()->Attach(linker.get());
+	auto new_fickler = new Fickler2D(FickleType::Protean);
+	new_fickler->transformable->self.transform = transform;
+	new_fickler->modulatable->self.modulate = modulate;
 	if (sync_on_attach)
-		linker->Sync();
-	m_InternalPlacements.ProteanLinkers()->push_back(std::move(linker));
+	{
+		m_Fickler.Attach(*new_fickler);
+		new_fickler->SyncAll();
+	}
+	else
+	{
+		new_fickler->SyncAll();
+		m_Fickler.Attach(*new_fickler);
+	}
+	m_InternalPlacements.push_back(new_fickler);
 }
 
-void ActorTesselation2D::PushBackStatic(const std::vector<Proteate2D>& proteates, bool sync_on_attach)
+void ActorTesselation2D::PushBackStatic(const std::vector<std::pair<Transform2D, Modulate>>& proteates, bool sync_on_attach)
 {
-	if (!m_Fickler.IsProtean())
+	if (m_Fickler.Type() != FickleType::Protean)
 		return;
-	m_InternalPlacements.ProteanLinkers()->reserve(m_InternalPlacements.ProteanLinkers()->capacity() + proteates.size());
+	m_InternalPlacements.reserve(m_InternalPlacements.capacity() + proteates.size());
 	for (const auto& proteate : proteates)
-		PushBackStatic(proteate, sync_on_attach);
+		PushBackStatic(proteate.first, proteate.second, sync_on_attach);
 }
 
 void ActorTesselation2D::PushBackStatic(const Modulate& modulate, bool sync_on_attach)
 {
-	if (!m_Fickler.IsModulatable())
+	if (m_Fickler.Type() != FickleType::Modulatable)
 		return;
-	auto modulator = std::make_unique<Modulator>(modulate);
-	m_Fickler.Modulator()->Attach(modulator.get());
+	auto new_fickler = new Fickler2D(FickleType::Modulatable);
+	new_fickler->modulatable->self.modulate = modulate;
 	if (sync_on_attach)
-		modulator->Sync();
-	m_InternalPlacements.Modulators()->push_back(std::move(modulator));
+	{
+		m_Fickler.AttachModulator(new_fickler->Modulator());
+		new_fickler->Modulator()->Sync();
+	}
+	else
+	{
+		new_fickler->Modulator()->Sync();
+		m_Fickler.AttachModulator(new_fickler->Modulator());
+	}
+	m_InternalPlacements.push_back(new_fickler);
 }
 
 void ActorTesselation2D::PushBackStatic(const std::vector<Modulate>& modulates, bool sync_on_attach)
 {
-	if (!m_Fickler.IsModulatable())
+	if (m_Fickler.Type() != FickleType::Modulatable)
 		return;
-	m_InternalPlacements.Modulators()->reserve(m_InternalPlacements.Modulators()->capacity() + modulates.size());
+	m_InternalPlacements.reserve(m_InternalPlacements.capacity() + modulates.size());
 	for (const auto& modulate : modulates)
 		PushBackStatic(modulate, sync_on_attach);
 }

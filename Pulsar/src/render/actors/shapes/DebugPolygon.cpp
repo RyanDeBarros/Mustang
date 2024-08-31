@@ -7,7 +7,7 @@
 DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, GLenum indexing_mode, ZIndex z, FickleType fickle_type)
 	: FickleActor2D(fickle_type, z), m_Notification(new DP_Notification(this))
 {
-	*m_Fickler.Notification() = m_Notification;
+	m_Fickler.SetNotification(m_Notification);
 	BindBufferFuncs();
 	Loader::loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
 	SetIndexingMode(indexing_mode);
@@ -17,13 +17,13 @@ DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, GLenum indexing
 DebugPolygon::DebugPolygon(const DebugPolygon& other)
 	: FickleActor2D(other), m_Renderable(other.m_Renderable), m_Points(other.m_Points), m_IndexingMode(other.m_IndexingMode), m_Notification(new DP_Notification(this)), m_Status(other.m_Status), f_BufferPackedP(other.f_BufferPackedP), f_BufferPackedRS(other.f_BufferPackedRS), f_BufferPackedM(other.f_BufferPackedM)
 {
-	*m_Fickler.Notification() = m_Notification;
+	m_Fickler.SetNotification(m_Notification);
 }
 
 DebugPolygon::DebugPolygon(DebugPolygon&& other) noexcept
 	: FickleActor2D(std::move(other)), m_Renderable(std::move(other.m_Renderable)), m_Points(std::move(other.m_Points)), m_IndexingMode(other.m_IndexingMode), m_Notification(new DP_Notification(this)), m_Status(other.m_Status), f_BufferPackedP(other.f_BufferPackedP), f_BufferPackedRS(other.f_BufferPackedRS), f_BufferPackedM(other.f_BufferPackedM)
 {
-	*m_Fickler.Notification() = m_Notification;
+	m_Fickler.SetNotification(m_Notification);
 }
 
 DebugPolygon& DebugPolygon::operator=(const DebugPolygon& other)
@@ -128,20 +128,20 @@ void DebugPolygon::BindBufferFuncs()
 	switch (m_Fickler.Type())
 	{
 	case FickleType::Protean:
-		f_BufferPackedP = &DebugPolygon::buffer_packed_p_protean;
-		f_BufferPackedRS = &DebugPolygon::buffer_packed_rs_protean;
-		f_BufferPackedM = &DebugPolygon::buffer_packed_m_protean;
+		f_BufferPackedP = &DebugPolygon::buffer_packed_p;
+		f_BufferPackedRS = &DebugPolygon::buffer_packed_rs;
+		f_BufferPackedM = &DebugPolygon::buffer_packed_m;
 		break;
 	case FickleType::Transformable:
-		f_BufferPackedP = &DebugPolygon::buffer_packed_p_transformable;
-		f_BufferPackedRS = &DebugPolygon::buffer_packed_rs_transformable;
-		f_BufferPackedM = &DebugPolygon::buffer_packed_m_transformable;
+		f_BufferPackedP = &DebugPolygon::buffer_packed_p;
+		f_BufferPackedRS = &DebugPolygon::buffer_packed_rs;
+		f_BufferPackedM = &DebugPolygon::buffer_packed_empty;
 		buffer_packed_m_default(Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask));
 		break;
 	case FickleType::Modulatable:
-		f_BufferPackedP = &DebugPolygon::buffer_packed_p_modulatable;
-		f_BufferPackedRS = &DebugPolygon::buffer_packed_rs_modulatable;
-		f_BufferPackedM = &DebugPolygon::buffer_packed_m_modulatable;
+		f_BufferPackedP = &DebugPolygon::buffer_packed_empty;
+		f_BufferPackedRS = &DebugPolygon::buffer_packed_empty;
+		f_BufferPackedM = &DebugPolygon::buffer_packed_m;
 		buffer_packed_p_default(Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask));
 		buffer_packed_rs_default(Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask));
 		break;
@@ -152,28 +152,14 @@ void DebugPolygon::BindBufferFuncs()
 	}
 }
 
-void DebugPolygon::buffer_packed_p_protean(Stride stride)
+void DebugPolygon::buffer_packed_p(Stride stride)
 {
-	const PackedP2D& position = m_Fickler.ProteanLinker()->self.packedP;
+	const PackedP2D& position = *m_Fickler.PackedP();
 	for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 	{
 		m_Renderable.vertexBufferData[i * stride	] = static_cast<GLfloat>(position.x);
 		m_Renderable.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(position.y);
 	}
-}
-
-void DebugPolygon::buffer_packed_p_transformable(Stride stride)
-{
-	const PackedP2D& position = m_Fickler.Transformer()->self.packedP;
-	for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
-	{
-		m_Renderable.vertexBufferData[i * stride	] = static_cast<GLfloat>(position.x);
-		m_Renderable.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(position.y);
-	}
-}
-
-void DebugPolygon::buffer_packed_p_modulatable(Stride)
-{
 }
 
 void DebugPolygon::buffer_packed_p_default(Stride stride)
@@ -185,9 +171,9 @@ void DebugPolygon::buffer_packed_p_default(Stride stride)
 	}
 }
 
-void DebugPolygon::buffer_packed_rs_protean(Stride stride)
+void DebugPolygon::buffer_packed_rs(Stride stride)
 {
-	const PackedRS2D& condensed_rs_matrix = m_Fickler.ProteanLinker()->self.packedRS;
+	const PackedRS2D& condensed_rs_matrix = *m_Fickler.PackedRS();
 	for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 	{
 		m_Renderable.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);
@@ -195,22 +181,6 @@ void DebugPolygon::buffer_packed_rs_protean(Stride stride)
 		m_Renderable.vertexBufferData[i * stride + 4] = static_cast<GLfloat>(condensed_rs_matrix[1][0]);
 		m_Renderable.vertexBufferData[i * stride + 5] = static_cast<GLfloat>(condensed_rs_matrix[1][1]);
 	}
-}
-
-void DebugPolygon::buffer_packed_rs_transformable(Stride stride)
-{
-	const PackedRS2D& condensed_rs_matrix = m_Fickler.Transformer()->self.packedRS;
-	for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
-	{
-		m_Renderable.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);
-		m_Renderable.vertexBufferData[i * stride + 3] = static_cast<GLfloat>(condensed_rs_matrix[0][1]);
-		m_Renderable.vertexBufferData[i * stride + 4] = static_cast<GLfloat>(condensed_rs_matrix[1][0]);
-		m_Renderable.vertexBufferData[i * stride + 5] = static_cast<GLfloat>(condensed_rs_matrix[1][1]);
-	}
-}
-
-void DebugPolygon::buffer_packed_rs_modulatable(Stride)
-{
 }
 
 void DebugPolygon::buffer_packed_rs_default(Stride stride)
@@ -224,25 +194,9 @@ void DebugPolygon::buffer_packed_rs_default(Stride stride)
 	}
 }
 
-void DebugPolygon::buffer_packed_m_protean(Stride stride)
+void DebugPolygon::buffer_packed_m(Stride stride)
 {
-	const Modulate& color = m_Fickler.ProteanLinker()->self.packedM;
-	for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
-	{
-		m_Renderable.vertexBufferData[i * stride + 6] = static_cast<GLfloat>(color[0]);
-		m_Renderable.vertexBufferData[i * stride + 7] = static_cast<GLfloat>(color[1]);
-		m_Renderable.vertexBufferData[i * stride + 8] = static_cast<GLfloat>(color[2]);
-		m_Renderable.vertexBufferData[i * stride + 9] = static_cast<GLfloat>(color[3]);
-	}
-}
-
-void DebugPolygon::buffer_packed_m_transformable(Stride)
-{
-}
-
-void DebugPolygon::buffer_packed_m_modulatable(Stride stride)
-{
-	const Modulate& color = m_Fickler.Modulator()->self.packedM;
+	const Modulate& color = *m_Fickler.PackedM();
 	for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 	{
 		m_Renderable.vertexBufferData[i * stride + 6] = static_cast<GLfloat>(color[0]);

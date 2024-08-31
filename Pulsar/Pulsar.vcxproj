@@ -206,7 +206,6 @@
     <ClCompile Include="src\factory\TextureRegistry.cpp" />
     <ClCompile Include="src\render\actors\TileMap.cpp" />
     <ClCompile Include="src\render\transform\Modulate.cpp" />
-    <ClCompile Include="src\render\transform\Protean.cpp" />
     <ClCompile Include="src\render\transform\Transform.cpp" />
     <ClCompile Include="src\render\transform\Transforms.cpp" />
     <ClCompile Include="src\utils\CopyPtr.inl" />
@@ -225,7 +224,6 @@
     <ClInclude Include="src\render\actors\anim\AnimationTrack.inl" />
     <ClInclude Include="src\render\actors\anim\FramesArray.h" />
     <ClInclude Include="src\render\actors\particles\ParticleSubsystemRegistry.h" />
-    <ClInclude Include="src\render\transform\Protean.h" />
     <ClInclude Include="src\AssetLoader.h" />
     <ClInclude Include="src\factory\Atlas.h" />
     <ClInclude Include="src\factory\Tile.h" />

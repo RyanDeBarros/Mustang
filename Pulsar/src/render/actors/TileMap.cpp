@@ -11,19 +11,10 @@ TileMap::TileMap(const std::shared_ptr<const Atlas>& atlas, const TextureSetting
 	{
 		std::unique_ptr<RectRender> rect_render(std::make_unique<RectRender>(m_Atlas->SampleSubtile(i, texture_settings, texture_version, shader, 0, fickle_type, visible)));
 		std::shared_ptr<ActorTesselation2D> tessel(std::make_shared<ActorTesselation2D>(rect_render.get(), fickle_type));
-		if (m_Fickler.IsTransformable()) [[likely]]
-			m_Fickler.Transformer()->Attach(tessel->Fickler().Transformer());
-		else if (m_Fickler.IsProtean())
-			m_Fickler.ProteanLinker()->Attach(tessel->Fickler().ProteanLinker());
-		else if (m_Fickler.IsModulatable()) [[unlikely]]
-			m_Fickler.Modulator()->Attach(tessel->Fickler().Modulator());
+		m_Fickler.Attach(tessel->Fickler());
 		m_Map.push_back({ std::move(rect_render), std::move(tessel) });
 	}
 	m_Ordering = Permutation(m_Atlas->GetPlacements().size());
-}
-
-TileMap::~TileMap()
-{
 }
 
 void TileMap::RequestDraw(CanvasLayer* canvas_layer)
@@ -42,10 +33,13 @@ bool TileMap::SetOrdering(const Permutation& permutation)
 
 void TileMap::Insert(TileMapIndex tessel, float posX, float posY, const Modulate& modulate)
 {
-	if (m_Fickler.IsTransformable())
-		m_Map[tessel].tessel->PushBackStatic({ {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} });
-	if (m_Fickler.IsProtean())
-		m_Map[tessel].tessel->PushBackStatic({ { {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} }, modulate });
+	if (m_Fickler.transformable)
+	{
+		if (m_Fickler.modulatable)
+			m_Map[tessel].tessel->PushBackStatic({ {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} }, modulate );
+		else
+			m_Map[tessel].tessel->PushBackStatic({ {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} });
+	}
 }
 
 ActorTesselation2D* const TileMap::TesselationRef(TileMapIndex i) const

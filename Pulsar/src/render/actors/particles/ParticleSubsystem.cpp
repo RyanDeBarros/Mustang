@@ -14,12 +14,14 @@ ParticleSubsystem::ParticleSubsystem(const ParticleSubsystemData& wave_data, Par
 }
 
 ParticleSubsystem::ParticleSubsystem(const ParticleSubsystem& other)
-	: m_Data(other.m_Data), m_PeriodInv(other.m_PeriodInv), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Fickler(other.m_Fickler), f_AttachFickle(other.f_AttachFickle), f_FicklerSwapPop(other.f_FicklerSwapPop)
+	: m_Data(other.m_Data), m_PeriodInv(other.m_PeriodInv), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum),
+	m_SubsystemIndex(other.m_SubsystemIndex), m_Fickler(other.m_Fickler), f_AttachFickle(other.f_AttachFickle), f_FicklerSwapPop(other.f_FicklerSwapPop)
 {
 }
 
 ParticleSubsystem::ParticleSubsystem(ParticleSubsystem&& other) noexcept
-	: m_Data(std::move(other.m_Data)), m_PeriodInv(other.m_PeriodInv), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum), m_SubsystemIndex(other.m_SubsystemIndex), m_Fickler(std::move(other.m_Fickler)), f_AttachFickle(other.f_AttachFickle), f_FicklerSwapPop(other.f_FicklerSwapPop)
+	: m_Data(std::move(other.m_Data)), m_PeriodInv(other.m_PeriodInv), m_NumSpawned(other.m_NumSpawned), m_TotalSpawn(other.m_TotalSpawn), m_WaveNum(other.m_WaveNum),
+	m_SubsystemIndex(other.m_SubsystemIndex), m_Fickler(std::move(other.m_Fickler)), f_AttachFickle(other.f_AttachFickle), f_FicklerSwapPop(other.f_FicklerSwapPop)
 {
 }
 
@@ -132,24 +134,25 @@ void ParticleSubsystem::BindFickleFunctions()
 	}
 }
 
-void ParticleSubsystem::attach_fickle_protean(FickleSelector2D& fickler)
+void ParticleSubsystem::attach_fickle_protean(Fickler2D& fickler)
 {
-	m_Fickler.ProteanLinker()->Attach(fickler.ProteanLinker());
+	m_Fickler.AttachUnsafe(fickler);
 }
 
-void ParticleSubsystem::attach_fickle_transformable(FickleSelector2D& fickler)
+void ParticleSubsystem::attach_fickle_transformable(Fickler2D& fickler)
 {
-	m_Fickler.Transformer()->Attach(fickler.Transformer());
+	m_Fickler.AttachTransformerUnsafe(fickler);
 }
 
-void ParticleSubsystem::attach_fickle_modulatable(FickleSelector2D& fickler)
+void ParticleSubsystem::attach_fickle_modulatable(Fickler2D& fickler)
 {
-	m_Fickler.Modulator()->Attach(fickler.Modulator());
+	m_Fickler.AttachModulatorUnsafe(fickler);
 }
 
 void ParticleSubsystem::fickler_swap_pop_protean(ParticleCount i)
 {
-	swap_pop(m_Fickler.ProteanLinker()->children, i);
+	swap_pop(m_Fickler.Transformer()->children, i);
+	swap_pop(m_Fickler.Modulator()->children, i);
 }
 
 void ParticleSubsystem::fickler_swap_pop_transformable(ParticleCount i)

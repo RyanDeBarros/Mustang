@@ -89,6 +89,8 @@ struct Modulator
 
 	inline void Attach(Modulator* modulator)
 	{
+		if (!modulator)
+			return;
 		children.push_back(modulator);
 		if (modulator->parent)
 			modulator->parent->Detach(modulator);
@@ -97,6 +99,8 @@ struct Modulator
 
 	inline void Detach(Modulator* modulator)
 	{
+		if (!modulator)
+			return;
 		if (modulator->parent != this)
 			return;
 		auto iter = std::find(children.begin(), children.end(), modulator);

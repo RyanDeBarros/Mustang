@@ -32,7 +32,7 @@ class ParticleSubsystem
 	ParticleCount m_TotalSpawn;
 	unsigned short m_WaveNum = 0;
 	ParticleSubsystemIndex m_SubsystemIndex;
-	FickleSelector2D m_Fickler;
+	Fickler2D m_Fickler;
 	std::vector<Particle> m_Particles;
 
 public:
@@ -44,7 +44,7 @@ public:
 
 	inline void SetWavePeriod(real wave_period) { m_Data.wavePeriod = wave_period; m_PeriodInv = 1.0f / m_Data.wavePeriod; }
 
-	inline FickleSelector2D& Fickler() { return m_Fickler; }
+	inline Fickler2D& Fickler() { return m_Fickler; }
 
 private:
 	friend class ParticleEffect;
@@ -54,10 +54,12 @@ private:
 	void RemoveUnordered(ParticleCount i);
 	
 	void BindFickleFunctions();
-	void (ParticleSubsystem::*f_AttachFickle)(FickleSelector2D&) = nullptr;
-	void attach_fickle_protean(FickleSelector2D&);
-	void attach_fickle_transformable(FickleSelector2D&);
-	void attach_fickle_modulatable(FickleSelector2D&);
+	
+	void (ParticleSubsystem::* f_AttachFickle)(Fickler2D&) = nullptr;
+	void attach_fickle_protean(Fickler2D&);
+	void attach_fickle_transformable(Fickler2D&);
+	void attach_fickle_modulatable(Fickler2D&);
+	
 	void (ParticleSubsystem::*f_FicklerSwapPop)(ParticleCount) = nullptr;
 	void fickler_swap_pop_protean(ParticleCount);
 	void fickler_swap_pop_transformable(ParticleCount);

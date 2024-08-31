@@ -12,7 +12,7 @@ namespace Particles {
 		return make_functor_ptr<false>([](const CHRSeed&, const cls& tuple) -> CHRBind {
 			return { make_functor_ptr<false>([](Particle& p, const CHRFunc& f) -> void {
 				f(p);
-			}, std::move(std::get<0>(tuple))), std::get<1>(tuple) };
+			}, std::get<0>(tuple)), std::get<1>(tuple) };
 		}, cls(std::move(f), max_index));
 	}
 
@@ -24,7 +24,7 @@ namespace Particles {
 			using cls_inner = std::tuple<FunctorPtr<void, const tpl&>, const CHRSeed&>;
 			return { make_functor_ptr<false>([](Particle& p, const cls_inner& tuple) -> void {
 				std::get<0>(tuple)(tpl(p, std::get<1>(tuple)));
-			}, cls_inner(std::move(std::get<0>(tuple)), seed)), std::get<1>(tuple) };
+			}, cls_inner(std::get<0>(tuple), seed)), std::get<1>(tuple) };
 		}, cls(std::move(f), max_index));
 	}
 
@@ -260,7 +260,7 @@ namespace Particles {
 		}
 
 		// TODO define sync functions on particle using function pointers to not have to go through ifs in fickler syncs.
-		static CharacteristicGen _SyncAll = Characterize(make_functor_ptr([](Particle& p) -> void { p.m_Shape->Fickler().Sync(); }), 0);
+		static CharacteristicGen _SyncAll = Characterize(make_functor_ptr([](Particle& p) -> void { p.m_Shape->Fickler().SyncAll(); }), 0);
 		static CharacteristicGen _SyncT = Characterize(make_functor_ptr([](Particle& p) -> void { p.m_Shape->Fickler().SyncT(); }), 0);
 		static CharacteristicGen _SyncP = Characterize(make_functor_ptr([](Particle& p) -> void { p.m_Shape->Fickler().SyncP(); }), 0);
 		static CharacteristicGen _SyncRS = Characterize(make_functor_ptr([](Particle& p) -> void { p.m_Shape->Fickler().SyncRS(); }), 0);
