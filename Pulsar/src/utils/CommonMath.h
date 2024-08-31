@@ -31,9 +31,9 @@ struct CumulativeFunc
 	Int prev = 0;
 
 	CumulativeFunc(FunctorPtr<float, float>&& cf, Int initial = 0) : cfunc(std::move(cf)), prev(initial) {}
-	CumulativeFunc(const CumulativeFunc& func) : cfunc(func.cfunc.Clone()), prev(func.prev) {}
+	CumulativeFunc(const CumulativeFunc& func) : cfunc(func.cfunc), prev(func.prev) {}
 	CumulativeFunc(CumulativeFunc&& func) noexcept : cfunc(std::move(func.cfunc)), prev(func.prev) {}
-	CumulativeFunc& operator=(const CumulativeFunc& func) { cfunc = func.cfunc.Clone(); prev = func.prev; return *this; }
+	CumulativeFunc& operator=(const CumulativeFunc& func) { cfunc = func.cfunc; prev = func.prev; return *this; }
 	CumulativeFunc& operator=(CumulativeFunc&& func) noexcept { cfunc = std::move(func.cfunc); prev = func.prev; return *this; }
 
 	Int operator()(float t)

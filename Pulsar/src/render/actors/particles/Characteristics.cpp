@@ -266,11 +266,11 @@ namespace Particles {
 		static CharacteristicGen _SyncRS = Characterize(make_functor_ptr([](Particle& p) -> void { p.m_Shape->Fickler().SyncRS(); }), 0);
 		static CharacteristicGen _SyncM = Characterize(make_functor_ptr([](Particle& p) -> void { p.m_Shape->Fickler().SyncM(); }), 0);
 
-		CharacteristicGen SyncAll() { return _SyncAll.Clone(); }
-		CharacteristicGen SyncT() { return _SyncT.Clone(); }
-		CharacteristicGen SyncP() { return _SyncP.Clone(); }
-		CharacteristicGen SyncRS() { return _SyncRS.Clone(); }
-		CharacteristicGen SyncM() { return _SyncM.Clone(); }
+		CharacteristicGen SyncAll() { return _SyncAll.clone(); }
+		CharacteristicGen SyncT() { return _SyncT.clone(); }
+		CharacteristicGen SyncP() { return _SyncP.clone(); }
+		CharacteristicGen SyncRS() { return _SyncRS.clone(); }
+		CharacteristicGen SyncM() { return _SyncM.clone(); }
 
 		FunctorPtr<float, const CHRSeed&> Seed_waveT()
 		{
