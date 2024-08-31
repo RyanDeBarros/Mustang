@@ -20,7 +20,7 @@ public:
 	LayerView2D(LayerView2D&&) = delete;
 
 	Transform2D m_Transform;
-	inline void NotifyTransform() { UpdateVP(); }
+	void NotifyTransform() { UpdateVP(); }
 
 private:
 	friend class CanvasLayer;

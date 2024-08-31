@@ -12,6 +12,16 @@ ParticleSubsystemArray::ParticleSubsystemArray(const std::vector<ParticleSubsyst
 	}
 }
 
+ParticleSubsystemArray::ParticleSubsystemArray(std::vector<ParticleSubsystemData>&& subsystem_data, ZIndex z, FickleType fickle_type, bool visible, bool enabled)
+	: ParticleEffect(std::move(subsystem_data), z, fickle_type, enabled), visible(visible)
+{
+	for (size_t _ = 0; _ < m_Subsystems.size(); _++)
+	{
+		m_Batchers.push_back(DebugBatcher(z));
+		m_WaitingForDespawn.push_back({});
+	}
+}
+
 void ParticleSubsystemArray::RequestDraw(CanvasLayer* canvas_layer)
 {
 	ParticleEffect::OnUpdate();

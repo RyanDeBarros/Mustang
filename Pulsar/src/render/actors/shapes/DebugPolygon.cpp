@@ -104,9 +104,11 @@ void DebugPolygon::CheckStatus()
 		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 		{
 			// TODO buffer overflow?
-#pragma warning(suppress : 6386)
+#pragma warning(push)
+#pragma warning(disable : 6386)
 			m_Renderable.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(m_Points[i][0]);
 			m_Renderable.vertexBufferData[i * stride + 11] = static_cast<GLfloat>(m_Points[i][1]);
+#pragma warning(pop)
 		}
 	}
 	// update TransformP

@@ -4,6 +4,8 @@
 #include "utils/Strings.h"
 #include "utils/Data.inl"
 
+// NOTE all fickle pointers are assumed to be non-null.
+
 namespace Particles {
 
 	CharacteristicGen Characterize(CHRFunc&& f, DataIndex max_index)
@@ -206,16 +208,15 @@ namespace Particles {
 			using cls = std::tuple<DataIndex, FunctorPtr<glm::vec4, float>>;
 			return Characterize(make_functor_ptr<false>([](Particle& p, const cls& tuple) -> void {
 				// set_ptr(p.m_Shape->Fickler().Modulate(), color(p[di]));
-				set_ptr(p.m_Shape->Fickler().Modulate(), std::get<1>(tuple)(p[std::get<0>(tuple)]));
+				*p.m_Shape->Fickler().Modulate() = std::get<1>(tuple)(p[std::get<0>(tuple)]);
 			}, cls(di, std::move(color))), di + 1);
 		}
 
-		// TODO define different fickle functions on particle using function pointers to not have to go through ifs in fickler syncs.
 		CharacteristicGen SetColorUsingTime(FunctorPtr<Modulate, float>&& color)
 		{
 			using cls = FunctorPtr<glm::vec4, float>;
 			return Characterize(make_functor_ptr<false>([](Particle& p, const cls& color) -> void {
-				set_ptr(p.m_Shape->Fickler().Modulate(), color(p.t()));
+				*p.m_Shape->Fickler().Modulate() = color(p.t());
 			}, std::move(color)), 0);
 		}
 
@@ -223,14 +224,14 @@ namespace Particles {
 		{
 			using cls = std::tuple<FunctorPtr<glm::vec2, float>, DataIndex>;
 			return Characterize(make_functor_ptr<false>([](Particle& p, const cls& tuple) -> void {
-				set_ptr(p.m_Shape->Fickler().Scale(), std::get<0>(tuple)(p[std::get<1>(tuple)]));
+				*p.m_Shape->Fickler().Scale() = std::get<0>(tuple)(p[std::get<1>(tuple)]);
 			}, cls(std::move(scale), di)), di + 1);
 		}
 
 		CharacteristicGen SetLocalPosition(const Position2D& position)
 		{
 			return Characterize(make_functor_ptr<false>([](Particle& p, const Position2D& position) -> void {
-				set_ptr(p.m_Shape->Fickler().Position(), position);
+				*p.m_Shape->Fickler().Position() = position;
 			}, position), 0);
 		}
 
@@ -238,7 +239,7 @@ namespace Particles {
 		{
 			using cls = std::tuple<FunctorPtr<glm::vec2, float>, DataIndex>;
 			return Characterize(make_functor_ptr<false>([](Particle& p, const cls& tuple) -> void {
-				set_ptr(p.m_Shape->Fickler().Position(), std::get<0>(tuple)(p[std::get<1>(tuple)]));
+				*p.m_Shape->Fickler().Position() = std::get<0>(tuple)(p[std::get<1>(tuple)]);
 			}, cls(std::move(position), di)), di + 1);
 		}
 
@@ -246,7 +247,7 @@ namespace Particles {
 		{
 			using cls = std::tuple<FunctorPtr<glm::vec2, const glm::vec2&>, DataIndex, DataIndex>;
 			return Characterize(make_functor_ptr<false>([](Particle& p, const cls& tuple) -> void {
-				set_ptr(p.m_Shape->Fickler().Position(), std::get<0>(tuple)(glm::vec2{ p[std::get<1>(tuple)], p[std::get<2>(tuple)] }));
+				*p.m_Shape->Fickler().Position() = std::get<0>(tuple)(glm::vec2{ p[std::get<1>(tuple)], p[std::get<2>(tuple)] });
 			}, cls(std::move(position), dix, diy)), std::max(dix, diy) + 1);
 		}
 
@@ -259,7 +260,6 @@ namespace Particles {
 			}, cls(dix, diy)), std::max(dix, diy) + 1);
 		}
 
-		// TODO define sync functions on particle using function pointers to not have to go through ifs in fickler syncs.
 		static CharacteristicGen _SyncAll = Characterize(make_functor_ptr([](Particle& p) -> void { p.m_Shape->Fickler().SyncAll(); }), 0);
 		static CharacteristicGen _SyncT = Characterize(make_functor_ptr([](Particle& p) -> void { p.m_Shape->Fickler().SyncT(); }), 0);
 		static CharacteristicGen _SyncP = Characterize(make_functor_ptr([](Particle& p) -> void { p.m_Shape->Fickler().SyncP(); }), 0);

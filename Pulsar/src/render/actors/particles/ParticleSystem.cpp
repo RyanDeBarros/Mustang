@@ -7,6 +7,11 @@ ParticleSystem::ParticleSystem(const std::vector<ParticleSubsystemData>& subsyst
 {
 }
 
+ParticleSystem::ParticleSystem(std::vector<ParticleSubsystemData>&& subsystem_data, ZIndex z, FickleType fickle_type, bool visible, bool enabled)
+	: ParticleEffect(std::move(subsystem_data), z, fickle_type, enabled), m_Batcher(z), visible(visible)
+{
+}
+
 void ParticleSystem::RequestDraw(CanvasLayer* canvas_layer)
 {
 	ParticleEffect::OnUpdate();

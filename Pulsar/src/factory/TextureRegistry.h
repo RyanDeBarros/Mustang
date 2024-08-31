@@ -13,7 +13,7 @@ struct TextureConstructArgs_filepath
 	TextureVersion version = 0;
 	float svg_scale = 1.0f;
 
-	inline bool operator==(const TextureConstructArgs_filepath& args) const
+	bool operator==(const TextureConstructArgs_filepath& args) const
 	{
 		return filepath == args.filepath && settings == args.settings && temporaryBuffer == args.temporaryBuffer && version == args.version && svg_scale == args.svg_scale;
 	}
@@ -22,7 +22,7 @@ struct TextureConstructArgs_filepath
 template<>
 struct std::hash<TextureConstructArgs_filepath>
 {
-	inline size_t operator()(const TextureConstructArgs_filepath& args) const
+	size_t operator()(const TextureConstructArgs_filepath& args) const
 	{
 		auto hash1 = hash<std::string>{}(args.filepath);
 		auto hash2 = hash<TextureSettings>{}(args.settings);
@@ -39,7 +39,7 @@ struct TextureConstructArgs_tile
 	TextureVersion version = 0;
 	TextureSettings settings = {};
 
-	inline bool operator==(const TextureConstructArgs_tile& args) const
+	bool operator==(const TextureConstructArgs_tile& args) const
 	{
 		return tile == args.tile && settings == args.settings && version == args.version;
 	}
@@ -48,7 +48,7 @@ struct TextureConstructArgs_tile
 template<>
 struct std::hash<TextureConstructArgs_tile>
 {
-	inline size_t operator()(const TextureConstructArgs_tile& args) const
+	size_t operator()(const TextureConstructArgs_tile& args) const
 	{
 		auto hash1 = hash<TileHandle>{}(args.tile);
 		auto hash2 = hash<TextureVersion>{}(args.version);
@@ -82,8 +82,8 @@ public:
 	static void Bind(TextureHandle handle, TextureSlot slot);
 	static void Unbind(TextureSlot slot);
 	
-	inline static int GetWidth(TextureHandle handle) { Texture const* texture = Get(handle); return texture ? texture->GetWidth() : 0; }
-	inline static int GetHeight(TextureHandle handle) { Texture const* texture = Get(handle); return texture ? texture->GetHeight() : 0; }
-	inline static TileHandle GetTileHandle(TextureHandle handle) { Texture const* texture = Get(handle); return texture ? texture->GetTileHandle() : 0; }
+	static int GetWidth(TextureHandle handle) { Texture const* texture = Get(handle); return texture ? texture->GetWidth() : 0; }
+	static int GetHeight(TextureHandle handle) { Texture const* texture = Get(handle); return texture ? texture->GetHeight() : 0; }
+	static TileHandle GetTileHandle(TextureHandle handle) { Texture const* texture = Get(handle); return texture ? texture->GetTileHandle() : 0; }
 	static void SetSettings(TextureHandle handle, const TextureSettings& settings);
 };

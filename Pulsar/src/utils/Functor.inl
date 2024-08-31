@@ -20,18 +20,17 @@ decltype(auto) redirect(T arg)
 template<typename Ret, typename Arg>
 struct FunctorInterface
 {
-	// TODO for virtual inheritance, add more virtual destructors.
-	inline virtual ~FunctorInterface() = default;
-	inline virtual Ret operator()(Arg arg) = 0;
-	inline virtual FunctorInterface<Ret, Arg>* Clone() = 0;
+	virtual ~FunctorInterface() = default;
+	virtual Ret operator()(Arg arg) = 0;
+	virtual FunctorInterface<Ret, Arg>* Clone() = 0;
 };
 
 template<typename Ret>
 struct FunctorInterface<Ret, void>
 {
-	inline virtual ~FunctorInterface() = default;
-	inline virtual Ret operator()() = 0;
-	inline virtual FunctorInterface<Ret, void>* Clone() = 0;
+	virtual ~FunctorInterface() = default;
+	virtual Ret operator()() = 0;
+	virtual FunctorInterface<Ret, void>* Clone() = 0;
 };
 
 template<typename Ret, typename Arg, typename Cls>
@@ -85,16 +84,16 @@ struct Functor : public FunctorInterface<Ret, Arg>
 	static_assert(!std::is_rvalue_reference_v<Cls>, "Functor: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, Arg, Cls>;
 
-	inline Functor(func_signature function, _Storage closure) : function(function), closure(closure) {}
+	Functor(func_signature function, _Storage closure) : function(function), closure(closure) {}
 
-	inline Ret operator()(Arg arg) override
+	Ret operator()(Arg arg) override
 	{
 		if constexpr (std::is_void_v<Ret>)
 			function(redirect<Arg>(arg), redirect<Cls>(closure));
 		else
 			return function(redirect<Arg>(arg), redirect<Cls>(closure));
 	}
-	inline FunctorInterface<Ret, Arg>* Clone() override
+	FunctorInterface<Ret, Arg>* Clone() override
 	{
 		return new Functor<Ret, Arg, Cls, _Storage, true>(function, closure);
 	}
@@ -111,16 +110,16 @@ struct Functor<Ret, Arg, Cls, _Storage, false> : public FunctorInterface<Ret, Ar
 	static_assert(!std::is_rvalue_reference_v<Cls>, "Functor: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, Arg, Cls>;
 
-	inline Functor(func_signature function, auto&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
+	Functor(func_signature function, auto&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
 
-	inline Ret operator()(Arg arg) override
+	Ret operator()(Arg arg) override
 	{
 		if constexpr (std::is_void_v<Ret>)
 			function(redirect<Arg>(arg), redirect<Cls>(closure));
 		else
 			return function(redirect<Arg>(arg), redirect<Cls>(closure));
 	}
-	inline FunctorInterface<Ret, Arg>* Clone() override
+	FunctorInterface<Ret, Arg>* Clone() override
 	{
 		return new Functor<Ret, Arg, Cls, _Storage, false>(function, std::forward<_Storage&>(closure));
 	}
@@ -135,16 +134,16 @@ struct Functor<Ret, Arg, void, _Storage, _ValueIn> : public FunctorInterface<Ret
 	static_assert(std::is_void_v<_Storage>, "Functor: _Storage must be void when Cls is void.");
 	using func_signature = func_signature_t<Ret, Arg, void>;
 
-	inline Functor(func_signature function) : function(function) {}
+	Functor(func_signature function) : function(function) {}
 
-	inline Ret operator()(Arg arg) override
+	Ret operator()(Arg arg) override
 	{
 		if constexpr (std::is_void_v<Ret>)
 			function(redirect<Arg>(arg));
 		else
 			return function(redirect<Arg>(arg));
 	}
-	inline FunctorInterface<Ret, Arg>* Clone() override
+	FunctorInterface<Ret, Arg>* Clone() override
 	{
 		return new Functor<Ret, Arg, void, void, _ValueIn>(function);
 	}
@@ -161,16 +160,16 @@ struct Functor<Ret, void, Cls, _Storage, true> : public FunctorInterface<Ret, vo
 	static_assert(!std::is_rvalue_reference_v<Cls>, "Functor: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, void, Cls>;
 
-	inline Functor(func_signature function, _Storage closure) : function(function), closure(closure) {}
+	Functor(func_signature function, _Storage closure) : function(function), closure(closure) {}
 
-	inline Ret operator()() override
+	Ret operator()() override
 	{
 		if constexpr (std::is_void_v<Ret>)
 			function(redirect<Cls>(closure));
 		else
 			return function(redirect<Cls>(closure));
 	}
-	inline FunctorInterface<Ret, void>* Clone() override
+	FunctorInterface<Ret, void>* Clone() override
 	{
 		return new Functor<Ret, void, Cls, _Storage, true>(function, closure);
 	}
@@ -187,16 +186,16 @@ struct Functor<Ret, void, Cls, _Storage, false> : public FunctorInterface<Ret, v
 	static_assert(!std::is_rvalue_reference_v<Cls>, "Functor: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, void, Cls>;
 
-	inline Functor(func_signature function, auto&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
+	Functor(func_signature function, auto&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
 
-	inline Ret operator()() override
+	Ret operator()() override
 	{
 		if constexpr (std::is_void_v<Ret>)
 			function(redirect<Cls>(closure));
 		else
 			return function(redirect<Cls>(closure));
 	}
-	inline FunctorInterface<Ret, void>* Clone() override
+	FunctorInterface<Ret, void>* Clone() override
 	{
 		return new Functor<Ret, void, Cls, _Storage, false>(function, std::forward<_Storage&>(closure));
 	}
@@ -211,16 +210,16 @@ struct Functor<Ret, void, void, _Storage, _ValueIn> : public FunctorInterface<Re
 	static_assert(std::is_void_v<_Storage>, "Functor: _Storage must be void when Cls is void.");
 	using func_signature = func_signature_t<Ret, void, void>;
 
-	inline Functor(func_signature function) : function(function) {}
+	Functor(func_signature function) : function(function) {}
 
-	inline Ret operator()() override
+	Ret operator()() override
 	{
 		if constexpr (std::is_void_v<Ret>)
 			function();
 		else
 			return function();
 	}
-	inline FunctorInterface<Ret, void>* Clone() override
+	FunctorInterface<Ret, void>* Clone() override
 	{
 		return new Functor<Ret, void, void, void, _ValueIn>(function);
 	}
@@ -238,15 +237,15 @@ public:
 	using ArgType = Arg;
 
 	template<typename Cls, typename _Storage, bool _ValueIn>
-	inline FunctorPtr(Functor<Ret, Arg, Cls, _Storage, _ValueIn>* f) : f(f) {}
-	inline FunctorPtr(FunctorInterface<Ret, Arg>* f) : f(f) {}
-	inline FunctorPtr(const FunctorPtr<Ret, Arg>& other)
+	FunctorPtr(Functor<Ret, Arg, Cls, _Storage, _ValueIn>* f) : f(f) {}
+	FunctorPtr(FunctorInterface<Ret, Arg>* f) : f(f) {}
+	FunctorPtr(const FunctorPtr<Ret, Arg>& other)
 	{
 		if (other.f)
 			f = other.f->Clone();
 	}
-	inline FunctorPtr(FunctorPtr<Ret, Arg>&& other) noexcept : f(other.f) { other.f = nullptr; }
-	inline FunctorPtr& operator=(const FunctorPtr<Ret, Arg>& other)
+	FunctorPtr(FunctorPtr<Ret, Arg>&& other) noexcept : f(other.f) { other.f = nullptr; }
+	FunctorPtr& operator=(const FunctorPtr<Ret, Arg>& other)
 	{
 		if (this == &other)
 			return *this;
@@ -258,7 +257,7 @@ public:
 			f = nullptr;
 		return *this;
 	}
-	inline FunctorPtr& operator=(FunctorPtr&& other) noexcept
+	FunctorPtr& operator=(FunctorPtr&& other) noexcept
 	{
 		if (this == &other)
 			return *this;
@@ -268,15 +267,15 @@ public:
 		other.f = nullptr;
 		return *this;
 	}
-	inline ~FunctorPtr() { if (f) delete f; }
-	inline FunctorPtr<Ret, Arg> Clone() const
+	~FunctorPtr() { if (f) delete f; }
+	FunctorPtr<Ret, Arg> Clone() const
 	{
 		return f ? FunctorPtr<Ret, Arg>(f->Clone()) : nullptr;
 	}
 
 	// TODO dangerous to dereference. Define macro that can check if f is null first. OR use func pointer assignment in constructor or whenever f could be set null. In which case, operator()() should throw.
 	// Also, even if f is non-null, f.function may be null.
-	inline Ret operator()(Arg arg) const
+	Ret operator()(Arg arg) const
 	{
 		if constexpr (std::is_void_v<Ret>)
 			(*f)(arg);
@@ -295,15 +294,15 @@ public:
 	using ArgType = void;
 
 	template<typename Cls, typename _Storage, bool _ValueIn>
-	inline FunctorPtr(Functor<Ret, void, Cls, _Storage, _ValueIn>* f) : f(f) {}
-	inline FunctorPtr(FunctorInterface<Ret, void>* f) : f(f) {}
-	inline FunctorPtr(const FunctorPtr<Ret, void>& other)
+	FunctorPtr(Functor<Ret, void, Cls, _Storage, _ValueIn>* f) : f(f) {}
+	FunctorPtr(FunctorInterface<Ret, void>* f) : f(f) {}
+	FunctorPtr(const FunctorPtr<Ret, void>& other)
 	{
 		if (other.f)
 			f = other.f->Clone();
 	}
-	inline FunctorPtr(FunctorPtr<Ret, void>&& other) noexcept : f(other.f) { other.f = nullptr; }
-	inline FunctorPtr& operator=(const FunctorPtr<Ret, void>& other)
+	FunctorPtr(FunctorPtr<Ret, void>&& other) noexcept : f(other.f) { other.f = nullptr; }
+	FunctorPtr& operator=(const FunctorPtr<Ret, void>& other)
 	{
 		if (this == &other)
 			return *this;
@@ -315,7 +314,7 @@ public:
 			f = nullptr;
 		return *this;
 	}
-	inline FunctorPtr& operator=(FunctorPtr&& other) noexcept
+	FunctorPtr& operator=(FunctorPtr&& other) noexcept
 	{
 		if (this == &other)
 			return *this;
@@ -325,14 +324,14 @@ public:
 		other.f = nullptr;
 		return *this;
 	}
-	inline ~FunctorPtr() { if (f) delete f; }
-	inline FunctorPtr<Ret, void> Clone() const
+	~FunctorPtr() { if (f) delete f; }
+	FunctorPtr<Ret, void> Clone() const
 	{
 		return f ? FunctorPtr<Ret, void>(f->Clone()) : nullptr;
 	}
 
 	// TODO dangerous to dereference. Define macro that can check if f is null first.
-	inline Ret operator()() const
+	Ret operator()() const
 	{
 		if constexpr (std::is_void_v<Ret>)
 			(*f)();

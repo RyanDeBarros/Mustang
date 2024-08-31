@@ -8,18 +8,18 @@ struct AnimationPlayer
 {
 	std::vector<CopyPtr<AnimationTrackBase<_Target>>> tracks;
 
-	inline AnimationPlayer() = default;
-	inline AnimationPlayer(const AnimationPlayer<_Target>& other)
+	AnimationPlayer() = default;
+	AnimationPlayer(const AnimationPlayer<_Target>& other)
 		: tracks(other.tracks), target(other.target), period(other.period), time(other.time), speed(other.speed), isInReverse(other.isInReverse)
 	{
 		SyncTracks();
 	}
-	inline AnimationPlayer(AnimationPlayer<_Target>&& other) noexcept
+	AnimationPlayer(AnimationPlayer<_Target>&& other) noexcept
 		: tracks(std::move(other.tracks)), target(other.target), period(other.period), time(other.time), speed(other.speed), isInReverse(other.isInReverse)
 	{
 		SyncTracks();
 	}
-	inline AnimationPlayer<_Target>& operator=(const AnimationPlayer<_Target>& other)
+	AnimationPlayer<_Target>& operator=(const AnimationPlayer<_Target>& other)
 	{
 		if (this == &other)
 			return *this;
@@ -32,7 +32,7 @@ struct AnimationPlayer
 		SyncTracks();
 		return *this;
 	}
-	inline AnimationPlayer<_Target>& operator=(AnimationPlayer<_Target>&& other) noexcept
+	AnimationPlayer<_Target>& operator=(AnimationPlayer<_Target>&& other) noexcept
 	{
 		if (this == &other)
 			return *this;
@@ -46,18 +46,18 @@ struct AnimationPlayer
 		return *this;
 	}
 
-	inline _Target* GetTarget() { return target; }
-	inline void SetTarget(_Target* t)
+	_Target* GetTarget() { return target; }
+	void SetTarget(_Target* t)
 	{
 		target = t;
 		SyncTracks();
 	}
-	inline float GetPeriod() const { return period; }
-	inline void SetPeriod(float per) { if (per > 0.0f) period = per; }
-	inline float GetSpeed() const { return speed; }
-	inline void SetSpeed(float sp) { if (sp >= 0.0f) speed = sp; }
+	float GetPeriod() const { return period; }
+	void SetPeriod(float per) { if (per > 0.0f) period = per; }
+	float GetSpeed() const { return speed; }
+	void SetSpeed(float sp) { if (sp >= 0.0f) speed = sp; }
 
-	inline void SyncTracks()
+	void SyncTracks()
 	{
 		for (const auto& track : tracks)
 			track->SyncTarget(target);

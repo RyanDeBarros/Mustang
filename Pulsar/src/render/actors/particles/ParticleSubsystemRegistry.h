@@ -7,7 +7,7 @@
 
 struct psregistry_mismatch_error : public std::runtime_error
 {
-	inline psregistry_mismatch_error() : std::runtime_error("array size mismatch") {}
+	psregistry_mismatch_error() : std::runtime_error("array size mismatch") {}
 };
 
 class ParticleSubsystemRegistry
@@ -19,7 +19,7 @@ class ParticleSubsystemRegistry
 	ParticleSubsystemRegistry() = default;
 
 public:
-	inline static ParticleSubsystemRegistry& Instance()
+	static ParticleSubsystemRegistry& Instance()
 	{
 		static ParticleSubsystemRegistry instance;
 		return instance;

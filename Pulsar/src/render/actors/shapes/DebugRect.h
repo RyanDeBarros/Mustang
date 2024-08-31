@@ -15,10 +15,10 @@ public:
 	DebugRect& operator=(const DebugRect&);
 	DebugRect& operator=(DebugRect&&) noexcept;
 
-	inline float GetWidth() const { return m_Width; }
-	inline float GetHeight() const { return m_Height; }
-	inline bool IsFilled() const { return m_Filled; }
-	inline glm::vec2 GetPivot() const { return m_Pivot; }
+	float GetWidth() const { return m_Width; }
+	float GetHeight() const { return m_Height; }
+	bool IsFilled() const { return m_Filled; }
+	glm::vec2 GetPivot() const { return m_Pivot; }
 	void SetWidth(float width);
 	void GetHeight(float height);
 	void SetFilled(bool filled);

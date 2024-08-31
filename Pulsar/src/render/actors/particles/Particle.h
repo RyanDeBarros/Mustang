@@ -51,10 +51,10 @@ public:
 	Particle& operator=(Particle&&) noexcept;
 	~Particle();
 
-	inline float& operator[](Particles::DataIndex i) { return m_Data[i]; }
+	float& operator[](Particles::DataIndex i) { return m_Data[i]; }
 	
-	inline real t() const { return m_T; }
-	inline real dt() const { return m_DT; }
+	real t() const { return m_T; }
+	real dt() const { return m_DT; }
 
 private:
 	void OnDraw(real delta_time);

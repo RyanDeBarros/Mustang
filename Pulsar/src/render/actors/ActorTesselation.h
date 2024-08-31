@@ -21,7 +21,7 @@ public:
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 	
-	inline FickleActor2D* ActorRef() const { return m_Actor; }
+	FickleActor2D* ActorRef() const { return m_Actor; }
 	void PushBackStatic(const Transform2D& transform, bool sync_on_attach = false);
 	void PushBackStatic(const std::vector<Transform2D>& transforms, bool sync_on_attach = false);
 	void PushBackStatic(const Transform2D& transform, const Modulate& modulate, bool sync_on_attach = false);

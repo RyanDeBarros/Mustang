@@ -18,6 +18,19 @@ ParticleEffect::ParticleEffect(const std::vector<ParticleSubsystemData>& subsyst
 	Reset();
 }
 
+ParticleEffect::ParticleEffect(std::vector<ParticleSubsystemData>&& subsystem_data, ZIndex z, FickleType fickle_type, bool enabled)
+	: FickleActor2D(fickle_type, z), enabled(enabled)
+{
+	ParticleSubsystemIndex i = 0;
+	for (auto& subsys : subsystem_data)
+	{
+		std::shared_ptr<ParticleSubsystem> subsystem = std::make_shared<ParticleSubsystem>(std::move(subsys), i++, fickle_type);
+		m_Subsystems.push_back(subsystem);
+		m_Fickler.Attach(subsystem->Fickler());
+	}
+	Reset();
+}
+
 // TODO some way of skipping frames for intensive actors like particle systems. i.e., instead of updating every draw frame, an intensive actor can update for say, 120FPS, to limit draw/update overhead. Drawing will still happen obviously, but the update will happen every N frames. Maybe separate the two into separate functions.
 void ParticleEffect::OnUpdate()
 {

@@ -5,12 +5,19 @@
 #include "Logger.inl"
 #include "utils/Data.inl"
 
-// TODO r-value wave_data overload?
 ParticleSubsystem::ParticleSubsystem(const ParticleSubsystemData& wave_data, ParticleSubsystemIndex subsystem_index, FickleType fickle_type)
 	: m_Data(wave_data), m_TotalSpawn(m_Data.spawnFunc(1.0f)), m_SubsystemIndex(subsystem_index), m_Fickler(fickle_type)
 {
-	PULSAR_ASSERT(wave_data.prototypeShape->Fickler().Type() == fickle_type);
-	SetWavePeriod(wave_data.wavePeriod);
+	PULSAR_ASSERT(m_Data.prototypeShape->Fickler().Type() == fickle_type);
+	SetWavePeriod(m_Data.wavePeriod);
+	BindFickleFunctions();
+}
+
+ParticleSubsystem::ParticleSubsystem(ParticleSubsystemData&& wave_data, ParticleSubsystemIndex subsystem_index, FickleType fickle_type)
+	: m_Data(std::move(wave_data)), m_TotalSpawn(m_Data.spawnFunc(1.0f)), m_SubsystemIndex(subsystem_index), m_Fickler(fickle_type)
+{
+	PULSAR_ASSERT(m_Data.prototypeShape->Fickler().Type() == fickle_type);
+	SetWavePeriod(m_Data.wavePeriod);
 	BindFickleFunctions();
 }
 

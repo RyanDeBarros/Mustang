@@ -61,9 +61,9 @@ public:
 	bool OnDetach(ActorRenderBase2D* const actor);
 	void OnDraw();
 
-	inline LayerView2D& GetLayerView2DRef() { return m_LayerView; }
-	inline CanvasIndex GetZIndex() const { return m_Data.ci; }
-	inline CanvasLayerData& GetDataRef() { return m_Data; }
+	LayerView2D& GetLayerView2DRef() { return m_LayerView; }
+	CanvasIndex GetZIndex() const { return m_Data.ci; }
+	CanvasLayerData& GetDataRef() { return m_Data; }
 
 	void DrawPrimitive(class ActorPrimitive2D&);
 	void DrawArray(const Renderable& renderable, GLenum indexing_mode);

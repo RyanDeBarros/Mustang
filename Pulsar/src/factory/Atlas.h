@@ -49,15 +49,15 @@ public:
 
 	bool operator==(const Atlas& other) const;
 
-	inline int GetBorder() const { return m_Border; }
-	inline const std::vector<Placement>& GetPlacements() const { return m_Placements; }
-	inline unsigned char const* const GetBuffer() const { return TileRegistry::GetImageBuffer(m_Tile); }
+	int GetBorder() const { return m_Border; }
+	const std::vector<Placement>& GetPlacements() const { return m_Placements; }
+	unsigned char const* const GetBuffer() const { return TileRegistry::GetImageBuffer(m_Tile); }
 	
 	class RectRender SampleSubtile(size_t index, const struct TextureSettings& texture_settings = Texture::nearest_settings,
 		TextureVersion texture_version = 0, ShaderHandle shader = ShaderRegistry::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true) const;
-	inline TileHandle GetTileHandle() const { return m_Tile; }
-	inline int GetWidth() const { return TileRegistry::GetWidth(m_Tile); }
-	inline int GetHeight() const { return TileRegistry::GetHeight(m_Tile); }
+	TileHandle GetTileHandle() const { return m_Tile; }
+	int GetWidth() const { return TileRegistry::GetWidth(m_Tile); }
+	int GetHeight() const { return TileRegistry::GetHeight(m_Tile); }
 
 private:
 	void RectPack(std::vector<TileHandle>& tiles, int width = -1, int height = -1);

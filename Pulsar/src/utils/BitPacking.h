@@ -11,21 +11,21 @@ class BitPack_u32_u32
 	uint64_t x;
 
 public:
-	inline BitPack_u32_u32(uint32_t _1, uint32_t _2) : x(
+	BitPack_u32_u32(uint32_t _1, uint32_t _2) : x(
 		(static_cast<uint64_t>(_1) << 32) | _2
 	) {}
-	inline uint32_t _1() const
+	uint32_t _1() const
 	{
 		return x >> 32;
 	}
-	inline uint32_t _2() const {
+	uint32_t _2() const {
 		return x;
 	}
-	inline void i1(uint32_t _1)
+	void i1(uint32_t _1)
 	{
 		x = (x & 0x00000000FFFFFFFF) | (static_cast<uint64_t>(_1) << 32);
 	}
-	inline void i2(uint32_t _2) {
+	void i2(uint32_t _2) {
 		x = (x & 0xFFFFFFFF00000000) | _2;
 	}
 };
@@ -45,25 +45,25 @@ class BitPack_32_32
 	uint64_t x;
 
 public:
-	inline BitPack_32_32(T1 _1, T2 _2) : x(
+	BitPack_32_32(T1 _1, T2 _2) : x(
 		(static_cast<uint64_t>(PULSAR_REINTERPRET(uint32_t, _1)) << 32)
 		| PULSAR_REINTERPRET(uint32_t, _2)
 	) {}
-	inline T1 _1() const
+	T1 _1() const
 	{
 		uint32_t y = x >> 32;
 		return PULSAR_REINTERPRET(T1, y);
 	}
-	inline T2 _2() const
+	T2 _2() const
 	{
 		uint32_t y = x;
 		return PULSAR_REINTERPRET(T2, y);
 	}
-	inline void _1(T1 _1)
+	void _1(T1 _1)
 	{
 		x = (x & 0x00000000FFFFFFFF) | (static_cast<uint64_t>(PULSAR_REINTERPRET(uint32_t, _1)) << 32);
 	}
-	inline void _2(T2 _2)
+	void _2(T2 _2)
 	{
 		x = (x & 0xFFFFFFFF00000000) | PULSAR_REINTERPRET(uint32_t, _2);
 	}
@@ -75,35 +75,35 @@ class BitPack_32_16_16
 	uint64_t x;
 
 public:
-	inline BitPack_32_16_16(T1 _1, T2 _2, T3 _3) : x(
+	BitPack_32_16_16(T1 _1, T2 _2, T3 _3) : x(
 		(static_cast<uint64_t>(PULSAR_REINTERPRET(uint32_t, _1)) << 32)
 		| (static_cast<uint64_t>(PULSAR_REINTERPRET(uint16_t, _2)) << 16)
 		| PULSAR_REINTERPRET(uint16_t, _3)
 	) {}
-	inline T1 _1() const
+	T1 _1() const
 	{
 		uint32_t y = x >> 32;
 		return PULSAR_REINTERPRET(T1, y);
 	}
-	inline T2 _2() const
+	T2 _2() const
 	{
 		uint16_t y = x >> 16;
 		return PULSAR_REINTERPRET(T2, y);
 	}
-	inline T3 _3() const
+	T3 _3() const
 	{
 		uint16_t y = x;
 		return PULSAR_REINTERPRET(T3, y);
 	}
-	inline void _1(T1 _1)
+	void _1(T1 _1)
 	{
 		x = (x & 0x00000000FFFFFFFF) | (static_cast<uint64_t>(PULSAR_REINTERPRET(uint32_t, _1)) << 32);
 	}
-	inline void _2(T2 _2)
+	void _2(T2 _2)
 	{
 		x = (x & 0xFFFFFFFF0000FFFF) | (static_cast<uint64_t>(PULSAR_REINTERPRET(uint16_t, _2)) << 16);
 	}
-	inline void _3(T3 _3)
+	void _3(T3 _3)
 	{
 		x = (x & 0xFFFFFFFFFFFF0000) | PULSAR_REINTERPRET(uint16_t, _3);
 	}
@@ -115,35 +115,35 @@ class BitPack_16_16_32
 	uint64_t x;
 
 public:
-	inline BitPack_16_16_32(T1 _1, T2 _2, T3 _3) : x(
+	BitPack_16_16_32(T1 _1, T2 _2, T3 _3) : x(
 		(static_cast<uint64_t>(PULSAR_REINTERPRET(uint16_t, _1)) << 48)
 		| (static_cast<uint64_t>(PULSAR_REINTERPRET(uint16_t, _2)) << 32)
 		| PULSAR_REINTERPRET(uint32_t, _3)
 	) {}
-	inline T1 _1() const
+	T1 _1() const
 	{
 		uint16_t y = x >> 48;
 		return PULSAR_REINTERPRET(T1, y);
 	}
-	inline T2 _2() const
+	T2 _2() const
 	{
 		uint16_t y = x >> 32;
 		return PULSAR_REINTERPRET(T2, y);
 	}
-	inline T3 _3() const
+	T3 _3() const
 	{
 		uint32_t y = x;
 		return PULSAR_REINTERPRET(T3, y);
 	}
-	inline void _1(T1 _1)
+	void _1(T1 _1)
 	{
 		x = (x & 0x0000FFFFFFFFFFFF) | (static_cast<uint64_t>(PULSAR_REINTERPRET(uint16_t, _1)) << 48);
 	}
-	inline void _2(T2 _2)
+	void _2(T2 _2)
 	{
 		x = (x & 0xFFFF0000FFFFFFFF) | (static_cast<uint64_t>(PULSAR_REINTERPRET(uint16_t, _2)) << 32);
 	}
-	inline void _3(T3 _3)
+	void _3(T3 _3)
 	{
 		x = (x & 0xFFFFFFFF00000000) | PULSAR_REINTERPRET(uint32_t, _3);
 	}
@@ -155,45 +155,45 @@ class BitPack_16_16_16_16
 	uint64_t x;
 
 public:
-	inline BitPack_16_16_16_16(T1 _1, T2 _2, T3 _3, T4 _4) : x(
+	BitPack_16_16_16_16(T1 _1, T2 _2, T3 _3, T4 _4) : x(
 		(static_cast<uint64_t>(PULSAR_REINTERPRET(uint16_t, _1)) << 48)
 		| (static_cast<uint64_t>(PULSAR_REINTERPRET(uint16_t, _2)) << 32)
 		| (static_cast<uint64_t>(PULSAR_REINTERPRET(uint16_t, _3)) << 16)
 		| PULSAR_REINTERPRET(uint16_t, _4)
 	) {}
-	inline T1 _1() const
+	T1 _1() const
 	{
 		uint16_t y = x >> 48;
 		return PULSAR_REINTERPRET(T1, y);
 	}
-	inline T2 _2() const
+	T2 _2() const
 	{
 		uint16_t y = x >> 32;
 		return PULSAR_REINTERPRET(T2, y);
 	}
-	inline T3 _3() const
+	T3 _3() const
 	{
 		uint16_t y = x >> 16;
 		return PULSAR_REINTERPRET(T3, y);
 	}
-	inline T4 _4() const
+	T4 _4() const
 	{
 		uint16_t y = x;
 		return PULSAR_REINTERPRET(T4, y);
 	}
-	inline void _1(T1 _1)
+	void _1(T1 _1)
 	{
 		x = (x & 0x0000FFFFFFFFFFFF) | (static_cast<uint64_t>(PULSAR_REINTERPRET(uint16_t, _1)) << 48);
 	}
-	inline void _2(T2 _2)
+	void _2(T2 _2)
 	{
 		x = (x & 0xFFFF0000FFFFFFFF) | (static_cast<uint64_t>(PULSAR_REINTERPRET(uint16_t, _2)) << 32);
 	}
-	inline void _3(T3 _3)
+	void _3(T3 _3)
 	{
 		x = (x & 0xFFFFFFFF0000FFFF) | (static_cast<uint64_t>(PULSAR_REINTERPRET(uint16_t, _3)) << 16);
 	}
-	inline void _4(T4 _4)
+	void _4(T4 _4)
 	{
 		x = (x & 0xFFFFFFFFFFFF0000) | PULSAR_REINTERPRET(uint16_t, _4);
 	}
@@ -205,25 +205,25 @@ class BitPack_16_16
 	uint32_t x;
 
 public:
-	inline BitPack_16_16(T1 _1, T2 _2) : x(
+	BitPack_16_16(T1 _1, T2 _2) : x(
 		(static_cast<uint32_t>(PULSAR_REINTERPRET(uint16_t, _1)) << 16)
 		| PULSAR_REINTERPRET(uint16_t, _2)
 	) {}
-	inline T1 _1() const
+	T1 _1() const
 	{
 		uint16_t y = x >> 16;
 		return PULSAR_REINTERPRET(T1, y);
 	}
-	inline T2 _2() const
+	T2 _2() const
 	{
 		uint16_t y = x;
 		return PULSAR_REINTERPRET(T2, y);
 	}
-	inline void _1(T1 _1)
+	void _1(T1 _1)
 	{
 		x = (x & 0x0000FFFF) | (static_cast<uint32_t>(PULSAR_REINTERPRET(uint16_t, _1)) << 16);
 	}
-	inline void _2(T2 _2)
+	void _2(T2 _2)
 	{
 		x = (x & 0xFFFF0000) | PULSAR_REINTERPRET(uint16_t, _2);
 	}

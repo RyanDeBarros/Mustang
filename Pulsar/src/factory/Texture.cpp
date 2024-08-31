@@ -135,7 +135,6 @@ void Texture::SetSettings(const TextureSettings& settings) const
 	PULSAR_TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)settings.magFilter));
 	PULSAR_TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.wrapS));
 	PULSAR_TRY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.wrapT));
-	// TODO lod level?
 	Unbind();
 }
 

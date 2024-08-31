@@ -36,7 +36,7 @@ struct CumulativeFunc
 	CumulativeFunc& operator=(const CumulativeFunc& func) { cfunc = func.cfunc.Clone(); prev = func.prev; return *this; }
 	CumulativeFunc& operator=(CumulativeFunc&& func) noexcept { cfunc = std::move(func.cfunc); prev = func.prev; return *this; }
 
-	inline Int operator()(float t)
+	Int operator()(float t)
 	{
 		Int res = static_cast<Int>(std::lroundf(cfunc(t)));
 		if (res >= prev)

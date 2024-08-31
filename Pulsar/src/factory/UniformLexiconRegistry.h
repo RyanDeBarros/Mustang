@@ -13,7 +13,7 @@ struct UniformLexiconConstructArgs
 {
 	const std::unordered_map<std::string, Uniform>& uniforms;
 
-	inline bool operator==(const UniformLexiconConstructArgs& args) const
+	bool operator==(const UniformLexiconConstructArgs& args) const
 	{
 		return uniforms == args.uniforms;
 	}
@@ -22,7 +22,7 @@ struct UniformLexiconConstructArgs
 template<>
 struct std::hash<UniformLexiconConstructArgs>
 {
-	inline size_t operator()(const UniformLexiconConstructArgs& args) const
+	size_t operator()(const UniformLexiconConstructArgs& args) const
 	{
 		size_t hasher = 0;
 		size_t i = 0;

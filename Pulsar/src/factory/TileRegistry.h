@@ -11,7 +11,7 @@ struct TileConstructArgs
 	std::string filepath;
 	float svg_scale = 1.0f;
 
-	inline bool operator==(const TileConstructArgs& args) const
+	bool operator==(const TileConstructArgs& args) const
 	{
 		return filepath == args.filepath && svg_scale == args.svg_scale;
 	}
@@ -20,7 +20,7 @@ struct TileConstructArgs
 template<>
 struct std::hash<TileConstructArgs>
 {
-	inline size_t operator()(const TileConstructArgs& args) const
+	size_t operator()(const TileConstructArgs& args) const
 	{
 		return hash<std::string>{}(args.filepath) ^ (hash<float>{}(args.svg_scale) << 1);
 	}

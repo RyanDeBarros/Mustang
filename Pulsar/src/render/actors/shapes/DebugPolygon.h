@@ -13,7 +13,7 @@ typedef std::pair<GLenum, BatchModel> DebugModel;
 template<>
 struct std::hash<DebugModel>
 {
-	inline size_t operator()(const DebugModel& model) const
+	size_t operator()(const DebugModel& model) const
 	{
 		auto hash1 = hash<GLenum>{}(model.first);
 		auto hash2 = hash<BatchModel>{}(model.second);
@@ -53,19 +53,19 @@ public:
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
 	virtual bool DrawPrep();
-	inline DebugModel GetDebugModel() const { return { m_IndexingMode, m_Renderable.model }; }
+	DebugModel GetDebugModel() const { return { m_IndexingMode, m_Renderable.model }; }
 
-	inline std::vector<glm::vec2>& PointsRef() { m_Status |= 0b1; return m_Points; }
-	inline void SetPointPosition(const size_t& i, const glm::vec2& point) { if (i >= 0 && i < m_Points.size()) { m_Points[i] = point; m_Status |= 0b100; } }
+	std::vector<glm::vec2>& PointsRef() { m_Status |= 0b1; return m_Points; }
+	void SetPointPosition(const size_t& i, const glm::vec2& point) { if (i >= 0 && i < m_Points.size()) { m_Points[i] = point; m_Status |= 0b100; } }
 
-	inline GLenum GetIndexingMode() const { return m_IndexingMode; }
-	inline void SetIndexingMode(GLenum indexing_mode) { m_Status |= 0b1; m_IndexingMode = indexing_mode; }
+	GLenum GetIndexingMode() const { return m_IndexingMode; }
+	void SetIndexingMode(GLenum indexing_mode) { m_Status |= 0b1; m_IndexingMode = indexing_mode; }
 
-	inline void FlagProteate() { m_Status |= 0b11010; }
-	inline void FlagTransform() { m_Status |= 0b11000; }
-	inline void FlagTransformP() { m_Status |= 0b1000; }
-	inline void FlagTransformRS() { m_Status |= 0b10000; }
-	inline void FlagModulate() { m_Status |= 0b10; }
+	void FlagProteate() { m_Status |= 0b11010; }
+	void FlagTransform() { m_Status |= 0b11000; }
+	void FlagTransformP() { m_Status |= 0b1000; }
+	void FlagTransformRS() { m_Status |= 0b10000; }
+	void FlagModulate() { m_Status |= 0b10; }
 
 	bool visible = true;
 
@@ -80,7 +80,7 @@ private:
 	void buffer_packed_rs_default(Stride);
 	void buffer_packed_m(Stride);
 	void buffer_packed_m_default(Stride);
-	inline void buffer_packed_empty(Stride) {}
+	void buffer_packed_empty(Stride) {}
 };
 
 struct DP_Notification : public FickleNotification
@@ -89,7 +89,7 @@ struct DP_Notification : public FickleNotification
 
 	DP_Notification(DebugPolygon* poly) : poly(poly) {}
 
-	void Notify(FickleSyncCode code)
+	void Notify(FickleSyncCode code) override
 	{
 		switch (code)
 		{

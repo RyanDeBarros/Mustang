@@ -11,5 +11,6 @@ enum class FickleSyncCode
 
 struct FickleNotification
 {
+	virtual ~FickleNotification() = default;
 	virtual void Notify(FickleSyncCode) {}
 };

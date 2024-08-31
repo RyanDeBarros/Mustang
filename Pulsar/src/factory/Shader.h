@@ -24,5 +24,5 @@ public:
 
 	GLint GetUniformLocation(const char* uniform_name) const;
 	
-	inline bool IsValid() const { return m_RID > 0; }
+	bool IsValid() const { return m_RID > 0; }
 };

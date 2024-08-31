@@ -13,6 +13,7 @@ class ParticleSystem : public ParticleEffect
 
 public:
 	ParticleSystem(const std::vector<ParticleSubsystemData>& subsystem_data, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true, bool enabled = true);
+	ParticleSystem(std::vector<ParticleSubsystemData>&& subsystem_data, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true, bool enabled = true);
 	ParticleSystem(const ParticleSystem&) = delete;
 	ParticleSystem(ParticleSystem&&) = delete;
 

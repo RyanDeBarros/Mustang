@@ -805,9 +805,9 @@ LOAD_STATUS Loader::loadParticleEffect(const char* filepath, ParticleEffect*& pe
 		}
 
 		if (ptype == "array")
-			peffect_initializer = new ParticleSubsystemArray(subsystems, 0, fickle_type, true, auto_enable);
+			peffect_initializer = new ParticleSubsystemArray(std::move(subsystems), 0, fickle_type, true, auto_enable);
 		else if (ptype == "system")
-			peffect_initializer = new ParticleSystem(subsystems, 0, fickle_type, true, auto_enable);
+			peffect_initializer = new ParticleSystem(std::move(subsystems), 0, fickle_type, true, auto_enable);
 		else
 			return LOAD_STATUS::ASSET_LOAD_ERR;
 

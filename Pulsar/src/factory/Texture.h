@@ -77,7 +77,7 @@ struct TextureSettings
 template<>
 struct std::hash<TextureSettings>
 {
-	inline size_t operator()(const TextureSettings& settings) const
+	size_t operator()(const TextureSettings& settings) const
 	{
 		auto hash1 = hash<MinFilter>{}(settings.minFilter);
 		auto hash2 = hash<MagFilter>{}(settings.magFilter);
@@ -98,7 +98,7 @@ class Texture
 	TileHandle m_Tile;
 
 	friend class TextureRegistry;
-	inline bool IsValid() const { return m_RID > 0; }
+	bool IsValid() const { return m_RID > 0; }
 
 public:
 	Texture(const char* filepath, TextureSettings settings = {}, bool temporary_buffer = true, float svg_scale = 1.0f);
@@ -114,9 +114,9 @@ public:
 
 	void SetSettings(const TextureSettings& settings) const;
 
-	inline int GetWidth() const { return m_Width; }
-	inline int GetHeight() const { return m_Height; }
-	inline TileHandle GetTileHandle() const { return m_Tile; }
+	int GetWidth() const { return m_Width; }
+	int GetHeight() const { return m_Height; }
+	TileHandle GetTileHandle() const { return m_Tile; }
 
 	static const TextureSettings linear_settings;
 	static const TextureSettings nearest_settings;

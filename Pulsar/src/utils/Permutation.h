@@ -16,7 +16,7 @@ public:
 	Permutation(size_t n);
 	Permutation(const std::vector<size_t>& nums);
 	size_t operator[](size_t i) const;
-	inline size_t size() const { return m_N; }
+	size_t size() const { return m_N; }
 	Permutation inverse() const;
 };
 
@@ -26,7 +26,7 @@ class SwapPopIndexer
 
 public:
 	SwapPopIndexer(size_t initial_size);
-	inline size_t operator[](size_t i) const { return m_Indices[i]; }
+	size_t operator[](size_t i) const { return m_Indices[i]; }
 	
 	void SwapPop(size_t i);
 	void Push();

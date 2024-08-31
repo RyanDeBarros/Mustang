@@ -12,11 +12,11 @@ struct PackedModulate
 	Modulate modulate = { 1.0f, 1.0f, 1.0f, 1.0f };
 	Modulate packedM = { 1.0f, 1.0f, 1.0f, 1.0f };
 	
-	inline Modulate* operator*()
+	Modulate* operator*()
 	{
 		return &modulate;
 	}
-	inline Modulate* operator->()
+	Modulate* operator->()
 	{
 		return &modulate;
 	}
@@ -34,24 +34,24 @@ struct Modulator
 	Modulator* parent = nullptr;
 	std::vector<Modulator*> children;
 
-	explicit inline Modulator(const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }, FickleNotification* notify = nullptr, bool sync = true)
+	explicit Modulator(const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f }, FickleNotification* notify = nullptr, bool sync = true)
 		: self{ modulate }, notify(notify)
 	{
 		if (sync)
 			self.Sync();
 	}
 
-	inline Modulator(const Modulator& modulator)
+	Modulator(const Modulator& modulator)
 		: self(modulator.self), parent(modulator.parent), children(modulator.children)
 	{
 	}
 
-	inline Modulator(Modulator&& modulator) noexcept
+	Modulator(Modulator&& modulator) noexcept
 		: self(modulator.self), parent(std::move(modulator.parent)), children(std::move(modulator.children))
 	{
 	}
 
-	inline Modulator& operator=(const Modulator& modulator)
+	Modulator& operator=(const Modulator& modulator)
 	{
 		self = modulator.self;
 		parent = modulator.parent;
@@ -59,7 +59,7 @@ struct Modulator
 		return *this;
 	}
 
-	inline Modulator& operator=(Modulator&& modulator) noexcept
+	Modulator& operator=(Modulator&& modulator) noexcept
 	{
 		self = modulator.self;
 		parent = std::move(modulator.parent);
@@ -67,10 +67,10 @@ struct Modulator
 		return *this;
 	}
 
-	inline Modulate& Self() { return self.modulate; }
+	Modulate& Self() { return self.modulate; }
 	void SetPackedLocalOf(const Modulate& global);
 
-	inline void SyncChildren()
+	void SyncChildren()
 	{
 		if (notify)
 			notify->Notify(FickleSyncCode::SyncM);
@@ -78,7 +78,7 @@ struct Modulator
 			c->Sync();
 	}
 
-	inline void Sync()
+	void Sync()
 	{
 		if (parent)
 			self.Sync(parent->self);
@@ -87,7 +87,7 @@ struct Modulator
 		SyncChildren();
 	}
 
-	inline void Attach(Modulator* modulator)
+	void Attach(Modulator* modulator)
 	{
 		if (!modulator)
 			return;
@@ -97,7 +97,7 @@ struct Modulator
 		modulator->parent = this;
 	}
 
-	inline void Detach(Modulator* modulator)
+	void Detach(Modulator* modulator)
 	{
 		if (!modulator)
 			return;
@@ -111,27 +111,27 @@ struct Modulator
 		}
 	}
 
-	inline void AttachAll(Modulator* modulator_array, size_t length)
+	void AttachAll(Modulator* modulator_array, size_t length)
 	{
 		children.reserve(children.capacity() + length);
 		for (size_t i = 0; i < length; i++)
 			Attach(modulator_array + i);
 	}
 
-	inline void AttachAll(Modulator** modulator_array, size_t length)
+	void AttachAll(Modulator** modulator_array, size_t length)
 	{
 		children.reserve(children.capacity() + length);
 		for (size_t i = 0; i < length; i++)
 			Attach(modulator_array[i]);
 	}
 
-	inline void DetachAll(Modulator* modulator_array, size_t length)
+	void DetachAll(Modulator* modulator_array, size_t length)
 	{
 		for (size_t i = 0; i < length; i++)
 			Detach(modulator_array + i);
 	}
 
-	inline void DetachAll(Modulator** modulator_array, size_t length)
+	void DetachAll(Modulator** modulator_array, size_t length)
 	{
 		for (size_t i = 0; i < length; i++)
 			Detach(modulator_array[i]);

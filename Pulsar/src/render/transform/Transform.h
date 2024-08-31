@@ -25,14 +25,8 @@ struct PackedTransform2D
 	PackedP2D packedP = { 0.0f, 0.0f };
 	PackedRS2D packedRS = { 1.0f, 0.0f, 0.0f, 1.0f };
 
-	inline Transform2D* operator*()
-	{
-		return &transform;
-	}
-	inline Transform2D* operator->()
-	{
-		return &transform;
-	}
+	Transform2D* operator*() { return &transform; }
+	Transform2D* operator->() { return &transform; }
 
 	void Sync();
 	void Sync(const PackedTransform2D& parent);
@@ -50,24 +44,24 @@ struct Transformer2D
 	Transformer2D* parent = nullptr;
 	std::vector<Transformer2D*> children;
 
-	explicit inline Transformer2D(const Transform2D& transform = {}, FickleNotification* notify = nullptr, bool sync = true)
+	explicit Transformer2D(const Transform2D& transform = {}, FickleNotification* notify = nullptr, bool sync = true)
 		: self{ transform }, notify(std::move(notify)) 
 	{
 		if (sync)
 			self.Sync();
 	}
 
-	inline Transformer2D(const Transformer2D& transformer)
+	Transformer2D(const Transformer2D& transformer)
 		: self(transformer.self), parent(transformer.parent), children(transformer.children)
 	{
 	}
 
-	inline Transformer2D(Transformer2D&& transformer) noexcept
+	Transformer2D(Transformer2D&& transformer) noexcept
 		: self(transformer.self), parent(std::move(transformer.parent)), children(std::move(transformer.children))
 	{
 	}
 	
-	inline Transformer2D& operator=(const Transformer2D& transformer)
+	Transformer2D& operator=(const Transformer2D& transformer)
 	{
 		self = transformer.self;
 		parent = transformer.parent;
@@ -75,7 +69,7 @@ struct Transformer2D
 		return *this;
 	}
 	
-	inline Transformer2D& operator=(Transformer2D&& transformer) noexcept
+	Transformer2D& operator=(Transformer2D&& transformer) noexcept
 	{
 		self = transformer.self;
 		parent = std::move(transformer.parent);
@@ -83,15 +77,15 @@ struct Transformer2D
 		return *this;
 	}
 
-	inline Transform2D& Self() { return self.transform; }
-	inline Position2D& Position() { return self->position; }
-	inline Rotation2D& Rotation() { return self->rotation; }
-	inline Scale2D& Scale() { return self->scale; }
+	Transform2D& Self() { return self.transform; }
+	Position2D& Position() { return self->position; }
+	Rotation2D& Rotation() { return self->rotation; }
+	Scale2D& Scale() { return self->scale; }
 	void SetPackedLocalOf(const PackedP2D& globalPackedP, const PackedRS2D& globalPackedRS);
 	void SetPackedLocalOf(const PackedP2D& globalPackedP);
 	void SetPackedLocalOf(const PackedRS2D& globalPackedRS);
 
-	inline void SyncChildren()
+	void SyncChildren()
 	{
 		if (notify)
 			notify->Notify(FickleSyncCode::SyncT);
@@ -99,7 +93,7 @@ struct Transformer2D
 			c->Sync();
 	}
 
-	inline void SyncChildrenP()
+	void SyncChildrenP()
 	{
 		if (notify)
 			notify->Notify(FickleSyncCode::SyncP);
@@ -107,7 +101,7 @@ struct Transformer2D
 			c->SyncP();
 	}
 
-	inline void SyncChildrenRS()
+	void SyncChildrenRS()
 	{
 		if (notify)
 			notify->Notify(FickleSyncCode::SyncRS);
@@ -115,7 +109,7 @@ struct Transformer2D
 			c->SyncRS();
 	}
 
-	inline void Sync()
+	void Sync()
 	{
 		if (parent)
 			self.Sync(parent->self);
@@ -124,7 +118,7 @@ struct Transformer2D
 		SyncChildren();
 	}
 
-	inline void SyncP()
+	void SyncP()
 	{
 		if (parent)
 			self.SyncP(parent->self);
@@ -133,7 +127,7 @@ struct Transformer2D
 		SyncChildrenP();
 	}
 
-	inline void SyncRS()
+	void SyncRS()
 	{
 		if (parent)
 			self.SyncRS(parent->self);
@@ -144,7 +138,7 @@ struct Transformer2D
 
 	// use inheritance to define parent transformer that doesn't use vector of children, or possibly parent. that way, one can attach simpler transforms/modulates, such as in ActorTesselation.
 
-	inline void Attach(Transformer2D* transformer)
+	void Attach(Transformer2D* transformer)
 	{
 		if (!transformer)
 			return;
@@ -154,7 +148,7 @@ struct Transformer2D
 		transformer->parent = this;
 	}
 
-	inline void Detach(Transformer2D* transformer)
+	void Detach(Transformer2D* transformer)
 	{
 		if (!transformer)
 			return;
@@ -168,27 +162,27 @@ struct Transformer2D
 		}
 	}
 
-	inline void AttachAll(Transformer2D* transformer_array, size_t length)
+	void AttachAll(Transformer2D* transformer_array, size_t length)
 	{
 		children.reserve(children.capacity() + length);
 		for (size_t i = 0; i < length; i++)
 			Attach(transformer_array + i);
 	}
 
-	inline void AttachAll(Transformer2D** transformer_array, size_t length)
+	void AttachAll(Transformer2D** transformer_array, size_t length)
 	{
 		children.reserve(children.capacity() + length);
 		for (size_t i = 0; i < length; i++)
 			Attach(transformer_array[i]);
 	}
 
-	inline void DetachAll(Transformer2D* transformer_array, size_t length)
+	void DetachAll(Transformer2D* transformer_array, size_t length)
 	{
 		for (size_t i = 0; i < length; i++)
 			Detach(transformer_array + i);
 	}
 
-	inline void DetachAll(Transformer2D** transformer_array, size_t length)
+	void DetachAll(Transformer2D** transformer_array, size_t length)
 	{
 		for (size_t i = 0; i < length; i++)
 			Detach(transformer_array[i]);

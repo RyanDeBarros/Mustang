@@ -13,7 +13,7 @@ struct KeyFrame
 {
 	static constexpr bool progressive = false;
 	float timepoint;
-	inline KeyFrame(float timepoint) : timepoint(timepoint) {}
+	KeyFrame(float timepoint) : timepoint(timepoint) {}
 };
 
 namespace Interp {
@@ -25,19 +25,20 @@ template<typename _Value, unsigned int _InterpMethod, bool _InOrder>
 struct interpolate
 {
 	static_assert(false, "interpolate is not defined for type and/or interpolation method.");
-	inline static std::decay_t<_Value> _(_Value a, float ta, _Value b, float tb, float t, float period) {}
+	static std::decay_t<_Value> _(_Value a, float ta, _Value b, float tb, float t, float period) {}
 };
 
 template<typename _Property, typename _KeyFrame, unsigned int _InterpMethod, bool _InOrder>
 struct interpexec
 {
 	static_assert(false, "interpexec is not defined for keyframe type and/or interpolation method.");
-	inline static void _(_Property* property, _KeyFrame& a, _KeyFrame& b, float t, float period) {}
+	static void _(_Property* property, _KeyFrame& a, _KeyFrame& b, float t, float period) {}
 };
 
 template<typename _Target>
 struct AnimationTrackBase
 {
+	virtual ~AnimationTrackBase() = default;
 	virtual void SyncTarget(_Target* target) = 0;
 	virtual void AdvanceForward(float time, float period) = 0;
 	virtual void AdvanceBackward(float time, float period) = 0;
@@ -60,7 +61,7 @@ struct AnimationTrack : public AnimationTrackBase<_Target>
 	FunctorPtr<void, void> callback = VoidFunctorPtr;
 	FunctorPtr<_Property*, _Target*> getProperty = make_functor_ptr([](_Target*) -> _Property* { return nullptr; });
 
-	inline AnimationTrack() = default;
+	AnimationTrack() = default;
 	
 	void Insert(const _KeyFrame& key_frame);
 	void Insert(_KeyFrame&& key_frame);
@@ -72,7 +73,7 @@ private:
 	_Property* property = nullptr;
 	unsigned short lastIndex = 0;
 
-	inline void SyncTarget(_Target* target) override { property = getProperty(target); }
+	void SyncTarget(_Target* target) override { property = getProperty(target); }
 	void AdvanceForward(float time, float period) override;
 	void AdvanceBackward(float time, float period) override;
 

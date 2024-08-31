@@ -31,10 +31,10 @@ struct Renderable;
 
 namespace Render
 {
-	extern inline BufferCounter VertexBufferLayoutCount(const Renderable&);
-	extern inline BufferCounter VertexBufferLayoutCount(const BufferCounter&, const VertexLayout&, const VertexLayoutMask&);
-	extern inline Stride StrideCountOf(const VertexLayout&, const VertexLayoutMask&);
-	extern inline void _AttribLayout(const VertexLayout&, const VertexLayoutMask&);
+	extern BufferCounter VertexBufferLayoutCount(const Renderable&);
+	extern BufferCounter VertexBufferLayoutCount(const BufferCounter&, const VertexLayout&, const VertexLayoutMask&);
+	extern Stride StrideCountOf(const VertexLayout&, const VertexLayoutMask&);
+	extern void _AttribLayout(const VertexLayout&, const VertexLayoutMask&);
 }
 
 struct Renderable

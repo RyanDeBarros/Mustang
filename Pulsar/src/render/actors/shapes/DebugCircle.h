@@ -13,7 +13,7 @@ public:
 	DebugCircle& operator=(const DebugCircle&);
 	DebugCircle& operator=(DebugCircle&&) noexcept;
 
-	inline float GetDiameter() const { return m_Diameter; }
+	float GetDiameter() const { return m_Diameter; }
 	void SetRadius(float radius);
 	
 private:

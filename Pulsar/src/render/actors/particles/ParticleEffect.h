@@ -17,8 +17,10 @@ class ParticleEffect : public FickleActor2D
 
 public:
 	ParticleEffect(const std::vector<ParticleSubsystemData>& subsystem_data, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool enabled = true);
+	ParticleEffect(std::vector<ParticleSubsystemData>&& subsystem_data, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool enabled = true);
 	ParticleEffect(const ParticleEffect&) = delete;
 	ParticleEffect(ParticleEffect&&) = delete;
+	virtual ~ParticleEffect() = default;
 
 	/// Whether the particle system is updated every update frame. This does not affect whether the system should be drawn.
 	bool enabled;
@@ -29,10 +31,10 @@ public:
 
 	void Pause();
 	void Resume();
-	inline void Reset() { m_TotalPlayed = 0.0f; m_DeltaTime = 0.0f; m_PlayTime = 0.0f; }
+	void Reset() { m_TotalPlayed = 0.0f; m_DeltaTime = 0.0f; m_PlayTime = 0.0f; }
 	void PlayFor(real n);
 
-	inline ParticleSubsystem& SubsystemRef(unsigned int i) { return *m_Subsystems[i]; }
+	ParticleSubsystem& SubsystemRef(unsigned int i) { return *m_Subsystems[i]; }
 
 protected:
 	std::vector<std::shared_ptr<ParticleSubsystem>> m_Subsystems;

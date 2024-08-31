@@ -23,22 +23,22 @@ protected:
 	T* ptr = nullptr;
 
 public:
-	inline FickleWrapper() {}
-	inline FickleWrapper(const T& fickler) : ptr(new T(fickler)) {}
-	inline FickleWrapper(T&& fickler) : ptr(new T(std::move(fickler))) {}
-	inline FickleWrapper(const FickleWrapper<T>& other)
+	FickleWrapper() {}
+	FickleWrapper(const T& fickler) : ptr(new T(fickler)) {}
+	FickleWrapper(T&& fickler) : ptr(new T(std::move(fickler))) {}
+	FickleWrapper(const FickleWrapper<T>& other)
 	{
 		if (other.ptr)
 			ptr = new T(*other.ptr);
 	}
-	inline FickleWrapper(FickleWrapper<T>&& other) noexcept
+	FickleWrapper(FickleWrapper<T>&& other) noexcept
 		: ptr(other.ptr)
 	{
 		other.ptr = nullptr;
 	}
 protected:
 	friend struct Fickler2D;
-	inline FickleWrapper& operator=(const FickleWrapper<T>& other)
+	FickleWrapper& operator=(const FickleWrapper<T>& other)
 	{
 		if (this == &other)
 			return *this;
@@ -61,7 +61,7 @@ protected:
 		}
 		return *this;
 	}
-	inline FickleWrapper& operator=(FickleWrapper<T>&& other) noexcept
+	FickleWrapper& operator=(FickleWrapper<T>&& other) noexcept
 	{
 		if (this == &other)
 			return *this;
@@ -77,11 +77,11 @@ public:
 		if (ptr)
 			delete ptr;
 	}
-	inline operator bool() const
+	operator bool() const
 	{
 		return ptr;
 	}
-	inline void Disengage()
+	void Disengage()
 	{
 		if (ptr)
 		{
@@ -89,7 +89,7 @@ public:
 			ptr = nullptr;
 		}
 	}
-	inline void Engage(const T& fickler)
+	void Engage(const T& fickler)
 	{
 		if (ptr)
 		{
@@ -101,7 +101,7 @@ public:
 			ptr = new T(fickler);
 		}
 	}
-	inline void Engage(T&& fickler)
+	void Engage(T&& fickler)
 	{
 		if (ptr)
 		{
@@ -113,22 +113,22 @@ public:
 			ptr = new T(std::move(fickler));
 		}
 	}
-	inline T* Ref()
+	T* Ref()
 	{
 		return ptr;
 	}
-	inline T& operator*() { return *ptr; }
-	inline const T& operator*() const { return *ptr; }
-	inline T* operator->() { return ptr; }
+	T& operator*() { return *ptr; }
+	const T& operator*() const { return *ptr; }
+	T* operator->() { return ptr; }
 };
 
 struct Transformable2D : public FickleWrapper<Transformer2D>
 {
-	inline Transformable2D() : FickleWrapper<Transformer2D>() {}
-	inline Transformable2D(const Transformer2D& transformer) : FickleWrapper<Transformer2D>(transformer) {}
-	inline Transformable2D(Transformer2D&& transformer) : FickleWrapper<Transformer2D>(std::move(transformer)) {}
+	Transformable2D() : FickleWrapper<Transformer2D>() {}
+	Transformable2D(const Transformer2D& transformer) : FickleWrapper<Transformer2D>(transformer) {}
+	Transformable2D(Transformer2D&& transformer) : FickleWrapper<Transformer2D>(std::move(transformer)) {}
 	
-	inline void Emplace(const Transform2D& transform = {})
+	void Emplace(const Transform2D& transform = {})
 	{
 		if (ptr)
 		{
@@ -144,11 +144,11 @@ struct Transformable2D : public FickleWrapper<Transformer2D>
 
 struct Modulatable : public FickleWrapper<Modulator>
 {
-	inline Modulatable() : FickleWrapper<Modulator>() {}
-	inline Modulatable(const Modulator& modulator) : FickleWrapper<Modulator>(modulator) {}
-	inline Modulatable(Modulator&& modulator) : FickleWrapper<Modulator>(std::move(modulator)) {}
+	Modulatable() : FickleWrapper<Modulator>() {}
+	Modulatable(const Modulator& modulator) : FickleWrapper<Modulator>(modulator) {}
+	Modulatable(Modulator&& modulator) : FickleWrapper<Modulator>(std::move(modulator)) {}
 
-	inline void Emplace(const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f })
+	void Emplace(const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f })
 	{
 		if (ptr)
 		{
@@ -171,9 +171,9 @@ struct FickleType
 {
 	bool transformable;
 	bool modulatable;
-	inline constexpr FickleType(bool transformable, bool modulatable) : transformable(transformable), modulatable(modulatable) {}
+	constexpr FickleType(bool transformable, bool modulatable) : transformable(transformable), modulatable(modulatable) {}
 
-	inline constexpr operator int() const
+	constexpr operator int() const
 	{
 		if (transformable)
 			return modulatable ? 0 : 1;
@@ -196,14 +196,14 @@ class ProteanChildren
 	std::vector<Modulator*>& m_children;
 
 public:
-	inline ProteanChildren(std::vector<Transformer2D*>& t_children, std::vector<Modulator*>& m_children) : t_children(t_children), m_children(m_children) {}
+	ProteanChildren(std::vector<Transformer2D*>& t_children, std::vector<Modulator*>& m_children) : t_children(t_children), m_children(m_children) {}
 
 	template<typename _Fickle>
 	auto at(size_t);
 	template<>
-	inline auto at<Transformer2D>(size_t i) { return static_cast<Transformer2D*&>(t_children[i]); }
+	auto at<Transformer2D>(size_t i) { return static_cast<Transformer2D*&>(t_children[i]); }
 	template<>
-	inline auto at<Modulator>(size_t i) { return static_cast<Modulator*&>(m_children[i]); }
+	auto at<Modulator>(size_t i) { return static_cast<Modulator*&>(m_children[i]); }
 
 	void push_back(Transformer2D* transformer, Modulator* modulator) { t_children.push_back(transformer); m_children.push_back(modulator); }
 	void erase(size_t i) { t_children.erase(t_children.begin() + i); m_children.erase(m_children.begin() + i); }
@@ -216,34 +216,34 @@ class ProteanLinker2D
 	Modulator& modulator;
 
 public:
-	inline ProteanLinker2D(Transformer2D& transformer, Modulator& modulator) : transformer(transformer), modulator(modulator) {}
+	ProteanLinker2D(Transformer2D& transformer, Modulator& modulator) : transformer(transformer), modulator(modulator) {}
 
 	ProteanChildren Children() { return ProteanChildren(transformer.children, modulator.children); }
 
-	inline PackedP2D& PackedP() { return transformer.self.packedP; }
-	inline PackedRS2D& PackedRS() { return transformer.self.packedRS; }
-	inline ::Modulate& PackedM() { return modulator.self.packedM; }
+	PackedP2D& PackedP() { return transformer.self.packedP; }
+	PackedRS2D& PackedRS() { return transformer.self.packedRS; }
+	::Modulate& PackedM() { return modulator.self.packedM; }
 
-	inline void SyncAll() { transformer.Sync(); modulator.Sync(); }
-	inline void SyncT() { transformer.Sync(); }
-	inline void SyncP() { transformer.SyncP(); }
-	inline void SyncRS() { transformer.SyncRS(); }
-	inline void SyncM() { modulator.Sync(); }
+	void SyncAll() { transformer.Sync(); modulator.Sync(); }
+	void SyncT() { transformer.Sync(); }
+	void SyncP() { transformer.SyncP(); }
+	void SyncRS() { transformer.SyncRS(); }
+	void SyncM() { modulator.Sync(); }
 
-	inline void Sync(const PackedTransform2D& pt) { transformer.self.Sync(pt); }
-	inline void Sync(const PackedP2D& pp, const PackedRS2D& prs) { transformer.self.Sync(pp, prs); }
-	inline void Sync(const PackedModulate& pm) { modulator.self.Sync(pm); }
-	inline void SyncAll(const ProteanLinker2D& linker) { Sync(linker.transformer.self.packedP, linker.transformer.self.packedRS);
+	void Sync(const PackedTransform2D& pt) { transformer.self.Sync(pt); }
+	void Sync(const PackedP2D& pp, const PackedRS2D& prs) { transformer.self.Sync(pp, prs); }
+	void Sync(const PackedModulate& pm) { modulator.self.Sync(pm); }
+	void SyncAll(const ProteanLinker2D& linker) { Sync(linker.transformer.self.packedP, linker.transformer.self.packedRS);
 		modulator.self.Sync(linker.modulator.self.packedM); }
-	inline void SyncAll(ProteanChildren& children, size_t i) { Sync(children.at<Transformer2D>(i)->self); Sync(children.at<Modulator>(i)->self); }
+	void SyncAll(ProteanChildren& children, size_t i) { Sync(children.at<Transformer2D>(i)->self); Sync(children.at<Modulator>(i)->self); }
 
-	inline void SyncChildrenAll() { transformer.SyncChildren(); modulator.SyncChildren(); }
-	inline void SyncChildrenT() { transformer.SyncChildren(); }
-	inline void SyncChildrenP() { transformer.SyncChildrenP(); }
-	inline void SyncChildrenRS() { transformer.SyncChildrenRS(); }
-	inline void SyncChildrenM() { modulator.SyncChildren(); }
+	void SyncChildrenAll() { transformer.SyncChildren(); modulator.SyncChildren(); }
+	void SyncChildrenT() { transformer.SyncChildren(); }
+	void SyncChildrenP() { transformer.SyncChildrenP(); }
+	void SyncChildrenRS() { transformer.SyncChildrenRS(); }
+	void SyncChildrenM() { modulator.SyncChildren(); }
 
-	inline void Attach(ProteanLinker2D& linker) { transformer.Attach(&linker.transformer); modulator.Attach(&linker.modulator); }
+	void Attach(ProteanLinker2D& linker) { transformer.Attach(&linker.transformer); modulator.Attach(&linker.modulator); }
 };
 
 struct Fickler2D
@@ -251,7 +251,7 @@ struct Fickler2D
 	Transformable2D transformable;
 	Modulatable modulatable;
 
-	inline Fickler2D(FickleType type = { true, true })
+	Fickler2D(FickleType type = { true, true })
 	{
 		if (type.transformable)
 			transformable.Engage(Transformer2D{});
@@ -259,45 +259,45 @@ struct Fickler2D
 			modulatable.Engage(::Modulator{});
 	}
 
-	inline Transform2D* Transform() { return transformable ? &transformable->Self() : nullptr; }
-	inline Position2D* Position() { return transformable ? &transformable->Position() : nullptr; }
-	inline Rotation2D* Rotation() { return transformable ? &transformable->Rotation() : nullptr; }
-	inline Scale2D* Scale() { return transformable ? &transformable->Scale() : nullptr; }
-	inline ::Modulate* Modulate() { return modulatable ? &modulatable->Self() : nullptr; }
+	Transform2D* Transform() { return transformable ? &transformable->Self() : nullptr; }
+	Position2D* Position() { return transformable ? &transformable->Position() : nullptr; }
+	Rotation2D* Rotation() { return transformable ? &transformable->Rotation() : nullptr; }
+	Scale2D* Scale() { return transformable ? &transformable->Scale() : nullptr; }
+	::Modulate* Modulate() { return modulatable ? &modulatable->Self() : nullptr; }
 
-	inline Transformer2D* Transformer() { return transformable ? transformable.Ref() : nullptr; }
-	inline ::Modulator* Modulator() { return modulatable ? modulatable.Ref() : nullptr; }
-	inline ProteanLinker2D ProteanLinker() { return transformable && modulatable ? ProteanLinker2D(*transformable, *modulatable) : throw bad_fickle_type_error(); }
+	Transformer2D* Transformer() { return transformable ? transformable.Ref() : nullptr; }
+	::Modulator* Modulator() { return modulatable ? modulatable.Ref() : nullptr; }
+	ProteanLinker2D ProteanLinker() { return transformable && modulatable ? ProteanLinker2D(*transformable, *modulatable) : throw bad_fickle_type_error(); }
 	
-	inline PackedP2D* PackedP() { return transformable ? &transformable->self.packedP : nullptr; }
-	inline PackedRS2D* PackedRS() { return transformable ? &transformable->self.packedRS : nullptr; }
-	inline ::Modulate* PackedM() { return modulatable ? &modulatable->self.packedM : nullptr; }
+	PackedP2D* PackedP() { return transformable ? &transformable->self.packedP : nullptr; }
+	PackedRS2D* PackedRS() { return transformable ? &transformable->self.packedRS : nullptr; }
+	::Modulate* PackedM() { return modulatable ? &modulatable->self.packedM : nullptr; }
 
-	inline void SetNotification(FickleNotification* notification) { if (transformable) transformable->notify = notification; if (modulatable) modulatable->notify = notification; }
+	void SetNotification(FickleNotification* notification) { if (transformable) transformable->notify = notification; if (modulatable) modulatable->notify = notification; }
 
-	inline void SyncAll() { if (transformable) transformable->Sync(); if (modulatable) modulatable->Sync(); }
-	inline void SyncT() { if (transformable) transformable->Sync(); }
-	inline void SyncP() { if (transformable) transformable->SyncP(); }
-	inline void SyncRS() { if (transformable) transformable->SyncRS(); }
-	inline void SyncM() { if (modulatable) modulatable->Sync(); }
+	void SyncAll() { if (transformable) transformable->Sync(); if (modulatable) modulatable->Sync(); }
+	void SyncT() { if (transformable) transformable->Sync(); }
+	void SyncP() { if (transformable) transformable->SyncP(); }
+	void SyncRS() { if (transformable) transformable->SyncRS(); }
+	void SyncM() { if (modulatable) modulatable->Sync(); }
 
-	inline void Attach(Fickler2D& fickler) { if (transformable) Transformer()->Attach(fickler.Transformer());
+	void Attach(Fickler2D& fickler) { if (transformable) Transformer()->Attach(fickler.Transformer());
 		if (modulatable) Modulator()->Attach(fickler.Modulator()); }
-	inline void Attach(ProteanLinker2D& linker) { try { ProteanLinker().Attach(linker); } catch (bad_fickle_type_error) {} }
-	inline void AttachTransformer(Fickler2D& fickler) { if (transformable) Transformer()->Attach(fickler.Transformer()); }
-	inline void AttachTransformer(Transformer2D* transformer) { if (transformable) Transformer()->Attach(transformer); }
-	inline void AttachModulator(Fickler2D& fickler) { if (modulatable) Modulator()->Attach(fickler.Modulator()); }
-	inline void AttachModulator(::Modulator* modulator) { if (modulatable) Modulator()->Attach(modulator); }
-	inline void AttachUnsafe(Fickler2D& fickler) { Transformer()->Attach(fickler.Transformer()); Modulator()->Attach(fickler.Modulator()); }
-	inline void AttachUnsafe(ProteanLinker2D& linker) { ProteanLinker().Attach(linker); }
-	inline void AttachTransformerUnsafe(Fickler2D& fickler) { Transformer()->Attach(fickler.Transformer()); }
-	inline void AttachTransformerUnsafe(Transformer2D* transformer) { Transformer()->Attach(transformer); }
-	inline void AttachModulatorUnsafe(Fickler2D& fickler) { Modulator()->Attach(fickler.Modulator()); }
-	inline void AttachModulatorUnsafe(::Modulator* modulator) { Modulator()->Attach(modulator); }
+	void Attach(ProteanLinker2D& linker) { try { ProteanLinker().Attach(linker); } catch (bad_fickle_type_error) {} }
+	void AttachTransformer(Fickler2D& fickler) { if (transformable) Transformer()->Attach(fickler.Transformer()); }
+	void AttachTransformer(Transformer2D* transformer) { if (transformable) Transformer()->Attach(transformer); }
+	void AttachModulator(Fickler2D& fickler) { if (modulatable) Modulator()->Attach(fickler.Modulator()); }
+	void AttachModulator(::Modulator* modulator) { if (modulatable) Modulator()->Attach(modulator); }
+	void AttachUnsafe(Fickler2D& fickler) { Transformer()->Attach(fickler.Transformer()); Modulator()->Attach(fickler.Modulator()); }
+	void AttachUnsafe(ProteanLinker2D& linker) { ProteanLinker().Attach(linker); }
+	void AttachTransformerUnsafe(Fickler2D& fickler) { Transformer()->Attach(fickler.Transformer()); }
+	void AttachTransformerUnsafe(Transformer2D* transformer) { Transformer()->Attach(transformer); }
+	void AttachModulatorUnsafe(Fickler2D& fickler) { Modulator()->Attach(fickler.Modulator()); }
+	void AttachModulatorUnsafe(::Modulator* modulator) { Modulator()->Attach(modulator); }
 
-	inline ProteanChildren ProteanChildren() {	return transformable && modulatable ? ::ProteanChildren(Transformer()->children, Modulator()->children) : throw bad_fickle_type_error(); }
+	ProteanChildren ProteanChildren() {	return transformable && modulatable ? ::ProteanChildren(Transformer()->children, Modulator()->children) : throw bad_fickle_type_error(); }
 
-	inline FickleType Type() const
+	FickleType Type() const
 	{
 		if (transformable)
 		{
@@ -314,7 +314,7 @@ struct Fickler2D
 				throw bad_fickle_type_error();
 		}
 	}
-	inline bool IsProteanSafe() const
+	bool IsProteanSafe() const
 	{
 		return transformable && modulatable && remove_const(transformable).Ref() && remove_const(modulatable).Ref()
 			&& (remove_const(transformable)->children.size() == remove_const(modulatable)->children.size());

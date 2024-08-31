@@ -12,7 +12,7 @@ struct ShaderConstructArgs
 	std::string vertexShader;
 	std::string fragmentShader;
 
-	inline bool operator==(const ShaderConstructArgs& args) const
+	bool operator==(const ShaderConstructArgs& args) const
 	{
 		return vertexShader == args.vertexShader && fragmentShader == args.fragmentShader;
 	}
@@ -21,7 +21,7 @@ struct ShaderConstructArgs
 template<>
 struct std::hash<ShaderConstructArgs>
 {
-	inline size_t operator()(const ShaderConstructArgs& args) const
+	size_t operator()(const ShaderConstructArgs& args) const
 	{
 		auto hash1 = hash<std::string>{}(args.vertexShader);
 		auto hash2 = hash<std::string>{}(args.fragmentShader);
@@ -56,7 +56,7 @@ public:
 	static bool DestroyShader(ShaderHandle handle);
 	static void Bind(ShaderHandle handle);
 	static void Unbind();
-	inline static ShaderHandle Standard() { return standard_shader; }
+	static ShaderHandle Standard() { return standard_shader; }
 
 	static void SetUniform1i(ShaderHandle handle, const char* uniform_name, const GLint value);
 	static void SetUniform2iv(ShaderHandle handle, const char* uniform_name, const GLint* value, GLsizei array_count = 1);

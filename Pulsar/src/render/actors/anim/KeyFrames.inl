@@ -9,14 +9,14 @@ struct KF_Assign : public KeyFrame<_Property>
 {
 	static constexpr bool progressive = false;
 	_Property value;
-	inline KF_Assign(float timepoint, const _Property& value) : KeyFrame<_Property>(timepoint), value(value) {}
-	inline KF_Assign(float timepoint, _Property&& value) : KeyFrame<_Property>(timepoint), value(std::move(value)) {}
+	KF_Assign(float timepoint, const _Property& value) : KeyFrame<_Property>(timepoint), value(value) {}
+	KF_Assign(float timepoint, _Property&& value) : KeyFrame<_Property>(timepoint), value(std::move(value)) {}
 };
 
 template<typename _Property, unsigned int _InterpMethod, bool _InOrder>
 struct interpexec<_Property, KF_Assign<_Property>, _InterpMethod, _InOrder>
 {
-	inline static void _(_Property* target, KF_Assign<_Property>& a, KF_Assign<_Property>& b, float t, float period)
+	static void _(_Property* target, KF_Assign<_Property>& a, KF_Assign<_Property>& b, float t, float period)
 	{
 		if (target)
 			*target = interpolate<_Property, _InterpMethod, _InOrder>::_(a.value, a.timepoint, b.value, b.timepoint, t, period);
@@ -28,14 +28,14 @@ struct KF_Assign_Unsafe : public KeyFrame<_Property>
 {
 	static constexpr bool progressive = false;
 	_Property value;
-	inline KF_Assign_Unsafe(float timepoint, const _Property& value) : KeyFrame<_Property>(timepoint), value(value) {}
-	inline KF_Assign_Unsafe(float timepoint, _Property&& value) : KeyFrame<_Property>(timepoint), value(std::move(value)) {}
+	KF_Assign_Unsafe(float timepoint, const _Property& value) : KeyFrame<_Property>(timepoint), value(value) {}
+	KF_Assign_Unsafe(float timepoint, _Property&& value) : KeyFrame<_Property>(timepoint), value(std::move(value)) {}
 };
 
 template<typename _Property, unsigned int _InterpMethod, bool _InOrder>
 struct interpexec<_Property, KF_Assign_Unsafe<_Property>, _InterpMethod, _InOrder>
 {
-	inline static void _(_Property* target, KF_Assign_Unsafe<_Property>& a, KF_Assign_Unsafe<_Property>& b, float t, float period)
+	static void _(_Property* target, KF_Assign_Unsafe<_Property>& a, KF_Assign_Unsafe<_Property>& b, float t, float period)
 	{
 		*target = interpolate<_Property, _InterpMethod, _InOrder>::_(a.value, a.timepoint, b.value, b.timepoint, t, period);
 	}
@@ -46,14 +46,14 @@ struct KF_Event : public KeyFrame<_Property>
 {
 	static constexpr bool progressive = true;
 	FunctorPtr<void, _Property*> event;
-	inline KF_Event(float timepoint, const FunctorPtr<void, _Property*>& event) : KeyFrame<_Property>(timepoint), event(event) {}
-	inline KF_Event(float timepoint, FunctorPtr<void, _Property*>&& event) : KeyFrame<_Property>(timepoint), event(std::move(event)) {}
+	KF_Event(float timepoint, const FunctorPtr<void, _Property*>& event) : KeyFrame<_Property>(timepoint), event(event) {}
+	KF_Event(float timepoint, FunctorPtr<void, _Property*>&& event) : KeyFrame<_Property>(timepoint), event(std::move(event)) {}
 };
 
 template<typename _Property, unsigned int _InterpMethod, bool _InOrder>
 struct interpexec<_Property, KF_Event<_Property>, _InterpMethod, _InOrder>
 {
-	inline static void _(_Property* target, KF_Event<_Property>& a, KF_Event<_Property>& b, float t, float period)
+	static void _(_Property* target, KF_Event<_Property>& a, KF_Event<_Property>& b, float t, float period)
 	{
 		a.event(target);
 	}
@@ -62,13 +62,13 @@ struct interpexec<_Property, KF_Event<_Property>, _InterpMethod, _InOrder>
 template<bool _InOrder>
 struct interpolate<float, Interp::Constant, _InOrder>
 {
-	inline static float _(float a, float ta, float b, float tb, float t, float period) { return a; }
+	static float _(float a, float ta, float b, float tb, float t, float period) { return a; }
 };
 
 template<bool _InOrder>
 struct interpolate<float, Interp::Linear, _InOrder>
 {
-	inline static float _(float a, float ta, float b, float tb, float t, float period)
+	static float _(float a, float ta, float b, float tb, float t, float period)
 	{
 		if constexpr (_InOrder)
 		{
@@ -85,7 +85,7 @@ struct interpolate<float, Interp::Linear, _InOrder>
 template<unsigned int _InterpMethod, bool _InOrder>
 struct interpolate<glm::vec2, _InterpMethod, _InOrder>
 {
-	inline static glm::vec2 _(const glm::vec2& a, float ta, const glm::vec2& b, float tb, float t, float period)
+	static glm::vec2 _(const glm::vec2& a, float ta, const glm::vec2& b, float tb, float t, float period)
 	{
 		return {
 			interpolate<float, _InterpMethod, _InOrder>::_(a.x, ta, b.x, tb, t, period),
@@ -97,7 +97,7 @@ struct interpolate<glm::vec2, _InterpMethod, _InOrder>
 template<unsigned int _InterpMethod, bool _InOrder>
 struct interpolate<glm::vec3, _InterpMethod, _InOrder>
 {
-	inline static glm::vec3 _(const glm::vec3& a, float ta, const glm::vec3& b, float tb, float t, float period)
+	static glm::vec3 _(const glm::vec3& a, float ta, const glm::vec3& b, float tb, float t, float period)
 	{
 		return {
 			interpolate<float, _InterpMethod, _InOrder>::_(a.x, ta, b.x, tb, t, period),
@@ -110,7 +110,7 @@ struct interpolate<glm::vec3, _InterpMethod, _InOrder>
 template<unsigned int _InterpMethod, bool _InOrder>
 struct interpolate<glm::vec4, _InterpMethod, _InOrder>
 {
-	inline static glm::vec4 _(const glm::vec4& a, float ta, const glm::vec4& b, float tb, float t, float period)
+	static glm::vec4 _(const glm::vec4& a, float ta, const glm::vec4& b, float tb, float t, float period)
 	{
 		return {
 			interpolate<float, _InterpMethod, _InOrder>::_(a.x, ta, b.x, tb, t, period),

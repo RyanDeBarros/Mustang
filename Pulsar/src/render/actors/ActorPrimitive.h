@@ -31,32 +31,32 @@ public:
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
-	inline void SetShaderHandle(ShaderHandle handle) { m_Render.model.shader = handle; }
-	inline virtual void SetTextureHandle(TextureHandle handle) { m_Render.textureHandle = handle; }
+	void SetShaderHandle(ShaderHandle handle) { m_Render.model.shader = handle; }
+	virtual void SetTextureHandle(TextureHandle handle) { m_Render.textureHandle = handle; }
 
-	inline void SetVisible(bool visible) { m_Status = (visible ? m_Status |= 1 : m_Status &= ~1); }
-	inline void FillModulationPoints(const glm::vec4& default_value = { 1.0f, 1.0f, 1.0f, 1.0f })
+	void SetVisible(bool visible) { m_Status = (visible ? m_Status |= 1 : m_Status &= ~1); }
+	void FillModulationPoints(const glm::vec4& default_value = { 1.0f, 1.0f, 1.0f, 1.0f })
 	{ 
 		if (m_ModulationColors.size() < m_Render.vertexCount)
 			m_ModulationColors.resize(m_Render.vertexCount, default_value);
 		FlagModulate();
 	}
 
-	inline void FlagProteate() { m_Status |= 0b1110; }
-	inline void FlagTransform() { m_Status |= 0b110; }
-	inline void FlagTransformP() { m_Status |= 0b10; }
-	inline void FlagTransformRS() { m_Status |= 0b100; }
-	inline void FlagModulate() { m_Status |= 0b1000; }
+	void FlagProteate() { m_Status |= 0b1110; }
+	void FlagTransform() { m_Status |= 0b110; }
+	void FlagTransformP() { m_Status |= 0b10; }
+	void FlagTransformRS() { m_Status |= 0b100; }
+	void FlagModulate() { m_Status |= 0b1000; }
 	
-	inline void SetModulation(const glm::vec4& color) { m_ModulationColors = std::vector<glm::vec4>(m_Render.vertexCount, color); FlagModulate(); }
-	inline void SetModulationPerPoint(const std::vector<glm::vec4>& colors) { m_ModulationColors = colors; FlagModulate(); }
-	inline void SetModulationPerPoint(std::vector<glm::vec4>&& colors) { m_ModulationColors = std::move(colors); FlagModulate(); }
+	void SetModulation(const glm::vec4& color) { m_ModulationColors = std::vector<glm::vec4>(m_Render.vertexCount, color); FlagModulate(); }
+	void SetModulationPerPoint(const std::vector<glm::vec4>& colors) { m_ModulationColors = colors; FlagModulate(); }
+	void SetModulationPerPoint(std::vector<glm::vec4>&& colors) { m_ModulationColors = std::move(colors); FlagModulate(); }
 
 	void CropPoints(const std::vector<glm::vec2>& points, int atlas_width, int atlas_height);
 	void CropRelativePoints(const std::vector<glm::vec2>& atlas_points);
 
-	inline TextureHandle GetTextureHandle() const { return m_Render.textureHandle; }
-	inline const Renderable& GetRenderable() const { return m_Render; }
+	TextureHandle GetTextureHandle() const { return m_Render.textureHandle; }
+	const Renderable& GetRenderable() const { return m_Render; }
 
 protected:
 	void OnDraw(signed char texture_slot);
@@ -78,9 +78,9 @@ struct AP2D_Notification : public FickleNotification
 {
 	ActorPrimitive2D* prim = nullptr;
 
-	inline AP2D_Notification(ActorPrimitive2D* prim) : prim(prim) {}
+	AP2D_Notification(ActorPrimitive2D* prim) : prim(prim) {}
 
-	inline void Notify(FickleSyncCode code)
+	void Notify(FickleSyncCode code) override
 	{
 		switch (code)
 		{

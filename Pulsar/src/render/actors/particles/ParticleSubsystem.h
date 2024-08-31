@@ -37,14 +37,15 @@ class ParticleSubsystem
 
 public:
 	ParticleSubsystem(const ParticleSubsystemData& wave_data, ParticleSubsystemIndex subsystem_index, FickleType fickle_type = FickleType::Protean);
+	ParticleSubsystem(ParticleSubsystemData&& wave_data, ParticleSubsystemIndex subsystem_index, FickleType fickle_type = FickleType::Protean);
 	ParticleSubsystem(const ParticleSubsystem&);
 	ParticleSubsystem(ParticleSubsystem&&) noexcept;
 	ParticleSubsystem& operator=(const ParticleSubsystem&);
 	ParticleSubsystem& operator=(ParticleSubsystem&&) noexcept;
 
-	inline void SetWavePeriod(real wave_period) { m_Data.wavePeriod = wave_period; m_PeriodInv = 1.0f / m_Data.wavePeriod; }
+	void SetWavePeriod(real wave_period) { m_Data.wavePeriod = wave_period; m_PeriodInv = 1.0f / m_Data.wavePeriod; }
 
-	inline Fickler2D& Fickler() { return m_Fickler; }
+	Fickler2D& Fickler() { return m_Fickler; }
 
 private:
 	friend class ParticleEffect;
