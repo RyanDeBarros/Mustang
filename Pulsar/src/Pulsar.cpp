@@ -201,7 +201,7 @@ void Pulsar::Run(GLFWwindow* window)
 	psys->Fickler().SyncRS();
 
 	Renderer::AddCanvasLayer(11);
-	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
+	Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
 	TileMap* tilemap_ini;
 	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap_ini) != LOAD_STATUS::OK)
@@ -325,10 +325,6 @@ void Pulsar::Run(GLFWwindow* window)
 	animEventTrack.SetOrInsert(KF_Event<void>(1.5f, make_functor_ptr([](void*) { Logger::LogInfo("1.5 seconds!"); })));
 	animEventTrack.SetOrInsert(KF_Event<void>(2.0f, make_functor_ptr([](void*) { Logger::LogInfo("2 seconds!"); })));
 	animPlayerEvents.tracks.push_back(CopyPtr(animEventTrack));
-
-	//Renderer::RemoveCanvasLayer(11);
-	//Renderer::AddCanvasLayer(11);
-	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
 	// small delay
 	while (totalDrawTime < 0.01f)

@@ -208,7 +208,9 @@
     <ClCompile Include="src\render\transform\Modulate.cpp" />
     <ClCompile Include="src\render\transform\Transform.cpp" />
     <ClCompile Include="src\render\transform\Transforms.cpp" />
-    <ClCompile Include="src\utils\CopyPtr.inl" />
+    <ClInclude Include="src\utils\CopyPtr.inl">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
     <ClCompile Include="src\utils\Permutation.cpp" />
     <ClCompile Include="src\utils\Strings.cpp" />
     <ClCompile Include="src\utils\CommonMath.cpp" />
@@ -220,8 +222,12 @@
   <ItemGroup>
     <ClInclude Include="sandbox\CHRS.h" />
     <ClInclude Include="src\render\actors\anim\AnimActorPrimitive.h" />
-    <ClInclude Include="src\render\actors\anim\AnimationPlayer.inl" />
-    <ClInclude Include="src\render\actors\anim\AnimationTrack.inl" />
+    <ClInclude Include="src\render\actors\anim\AnimationPlayer.inl">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="src\render\actors\anim\AnimationTrack.inl">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
     <ClInclude Include="src\render\actors\anim\FramesArray.h" />
     <ClInclude Include="src\render\actors\particles\ParticleSubsystemRegistry.h" />
     <ClInclude Include="src\AssetLoader.h" />
@@ -239,7 +245,9 @@
     <ClInclude Include="src\render\actors\shapes\DebugPoint.h" />
     <ClInclude Include="src\render\actors\shapes\DebugPolygon.h" />
     <ClInclude Include="src\render\actors\RectRender.h" />
-    <ClInclude Include="src\Logger.inl" />
+    <ClInclude Include="src\Logger.inl">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
     <ClInclude Include="src\Pulsar.h" />
     <ClInclude Include="src\render\actors\ActorComposite.h" />
     <ClInclude Include="src\render\actors\ActorPrimitive.h" />
@@ -263,15 +271,22 @@
     <ClInclude Include="src\render\actors\TileMap.h" />
     <ClInclude Include="src\render\transform\Modulate.h" />
     <ClInclude Include="src\render\transform\Transform.h" />
-    <ClInclude Include="src\render\transform\Fickle.inl" />
+    <ClInclude Include="src\render\transform\Fickle.inl">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
     <ClInclude Include="src\render\transform\Transforms.h" />
     <ClInclude Include="src\Macros.h" />
-    <ClInclude Include="src\utils\Array.inl" />
+    <ClInclude Include="src\utils\Array.inl">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
     <ClInclude Include="src\utils\BitPacking.h" />
     <ClInclude Include="src\utils\Constants.h" />
-    <ClInclude Include="src\utils\Data.inl" />
-    <ClInclude Include="src\utils\Functions.inl" />
-    <ClInclude Include="src\utils\Functor.inl" />
+    <ClInclude Include="src\utils\Data.inl">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="src\utils\Functions.inl">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
     <ClInclude Include="src\utils\Permutation.h" />
     <ClInclude Include="src\utils\Strings.h" />
     <ClInclude Include="src\utils\CommonMath.h" />
@@ -570,9 +585,18 @@
     <ClInclude Include="vendor\toml\toml.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\Handles.inl" />
-    <None Include="src\render\actors\anim\KeyFrames.inl" />
-    <None Include="src\render\transform\FickleNotification.inl" />
+    <ClInclude Include="src\Handles.inl">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="src\render\actors\anim\KeyFrames.inl">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <None Include="src\render\transform\FickleNotification.inl">
+      <FileType>CppHeader</FileType>
+    </None>
+    <ClInclude Include="src\utils\Functor.inl">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
     <None Include="src\VendorInclude.h" />
     <None Include="vendor\glm\detail\func_common.inl" />
     <None Include="vendor\glm\detail\func_common_simd.inl" />

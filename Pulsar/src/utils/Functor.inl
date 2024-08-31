@@ -82,6 +82,7 @@ struct Functor : public FunctorInterface<Ret, Arg>
 	static_assert(!std::is_lvalue_reference_v<_Storage>, "Functor: _Storage cannot be l-value reference when _ValueIn=true.");
 	static_assert(!std::is_rvalue_reference_v<_Storage>, "Functor: _Storage cannot be r-value reference.");
 	static_assert(std::is_convertible_v<_Storage, Cls>, "Functor: _Storage is not convertible to Cls.");
+	static_assert(!std::is_rvalue_reference_v<Cls>, "Functor: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, Arg, Cls>;
 
 	inline Functor(func_signature function, _Storage closure) : function(function), closure(closure) {}
@@ -107,9 +108,10 @@ struct Functor<Ret, Arg, Cls, _Storage, false> : public FunctorInterface<Ret, Ar
 {
 	static_assert(!std::is_rvalue_reference_v<_Storage>, "Functor: _Storage cannot be r-value reference.");
 	static_assert(std::is_convertible_v<_Storage, Cls>, "Functor: _Storage is not convertible to Cls.");
+	static_assert(!std::is_rvalue_reference_v<Cls>, "Functor: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, Arg, Cls>;
 
-	inline Functor(func_signature function, _Storage&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
+	inline Functor(func_signature function, auto&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
 
 	inline Ret operator()(Arg arg) override
 	{
@@ -120,7 +122,7 @@ struct Functor<Ret, Arg, Cls, _Storage, false> : public FunctorInterface<Ret, Ar
 	}
 	inline FunctorInterface<Ret, Arg>* Clone() override
 	{
-		return new Functor<Ret, Arg, Cls, _Storage, false>(function, PULSAR_FORWARD(closure));
+		return new Functor<Ret, Arg, Cls, _Storage, false>(function, std::forward<_Storage&>(closure));
 	}
 
 	func_signature function;
@@ -156,6 +158,7 @@ struct Functor<Ret, void, Cls, _Storage, true> : public FunctorInterface<Ret, vo
 	static_assert(!std::is_lvalue_reference_v<_Storage>, "Functor: _Storage cannot be l-value reference when _ValueIn=true.");
 	static_assert(!std::is_rvalue_reference_v<_Storage>, "Functor: _Storage cannot be r-value reference.");
 	static_assert(std::is_convertible_v<_Storage, Cls>, "Functor: _Storage is not convertible to Cls.");
+	static_assert(!std::is_rvalue_reference_v<Cls>, "Functor: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, void, Cls>;
 
 	inline Functor(func_signature function, _Storage closure) : function(function), closure(closure) {}
@@ -181,9 +184,10 @@ struct Functor<Ret, void, Cls, _Storage, false> : public FunctorInterface<Ret, v
 {
 	static_assert(!std::is_rvalue_reference_v<_Storage>, "Functor: _Storage cannot be r-value reference.");
 	static_assert(std::is_convertible_v<_Storage, Cls>, "Functor: _Storage is not convertible to Cls.");
+	static_assert(!std::is_rvalue_reference_v<Cls>, "Functor: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, void, Cls>;
 
-	inline Functor(func_signature function, _Storage&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
+	inline Functor(func_signature function, auto&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
 
 	inline Ret operator()() override
 	{
@@ -194,7 +198,7 @@ struct Functor<Ret, void, Cls, _Storage, false> : public FunctorInterface<Ret, v
 	}
 	inline FunctorInterface<Ret, void>* Clone() override
 	{
-		return new Functor<Ret, void, Cls, _Storage, false>(function, PULSAR_FORWARD(closure));
+		return new Functor<Ret, void, Cls, _Storage, false>(function, std::forward<_Storage&>(closure));
 	}
 
 	func_signature function;
@@ -244,6 +248,8 @@ public:
 	inline FunctorPtr(FunctorPtr<Ret, Arg>&& other) noexcept : f(other.f) { other.f = nullptr; }
 	inline FunctorPtr& operator=(const FunctorPtr<Ret, Arg>& other)
 	{
+		if (this == &other)
+			return *this;
 		if (f)
 			delete f;
 		if (other.f)
@@ -299,6 +305,8 @@ public:
 	inline FunctorPtr(FunctorPtr<Ret, void>&& other) noexcept : f(other.f) { other.f = nullptr; }
 	inline FunctorPtr& operator=(const FunctorPtr<Ret, void>& other)
 	{
+		if (this == &other)
+			return *this;
 		if (f)
 			delete f;
 		if (other.f)
