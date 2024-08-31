@@ -18,19 +18,19 @@ decltype(auto) redirect(T arg)
 }
 
 template<typename Ret, typename Arg>
-struct FunctorInterface
+struct _FunctorInterface
 {
-	virtual ~FunctorInterface() = default;
+	virtual ~_FunctorInterface() = default;
 	virtual Ret operator()(Arg arg) = 0;
-	virtual FunctorInterface<Ret, Arg>* clone() = 0;
+	virtual _FunctorInterface<Ret, Arg>* clone() = 0;
 };
 
 template<typename Ret>
-struct FunctorInterface<Ret, void>
+struct _FunctorInterface<Ret, void>
 {
-	virtual ~FunctorInterface() = default;
+	virtual ~_FunctorInterface() = default;
 	virtual Ret operator()() = 0;
-	virtual FunctorInterface<Ret, void>* clone() = 0;
+	virtual _FunctorInterface<Ret, void>* clone() = 0;
 };
 
 template<typename Ret, typename Arg, typename Cls>
@@ -76,15 +76,15 @@ template<typename T>
 using strip_rvalue_reference_t = strip_rvalue_reference<T>::type;
 
 template<typename Ret, typename Arg, typename Cls, typename _Storage, bool _ValueIn = true>
-struct Functor : public FunctorInterface<Ret, Arg>
+struct _FunctorEnclosure : public _FunctorInterface<Ret, Arg>
 {
-	static_assert(!std::is_lvalue_reference_v<_Storage>, "Functor: _Storage cannot be l-value reference when _ValueIn=true.");
-	static_assert(!std::is_rvalue_reference_v<_Storage>, "Functor: _Storage cannot be r-value reference.");
-	static_assert(std::is_convertible_v<_Storage, Cls>, "Functor: _Storage is not convertible to Cls.");
-	static_assert(!std::is_rvalue_reference_v<Cls>, "Functor: Cls cannot be r-value reference.");
+	static_assert(!std::is_lvalue_reference_v<_Storage>, "_FunctorEnclosure: _Storage cannot be l-value reference when _ValueIn=true.");
+	static_assert(!std::is_rvalue_reference_v<_Storage>, "_FunctorEnclosure: _Storage cannot be r-value reference.");
+	static_assert(std::is_convertible_v<_Storage, Cls>, "_FunctorEnclosure: _Storage is not convertible to Cls.");
+	static_assert(!std::is_rvalue_reference_v<Cls>, "_FunctorEnclosure: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, Arg, Cls>;
 
-	Functor(func_signature function, _Storage closure) : function(function), closure(closure) {}
+	_FunctorEnclosure(func_signature function, _Storage closure) : function(function), closure(closure) {}
 
 	Ret operator()(Arg arg) override
 	{
@@ -93,9 +93,9 @@ struct Functor : public FunctorInterface<Ret, Arg>
 		else
 			return function(redirect<Arg>(arg), redirect<Cls>(closure));
 	}
-	FunctorInterface<Ret, Arg>* clone() override
+	_FunctorInterface<Ret, Arg>* clone() override
 	{
-		return new Functor<Ret, Arg, Cls, _Storage, true>(function, closure);
+		return new _FunctorEnclosure<Ret, Arg, Cls, _Storage, true>(function, closure);
 	}
 
 	func_signature function;
@@ -103,14 +103,14 @@ struct Functor : public FunctorInterface<Ret, Arg>
 };
 
 template<typename Ret, typename Arg, typename Cls, typename _Storage>
-struct Functor<Ret, Arg, Cls, _Storage, false> : public FunctorInterface<Ret, Arg>
+struct _FunctorEnclosure<Ret, Arg, Cls, _Storage, false> : public _FunctorInterface<Ret, Arg>
 {
-	static_assert(!std::is_rvalue_reference_v<_Storage>, "Functor: _Storage cannot be r-value reference.");
-	static_assert(std::is_convertible_v<_Storage, Cls>, "Functor: _Storage is not convertible to Cls.");
-	static_assert(!std::is_rvalue_reference_v<Cls>, "Functor: Cls cannot be r-value reference.");
+	static_assert(!std::is_rvalue_reference_v<_Storage>, "_FunctorEnclosure: _Storage cannot be r-value reference.");
+	static_assert(std::is_convertible_v<_Storage, Cls>, "_FunctorEnclosure: _Storage is not convertible to Cls.");
+	static_assert(!std::is_rvalue_reference_v<Cls>, "_FunctorEnclosure: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, Arg, Cls>;
 
-	Functor(func_signature function, auto&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
+	_FunctorEnclosure(func_signature function, auto&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
 
 	Ret operator()(Arg arg) override
 	{
@@ -119,9 +119,9 @@ struct Functor<Ret, Arg, Cls, _Storage, false> : public FunctorInterface<Ret, Ar
 		else
 			return function(redirect<Arg>(arg), redirect<Cls>(closure));
 	}
-	FunctorInterface<Ret, Arg>* clone() override
+	_FunctorInterface<Ret, Arg>* clone() override
 	{
-		return new Functor<Ret, Arg, Cls, _Storage, false>(function, std::forward<_Storage&>(closure));
+		return new _FunctorEnclosure<Ret, Arg, Cls, _Storage, false>(function, std::forward<_Storage&>(closure));
 	}
 
 	func_signature function;
@@ -129,12 +129,12 @@ struct Functor<Ret, Arg, Cls, _Storage, false> : public FunctorInterface<Ret, Ar
 };
 
 template<typename Ret, typename Arg, typename _Storage, bool _ValueIn>
-struct Functor<Ret, Arg, void, _Storage, _ValueIn> : public FunctorInterface<Ret, Arg>
+struct _FunctorEnclosure<Ret, Arg, void, _Storage, _ValueIn> : public _FunctorInterface<Ret, Arg>
 {
-	static_assert(std::is_void_v<_Storage>, "Functor: _Storage must be void when Cls is void.");
+	static_assert(std::is_void_v<_Storage>, "_FunctorEnclosure: _Storage must be void when Cls is void.");
 	using func_signature = func_signature_t<Ret, Arg, void>;
 
-	Functor(func_signature function) : function(function) {}
+	_FunctorEnclosure(func_signature function) : function(function) {}
 
 	Ret operator()(Arg arg) override
 	{
@@ -143,24 +143,24 @@ struct Functor<Ret, Arg, void, _Storage, _ValueIn> : public FunctorInterface<Ret
 		else
 			return function(redirect<Arg>(arg));
 	}
-	FunctorInterface<Ret, Arg>* clone() override
+	_FunctorInterface<Ret, Arg>* clone() override
 	{
-		return new Functor<Ret, Arg, void, void, _ValueIn>(function);
+		return new _FunctorEnclosure<Ret, Arg, void, void, _ValueIn>(function);
 	}
 
 	func_signature function;
 };
 
 template<typename Ret, typename Cls, typename _Storage>
-struct Functor<Ret, void, Cls, _Storage, true> : public FunctorInterface<Ret, void>
+struct _FunctorEnclosure<Ret, void, Cls, _Storage, true> : public _FunctorInterface<Ret, void>
 {
-	static_assert(!std::is_lvalue_reference_v<_Storage>, "Functor: _Storage cannot be l-value reference when _ValueIn=true.");
-	static_assert(!std::is_rvalue_reference_v<_Storage>, "Functor: _Storage cannot be r-value reference.");
-	static_assert(std::is_convertible_v<_Storage, Cls>, "Functor: _Storage is not convertible to Cls.");
-	static_assert(!std::is_rvalue_reference_v<Cls>, "Functor: Cls cannot be r-value reference.");
+	static_assert(!std::is_lvalue_reference_v<_Storage>, "_FunctorEnclosure: _Storage cannot be l-value reference when _ValueIn=true.");
+	static_assert(!std::is_rvalue_reference_v<_Storage>, "_FunctorEnclosure: _Storage cannot be r-value reference.");
+	static_assert(std::is_convertible_v<_Storage, Cls>, "_FunctorEnclosure: _Storage is not convertible to Cls.");
+	static_assert(!std::is_rvalue_reference_v<Cls>, "_FunctorEnclosure: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, void, Cls>;
 
-	Functor(func_signature function, _Storage closure) : function(function), closure(closure) {}
+	_FunctorEnclosure(func_signature function, _Storage closure) : function(function), closure(closure) {}
 
 	Ret operator()() override
 	{
@@ -169,9 +169,9 @@ struct Functor<Ret, void, Cls, _Storage, true> : public FunctorInterface<Ret, vo
 		else
 			return function(redirect<Cls>(closure));
 	}
-	FunctorInterface<Ret, void>* clone() override
+	_FunctorInterface<Ret, void>* clone() override
 	{
-		return new Functor<Ret, void, Cls, _Storage, true>(function, closure);
+		return new _FunctorEnclosure<Ret, void, Cls, _Storage, true>(function, closure);
 	}
 
 	func_signature function;
@@ -179,14 +179,14 @@ struct Functor<Ret, void, Cls, _Storage, true> : public FunctorInterface<Ret, vo
 };
 
 template<typename Ret, typename Cls, typename _Storage>
-struct Functor<Ret, void, Cls, _Storage, false> : public FunctorInterface<Ret, void>
+struct _FunctorEnclosure<Ret, void, Cls, _Storage, false> : public _FunctorInterface<Ret, void>
 {
-	static_assert(!std::is_rvalue_reference_v<_Storage>, "Functor: _Storage cannot be r-value reference.");
-	static_assert(std::is_convertible_v<_Storage, Cls>, "Functor: _Storage is not convertible to Cls.");
-	static_assert(!std::is_rvalue_reference_v<Cls>, "Functor: Cls cannot be r-value reference.");
+	static_assert(!std::is_rvalue_reference_v<_Storage>, "_FunctorEnclosure: _Storage cannot be r-value reference.");
+	static_assert(std::is_convertible_v<_Storage, Cls>, "_FunctorEnclosure: _Storage is not convertible to Cls.");
+	static_assert(!std::is_rvalue_reference_v<Cls>, "_FunctorEnclosure: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, void, Cls>;
 
-	Functor(func_signature function, auto&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
+	_FunctorEnclosure(func_signature function, auto&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
 
 	Ret operator()() override
 	{
@@ -195,9 +195,9 @@ struct Functor<Ret, void, Cls, _Storage, false> : public FunctorInterface<Ret, v
 		else
 			return function(redirect<Cls>(closure));
 	}
-	FunctorInterface<Ret, void>* clone() override
+	_FunctorInterface<Ret, void>* clone() override
 	{
-		return new Functor<Ret, void, Cls, _Storage, false>(function, std::forward<_Storage&>(closure));
+		return new _FunctorEnclosure<Ret, void, Cls, _Storage, false>(function, std::forward<_Storage&>(closure));
 	}
 
 	func_signature function;
@@ -205,12 +205,12 @@ struct Functor<Ret, void, Cls, _Storage, false> : public FunctorInterface<Ret, v
 };
 
 template<typename Ret, typename _Storage, bool _ValueIn>
-struct Functor<Ret, void, void, _Storage, _ValueIn> : public FunctorInterface<Ret, void>
+struct _FunctorEnclosure<Ret, void, void, _Storage, _ValueIn> : public _FunctorInterface<Ret, void>
 {
-	static_assert(std::is_void_v<_Storage>, "Functor: _Storage must be void when Cls is void.");
+	static_assert(std::is_void_v<_Storage>, "_FunctorEnclosure: _Storage must be void when Cls is void.");
 	using func_signature = func_signature_t<Ret, void, void>;
 
-	Functor(func_signature function) : function(function) {}
+	_FunctorEnclosure(func_signature function) : function(function) {}
 
 	Ret operator()() override
 	{
@@ -219,9 +219,9 @@ struct Functor<Ret, void, void, _Storage, _ValueIn> : public FunctorInterface<Re
 		else
 			return function();
 	}
-	FunctorInterface<Ret, void>* clone() override
+	_FunctorInterface<Ret, void>* clone() override
 	{
-		return new Functor<Ret, void, void, void, _ValueIn>(function);
+		return new _FunctorEnclosure<Ret, void, void, void, _ValueIn>(function);
 	}
 
 	func_signature function;
@@ -233,24 +233,24 @@ struct null_functor_error : public std::exception
 };
 
 template<typename Ret, typename Arg>
-class FunctorPtr
+class Functor
 {
-	FunctorInterface<Ret, Arg>* f = nullptr;
+	_FunctorInterface<Ret, Arg>* f = nullptr;
 
 public:
 	using RetType = Ret;
 	using ArgType = Arg;
 
 	template<typename Cls, typename _Storage, bool _ValueIn>
-	FunctorPtr(Functor<Ret, Arg, Cls, _Storage, _ValueIn>* f) : f(f) {}
-	FunctorPtr(FunctorInterface<Ret, Arg>* f) : f(f) {}
-	FunctorPtr(const FunctorPtr<Ret, Arg>& other)
+	Functor(_FunctorEnclosure<Ret, Arg, Cls, _Storage, _ValueIn>* f) : f(f) {}
+	Functor(_FunctorInterface<Ret, Arg>* f) : f(f) {}
+	Functor(const Functor<Ret, Arg>& other)
 	{
 		if (other.f)
 			f = other.f->clone();
 	}
-	FunctorPtr(FunctorPtr<Ret, Arg>&& other) noexcept : f(other.f) { other.f = nullptr; }
-	FunctorPtr& operator=(const FunctorPtr<Ret, Arg>& other)
+	Functor(Functor<Ret, Arg>&& other) noexcept : f(other.f) { other.f = nullptr; }
+	Functor& operator=(const Functor<Ret, Arg>& other)
 	{
 		if (this == &other)
 			return *this;
@@ -262,7 +262,7 @@ public:
 			f = nullptr;
 		return *this;
 	}
-	FunctorPtr& operator=(FunctorPtr&& other) noexcept
+	Functor& operator=(Functor&& other) noexcept
 	{
 		if (this == &other)
 			return *this;
@@ -272,10 +272,10 @@ public:
 		other.f = nullptr;
 		return *this;
 	}
-	~FunctorPtr() { if (f) delete f; }
-	FunctorPtr<Ret, Arg> clone() const
+	~Functor() { if (f) delete f; }
+	Functor<Ret, Arg> clone() const
 	{
-		return f ? FunctorPtr<Ret, Arg>(f->clone()) : nullptr;
+		return f ? Functor<Ret, Arg>(f->clone()) : nullptr;
 	}
 
 	Ret operator()(Arg arg) const
@@ -299,24 +299,24 @@ public:
 };
 
 template<typename Ret>
-class FunctorPtr<Ret, void>
+class Functor<Ret, void>
 {
-	FunctorInterface<Ret, void>* f = nullptr;
+	_FunctorInterface<Ret, void>* f = nullptr;
 
 public:
 	using RetType = Ret;
 	using ArgType = void;
 
 	template<typename Cls, typename _Storage, bool _ValueIn>
-	FunctorPtr(Functor<Ret, void, Cls, _Storage, _ValueIn>* f) : f(f) {}
-	FunctorPtr(FunctorInterface<Ret, void>* f) : f(f) {}
-	FunctorPtr(const FunctorPtr<Ret, void>& other)
+	Functor(_FunctorEnclosure<Ret, void, Cls, _Storage, _ValueIn>* f) : f(f) {}
+	Functor(_FunctorInterface<Ret, void>* f) : f(f) {}
+	Functor(const Functor<Ret, void>& other)
 	{
 		if (other.f)
 			f = other.f->clone();
 	}
-	FunctorPtr(FunctorPtr<Ret, void>&& other) noexcept : f(other.f) { other.f = nullptr; }
-	FunctorPtr& operator=(const FunctorPtr<Ret, void>& other)
+	Functor(Functor<Ret, void>&& other) noexcept : f(other.f) { other.f = nullptr; }
+	Functor& operator=(const Functor<Ret, void>& other)
 	{
 		if (this == &other)
 			return *this;
@@ -328,7 +328,7 @@ public:
 			f = nullptr;
 		return *this;
 	}
-	FunctorPtr& operator=(FunctorPtr&& other) noexcept
+	Functor& operator=(Functor&& other) noexcept
 	{
 		if (this == &other)
 			return *this;
@@ -338,10 +338,10 @@ public:
 		other.f = nullptr;
 		return *this;
 	}
-	~FunctorPtr() { if (f) delete f; }
-	FunctorPtr<Ret, void> clone() const
+	~Functor() { if (f) delete f; }
+	Functor<Ret, void> clone() const
 	{
-		return f ? FunctorPtr<Ret, void>(f->clone()) : nullptr;
+		return f ? Functor<Ret, void>(f->clone()) : nullptr;
 	}
 
 	Ret operator()() const
@@ -368,7 +368,7 @@ template<typename T>
 struct is_functor_ptr : public std::false_type {};
 
 template<typename Ret, typename Arg>
-struct is_functor_ptr<FunctorPtr<Ret, Arg>> : public std::true_type {};
+struct is_functor_ptr<Functor<Ret, Arg>> : public std::true_type {};
 
 template<typename T>
 inline constexpr bool is_functor_ptr_v = is_functor_ptr<T>::value;
@@ -425,12 +425,12 @@ inline auto make_functor_ptr(auto f, auto&& closure) requires (!_ValueIn)
 		if constexpr (_ReferExternal)
 		{
 			using _Storage = strip_rvalue_reference_t<decltype(closure)>;
-			return FunctorPtr<Ret, Arg>(new Functor<Ret, Arg, Cls, _Storage, false>(f, PULSAR_FORWARD(closure)));
+			return Functor<Ret, Arg>(new _FunctorEnclosure<Ret, Arg, Cls, _Storage, false>(f, PULSAR_FORWARD(closure)));
 		}
 		else
 		{
 			using _Storage = std::remove_reference_t<decltype(closure)>;
-			return FunctorPtr<Ret, Arg>(new Functor<Ret, Arg, Cls, _Storage, false>(f, PULSAR_FORWARD(closure)));
+			return Functor<Ret, Arg>(new _FunctorEnclosure<Ret, Arg, Cls, _Storage, false>(f, PULSAR_FORWARD(closure)));
 		}
 	}
 	else
@@ -442,12 +442,12 @@ inline auto make_functor_ptr(auto f, auto&& closure) requires (!_ValueIn)
 		if constexpr (_ReferExternal)
 		{
 			using _Storage = strip_rvalue_reference_t<decltype(closure)>;
-			return FunctorPtr<Ret, void>(new Functor<Ret, void, Cls, _Storage, false>(f, PULSAR_FORWARD(closure)));
+			return Functor<Ret, void>(new _FunctorEnclosure<Ret, void, Cls, _Storage, false>(f, PULSAR_FORWARD(closure)));
 		}
 		else
 		{
 			using _Storage = std::remove_reference_t<decltype(closure)>;
-			return FunctorPtr<Ret, void>(new Functor<Ret, void, Cls, _Storage, false>(f, PULSAR_FORWARD(closure)));
+			return Functor<Ret, void>(new _FunctorEnclosure<Ret, void, Cls, _Storage, false>(f, PULSAR_FORWARD(closure)));
 		}
 	}
 }
@@ -466,7 +466,7 @@ inline auto make_functor_ptr(auto f, auto closure) requires (_ValueIn)
 		using _Storage = decltype(closure);
 		static_assert(std::is_same_v<std::decay_t<Cls>, std::decay_t<decltype(closure)>>);
 		static_assert(std::is_same_v<Func, func_signature_t<Ret, Arg, Cls>>);
-		return FunctorPtr<Ret, Arg>(new Functor<Ret, Arg, Cls, _Storage, true>(f, closure));
+		return Functor<Ret, Arg>(new _FunctorEnclosure<Ret, Arg, Cls, _Storage, true>(f, closure));
 	}
 	else
 	{
@@ -475,7 +475,7 @@ inline auto make_functor_ptr(auto f, auto closure) requires (_ValueIn)
 		using _Storage = decltype(closure);
 		static_assert(std::is_same_v<std::decay_t<Cls>, std::decay_t<decltype(closure)>>);
 		static_assert(std::is_same_v<Func, func_signature_t<Ret, void, Cls>>);
-		return FunctorPtr<Ret, void>(new Functor<Ret, void, Cls, _Storage, true>(f, closure));
+		return Functor<Ret, void>(new _FunctorEnclosure<Ret, void, Cls, _Storage, true>(f, closure));
 	}
 }
 
@@ -489,13 +489,13 @@ inline auto make_functor_ptr(auto f)
 	{
 		using Arg = parse_function<Func>::par_type;
 		static_assert(std::is_same_v<Func, func_signature_t<Ret, Arg, void>>);
-		return FunctorPtr<Ret, Arg>(new Functor<Ret, Arg, void, void, true>(f));
+		return Functor<Ret, Arg>(new _FunctorEnclosure<Ret, Arg, void, void, true>(f));
 	}
 	else
 	{
 		static_assert(std::is_same_v<Func, func_signature_t<Ret, void, void>>);
-		return FunctorPtr<Ret, void>(new Functor<Ret, void, void, void, true>(f));
+		return Functor<Ret, void>(new _FunctorEnclosure<Ret, void, void, void, true>(f));
 	}
 }
 
-inline FunctorPtr<void, void> VoidFunctorPtr = make_functor_ptr([]() {});
+inline Functor<void, void> VoidFunctor = make_functor_ptr([]() {});

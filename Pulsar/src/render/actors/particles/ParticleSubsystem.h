@@ -17,7 +17,7 @@ struct ParticleSubsystemData
 	real wavePeriod;
 	std::shared_ptr<DebugPolygon> prototypeShape;
 	CumulativeFunc<ParticleCount> spawnFunc;
-	FunctorPtr<real, const Particles::CHRSeed&> lifespanFunc;
+	Functor<real, const Particles::CHRSeed&> lifespanFunc;
 	Particles::CharacteristicGen characteristicGen;
 };
 

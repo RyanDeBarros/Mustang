@@ -17,13 +17,13 @@ namespace Particles {
 			}, std::get<0>(tuple)), std::get<1>(tuple) };
 		}, cls(std::move(f), max_index));
 	}
-
-	CharacteristicGen Characterize(FunctorPtr<void, const std::tuple<Particle&, const CHRSeed&>&>&& f, DataIndex max_index)
+	
+	CharacteristicGen Characterize(Functor<void, const std::tuple<Particle&, const CHRSeed&>&>&& f, DataIndex max_index)
 	{
 		using tpl = std::tuple<Particle&, const CHRSeed&>;
-		using cls = std::tuple<FunctorPtr<void, const tpl&>, DataIndex>;
+		using cls = std::tuple<Functor<void, const tpl&>, DataIndex>;
 		return make_functor_ptr<false>([](const CHRSeed& seed, const cls& tuple) -> CHRBind {
-			using cls_inner = std::tuple<FunctorPtr<void, const tpl&>, const CHRSeed&>;
+			using cls_inner = std::tuple<Functor<void, const tpl&>, const CHRSeed&>;
 			return { make_functor_ptr<false>([](Particle& p, const cls_inner& tuple) -> void {
 				std::get<0>(tuple)(tpl(p, std::get<1>(tuple)));
 			}, cls_inner(std::get<0>(tuple), seed)), std::get<1>(tuple) };
@@ -176,53 +176,53 @@ namespace Particles {
 			}, si), si + 1);
 		}
 
-		CharacteristicGen OperateData(DataIndex si, FunctorPtr<void, float&>&& func)
+		CharacteristicGen OperateData(DataIndex si, Functor<void, float&>&& func)
 		{
-			using cls = std::tuple<DataIndex, FunctorPtr<void, float&>>;
+			using cls = std::tuple<DataIndex, Functor<void, float&>>;
 			return Characterize(make_functor_ptr<false>([](Particle& p, const cls& tuple) -> void {
 				// func(p[si]);
 				std::get<1>(tuple)(p[std::get<0>(tuple)]);
 			}, cls(si, std::move(func))), si + 1);
 		}
 
-		CharacteristicGen OperateData(DataIndex si, FunctorPtr<void, const std::tuple<float&, float>&>&& func, DataIndex di)
+		CharacteristicGen OperateData(DataIndex si, Functor<void, const std::tuple<float&, float>&>&& func, DataIndex di)
 		{
-			using cls = std::tuple<DataIndex, FunctorPtr<void, const std::tuple<float&, float>&>, DataIndex>;
+			using cls = std::tuple<DataIndex, Functor<void, const std::tuple<float&, float>&>, DataIndex>;
 			return Characterize(make_functor_ptr<false>([](Particle& p, const cls& tuple) -> void {
 				// func({ p[si], p[di] });
 				std::get<1>(tuple)({ p[std::get<0>(tuple)], p[std::get<2>(tuple)] });
 			}, cls(si, std::move(func), di)), std::max(si, di) + 1);
 		}
 
-		CharacteristicGen OperateDataUsingSeed(DataIndex si, FunctorPtr<void, const std::tuple<float&, const CHRSeed&>&>&& func)
+		CharacteristicGen OperateDataUsingSeed(DataIndex si, Functor<void, const std::tuple<float&, const CHRSeed&>&>&& func)
 		{
-			using cls = std::tuple<FunctorPtr<void, const std::tuple<float&, const CHRSeed&>&>, DataIndex>;
+			using cls = std::tuple<Functor<void, const std::tuple<float&, const CHRSeed&>&>, DataIndex>;
 			return Characterize(make_functor_ptr<false>([](const std::tuple<Particle&, const CHRSeed&>& tuple, const cls& c) -> void {
 				// func({ p[si], seed });
 				std::get<0>(c)({ std::get<0>(tuple)[std::get<1>(c)], std::get<1>(tuple) });
 			}, cls(std::move(func), si)), si + 1);
 		}
 
-		CharacteristicGen SetColorUsingData(FunctorPtr<Modulate, float>&& color, DataIndex di)
+		CharacteristicGen SetColorUsingData(Functor<Modulate, float>&& color, DataIndex di)
 		{
-			using cls = std::tuple<DataIndex, FunctorPtr<glm::vec4, float>>;
+			using cls = std::tuple<DataIndex, Functor<glm::vec4, float>>;
 			return Characterize(make_functor_ptr<false>([](Particle& p, const cls& tuple) -> void {
 				// set_ptr(p.m_Shape->Fickler().Modulate(), color(p[di]));
 				*p.m_Shape->Fickler().Modulate() = std::get<1>(tuple)(p[std::get<0>(tuple)]);
 			}, cls(di, std::move(color))), di + 1);
 		}
 
-		CharacteristicGen SetColorUsingTime(FunctorPtr<Modulate, float>&& color)
+		CharacteristicGen SetColorUsingTime(Functor<Modulate, float>&& color)
 		{
-			using cls = FunctorPtr<glm::vec4, float>;
+			using cls = Functor<glm::vec4, float>;
 			return Characterize(make_functor_ptr<false>([](Particle& p, const cls& color) -> void {
 				*p.m_Shape->Fickler().Modulate() = color(p.t());
 			}, std::move(color)), 0);
 		}
 
-		CharacteristicGen SetLocalScaleUsingData(FunctorPtr<Scale2D, float>&& scale, DataIndex di)
+		CharacteristicGen SetLocalScaleUsingData(Functor<Scale2D, float>&& scale, DataIndex di)
 		{
-			using cls = std::tuple<FunctorPtr<glm::vec2, float>, DataIndex>;
+			using cls = std::tuple<Functor<glm::vec2, float>, DataIndex>;
 			return Characterize(make_functor_ptr<false>([](Particle& p, const cls& tuple) -> void {
 				*p.m_Shape->Fickler().Scale() = std::get<0>(tuple)(p[std::get<1>(tuple)]);
 			}, cls(std::move(scale), di)), di + 1);
@@ -235,17 +235,17 @@ namespace Particles {
 			}, position), 0);
 		}
 
-		CharacteristicGen SetLocalPositionUsingData(FunctorPtr<Position2D, float>&& position, DataIndex di)
+		CharacteristicGen SetLocalPositionUsingData(Functor<Position2D, float>&& position, DataIndex di)
 		{
-			using cls = std::tuple<FunctorPtr<glm::vec2, float>, DataIndex>;
+			using cls = std::tuple<Functor<glm::vec2, float>, DataIndex>;
 			return Characterize(make_functor_ptr<false>([](Particle& p, const cls& tuple) -> void {
 				*p.m_Shape->Fickler().Position() = std::get<0>(tuple)(p[std::get<1>(tuple)]);
 			}, cls(std::move(position), di)), di + 1);
 		}
 
-		CharacteristicGen SetLocalPositionUsingData(FunctorPtr<Position2D, const glm::vec2&>&& position, DataIndex dix, DataIndex diy)
+		CharacteristicGen SetLocalPositionUsingData(Functor<Position2D, const glm::vec2&>&& position, DataIndex dix, DataIndex diy)
 		{
-			using cls = std::tuple<FunctorPtr<glm::vec2, const glm::vec2&>, DataIndex, DataIndex>;
+			using cls = std::tuple<Functor<glm::vec2, const glm::vec2&>, DataIndex, DataIndex>;
 			return Characterize(make_functor_ptr<false>([](Particle& p, const cls& tuple) -> void {
 				*p.m_Shape->Fickler().Position() = std::get<0>(tuple)(glm::vec2{ p[std::get<1>(tuple)], p[std::get<2>(tuple)] });
 			}, cls(std::move(position), dix, diy)), std::max(dix, diy) + 1);
@@ -272,7 +272,7 @@ namespace Particles {
 		CharacteristicGen SyncRS() { return _SyncRS.clone(); }
 		CharacteristicGen SyncM() { return _SyncM.clone(); }
 
-		FunctorPtr<float, const CHRSeed&> Seed_waveT()
+		Functor<float, const CHRSeed&> Seed_waveT()
 		{
 			return make_functor_ptr([](const Particles::CHRSeed& seed) -> float { return seed.waveT; });
 		}

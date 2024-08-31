@@ -7,7 +7,7 @@
 namespace Particles {
 
 	extern CharacteristicGen Characterize(CHRFunc&& f, DataIndex max_index);
-	extern CharacteristicGen Characterize(FunctorPtr<void, const std::tuple<Particle&, const CHRSeed&>&>&& f, DataIndex max_index);
+	extern CharacteristicGen Characterize(Functor<void, const std::tuple<Particle&, const CHRSeed&>&>&& f, DataIndex max_index);
 
 	extern CharacteristicGen CombineSequential(std::vector<CharacteristicGen>&& characteristics);
 	extern CharacteristicGen GenSetup(CharacteristicGen&& setup);
@@ -25,18 +25,18 @@ namespace Particles {
 		extern CharacteristicGen FeedDataShiftMod(DataIndex si, DataIndex shiftI, float mod);
 		extern CharacteristicGen FeedDataTime(DataIndex si);
 
-		extern CharacteristicGen OperateData(DataIndex si, FunctorPtr<void, float&>&& func);
-		extern CharacteristicGen OperateData(DataIndex si, FunctorPtr<void, const std::tuple<float&, float>&>&& func, DataIndex di);
-		extern CharacteristicGen OperateDataUsingSeed(DataIndex si, FunctorPtr<void, const std::tuple<float&, const CHRSeed&>&>&& func);
+		extern CharacteristicGen OperateData(DataIndex si, Functor<void, float&>&& func);
+		extern CharacteristicGen OperateData(DataIndex si, Functor<void, const std::tuple<float&, float>&>&& func, DataIndex di);
+		extern CharacteristicGen OperateDataUsingSeed(DataIndex si, Functor<void, const std::tuple<float&, const CHRSeed&>&>&& func);
 
-		extern CharacteristicGen SetColorUsingData(FunctorPtr<Modulate, float>&& color, DataIndex di);
-		extern CharacteristicGen SetColorUsingTime(FunctorPtr<Modulate, float>&& color);
+		extern CharacteristicGen SetColorUsingData(Functor<Modulate, float>&& color, DataIndex di);
+		extern CharacteristicGen SetColorUsingTime(Functor<Modulate, float>&& color);
 		
-		extern CharacteristicGen SetLocalScaleUsingData(FunctorPtr<Scale2D, float>&& scale, DataIndex di);
+		extern CharacteristicGen SetLocalScaleUsingData(Functor<Scale2D, float>&& scale, DataIndex di);
 		
 		extern CharacteristicGen SetLocalPosition(const Position2D& position);
-		extern CharacteristicGen SetLocalPositionUsingData(FunctorPtr<Position2D, float>&& position, DataIndex di);
-		extern CharacteristicGen SetLocalPositionUsingData(FunctorPtr<Position2D, const glm::vec2&>&& position, DataIndex dix, DataIndex diy);
+		extern CharacteristicGen SetLocalPositionUsingData(Functor<Position2D, float>&& position, DataIndex di);
+		extern CharacteristicGen SetLocalPositionUsingData(Functor<Position2D, const glm::vec2&>&& position, DataIndex dix, DataIndex diy);
 		extern CharacteristicGen OperateLocalPositionFromVelocityData(DataIndex dix, DataIndex diy);
 
 		extern CharacteristicGen SyncAll();
@@ -45,7 +45,7 @@ namespace Particles {
 		extern CharacteristicGen SyncRS();
 		extern CharacteristicGen SyncM();
 
-		extern FunctorPtr<float, const CHRSeed&> Seed_waveT();
+		extern Functor<float, const CHRSeed&> Seed_waveT();
 	}
 
 }

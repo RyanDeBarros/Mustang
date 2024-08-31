@@ -21,11 +21,11 @@ namespace Particles {
 		unsigned int totalSpawn;
 	};
 
-	using CHRFunc = FunctorPtr<void, Particle&>;
+	using CHRFunc = Functor<void, Particle&>;
 
 	using CHRBind = std::pair<CHRFunc, DataIndex>;
 
-	using CharacteristicGen = FunctorPtr<CHRBind, const CHRSeed&>;
+	using CharacteristicGen = Functor<CHRBind, const CHRSeed&>;
 }
 
 struct Particle

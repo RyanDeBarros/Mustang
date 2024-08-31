@@ -45,9 +45,9 @@ template<typename _Property>
 struct KF_Event : public KeyFrame<_Property>
 {
 	static constexpr bool progressive = true;
-	FunctorPtr<void, _Property*> event;
-	KF_Event(float timepoint, const FunctorPtr<void, _Property*>& event) : KeyFrame<_Property>(timepoint), event(event) {}
-	KF_Event(float timepoint, FunctorPtr<void, _Property*>&& event) : KeyFrame<_Property>(timepoint), event(std::move(event)) {}
+	Functor<void, _Property*> event;
+	KF_Event(float timepoint, const Functor<void, _Property*>& event) : KeyFrame<_Property>(timepoint), event(event) {}
+	KF_Event(float timepoint, Functor<void, _Property*>&& event) : KeyFrame<_Property>(timepoint), event(std::move(event)) {}
 };
 
 template<typename _Property, unsigned int _InterpMethod, bool _InOrder>

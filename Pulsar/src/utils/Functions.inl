@@ -103,14 +103,14 @@ inline auto vec2_each(auto&& f) requires (decays_to_functor_ptr_v<decltype(f)>)
 {
 	using Ret = glm::vec<2, RetComp>;
 	using ft = std::decay_t<decltype(f)>;
-	using cls = FunctorPtr<ft::RetType, ft::ArgType>;
+	using cls = Functor<ft::RetType, ft::ArgType>;
 	return make_functor_ptr<false>([](const glm::vec<2, ArgComp>& arg, const cls& f) -> Ret {
 		return Ret{ static_cast<RetComp>(f(static_cast<ft::ArgType>(arg[0]))), static_cast<RetComp>(f(static_cast<ft::ArgType>(arg[1]))) };
 	}, PULSAR_FORWARD(f));
 }
 
 template<typename Ret, typename Arg>
-inline FunctorPtr<Ret, Arg> func_sum(auto&& f1, auto&& f2) requires (decays_to_functor_ptr_v<decltype(f1)> && decays_to_functor_ptr_v<decltype(f2)>)
+inline Functor<Ret, Arg> func_sum(auto&& f1, auto&& f2) requires (decays_to_functor_ptr_v<decltype(f1)> && decays_to_functor_ptr_v<decltype(f2)>)
 {
 	using f1t = std::decay_t<decltype(f1)>;
 	using f2t = std::decay_t<decltype(f2)>;
@@ -121,7 +121,7 @@ inline FunctorPtr<Ret, Arg> func_sum(auto&& f1, auto&& f2) requires (decays_to_f
 }
 
 template<typename Ret, typename Arg>
-inline FunctorPtr<Ret, Arg> func_mul(auto&& f1, auto&& f2) requires (decays_to_functor_ptr_v<decltype(f1)>&& decays_to_functor_ptr_v<decltype(f2)>)
+inline Functor<Ret, Arg> func_mul(auto&& f1, auto&& f2) requires (decays_to_functor_ptr_v<decltype(f1)>&& decays_to_functor_ptr_v<decltype(f2)>)
 {
 	using f1t = std::decay_t<decltype(f1)>;
 	using f2t = std::decay_t<decltype(f2)>;
@@ -133,7 +133,7 @@ inline FunctorPtr<Ret, Arg> func_mul(auto&& f1, auto&& f2) requires (decays_to_f
 
 /// f1 --> f2. Equivalently, f2(f1)
 template<typename Ret, typename Arg>
-inline FunctorPtr<Ret, Arg> func_compose(auto&& f1, auto&& f2) requires (decays_to_functor_ptr_v<decltype(f1)>&& decays_to_functor_ptr_v<decltype(f2)>)
+inline Functor<Ret, Arg> func_compose(auto&& f1, auto&& f2) requires (decays_to_functor_ptr_v<decltype(f1)>&& decays_to_functor_ptr_v<decltype(f2)>)
 {
 	using f1t = std::decay_t<decltype(f1)>;
 	using f2t = std::decay_t<decltype(f2)>;
@@ -144,7 +144,7 @@ inline FunctorPtr<Ret, Arg> func_compose(auto&& f1, auto&& f2) requires (decays_
 }
 
 template<typename Ret, typename Arg>
-inline FunctorPtr<Ret, Arg> func_conditional(auto&& condition, auto&& true_case, auto&& false_case)
+inline Functor<Ret, Arg> func_conditional(auto&& condition, auto&& true_case, auto&& false_case)
 		requires (decays_to_functor_ptr_v<decltype(condition)> && decays_to_functor_ptr_v<decltype(true_case)> && decays_to_functor_ptr_v<decltype(false_case)>)
 {
 	using cond_t = std::decay_t<decltype(condition)>;
