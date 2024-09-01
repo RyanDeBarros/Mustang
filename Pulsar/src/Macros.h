@@ -29,8 +29,12 @@
 /******************************/
 
 #ifndef PULSAR_ASSERT
+#if PULSAR_DEBUGGING_MODE == 1
 #define PULSAR_ASSERT(x) if (!(x)) __debugbreak();
+#else
+#define PULSAR_ASSERT(x) 
 #endif
+#endif // PULSAR_ASSERT
 #ifndef PULSAR_TRY
 #if PULSAR_DEBUGGING_MODE == 1
 #	define PULSAR_TRY(x) PULSAR_ASSERT(glNoError(#x, __FILE__, __LINE__)) x; PULSAR_ASSERT(glNoError(#x, __FILE__, __LINE__))

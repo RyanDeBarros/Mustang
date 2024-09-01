@@ -144,7 +144,7 @@ bool DebugBatcher::Erase(const std::vector<std::shared_ptr<DebugPolygon>>::itera
 	if (multi_polygon != m_Slots.end())
 	{
 		multi_polygon->second.Erase(where);
-		if (multi_polygon->second.draw_count == 0)
+		if (multi_polygon->second.DrawCount() == 0)
 		{
 			m_Slots.erase(multi_polygon);
 			Sort();
@@ -162,7 +162,7 @@ void DebugBatcher::EraseAll(const std::unordered_map<DebugModel, std::unordered_
 		if (multi_polygon != m_Slots.end())
 		{
 			multi_polygon->second.EraseAll(iter->second);
-			if (multi_polygon->second.draw_count == 0)
+			if (multi_polygon->second.DrawCount() == 0)
 			{
 				m_Slots.erase(multi_polygon);
 			}

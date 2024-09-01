@@ -5,6 +5,56 @@
 #include "factory/ShaderRegistry.h"
 #include "actors/ActorPrimitive.h"
 #include "actors/shapes/DebugMultiPolygon.h"
+#include "actors/RectRender.h"
+
+void RectBatcher::set_size(GLsizei i)
+{
+	GLsizei prev_size = static_cast<GLsizei>(indexes.size());
+	if (i < prev_size)
+	{
+		indexes.resize(i);
+		index_counts.resize(i);
+		indexes.shrink_to_fit();
+		index_counts.shrink_to_fit();
+	}
+	else
+	{
+		indexes.resize(i);
+		index_counts.resize(i);
+		for (size_t j = prev_size; j < i; ++j)
+		{
+			indexes[j] = static_cast<GLint>(4 * j);
+			index_counts[j] = static_cast<GLsizei>(4);
+		}
+	}
+	size = i;
+}
+
+bool RectBatcher::increment_and_push_size(GLsizei hard_limit, GLsizei hit_limit_incr)
+{
+	if (draw_count + 1 < size) [[likely]]
+	{
+		++draw_count;
+		return true;
+	}
+	else if (size + hit_limit_incr <= hard_limit)
+	{
+		set_size(size + hit_limit_incr);
+		++draw_count;
+		return true;
+	}
+	else return false;
+}
+
+bool RectBatcher::try_increment()
+{
+	if (draw_count + 1 < size) [[likely]]
+	{
+		++draw_count;
+		return true;
+	}
+	else return false;
+}
 
 // TODO in all drawing cases check if renderable vertex/index buffer data is too large to fit in pools
 
@@ -16,12 +66,18 @@ CanvasLayer::CanvasLayer(const CanvasLayerData& data)
 	vertexPos = m_VertexPool;
 	indexPos = m_IndexPool;
 
+	// generate buffers
 	PULSAR_TRY(glGenBuffers(1, &m_VB));
 	PULSAR_TRY(glGenBuffers(1, &m_IB));
-	BindBuffers();
+	// bind buffers
+	PULSAR_TRY(glBindBuffer(GL_ARRAY_BUFFER, m_VB));
+	PULSAR_TRY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IB));
+	// initialize buffers
 	PULSAR_TRY(glBufferData(GL_ARRAY_BUFFER, m_Data.maxVertexPoolSize * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW));
 	PULSAR_TRY(glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Data.maxIndexPoolSize * sizeof(GLuint), nullptr, GL_DYNAMIC_DRAW));
-	UnbindBuffers();
+	// unbind buffers
+	PULSAR_TRY(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	PULSAR_TRY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
 CanvasLayer::~CanvasLayer()
@@ -81,79 +137,90 @@ void CanvasLayer::OnDraw()
 {
 	SetBlending();
 	currentModel = BatchModel();
-	vertexPos = m_VertexPool;
-	indexPos = m_IndexPool;
-	currentLexicon.Clear();
+	ResetPoolsAndLexicon();
 	for (const auto& list : m_Batcher)
 		for (const auto& element : list.second)
 			element->RequestDraw(this);
 	FlushAndReset();
 }
 
-void CanvasLayer::DrawPrimitive(ActorPrimitive2D& primitive)
+void CanvasLayer::DrawPrimitive(ActorPrimitive2D* primitive)
 {
-	const auto& render = primitive.m_Render;
-	if (render.model != currentModel)
+	if (currentDrawMode != DrawMode::PRIMITIVE)
 	{
 		FlushAndReset();
-		currentModel = render.model;
-		currentLexiconHandle = render.model.uniformLexicon;
-		currentLexicon.MergeLexicon(render.model.uniformLexicon);
-		if (m_VAOs.find(currentModel) == m_VAOs.end())
-			RegisterModel();
+		currentDrawMode = DrawMode::PRIMITIVE;
+	}
+	const auto& render = primitive->m_Render;
+	if (render.model != currentModel)
+	{
+		SendTriangles();
+		SetBatchModel(render.model);
 	}
 	else if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(render)
 			|| m_Data.maxIndexPoolSize - (indexPos - m_IndexPool) < render.indexCount)
 	{
-		FlushAndReset();
+		SendTriangles();
 	}
-	primitive.OnDraw(GetTextureSlot(render));
-	PoolOver(render);
+	primitive->OnDraw(GetTextureSlot(render));
+	PoolOverAll(render);
 }
 
 void CanvasLayer::DrawArray(const Renderable& renderable, GLenum indexing_mode)
 {
 	FlushAndReset();
-	currentModel = renderable.model;
-	if (currentModel == BatchModel{})
-		return;
-	if (m_VAOs.find(currentModel) == m_VAOs.end())
-		RegisterModel();
-	PoolOverVerticesOnly(renderable);
-	if (vertexPos - m_VertexPool > 0)
-	{
- 		BindAllExceptIndexes();
-		PULSAR_TRY(glDrawArrays(indexing_mode, 0, renderable.vertexCount));
-		UnbindAll();
-	}
+	currentDrawMode = DrawMode::ARRAY;
+	SetBatchModel(renderable.model);
+	PoolOverVertexBuffer(renderable);
+	PoolOverLexicon(renderable);
+	SendArray(renderable, indexing_mode);
 }
 
-void CanvasLayer::DrawMultiArray(const DebugMultiPolygon& multi_polygon)
+void CanvasLayer::DrawMultiArray(DebugMultiPolygon* multi_polygon)
 {
 	FlushAndReset();
-	currentModel = multi_polygon.m_Model;
-	if (currentModel == BatchModel{})
-		return;
-	if (m_VAOs.find(currentModel) == m_VAOs.end())
-		RegisterModel();
-	for (const auto& poly : multi_polygon.m_Polygons)
+	currentDrawMode = DrawMode::MULTI_ARRAY;
+	SetBatchModel(multi_polygon->m_Model);
+	for (const auto& poly : multi_polygon->m_Polygons)
 	{
 		if (!poly->DrawPrep())
 			continue;
-		if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(poly->m_Renderable) && vertexPos - m_VertexPool > 0)
-		{
-			BindAllExceptIndexes();
-			PULSAR_TRY(glMultiDrawArrays(multi_polygon.m_IndexMode, multi_polygon.indexes_ptr, multi_polygon.index_counts_ptr, multi_polygon.draw_count));
-			UnbindAll();
-		}
-		PoolOverVerticesOnly(poly->m_Renderable);
+		if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(poly->m_Renderable))
+			SendMultiArray(multi_polygon);
+		PoolOverVertexBuffer(poly->m_Renderable);
+		PoolOverLexicon(poly->m_Renderable);
 	}
-	if (vertexPos - m_VertexPool > 0)
+	SendMultiArray(multi_polygon);
+}
+
+void CanvasLayer::DrawRect(RectRender* rect)
+{
+	if (currentDrawMode != DrawMode::RECT)
 	{
-		BindAllExceptIndexes();
-		PULSAR_TRY(glMultiDrawArrays(multi_polygon.m_IndexMode, multi_polygon.indexes_ptr, multi_polygon.index_counts_ptr, multi_polygon.draw_count));
-		UnbindAll();
+		FlushAndReset();
+		currentDrawMode = DrawMode::RECT;
 	}
+	if (!rectBatcher.increment_and_push_size(m_Data.maxIndexPoolSize))
+	{
+		SendRects();
+		rectBatcher.draw_count = 1;
+	}
+	const auto& render = rect->m_Render;
+	if (render.model != currentModel)
+	{
+		SendRects();
+		rectBatcher.draw_count = 1;
+		SetBatchModel(render.model);
+	}
+	else if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(render)
+		|| m_Data.maxIndexPoolSize - (indexPos - m_IndexPool) < render.indexCount)
+	{
+		SendRects();
+		rectBatcher.draw_count = 1;
+	}
+	rect->OnDraw(GetTextureSlot(render));
+	PoolOverVertexBuffer(render);
+	PoolOverLexicon(render);
 }
 
 void CanvasLayer::SetBlending() const
@@ -169,111 +236,188 @@ void CanvasLayer::SetBlending() const
 	}
 }
 
-void CanvasLayer::PoolOver(const Renderable& render)
+void CanvasLayer::SetBatchModel(const BatchModel& model)
 {
-	if (render.vertexBufferData)
-		memcpy_s(vertexPos, (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool)) * sizeof(VertexSize), render.vertexBufferData, Render::VertexBufferLayoutCount(render) * sizeof(GLfloat));
-	if (render.indexBufferData)
-		memcpy_s(indexPos, (m_Data.maxIndexPoolSize - (indexPos - m_IndexPool)) * sizeof(VertexSize), render.indexBufferData, render.indexCount * sizeof(GLuint));
-	if (render.vertexCount)
-		for (size_t ic = 0; ic < render.indexCount; ic++)
-			*(indexPos + ic) += (GLuint)(vertexPos - m_VertexPool) / Render::StrideCountOf(render.model.layout, render.model.layoutMask);
-	vertexPos += Render::VertexBufferLayoutCount(render);
-	indexPos += render.indexCount;
-	if (render.model.uniformLexicon != currentLexiconHandle)
-		currentLexicon.MergeLexicon(render.model.uniformLexicon);
+	currentModel = model;
+	currentLexiconHandle = model.uniformLexicon;
+	currentLexicon.MergeLexicon(model.uniformLexicon);
+	if (m_VAOs.find(currentModel) == m_VAOs.end())
+		RegisterModel();
 }
 
-void CanvasLayer::PoolOverVerticesOnly(const Renderable& render)
+void CanvasLayer::PoolOverAll(const Renderable& renderable)
 {
-	if (render.vertexBufferData)
-		memcpy_s(vertexPos, (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool)) * sizeof(VertexSize), render.vertexBufferData, Render::VertexBufferLayoutCount(render) * sizeof(GLfloat));
-	vertexPos += Render::VertexBufferLayoutCount(render);
-	if (render.model.uniformLexicon != currentLexiconHandle)
-		currentLexicon.MergeLexicon(render.model.uniformLexicon);
+	// order of these calls is crucial
+	PoolOverIndexBuffer(renderable);
+	PoolOverVertexBuffer(renderable);
+	PoolOverLexicon(renderable);
+}
+
+void CanvasLayer::PoolOverIndexBuffer(const Renderable& renderable)
+{
+	if (renderable.indexBufferData)
+		memcpy_s(indexPos, (m_Data.maxIndexPoolSize - (indexPos - m_IndexPool)) * sizeof(VertexSize),
+			renderable.indexBufferData, renderable.indexCount * sizeof(GLuint));
+	if (renderable.vertexCount)
+		for (size_t ic = 0; ic < renderable.indexCount; ic++)
+			*(indexPos + ic) += (GLuint)(vertexPos - m_VertexPool) / Render::StrideCountOf(renderable.model.layout, renderable.model.layoutMask);
+	indexPos += renderable.indexCount;
+}
+
+void CanvasLayer::PoolOverVertexBuffer(const Renderable& renderable)
+{
+	if (renderable.vertexBufferData)
+		memcpy_s(vertexPos, (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool)) * sizeof(VertexSize),
+			renderable.vertexBufferData, Render::VertexBufferLayoutCount(renderable) * sizeof(GLfloat));
+	vertexPos += Render::VertexBufferLayoutCount(renderable);
+}
+
+void CanvasLayer::PoolOverLexicon(const Renderable& renderable)
+{
+	if (renderable.model.uniformLexicon != currentLexiconHandle)
+		currentLexicon.MergeLexicon(renderable.model.uniformLexicon);
+}
+
+void CanvasLayer::FlushAndReset()
+{
+	if (currentDrawMode == DrawMode::RECT) [[likely]]
+		SendRects();
+	else if (currentDrawMode == DrawMode::PRIMITIVE)
+		SendTriangles();
 }
 
 TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 {
-	if (render.textureHandle == 0)
-	{
-		// no texture
+	if (render.textureHandle == 0) // no texture
 		return -1;
-	}
 	for (auto it = m_TextureSlotBatch.begin(); it != m_TextureSlotBatch.end(); it++)
 	{
 		if (*it == render.textureHandle)
 			return static_cast<TextureSlot>(it - m_TextureSlotBatch.begin());
 	}
 	if (m_TextureSlotBatch.size() >= _RendererSettings::max_texture_slots)
-	{
 		FlushAndReset();
-	}
 	TextureSlot slot = static_cast<TextureSlot>(m_TextureSlotBatch.size());
 	m_TextureSlotBatch.push_back(render.textureHandle);
 	return slot;
 }
 
-void CanvasLayer::FlushAndReset()
-{
-	// TODO this only applies for regular glDrawElements with GL_TRIANGLES calls, but not all the different CanvasLayer draw functions. Define an enum that holds the different 'modes' (primitive, array+debug_model, etc.). Then based on that, FlushAndReset calls the necessary draw function.
-	if (currentModel == BatchModel{})
-		return;
-	BindAllExceptIndexes();
-	for (auto it = m_TextureSlotBatch.begin(); it != m_TextureSlotBatch.end(); it++)
-	{
-		// Note: due to the abstraction of glDrawElements and glBufferSubData behind CanvasLayer, there is currently no need to actually call TextureRegistry::Unbind on anything.
-		TextureRegistry::Bind(*it, (TextureSlot)(it - m_TextureSlotBatch.begin()));
-	}
-	PULSAR_TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
-	if (indexPos - m_IndexPool > 0)
-	{
-		PULSAR_TRY(glDrawElements(GL_TRIANGLES, (GLsizei)(indexPos - m_IndexPool), GL_UNSIGNED_INT, nullptr));
-	}
-	UnbindAll();
-}
-
 void CanvasLayer::RegisterModel()
 {
-	BindBuffers();
 	GLuint vao;
 	PULSAR_TRY(glGenVertexArrays(1, &vao));
-	PULSAR_TRY(glBindVertexArray(vao));
+	BindVertexArray(vao);
 	Render::_AttribLayout(currentModel.layout, currentModel.layoutMask);
-	PULSAR_TRY(glBindVertexArray(0));
-	UnbindBuffers();
+	UnbindVertexArray();
 	m_VAOs[currentModel] = vao;
 }
 
-void CanvasLayer::BindBuffers() const
+void CanvasLayer::BindVertexArray(GLuint vao) const
 {
+	// order of these calls is crucial
+	PULSAR_TRY(glBindVertexArray(vao));
 	PULSAR_TRY(glBindBuffer(GL_ARRAY_BUFFER, m_VB));
 	PULSAR_TRY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IB));
 }
 
-void CanvasLayer::UnbindBuffers() const
+void CanvasLayer::UnbindVertexArray() const
 {
-	PULSAR_TRY(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	// order of these calls is crucial
 	PULSAR_TRY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+	PULSAR_TRY(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	PULSAR_TRY(glBindVertexArray(0));
 }
 
-void CanvasLayer::BindAllExceptIndexes()
+void CanvasLayer::OpenShading() const
 {
-	PULSAR_TRY(glBindVertexArray(m_VAOs[currentModel]));
-	BindBuffers();
+	// order of these calls is crucial
+	BindVertexArray(m_VAOs.find(currentModel)->second);
 	ShaderRegistry::Bind(currentModel.shader);
 	m_LayerView.PassVPUniform(currentModel.shader);
 	UniformLexiconRegistry::OnApply(currentModel.uniformLexicon, currentModel.shader);
+}
+
+void CanvasLayer::CloseShading() const
+{
+	ShaderRegistry::Unbind();
+	UnbindVertexArray();
+}
+
+void CanvasLayer::ResetPoolsAndLexicon()
+{
+	vertexPos = m_VertexPool;
+	indexPos = m_IndexPool;
+	currentLexicon.Clear();
+}
+
+void CanvasLayer::BindTextureSlots() const
+{
+	for (auto it = m_TextureSlotBatch.begin(); it != m_TextureSlotBatch.end(); it++)
+		// NOTE due to the abstraction of glDrawElements and glBufferSubData behind CanvasLayer, there is currently no need to actually call TextureRegistry::Unbind on anything.
+		TextureRegistry::Bind(*it, (TextureSlot)(it - m_TextureSlotBatch.begin()));
+}
+
+void CanvasLayer::SendVertexPool() const
+{
 	PULSAR_TRY(glBufferSubData(GL_ARRAY_BUFFER, 0, (vertexPos - m_VertexPool) * sizeof(GLfloat), m_VertexPool));
 }
 
-void CanvasLayer::UnbindAll()
+void CanvasLayer::SendIndexPool() const
 {
-	ShaderRegistry::Unbind();
-	UnbindBuffers();
-	PULSAR_TRY(glBindVertexArray(0));
-	vertexPos = m_VertexPool;
-	indexPos = m_IndexPool;
-	m_TextureSlotBatch.clear();
-	currentLexicon.Clear();
+	PULSAR_TRY(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, (indexPos - m_IndexPool) * sizeof(GLuint), m_IndexPool));
+}
+
+void CanvasLayer::SendTriangles()
+{
+	if (vertexPos - m_VertexPool > 0)
+	{
+		PULSAR_ASSERT(indexPos - m_IndexPool > 0);
+		OpenShading();
+		BindTextureSlots();
+		SendVertexPool();
+		SendIndexPool();
+		PULSAR_TRY(glDrawElements(GL_TRIANGLES, (GLsizei)(indexPos - m_IndexPool), GL_UNSIGNED_INT, nullptr));
+		CloseShading();
+		ResetPoolsAndLexicon();
+		m_TextureSlotBatch.clear();
+	}
+}
+
+void CanvasLayer::SendArray(const Renderable& renderable, GLenum indexing_mode)
+{
+	if (vertexPos - m_VertexPool > 0)
+	{
+		OpenShading();
+		SendVertexPool();
+		PULSAR_TRY(glDrawArrays(indexing_mode, 0, renderable.vertexCount));
+		CloseShading();
+		ResetPoolsAndLexicon();
+	}
+}
+
+void CanvasLayer::SendMultiArray(DebugMultiPolygon* multi_polygon)
+{
+	if (vertexPos - m_VertexPool > 0)
+	{
+		OpenShading();
+		SendVertexPool();
+		PULSAR_TRY(glMultiDrawArrays(multi_polygon->m_IndexMode, multi_polygon->indexes_ptr, multi_polygon->index_counts_ptr, multi_polygon->DrawCount()));
+		CloseShading();
+		ResetPoolsAndLexicon();
+	}
+}
+
+void CanvasLayer::SendRects()
+{
+	if (vertexPos - m_VertexPool > 0)
+	{
+		OpenShading();
+		BindTextureSlots();
+		SendVertexPool();
+		PULSAR_TRY(glMultiDrawArrays(GL_TRIANGLE_FAN, rectBatcher.indexes.data(), rectBatcher.index_counts.data(), rectBatcher.draw_count));
+		rectBatcher.draw_count = 0;
+		CloseShading();
+		ResetPoolsAndLexicon();
+		m_TextureSlotBatch.clear();
+	}
 }

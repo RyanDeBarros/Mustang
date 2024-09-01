@@ -33,6 +33,29 @@ struct CanvasLayerData
 
 typedef GLuint VAO;
 
+enum class DrawMode : unsigned char
+{
+	VOID,
+	PRIMITIVE,
+	ARRAY,
+	MULTI_ARRAY,
+	RECT
+};
+
+class RectBatcher
+{
+	friend class CanvasLayer;
+
+	std::vector<GLint> indexes; // { 0, 4, 8, ... }
+	std::vector<GLsizei> index_counts; // { 4, 4, 4, ... }
+	GLsizei draw_count = 0;
+	GLsizei size = 0;
+
+	void set_size(GLsizei i);
+	bool increment_and_push_size(GLsizei hard_limit, GLsizei hit_limit_incr = 25);
+	bool try_increment();
+};
+
 class CanvasLayer
 {
 	friend class Renderer;
@@ -45,10 +68,12 @@ class CanvasLayer
 	GLuint* indexPos;
 	GLuint m_VB, m_IB;
 	BatchModel currentModel;
-	UniformLexicon currentLexicon;
 	UniformLexiconHandle currentLexiconHandle = 0;
+	DrawMode currentDrawMode = DrawMode::VOID;
+	UniformLexicon currentLexicon;
 	std::vector<TextureHandle> m_TextureSlotBatch;
 	std::unordered_map<BatchModel, VAO> m_VAOs;
+	RectBatcher rectBatcher;
 
 public:
 	CanvasLayer(const CanvasLayerData& data);
@@ -65,19 +90,34 @@ public:
 	CanvasIndex GetZIndex() const { return m_Data.ci; }
 	CanvasLayerData& GetDataRef() { return m_Data; }
 
-	void DrawPrimitive(class ActorPrimitive2D&);
+	void DrawPrimitive(class ActorPrimitive2D*);
 	void DrawArray(const Renderable& renderable, GLenum indexing_mode);
-	void DrawMultiArray(const class DebugMultiPolygon&);
+	void DrawMultiArray(class DebugMultiPolygon*);
+	// TODO better name than RectRender?
+	void DrawRect(class RectRender*);
 
 private:
 	void SetBlending() const;
-	void PoolOver(const Renderable&);
-	void PoolOverVerticesOnly(const Renderable&);
-	TextureSlot GetTextureSlot(const Renderable&);
+	void SetBatchModel(const BatchModel&);
+	void PoolOverAll(const Renderable&);
+	void PoolOverIndexBuffer(const Renderable&);
+	void PoolOverVertexBuffer(const Renderable&);
+	void PoolOverLexicon(const Renderable&);
 	void FlushAndReset();
+	TextureSlot GetTextureSlot(const Renderable&);
+	
 	void RegisterModel();
-	void BindBuffers() const;
-	void UnbindBuffers() const;
-	void BindAllExceptIndexes();
-	void UnbindAll();
+	void BindVertexArray(GLuint) const;
+	void UnbindVertexArray() const;
+	void OpenShading() const;
+	void CloseShading() const;
+	void ResetPoolsAndLexicon();
+	void BindTextureSlots() const;
+	void SendVertexPool() const;
+	void SendIndexPool() const;
+
+	void SendTriangles();
+	void SendArray(const Renderable& renderable, GLenum indexing_mode);
+	void SendMultiArray(class DebugMultiPolygon*);
+	void SendRects();
 };

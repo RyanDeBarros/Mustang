@@ -5,19 +5,20 @@
 #include "render/CanvasLayer.h"
 
 DebugMultiPolygon::DebugMultiPolygon()
-	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(0), m_IndexMode(0), m_Model({}), ActorRenderBase2D(0)
+	: indexes_ptr(nullptr), index_counts_ptr(nullptr), m_IndexMode(0), m_Model({}), ActorRenderBase2D(0)
 {
 }
 
 DebugMultiPolygon::DebugMultiPolygon(const std::pair<GLenum, BatchModel>& pair, const ZIndex& z)
-	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(0), m_IndexMode(pair.first), m_Model(pair.second), ActorRenderBase2D(z)
+	: indexes_ptr(nullptr), index_counts_ptr(nullptr), m_IndexMode(pair.first), m_Model(pair.second), ActorRenderBase2D(z)
 {
 }
 
 DebugMultiPolygon::DebugMultiPolygon(const DebugMultiPolygon& other)
-	: indexes_ptr(nullptr), index_counts_ptr(nullptr), draw_count(other.draw_count), m_IndexMode(other.m_IndexMode),
+	: indexes_ptr(nullptr), index_counts_ptr(nullptr), m_IndexMode(other.m_IndexMode),
 	m_Model(other.m_Model), m_Polygons(other.m_Polygons), ActorRenderBase2D(other)
 {
+	GLsizei draw_count = static_cast<GLsizei>(m_Polygons.size());
 	if (other.indexes_ptr)
 	{
 		indexes_ptr = new GLint[draw_count];
@@ -31,7 +32,7 @@ DebugMultiPolygon::DebugMultiPolygon(const DebugMultiPolygon& other)
 }
 
 DebugMultiPolygon::DebugMultiPolygon(DebugMultiPolygon&& other) noexcept
-	: indexes_ptr(other.indexes_ptr), index_counts_ptr(other.index_counts_ptr), draw_count(other.draw_count), m_IndexMode(other.m_IndexMode),
+	: indexes_ptr(other.indexes_ptr), index_counts_ptr(other.index_counts_ptr), m_IndexMode(other.m_IndexMode),
 	m_Model(other.m_Model), m_Polygons(std::move(other.m_Polygons)), ActorRenderBase2D(std::move(other))
 {
 	other.indexes_ptr = nullptr;
@@ -43,10 +44,10 @@ DebugMultiPolygon& DebugMultiPolygon::operator=(const DebugMultiPolygon& other)
 	if (this == &other)
 		return *this;
 	ActorRenderBase2D::operator=(other);
-	draw_count = other.draw_count;
 	m_IndexMode = other.m_IndexMode;
 	m_Model = other.m_Model;
 	m_Polygons = other.m_Polygons;
+	GLsizei draw_count = static_cast<GLsizei>(m_Polygons.size());
 
 	if (indexes_ptr)
 		delete[] indexes_ptr;
@@ -75,7 +76,6 @@ DebugMultiPolygon& DebugMultiPolygon::operator=(DebugMultiPolygon&& other) noexc
 	if (this == &other)
 		return *this;
 	ActorRenderBase2D::operator=(std::move(other));
-	draw_count = other.draw_count;
 	m_IndexMode = other.m_IndexMode;
 	m_Model = other.m_Model;
 	m_Polygons = std::move(other.m_Polygons);
@@ -102,7 +102,7 @@ DebugMultiPolygon::~DebugMultiPolygon()
 
 void DebugMultiPolygon::RequestDraw(CanvasLayer* canvas_layer)
 {
-	canvas_layer->DrawMultiArray(*this);
+	canvas_layer->DrawMultiArray(this);
 }
 
 void DebugMultiPolygon::Sort()
@@ -215,7 +215,7 @@ void DebugMultiPolygon::UpdatePtrs() const
 		delete[] indexes_ptr;
 	if (index_counts_ptr)
 		delete[] index_counts_ptr;
-	draw_count = static_cast<GLsizei>(m_Polygons.size());
+	GLsizei draw_count = static_cast<GLsizei>(m_Polygons.size());
 	indexes_ptr = new GLint[draw_count];
 	index_counts_ptr = new GLsizei[draw_count];
 	for (size_t i = 0; i < draw_count; i++)

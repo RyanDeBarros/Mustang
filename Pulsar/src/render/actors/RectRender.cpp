@@ -6,6 +6,7 @@
 #include "AssetLoader.h"
 #include "Logger.inl"
 #include "utils/Data.inl"
+#include "render/CanvasLayer.h"
 
 Renderable RectRender::rect_renderable;
 
@@ -56,6 +57,11 @@ void RectRender::DefineRectRenderable()
 	LOAD_STATUS load_status = Loader::loadRenderable(_RendererSettings::rect_renderable_filepath.c_str(), rect_renderable);
 	if (load_status != LOAD_STATUS::OK)
 		Logger::LogErrorFatal("Could not load rect renderable. Load Status = " + std::to_string(static_cast<int>(load_status)));
+}
+
+void RectRender::RequestDraw(CanvasLayer* canvas_layer)
+{
+	canvas_layer->DrawRect(this);
 }
 
 void RectRender::SetPivot(float pivotX, float pivotY)

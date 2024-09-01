@@ -59,7 +59,7 @@ ActorPrimitive2D::~ActorPrimitive2D()
 void ActorPrimitive2D::RequestDraw(CanvasLayer* canvas_layer)
 {
 	if (m_Status & 0b1)
-		canvas_layer->DrawPrimitive(*this);
+		canvas_layer->DrawPrimitive(this);
 }
 
 void ActorPrimitive2D::OnDraw(signed char texture_slot)

@@ -17,7 +17,6 @@ class DebugMultiPolygon : public ActorRenderBase2D
 	BatchModel m_Model;
 	GLenum m_IndexMode;
 
-	mutable GLsizei draw_count;
 	mutable GLint* indexes_ptr;
 	mutable GLsizei* index_counts_ptr;
 
@@ -38,6 +37,7 @@ public:
 
 	virtual void RequestDraw(class CanvasLayer* canvas_layer) override;
 
+	GLsizei DrawCount() const { return static_cast<GLsizei>(m_Polygons.size()); }
 	void ChangeZIndex(const iterator& where, ZIndex z);
 	void ChangeZIndex(size_t i, ZIndex z);
 	void PushBack(const std::shared_ptr<DebugPolygon>& poly);

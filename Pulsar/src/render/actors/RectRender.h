@@ -13,6 +13,7 @@ protected:
 	glm::vec2 m_Pivot;
 
 public:
+	// TODO renderable should have empty index buffer, since it will not be used.
 	RectRender(TextureHandle texture = 0, ShaderHandle shader = ShaderRegistry::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true);
 	RectRender(const RectRender&);
 	RectRender(RectRender&&) noexcept;
@@ -20,6 +21,8 @@ public:
 	RectRender& operator=(RectRender&&) noexcept;
 	
 	static void DefineRectRenderable();
+
+	void RequestDraw(class CanvasLayer*) override;
 
 	int GetWidth() const { return TextureRegistry::GetWidth(m_Render.textureHandle); }
 	int GetHeight() const { return TextureRegistry::GetHeight(m_Render.textureHandle); }
