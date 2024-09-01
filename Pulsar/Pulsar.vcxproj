@@ -208,9 +208,11 @@
     <ClCompile Include="src\render\transform\Modulate.cpp" />
     <ClCompile Include="src\render\transform\Transform.cpp" />
     <ClCompile Include="src\render\transform\Transforms.cpp" />
+    <ClInclude Include="src\render\transform\YSorter.h" />
     <ClInclude Include="src\utils\CopyPtr.inl">
       <FileType>CppHeader</FileType>
     </ClInclude>
+    <ClCompile Include="src\render\transform\YSorter.cpp" />
     <ClCompile Include="src\utils\Permutation.cpp" />
     <ClCompile Include="src\utils\Strings.cpp" />
     <ClCompile Include="src\utils\CommonMath.cpp" />

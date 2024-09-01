@@ -32,6 +32,7 @@
 #include "render/actors/anim/AnimActorPrimitive.h"
 #include "render/actors/anim/AnimationPlayer.inl"
 #include "render/actors/anim/KeyFrames.inl"
+#include "render/transform/YSorter.h"
 
 using namespace Pulsar;
 
@@ -325,6 +326,17 @@ void Pulsar::Run(GLFWwindow* window)
 	animEventTrack.SetOrInsert(KF_Event<void>(1.5f, make_functor_ptr([](void*) { Logger::LogInfo("1.5 seconds!"); })));
 	animEventTrack.SetOrInsert(KF_Event<void>(2.0f, make_functor_ptr([](void*) { Logger::LogInfo("2 seconds!"); })));
 	animPlayerEvents.tracks.push_back(CopyPtr(animEventTrack));
+
+	Renderer::GetCanvasLayer(11)->OnDetach(&root);
+	Renderer::GetCanvasLayer(11)->OnDetach(&child2);
+	Renderer::GetCanvasLayer(11)->OnDetach(&grandchild2);
+	Renderer::GetCanvasLayer(11)->OnDetach(&child);
+	Renderer::GetCanvasLayer(11)->OnDetach(&grandchild);
+	Renderer::GetCanvasLayer(11)->OnDetach(serotonin.Primitive());
+
+	YSorter ysorter(10);
+	ysorter.PushBackAll({ &root, &child2, &grandchild2, &child, &grandchild, serotonin.Primitive() });
+	Renderer::GetCanvasLayer(11)->OnAttach(&ysorter);
 
 	// small delay
 	while (totalDrawTime < 0.01f)

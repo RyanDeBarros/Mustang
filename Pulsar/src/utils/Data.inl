@@ -57,3 +57,21 @@ inline void set_or_insert_sorted(std::vector<T>& vec, T&& el, Equals equals, Com
 	else
 		vec.insert(iter, std::forward<T>(el));
 }
+
+template<typename T, typename CompareGreaterThan>
+inline void insertion_sort(std::vector<T>& vec, CompareGreaterThan compare_greater_than)
+{
+	size_t i = 1, j, n = vec.size();
+	while (i < n)
+	{
+		T temp = std::move(vec[i]);
+		j = i;
+		while (j > 0 && compare_greater_than(vec[j - 1], temp))
+		{
+			vec[j] = std::move(vec[j - 1]);
+			j--;
+		}
+		vec[j] = std::move(temp);
+		i++;
+	}
+}

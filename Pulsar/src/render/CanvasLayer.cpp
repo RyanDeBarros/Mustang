@@ -376,7 +376,7 @@ void CanvasLayer::SendTriangles()
 		BindTextureSlots();
 		SendVertexPool();
 		SendIndexPool();
-		PULSAR_TRY(glDrawElements(GL_TRIANGLES, (GLsizei)(indexPos - m_IndexPool), GL_UNSIGNED_INT, nullptr));
+		PULSAR_TRY(glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indexPos - m_IndexPool), GL_UNSIGNED_INT, nullptr));
 		CloseShading();
 		ResetPoolsAndLexicon();
 		m_TextureSlotBatch.clear();
