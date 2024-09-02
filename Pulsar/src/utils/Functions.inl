@@ -51,11 +51,7 @@ template<glm::length_t RetL, glm::length_t InpL>
 inline glm::vec<RetL, float> linear_combo(const glm::vec<InpL, float>& v, const std::array<glm::vec<RetL, float>, InpL + 1>& coeffs)
 {
 	glm::vec<RetL, float> combo = coeffs[0];
-	//for (size_t i = 1; i < coeffs.size(); i++)
-		//combo += coeffs[i] * v[i - 1];
-	// TODO compile-time unfurl loop
-	for (glm::length_t i = 0; i < InpL; i++)
-		combo += coeffs[i + 1] * v[i];
+	unfurl_loop<InpL>([&combo, &coeffs, &v](glm::length_t i) { combo += coeffs[i + 1] * v[i]; });
 	return combo;
 }
 

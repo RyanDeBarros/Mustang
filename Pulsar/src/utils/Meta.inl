@@ -21,3 +21,29 @@ constexpr T& remove_const(const T& el)
 {
 	return *const_cast<T*>(&el);
 }
+
+template<size_t Until>
+struct _unfurl_loop_impl
+{
+	constexpr static void _(auto&& body)
+	{
+		_unfurl_loop_impl<Until - 1>::_(body);
+		body(Until);
+	}
+};
+
+template<>
+struct _unfurl_loop_impl<0>
+{
+	constexpr static void _(auto&& body)
+	{
+		body(0);
+	}
+};
+
+template<size_t Count>
+constexpr void unfurl_loop(auto&& body)
+{
+	if constexpr (Count > 0)
+		_unfurl_loop_impl<Count - 1>::_(body);
+}

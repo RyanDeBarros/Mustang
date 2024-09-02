@@ -28,9 +28,7 @@
 		return verif;
 #endif // PULSAR_VERIFY
 
-// TODO instead of simply returning invalid LOAD_STATUS, also print reason for the invalidity
-
-// TODO fickle type for all assets
+// TODO instead of simply returning invalid LOAD_STATUS, also print reason for the invalidity?
 
 static LOAD_STATUS verify_header(const toml::v3::ex::parse_result& file, const char* header_name)
 {
@@ -616,6 +614,40 @@ LOAD_STATUS Loader::loadAtlas(const char* asset_filepath, Atlas*& atlas_initiali
 	}
 }
 
+static LOAD_STATUS readFickleType(const toml::v3::node_view<toml::v3::node>& fickle, FickleType& fickle_type)
+{
+	if (auto fickle_ = fickle.value<std::string>())
+	{
+		const std::string& ft = fickle_.value();
+		if (ft == "protean")
+			fickle_type = FickleType::Protean;
+		else if (ft == "transformable")
+			fickle_type = FickleType::Transformable;
+		else if (ft == "modulatable")
+			fickle_type = FickleType::Modulatable;
+		else
+			return LOAD_STATUS::SYNTAX_ERR;
+	}
+	else if (auto fickle_ = fickle.value<int64_t>())
+	{
+		switch (fickle_.value())
+		{
+		case FickleType::Protean:
+			fickle_type = FickleType::Protean;
+			return LOAD_STATUS::OK;
+		case FickleType::Transformable:
+			fickle_type = FickleType::Transformable;
+			return LOAD_STATUS::OK;
+		case FickleType::Modulatable:
+			fickle_type = FickleType::Modulatable;
+			return LOAD_STATUS::OK;
+		default:
+			return LOAD_STATUS::SYNTAX_ERR;
+		}
+	}
+	return LOAD_STATUS::OK;
+}
+
 LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, TileMap*& tilemap_initializer, TextureVersion texture_version)
 {
 	try
@@ -656,21 +688,8 @@ LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, TileMap*& tilemap_in
 			visible = vis.value();
 
 		FickleType fickle_type = FickleType::Transformable;
-		if (auto ft = tm["fickle"].value<int64_t>())
-		{
-			switch (ft.value())
-			{
-			case 0:
-				fickle_type = FickleType::Protean;
-				break;
-			case 1:
-				fickle_type = FickleType::Transformable;
-				break;
-			case 2:
-				fickle_type = FickleType::Modulatable;
-				break;
-			}
-		}
+		if (readFickleType(tm["fickle"], fickle_type) != LOAD_STATUS::OK)
+			return LOAD_STATUS::SYNTAX_ERR;
 
 		tilemap_initializer = new TileMap(std::shared_ptr<Atlas>(atlas), texture_settings, texture_version, shader, z, fickle_type, visible);
 
@@ -737,18 +756,9 @@ LOAD_STATUS Loader::loadParticleEffect(const char* filepath, ParticleEffect*& pe
 			if (ptype == "")
 				ptype = "array";
 		}
-		// TODO extract this into separate function, like what was done with texture settings.
 		FickleType fickle_type = FickleType::Protean;
-		if (auto fickle = peffect["fickle"].value<std::string>())
-		{
-			const std::string& ft = fickle.value();
-			if (ft == "protean")
-				fickle_type = FickleType::Protean;
-			else if (ft == "transformable")
-				fickle_type = FickleType::Transformable;
-			else if (ft == "modulatable")
-				fickle_type = FickleType::Modulatable;
-		}
+		if (readFickleType(peffect["fickle"], fickle_type) != LOAD_STATUS::OK)
+			return LOAD_STATUS::SYNTAX_ERR;
 
 		auto subsys_arr = peffect["subsys"].as_array();
 		std::vector<ParticleSubsystemData> subsystems;

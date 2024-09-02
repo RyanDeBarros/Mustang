@@ -280,7 +280,6 @@ void Pulsar::Run(GLFWwindow* window)
 	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::RED * Colors::HALF_TRANSPARENT_WHITE, Colors::LIGHT_GREEN });
 
 	AnimActorPrimitive2D serotonin(new RectRender(0, ShaderRegistry::Standard(), 10), { FramesArray("res/textures/serotonin.gif") }, 1.0f / 60.0f, false, 1.5f);
-	// TODO serotonin gif is not working
 	//Renderer::RemoveCanvasLayer(11);
 	//Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(serotonin.Primitive());
@@ -290,7 +289,6 @@ void Pulsar::Run(GLFWwindow* window)
 	animPlayer1.SetPeriod(2.0f);
 	animPlayer1.SetSpeed(0.5f);
 	float ap1frames = 0.0f;
-	serotonin.SetFrameLength(0.0f);
 
 	Fickler2D* serotoninPRL = &serotonin.Primitive()->Fickler();
 	using AnimTrack1T = AnimationTrack<AnimActorPrimitive2D, Position2D, KF_Assign<Position2D>, Interp::Linear>;
