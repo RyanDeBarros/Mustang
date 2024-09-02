@@ -13,7 +13,8 @@ namespace _RendererSettings
 	
 	extern int initial_window_width, initial_window_height;
 	extern glm::vec4 gl_clear_color;
-	
+	extern bool vsync_on;
+
 	extern TextureSlot max_texture_slots;
 	extern VertexSize standard_vertex_pool_size;
 	extern VertexSize standard_index_pool_size;

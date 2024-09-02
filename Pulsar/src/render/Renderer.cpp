@@ -38,6 +38,7 @@ void Renderer::Init()
 	TileRegistry::Init();
 	RectRender::DefineRectRenderable();
 	PULSAR_TRY(glEnable(GL_PROGRAM_POINT_SIZE));
+	_SetClearColor();
 }
 
 void Renderer::Terminate()
@@ -70,7 +71,10 @@ void Renderer::_ForceRefresh()
 {
 	glfwSwapBuffers(focused_window);
 	PULSAR_TRY(glClear(GL_COLOR_BUFFER_BIT));
-	// TODO setting to not clear color, in order to save performance. most scenes will have a background anyways.
+}
+
+void Renderer::_SetClearColor()
+{
 	PULSAR_TRY(glClearColor(_RendererSettings::gl_clear_color[0], _RendererSettings::gl_clear_color[1], _RendererSettings::gl_clear_color[2], _RendererSettings::gl_clear_color[3]));
 }
 

@@ -56,8 +56,6 @@ bool RectBatcher::try_increment()
 	else return false;
 }
 
-// TODO in all drawing cases check if renderable vertex/index buffer data is too large to fit in pools
-
 CanvasLayer::CanvasLayer(const CanvasLayerData& data)
 	: m_Data(data), m_LayerView((float)m_Data.pLeft, (float)m_Data.pRight, (float)m_Data.pBottom, (float)m_Data.pTop)
 {
@@ -245,6 +243,8 @@ void CanvasLayer::SetBatchModel(const BatchModel& model)
 		RegisterModel();
 }
 
+// NOTE If buffer data is too large to fit in corresponding pool, it will not be rendered.
+// This check would have to be done before pooling over, in which case FlushAndReset() can be called.
 void CanvasLayer::PoolOverAll(const Renderable& renderable)
 {
 	// order of these calls is crucial

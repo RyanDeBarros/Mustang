@@ -93,7 +93,6 @@ public:
 	void DrawPrimitive(class ActorPrimitive2D*);
 	void DrawArray(const Renderable& renderable, GLenum indexing_mode);
 	void DrawMultiArray(class DebugMultiPolygon*);
-	// TODO better name than RectRender?
 	void DrawRect(class RectRender*);
 
 private:

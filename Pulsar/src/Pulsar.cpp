@@ -75,7 +75,8 @@ int Pulsar::StartUp(GLFWwindow*& window)
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
+	if (_RendererSettings::vsync_on)
+		glfwSwapInterval(1);
 	glfwSetWindowRefreshCallback(window, window_refresh_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	if (glewInit() != GLEW_OK)
@@ -203,7 +204,7 @@ void Pulsar::Run(GLFWwindow* window)
 
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
-
+	
 	TileMap* tilemap_ini;
 	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap_ini) != LOAD_STATUS::OK)
 		PULSAR_ASSERT(false);
@@ -279,6 +280,7 @@ void Pulsar::Run(GLFWwindow* window)
 	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::RED * Colors::HALF_TRANSPARENT_WHITE, Colors::LIGHT_GREEN });
 
 	AnimActorPrimitive2D serotonin(new RectRender(0, ShaderRegistry::Standard(), 10), { FramesArray("res/textures/serotonin.gif") }, 1.0f / 60.0f, false, 1.5f);
+	// TODO serotonin gif is not working
 	//Renderer::RemoveCanvasLayer(11);
 	//Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(serotonin.Primitive());

@@ -6,6 +6,7 @@ namespace _RendererSettings
 
 	int initial_window_width = 1440, initial_window_height = 1080;
 	glm::vec4 gl_clear_color = glm::vec4(0.08, 0.08, 0.08, 0.0);
+	bool vsync_on = true;
 	
 	TextureSlot max_texture_slots = 32;
 	VertexSize standard_vertex_pool_size = 2048;

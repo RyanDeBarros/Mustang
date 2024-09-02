@@ -4,6 +4,7 @@ header = "renderer"
 width = 1440
 height = 1080
 gl_clear_color = [0.08, 0.08, 0.08, 0.0]
+vsync_on = true
 
 [rendering]
 max_texture_slots = 32

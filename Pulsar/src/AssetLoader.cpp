@@ -55,9 +55,9 @@ bool Loader::_LoadRendererSettings()
 		if (auto window = file["window"])
 		{
 			if (auto width = window["width"].value<int64_t>())
-				_RendererSettings::initial_window_width = (int)width.value();
+				_RendererSettings::initial_window_width = static_cast<int>(width.value());
 			if (auto height = window["height"].value<int64_t>())
-				_RendererSettings::initial_window_height = (int)height.value();
+				_RendererSettings::initial_window_height = static_cast<int>(height.value());
 			if (auto gl_clear_color = window["gl_clear_color"].as_array())
 			{
 				_RendererSettings::gl_clear_color = {
@@ -65,6 +65,8 @@ bool Loader::_LoadRendererSettings()
 					gl_clear_color->get_as<double>(2)->get(), gl_clear_color->get_as<double>(3)->get()
 				};
 			}
+			if (auto vsync_on = window["vsync_on"].value<bool>())
+				_RendererSettings::vsync_on = vsync_on.value();
 		}
 		if (auto rendering = file["rendering"])
 		{
