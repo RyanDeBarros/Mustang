@@ -1,7 +1,7 @@
 #include "Renderable.h"
 
 #include "Macros.h"
-#include "factory/UniformLexiconRegistry.h"
+#include "registry/UniformLexiconRegistry.h"
 
 BatchModel::BatchModel(VertexLayout layout, VertexLayoutMask layoutMask, ShaderHandle shader, UniformLexiconHandle uniformLexicon)
 	: layout(layout), layoutMask(layoutMask), shader(shader), uniformLexicon(uniformLexicon)

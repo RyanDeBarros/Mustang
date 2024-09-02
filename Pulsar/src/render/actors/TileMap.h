@@ -8,7 +8,7 @@
 #include "utils/Permutation.h"
 #include "ActorPrimitive.h"
 #include "ActorTesselation.h"
-#include "factory/Atlas.h"
+#include "registry/compound/Atlas.h"
 #include "RectRender.h"
 #include "../transform/Transform.h"
 

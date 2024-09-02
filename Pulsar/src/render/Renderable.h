@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <toml/toml.hpp>
 
-#include "factory/ShaderRegistry.h"
+#include "registry/ShaderRegistry.h"
 
 typedef unsigned short VertexLayoutMask;
 typedef unsigned int VertexLayout;

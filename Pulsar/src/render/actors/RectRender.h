@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ActorPrimitive.h"
-#include "factory/TextureRegistry.h"
+#include "registry/TextureRegistry.h"
 
 class RectRender : public ActorPrimitive2D
 {

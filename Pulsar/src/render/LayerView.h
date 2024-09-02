@@ -6,7 +6,7 @@
 
 #include "Handles.inl"
 #include "transform/Transform.h"
-#include "factory/Shader.h"
+#include "registry/Shader.h"
 
 class LayerView2D
 {

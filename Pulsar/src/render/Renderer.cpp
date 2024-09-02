@@ -5,10 +5,10 @@
 
 #include "Macros.h"
 #include "Logger.inl"
-#include "factory/ShaderRegistry.h"
-#include "factory/TextureRegistry.h"
-#include "factory/UniformLexiconRegistry.h"
-#include "factory/TileRegistry.h"
+#include "registry/ShaderRegistry.h"
+#include "registry/TextureRegistry.h"
+#include "registry/UniformLexiconRegistry.h"
+#include "registry/TileRegistry.h"
 #include "render/actors/RectRender.h"
 
 #ifndef PULSAR_CHECK_INITIALIZED

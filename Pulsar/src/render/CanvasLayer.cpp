@@ -2,7 +2,7 @@
 
 #include "Macros.h"
 #include "Renderer.h"
-#include "factory/ShaderRegistry.h"
+#include "registry/ShaderRegistry.h"
 #include "actors/ActorPrimitive.h"
 #include "actors/shapes/DebugMultiPolygon.h"
 #include "actors/RectRender.h"

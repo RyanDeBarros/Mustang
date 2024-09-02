@@ -1,7 +1,7 @@
 #pragma once
 
 #include "utils/Array.inl"
-#include "factory/Texture.h"
+#include "registry/Texture.h"
 #include "Handles.inl"
 
 class FramesArray

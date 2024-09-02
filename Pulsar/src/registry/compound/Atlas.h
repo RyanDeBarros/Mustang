@@ -3,9 +3,9 @@
 #include <vector>
 #include <unordered_map>
 
-#include "Tile.h"
-#include "ShaderRegistry.h"
-#include "Texture.h"
+#include "../Tile.h"
+#include "../ShaderRegistry.h"
+#include "../Texture.h"
 #include "render/ActorRenderBase.h"
 
 struct Placement

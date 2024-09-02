@@ -4,7 +4,7 @@
 #include <fstream>
 
 #include "Logger.inl"
-#include "factory/TextureRegistry.h"
+#include "registry/TextureRegistry.h"
 
 FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settings, unsigned short starting_index, bool temporary_buffer)
 {

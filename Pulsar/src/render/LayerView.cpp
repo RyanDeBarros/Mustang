@@ -2,7 +2,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "factory/ShaderRegistry.h"
+#include "registry/ShaderRegistry.h"
 #include "transform/Transforms.h"
 
 LayerView2D::LayerView2D(float pLeft, float pRight, float pBottom, float pTop)

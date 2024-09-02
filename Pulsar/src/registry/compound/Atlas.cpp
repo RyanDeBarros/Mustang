@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Macros.h"
-#include "TileRegistry.h"
+#include "../TileRegistry.h"
 #include "render/actors/RectRender.h"
 #include "render/actors/ActorTesselation.h"
 

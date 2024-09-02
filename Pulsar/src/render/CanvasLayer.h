@@ -12,8 +12,8 @@
 #include "ActorRenderBase.h"
 #include "LayerView.h"
 #include "Renderable.h"
-#include "factory/TextureRegistry.h"
-#include "factory/UniformLexiconRegistry.h"
+#include "registry/TextureRegistry.h"
+#include "registry/UniformLexiconRegistry.h"
 
 typedef signed char CanvasIndex;
 
