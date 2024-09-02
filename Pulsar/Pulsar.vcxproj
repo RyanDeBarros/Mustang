@@ -291,6 +291,9 @@
     <ClInclude Include="src\utils\Functions.inl">
       <FileType>CppHeader</FileType>
     </ClInclude>
+    <ClInclude Include="src\utils\Meta.inl">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
     <ClInclude Include="src\utils\Permutation.h" />
     <ClInclude Include="src\utils\Strings.h" />
     <ClInclude Include="src\utils\CommonMath.h" />

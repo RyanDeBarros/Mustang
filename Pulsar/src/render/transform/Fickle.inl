@@ -8,13 +8,7 @@
 #include "Transform.h"
 #include "Modulate.h"
 #include "utils/CopyPtr.inl"
-
-// TODO put somewhere else?
-template<typename T>
-inline T& remove_const(const T& el)
-{
-	return *const_cast<T*>(&el);
-}
+#include "utils/Meta.inl"
 
 template<typename T>
 class FickleWrapper

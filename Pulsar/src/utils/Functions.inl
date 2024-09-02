@@ -83,7 +83,7 @@ inline auto vec2_expand(auto&& fx, auto&& fy) requires (decays_to_functor_ptr_v<
 	using cls = std::tuple<fxt, fyt>;
 	return make_functor_ptr<false>([](Arg arg, const cls& tuple) -> Ret {
 		return Ret{ static_cast<RetComp>(std::get<0>(tuple)(static_cast<fxt::ArgType>(arg))), static_cast<RetComp>(std::get<1>(tuple)(static_cast<fyt::ArgType>(arg))) };
-	}, cls(PULSAR_FORWARD(fx), PULSAR_FORWARD(fy)));
+	}, cls(forward(fx), forward(fy)));
 }
 
 template<typename RetComp = float, typename ArgComp = float>
@@ -95,7 +95,7 @@ inline auto vec2_compwise(auto&& fx, auto&& fy) requires (decays_to_functor_ptr_
 	using cls = std::tuple<fxt, fyt>;
 	return make_functor_ptr<false>([](const glm::vec<2, ArgComp>& arg, const cls& tuple) -> Ret {
 		return Ret{ static_cast<RetComp>(std::get<0>(tuple)(static_cast<fxt::ArgType>(arg[0]))), static_cast<RetComp>(std::get<1>(tuple)(static_cast<fyt::ArgType>(arg[1])))};
-	}, cls(PULSAR_FORWARD(fx), PULSAR_FORWARD(fy)));
+	}, cls(forward(fx), forward(fy)));
 }
 
 template<typename RetComp = float, typename ArgComp = float>
@@ -106,7 +106,7 @@ inline auto vec2_each(auto&& f) requires (decays_to_functor_ptr_v<decltype(f)>)
 	using cls = Functor<ft::RetType, ft::ArgType>;
 	return make_functor_ptr<false>([](const glm::vec<2, ArgComp>& arg, const cls& f) -> Ret {
 		return Ret{ static_cast<RetComp>(f(static_cast<ft::ArgType>(arg[0]))), static_cast<RetComp>(f(static_cast<ft::ArgType>(arg[1]))) };
-	}, PULSAR_FORWARD(f));
+	}, forward(f));
 }
 
 template<typename Ret, typename Arg>
@@ -117,7 +117,7 @@ inline Functor<Ret, Arg> func_sum(auto&& f1, auto&& f2) requires (decays_to_func
 	using cls = std::tuple<f1t, f2t>;
 	return make_functor_ptr<false>([](Arg arg, const cls& tuple) -> Ret {
 		return static_cast<Ret>(std::get<0>(tuple)(static_cast<f1t::ArgType>(arg)) + std::get<1>(tuple)(static_cast<f2t::ArgType>(arg)));
-	}, cls(PULSAR_FORWARD(f1), PULSAR_FORWARD(f2)));
+	}, cls(forward(f1), forward(f2)));
 }
 
 template<typename Ret, typename Arg>
@@ -128,7 +128,7 @@ inline Functor<Ret, Arg> func_mul(auto&& f1, auto&& f2) requires (decays_to_func
 	using cls = std::tuple<f1t, f2t>;
 	return make_functor_ptr<false>([](Arg arg, const cls& tuple) -> Ret {
 		return static_cast<Ret>(std::get<0>(tuple)(static_cast<f1t::ArgType>(arg)) * std::get<1>(tuple)(static_cast<f2t::ArgType>(arg)));
-	}, cls(PULSAR_FORWARD(f1), PULSAR_FORWARD(f2)));
+	}, cls(forward(f1), forward(f2)));
 }
 
 /// f1 --> f2. Equivalently, f2(f1)
@@ -140,7 +140,7 @@ inline Functor<Ret, Arg> func_compose(auto&& f1, auto&& f2) requires (decays_to_
 	using cls = std::tuple<f1t, f2t>;
 	return make_functor_ptr<false>([](Arg arg, const cls& tuple) -> Ret {
 		return static_cast<Ret>(std::get<1>(tuple)(static_cast<f2t::ArgType>(std::get<0>(tuple)(static_cast<f1t::ArgType>(arg)))));
-	}, cls(PULSAR_FORWARD(f1), PULSAR_FORWARD(f2)));
+	}, cls(forward(f1), forward(f2)));
 }
 
 template<typename Ret, typename Arg>
@@ -166,5 +166,5 @@ inline Functor<Ret, Arg> func_conditional(auto&& condition, auto&& true_case, au
 			else
 				return std::get<2>(tuple)(static_cast<false_t::ArgType>(arg));
 		}
-	}, cls(PULSAR_FORWARD(condition), PULSAR_FORWARD(true_case), PULSAR_FORWARD(false_case)));
+	}, cls(forward(condition), forward(true_case), forward(false_case)));
 }

@@ -2,20 +2,7 @@
 
 #include <type_traits>
 
-#ifndef PULSAR_FORWARD
-#define PULSAR_FORWARD(var) std::forward<decltype(var)>(var)
-#endif
-
-template<typename T>
-decltype(auto) redirect(T arg)
-{
-	if constexpr (std::is_lvalue_reference_v<T>)
-		return (arg);
-	else if constexpr (std::is_rvalue_reference_v<T>)
-		return std::move(arg);
-	else
-		return arg;
-}
+#include "utils/Meta.inl"
 
 template<typename Ret, typename Arg>
 struct _FunctorInterface
@@ -110,7 +97,7 @@ struct _FunctorEnclosure<Ret, Arg, Cls, _Storage, false> : public _FunctorInterf
 	static_assert(!std::is_rvalue_reference_v<Cls>, "_FunctorEnclosure: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, Arg, Cls>;
 
-	_FunctorEnclosure(func_signature function, auto&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
+	_FunctorEnclosure(func_signature function, auto&& closure) : function(function), closure(forward(closure)) {}
 
 	Ret operator()(Arg arg) override
 	{
@@ -186,7 +173,7 @@ struct _FunctorEnclosure<Ret, void, Cls, _Storage, false> : public _FunctorInter
 	static_assert(!std::is_rvalue_reference_v<Cls>, "_FunctorEnclosure: Cls cannot be r-value reference.");
 	using func_signature = func_signature_t<Ret, void, Cls>;
 
-	_FunctorEnclosure(func_signature function, auto&& closure) : function(function), closure(PULSAR_FORWARD(closure)) {}
+	_FunctorEnclosure(func_signature function, auto&& closure) : function(function), closure(forward(closure)) {}
 
 	Ret operator()() override
 	{
@@ -425,12 +412,12 @@ inline auto make_functor_ptr(auto f, auto&& closure) requires (!_ValueIn)
 		if constexpr (_ReferExternal)
 		{
 			using _Storage = strip_rvalue_reference_t<decltype(closure)>;
-			return Functor<Ret, Arg>(new _FunctorEnclosure<Ret, Arg, Cls, _Storage, false>(f, PULSAR_FORWARD(closure)));
+			return Functor<Ret, Arg>(new _FunctorEnclosure<Ret, Arg, Cls, _Storage, false>(f, forward(closure)));
 		}
 		else
 		{
 			using _Storage = std::remove_reference_t<decltype(closure)>;
-			return Functor<Ret, Arg>(new _FunctorEnclosure<Ret, Arg, Cls, _Storage, false>(f, PULSAR_FORWARD(closure)));
+			return Functor<Ret, Arg>(new _FunctorEnclosure<Ret, Arg, Cls, _Storage, false>(f, forward(closure)));
 		}
 	}
 	else
@@ -442,12 +429,12 @@ inline auto make_functor_ptr(auto f, auto&& closure) requires (!_ValueIn)
 		if constexpr (_ReferExternal)
 		{
 			using _Storage = strip_rvalue_reference_t<decltype(closure)>;
-			return Functor<Ret, void>(new _FunctorEnclosure<Ret, void, Cls, _Storage, false>(f, PULSAR_FORWARD(closure)));
+			return Functor<Ret, void>(new _FunctorEnclosure<Ret, void, Cls, _Storage, false>(f, forward(closure)));
 		}
 		else
 		{
 			using _Storage = std::remove_reference_t<decltype(closure)>;
-			return Functor<Ret, void>(new _FunctorEnclosure<Ret, void, Cls, _Storage, false>(f, PULSAR_FORWARD(closure)));
+			return Functor<Ret, void>(new _FunctorEnclosure<Ret, void, Cls, _Storage, false>(f, forward(closure)));
 		}
 	}
 }
