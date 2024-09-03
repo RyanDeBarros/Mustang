@@ -25,7 +25,7 @@ Tile::Tile(const char* filepath, float svg_scale)
 	const auto& fext = file_extension_of(filepath);
 	if (fext == "svg")
 	{
-		from_stbi = false;
+		deletion_policy = TileDeletionPolicy::FROM_NEW;
 		NSVGimage* image = nsvgParseFromFile(filepath, "px", 96);
 		if (image)
 		{
@@ -44,13 +44,18 @@ Tile::Tile(const char* filepath, float svg_scale)
 		}
 		else
 		{
+			if (m_ImageBuffer)
+			{
+				delete[] m_ImageBuffer;
+				m_ImageBuffer = nullptr;
+			}
 			Logger::LogError("SVG texture '" + std::string(filepath) + "' could not be loaded!");
 			return;
 		}
 	}
 	else
 	{
-		from_stbi = true;
+		deletion_policy = TileDeletionPolicy::FROM_STBI;
 		m_ImageBuffer = stbi_load(filepath, &m_Width, &m_Height, &m_BPP, 0);
 		if (!m_ImageBuffer)
 		{
@@ -60,13 +65,13 @@ Tile::Tile(const char* filepath, float svg_scale)
 	}
 }
 
-Tile::Tile(unsigned char* heap_image_buffer, int width, int height, int bpp)
-	: m_ImageBuffer(heap_image_buffer), m_Width(width), m_Height(height), m_BPP(bpp), from_stbi(false)
+Tile::Tile(unsigned char* heap_image_buffer, int width, int height, int bpp, TileDeletionPolicy deletion_policy)
+	: m_ImageBuffer(heap_image_buffer), m_Width(width), m_Height(height), m_BPP(bpp), deletion_policy(deletion_policy)
 {
 }
 
 Tile::Tile(Tile&& tile) noexcept
-	: m_ImageBuffer(tile.m_ImageBuffer), m_Width(tile.m_Width), m_Height(tile.m_Height), m_BPP(tile.m_BPP), from_stbi(tile.from_stbi)
+	: m_ImageBuffer(tile.m_ImageBuffer), m_Width(tile.m_Width), m_Height(tile.m_Height), m_BPP(tile.m_BPP), deletion_policy(tile.deletion_policy)
 {
 	tile.m_ImageBuffer = nullptr;
 }
@@ -76,17 +81,12 @@ Tile& Tile::operator=(Tile&& tile) noexcept
 	if (this == &tile)
 		return *this;
 	if (m_ImageBuffer)
-	{
-		if (from_stbi)
-			stbi_image_free(m_ImageBuffer);
-		else
-			delete[] m_ImageBuffer;
-	}
+		DeleteBuffer();
 	m_ImageBuffer = tile.m_ImageBuffer;
 	m_Width = tile.m_Width;
 	m_Height = tile.m_Height;
 	m_BPP = tile.m_BPP;
-	from_stbi = tile.from_stbi;
+	deletion_policy = tile.deletion_policy;
 	tile.m_ImageBuffer = nullptr;
 	return *this;
 }
@@ -95,10 +95,15 @@ Tile::~Tile()
 {
 	if (m_ImageBuffer)
 	{
-		if (from_stbi)
-			stbi_image_free(m_ImageBuffer);
-		else
-			delete[] m_ImageBuffer;
+		DeleteBuffer();
 		m_ImageBuffer = nullptr;
 	}
+}
+
+void Tile::DeleteBuffer() const
+{
+	if (deletion_policy == TileDeletionPolicy::FROM_STBI) [[likely]]
+		stbi_image_free(m_ImageBuffer);
+	else if (deletion_policy == TileDeletionPolicy::FROM_NEW)
+		delete[] m_ImageBuffer;
 }

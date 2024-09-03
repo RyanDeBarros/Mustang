@@ -66,6 +66,12 @@ constexpr T Max(const T& first, const Args&... args)
 	return std::max(first, static_cast<T>(Max(args...)));
 }
 
+template<typename T>
+constexpr std::decay_t<T> clamp(T min, T max, T value)
+{
+	return std::max(min, std::min(max, value));
+}
+
 inline auto unsigned_mod(auto x, auto y)
 {
 	return (x % y + y) % y;

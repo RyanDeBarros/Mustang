@@ -113,6 +113,9 @@ public:
 	void Unbind(TextureSlot slot = 0) const;
 
 	void SetSettings(const TextureSettings& settings) const;
+	TextureSettings GetSettings() const;
+	void ReTexImage(Tile const* tile, GLint lod_level = 0);
+	void ReTexImage(GLint lod_level = 0);
 
 	int GetWidth() const { return m_Width; }
 	int GetHeight() const { return m_Height; }
@@ -122,5 +125,5 @@ public:
 	static const TextureSettings nearest_settings;
 
 private:
-	void TexImage(Tile const* tile, const TextureSettings& settings, const std::string& err_msg);
+	void TexImage(Tile const* tile, const std::string& err_msg, GLint lod_level);
 };

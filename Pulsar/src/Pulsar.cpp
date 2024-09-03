@@ -21,6 +21,7 @@
 #include "render/actors/anim/AnimationPlayer.inl"
 #include "render/actors/anim/KeyFrames.inl"
 #include "render/transform/YSorter.h"
+#include "registry/compound/NonantTile.h"
 
 using namespace Pulsar;
 
@@ -326,6 +327,74 @@ void Pulsar::Run(GLFWwindow* window)
 	ysorter.PushBackAll({ &root, &child2, &grandchild2, &child, &grandchild, serotonin.Primitive() });
 	Renderer::GetCanvasLayer(11)->OnAttach(&ysorter);
 
+	Renderer::RemoveCanvasLayer(11);
+	Renderer::AddCanvasLayer(11);
+	
+	TileHandle ogntile = TileRegistry::GetHandle({"res/textures/grassTL.png"});
+	NonantTile ntile(*TileRegistry::Get(ogntile), NonantLines_Relative{ 0.5f, 0.8f, 0.25f, 0.8f });
+
+	RectRender og_nonant(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ogntile, 1, {MinFilter::Linear, MagFilter::Linear}}));
+
+	// TODO function on FickleActor2D that does sync automatically when setting position, rotation, etc.
+	set_ptr(og_nonant.Fickler().Scale(), { 20.0f, 20.0f });
+	set_ptr(og_nonant.Fickler().Position(), { -250.0f, 250.0f });
+	og_nonant.Fickler().SyncT();
+
+	RectRender nonantBL(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetBottomLeft(), 1, {MinFilter::Linear, MagFilter::Linear}}));
+	RectRender nonantBM(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetBottomMiddle(), 1, {MinFilter::Linear, MagFilter::Linear}}));
+	RectRender nonantBR(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetBottomRight(), 1, {MinFilter::Linear, MagFilter::Linear}}));
+	RectRender nonantCL(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetCenterLeft(), 1, {MinFilter::Linear, MagFilter::Linear} }));
+	RectRender nonantCM(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetCenterMiddle(), 1, {MinFilter::Linear, MagFilter::Linear} }));
+	RectRender nonantCR(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetCenterRight(), 1, {MinFilter::Linear, MagFilter::Linear} }));
+	RectRender nonantTL(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetTopLeft(), 1, {MinFilter::Linear, MagFilter::Linear} }));
+	RectRender nonantTM(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetTopMiddle(), 1, {MinFilter::Linear, MagFilter::Linear} }));
+	RectRender nonantTR(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetTopRight(), 1, {MinFilter::Linear, MagFilter::Linear} }));
+
+	// TODO add pivot to rect render constructor
+	nonantBL.SetPivot(0.0f, 0.0f);
+	nonantBM.SetPivot(0.0f, 0.0f);
+	nonantBR.SetPivot(0.0f, 0.0f);
+	nonantCL.SetPivot(0.0f, 0.0f);
+	nonantCM.SetPivot(0.0f, 0.0f);
+	nonantCR.SetPivot(0.0f, 0.0f);
+	nonantTL.SetPivot(0.0f, 0.0f);
+	nonantTM.SetPivot(0.0f, 0.0f);
+	nonantTR.SetPivot(0.0f, 0.0f);
+
+	Transformer2D root_nonant({ { 150.0f, -300.0f }, 0.0f, { 20.0f, 20.0f } });
+	root_nonant.Attach(nonantBL.Fickler().Transformer());
+	root_nonant.Attach(nonantBM.Fickler().Transformer());
+	root_nonant.Attach(nonantBR.Fickler().Transformer());
+	root_nonant.Attach(nonantCL.Fickler().Transformer());
+	root_nonant.Attach(nonantCM.Fickler().Transformer());
+	root_nonant.Attach(nonantCR.Fickler().Transformer());
+	root_nonant.Attach(nonantTL.Fickler().Transformer());
+	root_nonant.Attach(nonantTM.Fickler().Transformer());
+	root_nonant.Attach(nonantTR.Fickler().Transformer());
+
+	float border = 0.5f;
+	set_ptr(nonantBL.Fickler().Position(), { 0.0f, 0.0f });
+	set_ptr(nonantBM.Fickler().Position(), { ntile.GetAbsoluteLines().column_l + border, 0.0f });
+	set_ptr(nonantBR.Fickler().Position(), { ntile.GetAbsoluteLines().column_r + 2 * border, 0.0f });
+	set_ptr(nonantCL.Fickler().Position(), { 0.0f, ntile.GetAbsoluteLines().row_b + border });
+	set_ptr(nonantCM.Fickler().Position(), { ntile.GetAbsoluteLines().column_l + border, ntile.GetAbsoluteLines().row_b + border });
+	set_ptr(nonantCR.Fickler().Position(), { ntile.GetAbsoluteLines().column_r + 2 * border, ntile.GetAbsoluteLines().row_b + border });
+	set_ptr(nonantTL.Fickler().Position(), { 0.0f, ntile.GetAbsoluteLines().row_t + 2 * border });
+	set_ptr(nonantTM.Fickler().Position(), { ntile.GetAbsoluteLines().column_l + border, ntile.GetAbsoluteLines().row_t + 2 * border });
+	set_ptr(nonantTR.Fickler().Position(), { ntile.GetAbsoluteLines().column_r + 2 * border, ntile.GetAbsoluteLines().row_t + 2 * border });
+	root_nonant.Sync();
+
+	Renderer::GetCanvasLayer(11)->OnAttach(&og_nonant);
+	Renderer::GetCanvasLayer(11)->OnAttach(&nonantBL);
+	Renderer::GetCanvasLayer(11)->OnAttach(&nonantBM);
+	Renderer::GetCanvasLayer(11)->OnAttach(&nonantBR);
+	Renderer::GetCanvasLayer(11)->OnAttach(&nonantCL);
+	Renderer::GetCanvasLayer(11)->OnAttach(&nonantCM);
+	Renderer::GetCanvasLayer(11)->OnAttach(&nonantCR);
+	Renderer::GetCanvasLayer(11)->OnAttach(&nonantTL);
+	Renderer::GetCanvasLayer(11)->OnAttach(&nonantTM);
+	Renderer::GetCanvasLayer(11)->OnAttach(&nonantTR);
+
 	// small delay
 	while (totalDrawTime < 0.01f)
 	{
@@ -343,7 +412,33 @@ void Pulsar::Run(GLFWwindow* window)
 		totalDrawTime += deltaDrawTime;
 
 		_frame_start();
-		
+
+		//float relCL = 0.25f + 0.25f * glm::sin(Pulsar::totalDrawTime);
+		//float relCR = 0.75f + 0.25f * glm::sin(1.0f + Pulsar::totalDrawTime);
+		//float relRB = 0.25f + 0.25f * glm::cos(Pulsar::totalDrawTime);
+		//float relRT = 0.75f + 0.25f * glm::cos(1.0f + Pulsar::totalDrawTime);
+		//ntile.Reconfigure(NonantLines_Relative{ relCL, relCR, relRB, relRT });
+		//float border = 1.5f;
+		//set_ptr(nonantBL.Fickler().Position(), { 0.0f, 0.0f });
+		//set_ptr(nonantBM.Fickler().Position(), { ntile.GetAbsoluteLines().column_l + border, 0.0f });
+		//set_ptr(nonantBR.Fickler().Position(), { ntile.GetAbsoluteLines().column_r + 2 * border, 0.0f });
+		//set_ptr(nonantCL.Fickler().Position(), { 0.0f, ntile.GetAbsoluteLines().row_b + border });
+		//set_ptr(nonantCM.Fickler().Position(), { ntile.GetAbsoluteLines().column_l + border, ntile.GetAbsoluteLines().row_b + border });
+		//set_ptr(nonantCR.Fickler().Position(), { ntile.GetAbsoluteLines().column_r + 2 * border, ntile.GetAbsoluteLines().row_b + border });
+		//set_ptr(nonantTL.Fickler().Position(), { 0.0f, ntile.GetAbsoluteLines().row_t + 2 * border });
+		//set_ptr(nonantTM.Fickler().Position(), { ntile.GetAbsoluteLines().column_l + border, ntile.GetAbsoluteLines().row_t + 2 * border });
+		//set_ptr(nonantTR.Fickler().Position(), { ntile.GetAbsoluteLines().column_r + 2 * border, ntile.GetAbsoluteLines().row_t + 2 * border });
+		//root_nonant.Sync();
+		//const_cast<Texture*>(TextureRegistry::Get(nonantBL.GetTextureHandle()))->ReTexImage();
+		//const_cast<Texture*>(TextureRegistry::Get(nonantBM.GetTextureHandle()))->ReTexImage();
+		//const_cast<Texture*>(TextureRegistry::Get(nonantBR.GetTextureHandle()))->ReTexImage();
+		//const_cast<Texture*>(TextureRegistry::Get(nonantCL.GetTextureHandle()))->ReTexImage();
+		//const_cast<Texture*>(TextureRegistry::Get(nonantCM.GetTextureHandle()))->ReTexImage();
+		//const_cast<Texture*>(TextureRegistry::Get(nonantCR.GetTextureHandle()))->ReTexImage();
+		//const_cast<Texture*>(TextureRegistry::Get(nonantTL.GetTextureHandle()))->ReTexImage();
+		//const_cast<Texture*>(TextureRegistry::Get(nonantTM.GetTextureHandle()))->ReTexImage();
+		//const_cast<Texture*>(TextureRegistry::Get(nonantTR.GetTextureHandle()))->ReTexImage();
+
 		*child.Fickler().Rotation() = -Pulsar::totalDrawTime;
 		*child2.Fickler().Rotation() = -Pulsar::totalDrawTime;
 		*grandchild.Fickler().Rotation() = Pulsar::totalDrawTime;

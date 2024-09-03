@@ -51,7 +51,7 @@ public:
 
 	int GetBorder() const { return m_Border; }
 	const std::vector<Placement>& GetPlacements() const { return m_Placements; }
-	unsigned char const* const GetBuffer() const { return TileRegistry::GetImageBuffer(m_Tile); }
+	unsigned char const* GetBuffer() const { return TileRegistry::GetImageBuffer(m_Tile); }
 	
 	class RectRender SampleSubtile(size_t index, const struct TextureSettings& texture_settings = Texture::nearest_settings,
 		TextureVersion texture_version = 0, ShaderHandle shader = ShaderRegistry::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true) const;

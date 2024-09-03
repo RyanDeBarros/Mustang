@@ -47,7 +47,7 @@ FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settin
 		{
 			unsigned char* image = new unsigned char[image_size];
 			memcpy_s(image, image_size, stbi_buffer + image_size * i, image_size);
-			m_Frames[i] = TextureRegistry::RegisterTexture(Texture(Tile(image, width, height, bpp), settings));
+			m_Frames[i] = TextureRegistry::RegisterTexture(Texture(Tile(image, width, height, bpp, TileDeletionPolicy::FROM_NEW), settings));
 		}
 	}
 	else
@@ -56,7 +56,7 @@ FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settin
 		{
 			unsigned char* image = new unsigned char[image_size];
 			memcpy_s(image, image_size, stbi_buffer + image_size * i, image_size);
-			TileHandle tile = TileRegistry::RegisterTile(Tile(image, width, height, bpp));
+			TileHandle tile = TileRegistry::RegisterTile(Tile(image, width, height, bpp, TileDeletionPolicy::FROM_NEW));
 			m_Frames[i] = TextureRegistry::GetHandle(TextureConstructArgs_tile{ tile, 0, settings });
 		}
 	}

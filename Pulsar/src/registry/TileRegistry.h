@@ -6,6 +6,8 @@
 #include "Tile.h"
 #include "Handles.inl"
 
+// TODO for all construct args, define constructors to initialize data members
+
 struct TileConstructArgs
 {
 	std::string filepath;

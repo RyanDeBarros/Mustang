@@ -14,7 +14,7 @@ Atlas::Atlas(std::vector<TileHandle>& tiles, int width, int height, int border)
 	RectPack(tiles, width, height);
 	unsigned char* image_buffer = new unsigned char[Atlas::BPP * width * height](0);
 	PlaceTiles(image_buffer, width);
-	Tile tile(image_buffer, width, height, Atlas::BPP);
+	Tile tile(image_buffer, width, height, Atlas::BPP, TileDeletionPolicy::FROM_NEW);
 	m_Tile = TileRegistry::RegisterTile(std::move(tile));
 	if (m_Tile == 0)
 		throw null_handle_error();
