@@ -178,6 +178,7 @@
     <ClCompile Include="src\render\actors\anim\AnimActorPrimitive.cpp" />
     <ClCompile Include="src\render\actors\anim\FramesArray.cpp" />
     <ClCompile Include="src\render\actors\BatchSlotter.cpp" />
+    <ClCompile Include="src\render\actors\NonantRender.cpp" />
     <ClCompile Include="src\render\actors\particles\ParticleSubsystemRegistry.cpp" />
     <ClCompile Include="src\render\actors\shapes\DebugBatcher.cpp" />
     <ClCompile Include="src\render\actors\shapes\DebugCircle.cpp" />
@@ -210,6 +211,7 @@
     <ClCompile Include="src\render\transform\Transform.cpp" />
     <ClCompile Include="src\render\transform\Transforms.cpp" />
     <ClInclude Include="src\registry\compound\NonantTile.h" />
+    <ClInclude Include="src\render\actors\NonantRender.h" />
     <ClInclude Include="src\render\transform\YSorter.h" />
     <ClInclude Include="src\utils\CopyPtr.inl">
       <FileType>CppHeader</FileType>

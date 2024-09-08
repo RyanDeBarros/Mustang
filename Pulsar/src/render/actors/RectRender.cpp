@@ -10,12 +10,12 @@
 
 Renderable RectRender::rect_renderable;
 
-RectRender::RectRender(TextureHandle texture, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible)
+RectRender::RectRender(TextureHandle texture, const glm::vec2& pivot, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible)
 	: ActorPrimitive2D(rect_renderable, z, fickle_type, visible)
 {
 	SetShaderHandle(shader);
 	SetTextureHandle(texture);
-	SetPivot(0.5, 0.5);
+	SetPivot(pivot);
 	m_UVWidth = static_cast<float>(GetWidth());
 	m_UVHeight = static_cast<float>(GetHeight());
 }
@@ -78,6 +78,21 @@ void RectRender::SetPivot(float pivotX, float pivotY)
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 1 + 2 * stride] = (1 - pivotY) * height;
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 * stride] = -pivotX * width;
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 1 + 3 * stride] = (1 - pivotY) * height;
+}
+
+void RectRender::RefreshTexture()
+{
+	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
+	int width = GetWidth();
+	int height = GetHeight();
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos] = -m_Pivot.x * width;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 1] = -m_Pivot.y * height;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + stride] = (1 - m_Pivot.x) * width;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 1 + stride] = -m_Pivot.y * height;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 * stride] = (1 - m_Pivot.x) * width;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 1 + 2 * stride] = (1 - m_Pivot.y) * height;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 * stride] = -m_Pivot.x * width;
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 1 + 3 * stride] = (1 - m_Pivot.y) * height;
 }
 
 void RectRender::CropToRect(glm::vec4 rect, int atlas_width, int atlas_height)

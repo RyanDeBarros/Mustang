@@ -62,7 +62,7 @@ public:
 	TileHandle GetBottomMiddle() const { return tBM; }
 	TileHandle GetBottomRight() const { return tBR; }
 
-	const TileHandle& GetTileAtIndex(int i) const
+	const TileHandle& GetTile(int i) const
 	{
 		switch (i)
 		{

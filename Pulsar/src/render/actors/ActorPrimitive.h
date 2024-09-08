@@ -35,6 +35,7 @@ public:
 	virtual void SetTextureHandle(TextureHandle handle) { m_Render.textureHandle = handle; }
 
 	void SetVisible(bool visible) { m_Status = (visible ? m_Status |= 1 : m_Status &= ~1); }
+	bool IsVisible() const { return m_Status & 0b1; }
 	void FillModulationPoints(const glm::vec4& default_value = { 1.0f, 1.0f, 1.0f, 1.0f })
 	{ 
 		if (m_ModulationColors.size() < m_Render.vertexCount)

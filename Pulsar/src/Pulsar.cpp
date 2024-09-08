@@ -21,7 +21,7 @@
 #include "render/actors/anim/AnimationPlayer.inl"
 #include "render/actors/anim/KeyFrames.inl"
 #include "render/transform/YSorter.h"
-#include "registry/compound/NonantTile.h"
+#include "render/actors/NonantRender.h"
 
 using namespace Pulsar;
 
@@ -268,7 +268,9 @@ void Pulsar::Run(GLFWwindow* window)
 
 	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::RED * Colors::HALF_TRANSPARENT_WHITE, Colors::LIGHT_GREEN });
 
-	AnimActorPrimitive2D serotonin(new RectRender(0, ShaderRegistry::Standard(), 10), { FramesArray("res/textures/serotonin.gif") }, 1.0f / 60.0f, false, 1.5f);
+	// TODO FramesArray can use up a lot of unique texture handles. Add option to use textures directly without using texture registry.
+	AnimActorPrimitive2D serotonin(new RectRender(0), { FramesArray("res/textures/serotonin.gif") }, 1.0f / 60.0f, false, 1.5f);
+	serotonin.Primitive()->z = 10;
 	//Renderer::RemoveCanvasLayer(11);
 	//Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(serotonin.Primitive());
@@ -331,54 +333,24 @@ void Pulsar::Run(GLFWwindow* window)
 	Renderer::AddCanvasLayer(11);
 	
 	TileHandle ogntile = TileRegistry::GetHandle({"res/textures/grassTL.png"});
-	NonantTile ntile(*TileRegistry::Get(ogntile), NonantLines_Relative{ 0.5f, 0.8f, 0.25f, 0.8f });
+	NonantRender nonant(NonantTile(*TileRegistry::Get(ogntile), NonantLines_Relative{ 0.5f, 0.8f, 0.25f, 0.8f }));
 
-	RectRender og_nonant(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ogntile, 1, {MinFilter::Linear, MagFilter::Linear}}));
+	RectRender og_nonant(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ogntile, 1, {MinFilter::Nearest, MagFilter::Nearest}}));
 
 	// TODO function on FickleActor2D that does sync automatically when setting position, rotation, etc.
 	set_ptr(og_nonant.Fickler().Scale(), { 20.0f, 20.0f });
 	set_ptr(og_nonant.Fickler().Position(), { -250.0f, 250.0f });
 	og_nonant.Fickler().SyncT();
 
-	RectRender nonantRects[9] = {
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetBottomLeft(), 1, {MinFilter::Linear, MagFilter::Linear}})),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetBottomMiddle(), 1, {MinFilter::Linear, MagFilter::Linear}})),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetBottomRight(), 1, {MinFilter::Linear, MagFilter::Linear}})),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetCenterLeft(), 1, {MinFilter::Linear, MagFilter::Linear} })),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetCenterMiddle(), 1, {MinFilter::Linear, MagFilter::Linear} })),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetCenterRight(), 1, {MinFilter::Linear, MagFilter::Linear} })),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetTopLeft(), 1, {MinFilter::Linear, MagFilter::Linear} })),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetTopMiddle(), 1, {MinFilter::Linear, MagFilter::Linear} })),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ntile.GetTopRight(), 1, {MinFilter::Linear, MagFilter::Linear} }))
-	};
-
 	Renderer::GetCanvasLayer(11)->OnAttach(&og_nonant);
-	Transformer2D root_nonant({ { 150.0f, -300.0f }, 0.0f, { 20.0f, 20.0f } });
-	// TODO add pivot to rect render constructor
-	unfurl_loop<9>([&nonantRects, &root_nonant](int i) {
-		nonantRects[i].SetPivot(0.0f, 0.0f);
-		root_nonant.Attach(nonantRects[i].Fickler().Transformer());
-		Renderer::GetCanvasLayer(11)->OnAttach(nonantRects + i);
-		});
-
-	float border = 0.5f;
-	unfurl_loop<9>([&nonantRects, border, &ntile](int i) {
-		set_ptr(nonantRects[i].Fickler().Position(), { ntile.ColumnPos(i % 3) + (i % 3) * border, ntile.RowPos(i / 3) + (i / 3) * border });
-		});
-	root_nonant.Sync();
-
-	//ntile.Reconfigure(NonantLines_Relative{ 0.15f, 0.6f, 0.3f, 0.6f });
-	ntile.Reconfigure(NonantLines_Relative{ 0.5f, 0.8f, 0.25f, 0.8f });
-	unfurl_loop<9>([&nonantRects](int i) { const_cast<Texture*>(TextureRegistry::Get(nonantRects[i].GetTextureHandle()))->ReTexImage(); });
-	// TODO setting pivot should not be necessary to refresh after calling ReTexImage() on texture, or should it?
-	unfurl_loop<9>([&nonantRects](int i) {
-		nonantRects[i].SetPivot(0.0f, 0.0f);
-		});
-	unfurl_loop<9>([&nonantRects, border, &ntile](int i) {
-		set_ptr(nonantRects[i].Fickler().Position(), { ntile.ColumnPos(i % 3) + (i % 3) * border, ntile.RowPos(i / 3) + (i / 3) * border});
-		});
-	root_nonant.Sync();
-
+	Renderer::GetCanvasLayer(11)->OnAttach(&nonant);
+	set_ptr(nonant.Fickler().Transform(), { { 150.0f, -300.0f }, 0.0f, { 20.0f, 20.0f } });
+	nonant.Fickler().SyncT();
+	
+	//nonant.Reconfigure(NonantLines_Relative{ 0.5f, 0.8f, 0.25f, 0.8f });
+	
+	// TODO tilemap is broken.
+	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 
 	// small delay
 	while (totalDrawTime < 0.01f)
@@ -402,16 +374,8 @@ void Pulsar::Run(GLFWwindow* window)
 		float relCR = 0.85f + 0.25f * glm::sin(1.0f + Pulsar::totalDrawTime);
 		float relRB = 0.25f + 0.25f * glm::cos(Pulsar::totalDrawTime);
 		float relRT = 0.75f + 0.25f * glm::cos(1.0f + Pulsar::totalDrawTime);
-		ntile.Reconfigure(NonantLines_Relative{ relCL, relCR, relRB, relRT });
-		unfurl_loop<9>([&nonantRects, border, &ntile](int i) {
-			set_ptr(nonantRects[i].Fickler().Position(), { ntile.ColumnPos(i % 3) + (i % 3) * border, ntile.RowPos(i / 3) + (i / 3) * border });
-			});
-		root_nonant.Sync();
-		unfurl_loop<9>([&nonantRects](int i) { const_cast<Texture*>(TextureRegistry::Get(nonantRects[i].GetTextureHandle()))->ReTexImage(); });
-		unfurl_loop<9>([&nonantRects](int i) {
-			nonantRects[i].SetPivot(0.0f, 0.0f);
-			});
-
+		//nonant.Reconfigure(NonantLines_Relative{ relCL, relCR, relRB, relRT });
+		
 		*child.Fickler().Rotation() = -Pulsar::totalDrawTime;
 		*child2.Fickler().Rotation() = -Pulsar::totalDrawTime;
 		*grandchild.Fickler().Rotation() = Pulsar::totalDrawTime;

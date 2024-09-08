@@ -246,9 +246,11 @@ void Atlas::PlaceTiles(unsigned char* image_buffer, int atlas_width)
 				for (unsigned char c = 0; c < p_bpp && c < Atlas::BPP; c++)
 				{
 					if (placement.r)
-						image_buffer[(placement.x + m_Border + h + (placement.y + m_Border + w) * atlas_width) * Atlas::BPP + c] = p_buffer[(w + h * p_height) * p_bpp + c];
+						image_buffer[(placement.x + m_Border + h + (placement.y + m_Border + w) * atlas_width) * Atlas::BPP + c]
+							= p_buffer[(w + h * p_height) * p_bpp + c];
 					else
-						image_buffer[(placement.x + m_Border + w + (placement.y + m_Border + h) * atlas_width) * Atlas::BPP + c] = p_buffer[(w + h * p_width) * p_bpp + c];
+						image_buffer[(placement.x + m_Border + w + (placement.y + m_Border + h) * atlas_width) * Atlas::BPP + c]
+							= p_buffer[(w + h * p_width) * p_bpp + c];
 				}
 				for (unsigned char c = p_bpp; c < Atlas::BPP; c++)
 				{
@@ -262,11 +264,13 @@ void Atlas::PlaceTiles(unsigned char* image_buffer, int atlas_width)
 	}
 }
 
-RectRender Atlas::SampleSubtile(size_t index, const TextureSettings& texture_settings, TextureVersion texture_version, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible) const
+RectRender Atlas::SampleSubtile(size_t index, const TextureSettings& texture_settings, TextureVersion texture_version,
+	const glm::vec2& pivot, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible) const
 {
 	if (index >= m_Placements.size() || m_Placements[index].x < 0)
-		return RectRender(0, 0, 0, fickle_type, false);
-	RectRender actor(TextureRegistry::GetHandle(TextureConstructArgs_tile{ m_Tile, texture_version, texture_settings }), shader, z, fickle_type, visible);
+		return RectRender(0, {}, 0, 0, fickle_type, false);
+	RectRender actor(TextureRegistry::GetHandle(TextureConstructArgs_tile{ m_Tile, texture_version, texture_settings }),
+		pivot, shader, z, fickle_type, visible);
 	const Placement& rect = m_Placements[index];
 	int width = TileRegistry::GetWidth(m_Tile);
 	int height = TileRegistry::GetHeight(m_Tile);

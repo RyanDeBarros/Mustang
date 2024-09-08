@@ -54,7 +54,8 @@ public:
 	unsigned char const* GetBuffer() const { return TileRegistry::GetImageBuffer(m_Tile); }
 	
 	class RectRender SampleSubtile(size_t index, const struct TextureSettings& texture_settings = Texture::nearest_settings,
-		TextureVersion texture_version = 0, ShaderHandle shader = ShaderRegistry::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true) const;
+		TextureVersion texture_version = 0, const glm::vec2& pivot = { 0.5f, 0.5f }, ShaderHandle shader = ShaderRegistry::standard_shader,
+		ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true) const;
 	TileHandle GetTileHandle() const { return m_Tile; }
 	int GetWidth() const { return TileRegistry::GetWidth(m_Tile); }
 	int GetHeight() const { return TileRegistry::GetHeight(m_Tile); }

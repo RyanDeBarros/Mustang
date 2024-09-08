@@ -14,7 +14,8 @@ protected:
 
 public:
 	// TODO renderable should have empty index buffer, since it will not be used.
-	RectRender(TextureHandle texture = 0, ShaderHandle shader = ShaderRegistry::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true);
+	RectRender(TextureHandle texture = 0, const glm::vec2& pivot = { 0.5f, 0.5f }, ShaderHandle shader = ShaderRegistry::standard_shader,
+		ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true);
 	RectRender(const RectRender&);
 	RectRender(RectRender&&) noexcept;
 	RectRender& operator=(const RectRender&);
@@ -32,6 +33,7 @@ public:
 	glm::vec2 GetPivot() const { return m_Pivot; }
 	void SetPivot(float pivotX, float pivotY);
 	void SetPivot(const glm::vec2& pivot) { SetPivot(pivot.x, pivot.y); }
+	void RefreshTexture();
 
 	void CropToRect(glm::vec4 rect, int atlas_width, int atlas_height);
 	void CropToRelativeRect(glm::vec4 rect);

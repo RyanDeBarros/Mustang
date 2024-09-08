@@ -691,7 +691,8 @@ LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, TileMap*& tilemap_in
 		if (readFickleType(tm["fickle"], fickle_type) != LOAD_STATUS::OK)
 			return LOAD_STATUS::SYNTAX_ERR;
 
-		tilemap_initializer = new TileMap(std::shared_ptr<Atlas>(atlas), texture_settings, texture_version, shader, z, fickle_type, visible);
+		// TODO add pivot to asset file
+		tilemap_initializer = new TileMap(std::shared_ptr<Atlas>(atlas), texture_settings, texture_version, { 0.5f, 0.5f }, shader, z, fickle_type, visible);
 
 		std::vector<size_t> ordering;
 		if (auto order = tm["ordering"].as_array())

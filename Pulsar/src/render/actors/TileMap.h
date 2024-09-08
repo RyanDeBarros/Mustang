@@ -28,7 +28,8 @@ class TileMap : public FickleActor2D
 
 public:
 	TileMap(const std::shared_ptr<const Atlas>& atlas, const TextureSettings& texture_settings = Texture::nearest_settings, TextureVersion texture_version = 0,
-		ShaderHandle shader = ShaderRegistry::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Transformable, bool visible = true);
+		const glm::vec2& pivot = { 0.5f, 0.5f }, ShaderHandle shader = ShaderRegistry::standard_shader, ZIndex z = 0,
+		FickleType fickle_type = FickleType::Transformable, bool visible = true);
 	TileMap(const TileMap&) = delete;
 	TileMap(TileMap&&) = delete;
 

@@ -48,6 +48,8 @@ class ShaderRegistry
 	friend class RectRender;
 	friend class Atlas;
 	friend class TileMap;
+	friend class NonantRender;
+	// TODO make public? or specialized friend struct that can authorize access?
 	static ShaderHandle standard_shader;
 
 public:
