@@ -367,8 +367,8 @@ void Pulsar::Run(GLFWwindow* window)
 		});
 	root_nonant.Sync();
 
-	ntile.Reconfigure(NonantLines_Relative{ 0.15f, 0.6f, 0.3f, 0.6f });
-	//ntile.Reconfigure(NonantLines_Relative{ 0.5f, 0.8f, 0.25f, 0.8f });
+	//ntile.Reconfigure(NonantLines_Relative{ 0.15f, 0.6f, 0.3f, 0.6f });
+	ntile.Reconfigure(NonantLines_Relative{ 0.5f, 0.8f, 0.25f, 0.8f });
 	unfurl_loop<9>([&nonantRects](int i) { const_cast<Texture*>(TextureRegistry::Get(nonantRects[i].GetTextureHandle()))->ReTexImage(); });
 	// TODO setting pivot should not be necessary to refresh after calling ReTexImage() on texture, or should it?
 	unfurl_loop<9>([&nonantRects](int i) {

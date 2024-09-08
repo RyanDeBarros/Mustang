@@ -162,84 +162,84 @@ NonantTile::~NonantTile()
 	}
 }
 
-static void renew_subrow(unsigned char* renewal, unsigned char* old_row, int col_l_stride, int col_m_stride, int col_r_stride, char new_row_index,
-	const _SubbufferBounds& old_subbounds, _SubbufferBounds* new_subbounds, int* new_sb_offset,
-	const NonantLines_Absolute& new_lines, int width, int height, int bpp, int cell_y)
+struct _RenewSubbufferRowInfo
 {
-	// TODO in all of these helper functions, calling sb_offset/subbounds is redundant. Move it to a higher level function.
-	char cell_index = 3 * new_row_index;
-	_SubbufferBounds* cell_bounds = new_subbounds + cell_index;
-	int cell_w = cell_bounds->UW - cell_bounds->LW;
-	int cell_x = old_subbounds.LW; // std::max(old_subbounds.LW - 0, 0)
-	memcpy(renewal + new_sb_offset[cell_index] + (cell_y * cell_w + cell_x) * bpp,
-		old_row, static_cast<size_t>(col_l_stride - old_subbounds.LW * bpp)); // TODO width to copy and other redundant operations should go to higher level.
+	size_t sizeL = 0, sizeM = 0, sizeR = 0;
+	unsigned char const* fromL = nullptr;
+	unsigned char const* fromM = nullptr;
+	unsigned char const* fromR = nullptr;
+	int xL = 0, xM = 0, xR = 0;
+	int bpp = 0, substride = 0;
+	int y = 0;
+};
 
-	++cell_index;
-	++cell_bounds;
-	cell_w = cell_bounds->UW - cell_bounds->LW;
-	cell_x = std::max(old_subbounds.LW - new_lines.column_l, 0);
-	memcpy(renewal + new_sb_offset[cell_index] + (cell_y * cell_w + cell_x) * bpp,
-		old_row + col_l_stride - old_subbounds.LW * bpp, static_cast<size_t>(col_m_stride - col_l_stride));
-	
-	++cell_index;
-	++cell_bounds;
-	cell_w = cell_bounds->UW - cell_bounds->LW;
-	cell_x = std::max(old_subbounds.LW - new_lines.column_r, 0);
-	memcpy(renewal + new_sb_offset[cell_index] + (cell_y * cell_w + cell_x) * bpp,
-		old_row + col_m_stride - old_subbounds.LW * bpp, static_cast<size_t>(col_r_stride - col_m_stride));
+static void renew_subbuffer_row(char index, _RenewSubbufferRowInfo& info, int new_sb_y, int row_h, unsigned char* renewal,
+	_SubbufferBounds* new_subbounds, int* new_sb_offset)
+{
+	int wL = new_subbounds[index].UW - new_subbounds[index].LW;
+	unsigned char* toL = renewal + new_sb_offset[index] + (info.xL + new_sb_y * wL) * info.bpp;
+
+	++index;
+	int wM = new_subbounds[index].UW - new_subbounds[index].LW;
+	unsigned char* toM = renewal + new_sb_offset[index] + (info.xM + new_sb_y * wM) * info.bpp;
+
+	++index;
+	int wR = new_subbounds[index].UW - new_subbounds[index].LW;
+	unsigned char* toR = renewal + new_sb_offset[index] + (info.xR + new_sb_y * wR) * info.bpp;
+
+	while (info.y < row_h)
+	{
+		memcpy(toL, info.fromL, info.sizeL);
+		memcpy(toM, info.fromM, info.sizeM);
+		memcpy(toR, info.fromR, info.sizeR);
+		toL += wL * info.bpp;
+		toM += wM * info.bpp;
+		toR += wR * info.bpp;
+		info.fromL += info.substride;
+		info.fromM += info.substride;
+		info.fromR += info.substride;
+		++info.y;
+		++new_sb_y;
+	}
 }
 
-static void renew_subbuffer(int index, unsigned char* renewal, unsigned char* old_buffer,
-	int old_sb_offset, const _SubbufferBounds& old_subbounds, int* new_sb_offset, _SubbufferBounds* new_subbounds,
-	const NonantLines_Absolute& new_lines, int width, int height, int bpp)
+static void renew_subbuffer(const NonantTile& ntile, unsigned char* renewal, int old_sb_offset,
+	const _SubbufferBounds& old_subbounds, int* new_sb_offset, _SubbufferBounds* new_subbounds, const NonantLines_Absolute& new_lines)
 {
-	unsigned char* subbuffer = old_buffer + old_sb_offset;
-	int subwidth = old_subbounds.UW - old_subbounds.LW;
-	int subheight = old_subbounds.UH - old_subbounds.LH;
-	int substride = subwidth * bpp;
-
+	unsigned char const* subbuffer = ntile.GetSharedBuffer() + old_sb_offset;
+	
 	int row_b_h = clamp(old_subbounds.LH, old_subbounds.UH, new_lines.row_b);
 	int row_c_h = clamp(old_subbounds.LH, old_subbounds.UH, new_lines.row_t);
 	int row_t_h = old_subbounds.UH;
-	int col_l_stride = bpp * clamp(old_subbounds.LW, old_subbounds.UW, new_lines.column_l);
-	int col_m_stride = bpp * clamp(old_subbounds.LW, old_subbounds.UW, new_lines.column_r);
-	int col_r_stride = bpp * old_subbounds.UW;
+	int col_l_stride = ntile.GetBPP() * clamp(old_subbounds.LW, old_subbounds.UW, new_lines.column_l);
+	int col_m_stride = ntile.GetBPP() * clamp(old_subbounds.LW, old_subbounds.UW, new_lines.column_r);
+	int col_r_stride = ntile.GetBPP() * old_subbounds.UW;
 	
-	int r = 0;
-	int y = old_subbounds.LH;
-	while (y < row_b_h)
-	{
-		renew_subrow(renewal, subbuffer + r * substride, col_l_stride, col_m_stride, col_r_stride, 0,
-			old_subbounds, new_subbounds, new_sb_offset, new_lines, width, height, bpp, y);
-		++r;
-		++y;
-	}
-	int z = y - new_lines.row_b;
-	while (y < row_c_h)
-	{
-		renew_subrow(renewal, subbuffer + r * substride, col_l_stride, col_m_stride, col_r_stride, 1,
-			old_subbounds, new_subbounds, new_sb_offset, new_lines, width, height, bpp, z);
-		++r;
-		++y;
-		++z;
-	}
-	z = y - new_lines.row_t;
-	while (y < row_t_h)
-	{
-		renew_subrow(renewal, subbuffer + r * substride, col_l_stride, col_m_stride, col_r_stride, 2,
-			old_subbounds, new_subbounds, new_sb_offset, new_lines, width, height, bpp, z);
-		++r;
-		++y;
-		++z;
-	}
+	_RenewSubbufferRowInfo info;
+	info.xL = old_subbounds.LW; // std::max(old_subbounds.LW - 0, 0)
+	info.xM = std::max(old_subbounds.LW - new_lines.column_l, 0);
+	info.xR = std::max(old_subbounds.LW - new_lines.column_r, 0);
+	info.bpp = ntile.GetBPP();
+	info.substride = (old_subbounds.UW - old_subbounds.LW) * info.bpp;
+	info.sizeL = static_cast<size_t>(col_l_stride - old_subbounds.LW * info.bpp);
+	info.sizeM = static_cast<size_t>(col_m_stride - col_l_stride);
+	info.sizeR = static_cast<size_t>(col_r_stride - col_m_stride);
+	info.fromL = subbuffer;
+	info.fromM = subbuffer + col_l_stride - old_subbounds.LW * info.bpp;
+	info.fromR = subbuffer + col_m_stride - old_subbounds.LW * info.bpp;
+	info.y = old_subbounds.LH;
+	
+	renew_subbuffer_row(0, info, info.y, row_b_h, renewal, new_subbounds, new_sb_offset);
+	renew_subbuffer_row(3, info, info.y - new_lines.row_b, row_c_h, renewal, new_subbounds, new_sb_offset);
+	renew_subbuffer_row(6, info, info.y - new_lines.row_t, row_t_h, renewal, new_subbounds, new_sb_offset);
 }
 
-void NonantTile::SetTileProps(TileHandle th, int offset, unsigned char* renewal, const _SubbufferBounds& bounds) const
+void NonantTile::SetTileProps(TileHandle th, int offset, const _SubbufferBounds& bounds) const
 {
 	Tile* tile = const_cast<Tile*>(TileRegistry::Get(th));
 	tile->m_Width = bounds.UW - bounds.LW;
 	tile->m_Height = bounds.UH - bounds.LH;
-	tile->m_ImageBuffer = renewal + offset;
+	tile->m_ImageBuffer = sharedBuffer + offset;
 	offset += tile->m_Width * bpp * tile->m_Height;
 }
 
@@ -295,13 +295,13 @@ void NonantTile::RenewSharedBuffer(const NonantLines_Absolute& new_lines)
 		};
 
 		unfurl_loop<9>([this, renewal, &new_lines, &old_sb_offset, &old_subbounds, &new_subbounds, &new_sb_offset](int i)
-			{ renew_subbuffer(i, renewal, sharedBuffer, old_sb_offset[i], old_subbounds[i], new_sb_offset, new_subbounds, new_lines, width, height, bpp); });
-		unfurl_loop<9>([this, renewal, &new_lines, &new_sb_offset, &new_subbounds](int i)
-			{ SetTileProps(GetTileAtIndex(i), new_sb_offset[i], renewal, new_subbounds[i]); });
-
-		lines = new_lines;
+			{ renew_subbuffer(*this, renewal, old_sb_offset[i], old_subbounds[i], new_sb_offset, new_subbounds, new_lines); });
 		delete[] sharedBuffer;
 		sharedBuffer = renewal;
+		unfurl_loop<9>([this, &new_lines, &new_sb_offset, &new_subbounds](int i)
+			{ SetTileProps(GetTileAtIndex(i), new_sb_offset[i], new_subbounds[i]); });
+
+		lines = new_lines;
 	}
 }
 

@@ -33,7 +33,7 @@ class NonantTile
 	NonantLines_Absolute lines;
 
 	void CreateSharedBuffer(const Tile& tile);
-	void SetTileProps(TileHandle th, int offset, unsigned char* renewal, const struct _SubbufferBounds& bounds) const;
+	void SetTileProps(TileHandle th, int offset, const struct _SubbufferBounds& bounds) const;
 	void RenewSharedBuffer(const NonantLines_Absolute& new_lines);
 
 public:
