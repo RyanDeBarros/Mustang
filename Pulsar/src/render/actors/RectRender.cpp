@@ -16,8 +16,8 @@ RectRender::RectRender(TextureHandle texture, const glm::vec2& pivot, ShaderHand
 	SetShaderHandle(shader);
 	SetTextureHandle(texture);
 	SetPivot(pivot);
-	m_UVWidth = static_cast<float>(GetWidth());
-	m_UVHeight = static_cast<float>(GetHeight());
+	m_UVWidth = GetWidth();
+	m_UVHeight = GetHeight();
 }
 
 RectRender::RectRender(const RectRender& other)
@@ -83,6 +83,7 @@ void RectRender::SetPivot(float pivotX, float pivotY)
 void RectRender::RefreshTexture()
 {
 	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
+	// TODO should these maybe be uv sizes? That might resolve the other todo issue.
 	int width = GetWidth();
 	int height = GetHeight();
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos] = -m_Pivot.x * width;
@@ -93,13 +94,14 @@ void RectRender::RefreshTexture()
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 1 + 2 * stride] = (1 - m_Pivot.y) * height;
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 * stride] = -m_Pivot.x * width;
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 1 + 3 * stride] = (1 - m_Pivot.y) * height;
+	CropToRelativeRect();
 }
 
-void RectRender::CropToRect(glm::vec4 rect, int atlas_width, int atlas_height)
+void RectRender::CropToRect(const glm::vec4& rect, int atlas_width, int atlas_height)
 {
 	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
-	m_UVWidth = rect[2];
-	m_UVHeight = rect[3];
+	m_UVWidth = static_cast<int>(rect[2]);
+	m_UVHeight = static_cast<int>(rect[3]);
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2] = rect[0] / atlas_width;
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3] = rect[1] / atlas_height;
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 + stride] = (rect[0] + rect[2]) / atlas_width;
@@ -110,11 +112,11 @@ void RectRender::CropToRect(glm::vec4 rect, int atlas_width, int atlas_height)
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 + 3 * stride] = (rect[1] + rect[3]) / atlas_height;
 }
 
-void RectRender::CropToRelativeRect(glm::vec4 rect)
+void RectRender::CropToRelativeRect(const glm::vec4& rect)
 {
 	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
-	m_UVWidth = rect[2] * GetWidth();
-	m_UVHeight = rect[2] * GetHeight();
+	m_UVWidth = static_cast<int>(rect[2] * GetWidth());
+	m_UVHeight = static_cast<int>(rect[2] * GetHeight());
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2] = rect[0];
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3] = rect[1];
 	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 + stride] = rect[0] + rect[2];

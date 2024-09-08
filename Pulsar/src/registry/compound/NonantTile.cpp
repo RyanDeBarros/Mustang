@@ -127,8 +127,8 @@ NonantTile::NonantTile(const Tile& tile, const NonantLines_Relative& pos)
 }
 
 NonantTile::NonantTile(NonantTile&& other) noexcept
-	: sharedBuffer(other.sharedBuffer), tTL(other.tTL), tTM(other.tTM), tTR(other.tTR),
-	tCL(other.tCL), tCM(other.tCM), tCR(other.tCR), tBL(other.tBL), tBM(other.tBM), tBR(other.tBR), lines(other.lines)
+	: sharedBuffer(other.sharedBuffer), tTL(other.tTL), tTM(other.tTM), tTR(other.tTR), tCL(other.tCL), tCM(other.tCM), tCR(other.tCR),
+	tBL(other.tBL), tBM(other.tBM), tBR(other.tBR), lines(other.lines), width(other.width), height(other.height), bpp(other.bpp)
 {
 	other.sharedBuffer = nullptr;
 }
@@ -151,6 +151,9 @@ NonantTile& NonantTile::operator=(NonantTile&& other) noexcept
 	tBM = other.tBM;
 	tBR = other.tBR;
 	lines = other.lines;
+	width = other.width;
+	height = other.height;
+	bpp = other.bpp;
 	return *this;
 }
 

@@ -5,12 +5,19 @@
 
 class NonantRender : public FickleActor2D
 {
-	NonantTile ntile;
-	RectRender rects[9];
+	NonantTile ntile; // Create NonantTileRegistry and NonantTileHandle, since NonantTile's own buffers.
+	RectRender rects[9];	// TODO array causes size of NonantRender to be > 1500 bytes.
+							// Create an alternative to RectRender, since lots of things like shader/pivot are redundant in the array.
+							// Also, things like cropping are unnecessary for NonantRender, at least for the individual patches.
+	float nonantWidth;
+	float nonantHeight;
+	glm::vec2 pivot = { 0.5f, 0.5f };
 
 public:
 	NonantRender(NonantTile&& ntile, TextureVersion texture_version = 0, const TextureSettings& texture_settings = { MinFilter::Nearest, MagFilter::Nearest },
-		ShaderHandle shader = ShaderRegistry::standard_shader, ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true);
+		ShaderHandle shader = ShaderRegistry::standard_shader, ZIndex z = 0, bool modulatable = true, bool visible = true);
+	NonantRender(const NonantRender&) = delete; // TODO
+	NonantRender(NonantRender&&) = delete; // TODO
 
 	bool IsVisible() const { return rects[0].IsVisible(); }
 	void SetVisible(bool visible)
@@ -31,8 +38,16 @@ public:
 	void Reconfigure(const NonantLines_Relative& lines);
 	void Recallibrate();
 
-	// TODO SetWidth() SetHeight() SetSize() that scales inner tiles only.
+	const NonantTile& NTile() const { return ntile; }
+
+	glm::vec2 GetPivot() const { return pivot; }
+	void SetPivot(const glm::vec2& pivot);
+	float GetNonantWidth() const { return nonantWidth; }
+	float GetNonantHeight() const { return nonantHeight; }
+	void SetNonantWidth(float width);
+	void SetNonantHeight(float height);
+	void SetNonantSize(const glm::vec2& size);
 
 private:
-	void RecallibrateFickler();
+	void RecallibratePosition();
 };

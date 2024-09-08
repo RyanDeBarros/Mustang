@@ -4,27 +4,27 @@
 #include "utils/Data.inl"
 
 NonantRender::NonantRender(NonantTile&& ntile, TextureVersion texture_version, const TextureSettings& texture_settings,
-	ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible)
+	ShaderHandle shader, ZIndex z, bool modulatable, bool visible)
 	: ntile(std::move(ntile)), rects{
 		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(0),
-			texture_version, texture_settings }), {}, shader, z, fickle_type, visible),
+			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
 		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(1),
-			texture_version, texture_settings }), {}, shader, z, fickle_type, visible),
+			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
 		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(2),
-			texture_version, texture_settings }), {}, shader, z, fickle_type, visible),
+			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
 		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(3),
-			texture_version, texture_settings }), {}, shader, z, fickle_type, visible),
+			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
 		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(4),
-			texture_version, texture_settings }), {}, shader, z, fickle_type, visible),
+			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
 		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(5),
-			texture_version, texture_settings }), {}, shader, z, fickle_type, visible),
+			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
 		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(6),
-			texture_version, texture_settings }), {}, shader, z, fickle_type, visible),
+			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
 		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(7),
-			texture_version, texture_settings }), {}, shader, z, fickle_type, visible),
+			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
 		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(8),
-			texture_version, texture_settings }), {}, shader, z, fickle_type, visible)
-	}, FickleActor2D(fickle_type, z)
+			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible)
+	}, FickleActor2D(FickleType(true, modulatable), z)
 {
 	m_Fickler.Attach(rects[0].Fickler());
 	m_Fickler.Attach(rects[1].Fickler());
@@ -36,7 +36,7 @@ NonantRender::NonantRender(NonantTile&& ntile, TextureVersion texture_version, c
 	m_Fickler.Attach(rects[7].Fickler());
 	m_Fickler.Attach(rects[8].Fickler());
 
-	RecallibrateFickler();
+	RecallibratePosition();
 }
 
 void NonantRender::RequestDraw(CanvasLayer* canvas_layer)
@@ -85,18 +85,90 @@ void NonantRender::Recallibrate()
 	rects[6].RefreshTexture();
 	rects[7].RefreshTexture();
 	rects[8].RefreshTexture();
+
+	RecallibratePosition();
 }
 
-void NonantRender::RecallibrateFickler()
+void NonantRender::SetPivot(const glm::vec2& pvt)
 {
-	set_ptr(rects[0].Fickler().Position(), { this->ntile.ColumnPos(0), this->ntile.RowPos(0) });
-	set_ptr(rects[1].Fickler().Position(), { this->ntile.ColumnPos(1), this->ntile.RowPos(0) });
-	set_ptr(rects[2].Fickler().Position(), { this->ntile.ColumnPos(2), this->ntile.RowPos(0) });
-	set_ptr(rects[3].Fickler().Position(), { this->ntile.ColumnPos(0), this->ntile.RowPos(1) });
-	set_ptr(rects[4].Fickler().Position(), { this->ntile.ColumnPos(1), this->ntile.RowPos(1) });
-	set_ptr(rects[5].Fickler().Position(), { this->ntile.ColumnPos(2), this->ntile.RowPos(1) });
-	set_ptr(rects[6].Fickler().Position(), { this->ntile.ColumnPos(0), this->ntile.RowPos(2) });
-	set_ptr(rects[7].Fickler().Position(), { this->ntile.ColumnPos(1), this->ntile.RowPos(2) });
-	set_ptr(rects[8].Fickler().Position(), { this->ntile.ColumnPos(2), this->ntile.RowPos(2) });
-	m_Fickler.SyncAll();
+	pivot = pvt;
+	RecallibratePosition();
+}
+
+void NonantRender::SetNonantWidth(float width)
+{
+	nonantWidth = width;
+	float inner_scale_x = rects[1].GetUVWidth() > 0
+		? std::max(nonantWidth - rects[0].GetUVWidth() - rects[2].GetUVWidth(), 0.0f) / rects[1].GetUVWidth()
+		: 0.0f;
+
+	rects[1].Fickler().Scale()->x = inner_scale_x;
+	rects[1].Fickler().transformable->SyncRS();
+	rects[4].Fickler().Scale()->x = inner_scale_x;
+	rects[4].Fickler().transformable->SyncRS();
+	rects[7].Fickler().Scale()->x = inner_scale_x;
+	rects[7].Fickler().transformable->SyncRS();
+
+	RecallibratePosition();
+}
+
+void NonantRender::SetNonantHeight(float height)
+{
+	nonantHeight = height;
+	float inner_scale_y = rects[3].GetUVHeight() > 0
+		? std::max(nonantHeight - rects[0].GetUVHeight() - rects[6].GetUVHeight(), 0.0f) / rects[3].GetUVHeight()
+		: 0.0f;
+
+	rects[3].Fickler().Scale()->y = inner_scale_y;
+	rects[3].Fickler().transformable->SyncRS();
+	rects[4].Fickler().Scale()->y = inner_scale_y;
+	rects[4].Fickler().transformable->SyncRS();
+	rects[5].Fickler().Scale()->y = inner_scale_y;
+	rects[5].Fickler().transformable->SyncRS();
+
+	RecallibratePosition();
+}
+
+void NonantRender::SetNonantSize(const glm::vec2& size)
+{
+	nonantWidth = size.x;
+	nonantHeight = size.y;
+	float inner_scale_x = rects[1].GetUVWidth() > 0
+		? std::max(nonantWidth - rects[0].GetUVWidth() - rects[2].GetUVWidth(), 0.0f) / rects[1].GetUVWidth()
+		: 0.0f;
+	float inner_scale_y = rects[3].GetUVHeight() > 0
+		? std::max(nonantHeight - rects[0].GetUVHeight() - rects[6].GetUVHeight(), 0.0f) / rects[3].GetUVHeight()
+		: 0.0f;
+
+	rects[1].Fickler().Scale()->x = inner_scale_x;
+	rects[1].Fickler().transformable->SyncRS();
+	rects[3].Fickler().Scale()->y = inner_scale_y;
+	rects[3].Fickler().transformable->SyncRS();
+	rects[4].Fickler().Scale()->x = inner_scale_x;
+	rects[4].Fickler().Scale()->y = inner_scale_y;
+	rects[4].Fickler().transformable->SyncRS();
+	rects[5].Fickler().Scale()->y = inner_scale_y;
+	rects[5].Fickler().transformable->SyncRS();
+	rects[7].Fickler().Scale()->x = inner_scale_x;
+	rects[7].Fickler().transformable->SyncRS();
+
+	RecallibratePosition();
+}
+
+void NonantRender::RecallibratePosition()
+{
+	// TODO add pivot
+	float column_r_pos = ntile.ColumnPos(1) + rects[4].Fickler().Scale()->x * rects[4].GetUVWidth();
+	float row_t_pos = ntile.RowPos(1) + rects[4].Fickler().Scale()->y * rects[4].GetUVHeight();
+	float pvtX = pivot.x * nonantWidth, pvtY = pivot.y * nonantHeight;
+	rects[0].Fickler().transformable->Position() = { ntile.ColumnPos(0) - pvtX, ntile.RowPos(0) - pvtY };
+	rects[1].Fickler().transformable->Position() = { ntile.ColumnPos(1) - pvtX, rects[0].Fickler().transformable->Position().y };
+	rects[2].Fickler().transformable->Position() = { column_r_pos - pvtX, rects[0].Fickler().transformable->Position().y };
+	rects[3].Fickler().transformable->Position() = { rects[0].Fickler().transformable->Position().x, ntile.RowPos(1) - pvtY };
+	rects[4].Fickler().transformable->Position() = { rects[1].Fickler().transformable->Position().x, rects[3].Fickler().transformable->Position().y };
+	rects[5].Fickler().transformable->Position() = { rects[2].Fickler().transformable->Position().x, rects[3].Fickler().transformable->Position().y };
+	rects[6].Fickler().transformable->Position() = { rects[0].Fickler().transformable->Position().x, row_t_pos - pvtY };
+	rects[7].Fickler().transformable->Position() = { rects[1].Fickler().transformable->Position().x, rects[6].Fickler().transformable->Position().y };
+	rects[8].Fickler().transformable->Position() = { rects[2].Fickler().transformable->Position().x, rects[6].Fickler().transformable->Position().y };
+	m_Fickler.transformable->SyncP();
 }

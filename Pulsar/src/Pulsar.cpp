@@ -152,7 +152,7 @@ void Pulsar::Run(GLFWwindow* window)
 	actor4.Fickler().SyncT();
 	Renderer::GetCanvasLayer(-1)->OnAttach(&actor4);
 
-	set_ptr(actor1.Fickler().Scale(), {16.0f, 16.0f});
+	set_ptr(actor1.Fickler().Scale(), { 16.0f, 16.0f });
 	actor1.Fickler().SyncRS();
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(&actor3, -1);
 
@@ -166,7 +166,7 @@ void Pulsar::Run(GLFWwindow* window)
 		glm::vec4(0.5f, 1.0f, 0.5f, 1.0f),
 		glm::vec4(0.5f, 0.5f, 1.0f, 1.0f),
 		glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)
-	});
+		});
 
 	TextureRegistry::SetSettings(actor1.GetTextureHandle(), Texture::linear_settings);
 
@@ -188,17 +188,17 @@ void Pulsar::Run(GLFWwindow* window)
 		PULSAR_ASSERT(false);
 	std::unique_ptr<ParticleEffect> psys(psys_raw);
 
-	set_ptr(psys->Fickler().Scale(), glm::vec2{_RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height} * 0.75f);
+	set_ptr(psys->Fickler().Scale(), glm::vec2{ _RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height } *0.75f);
 	psys->Fickler().SyncRS();
 
 	Renderer::AddCanvasLayer(11);
 	Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
-	
+
 	TileMap* tilemap_ini;
 	if (Loader::loadTileMap("res/assets/tilemap.toml", tilemap_ini) != LOAD_STATUS::OK)
 		PULSAR_ASSERT(false);
 	std::unique_ptr<TileMap> tilemap(tilemap_ini);
-	set_ptr(tilemap->Fickler().Transform(), {{100.0f, 200.0f}, 0.3f, {5.0f, 8.0f}});
+	set_ptr(tilemap->Fickler().Transform(), { {100.0f, 200.0f}, 0.3f, {5.0f, 8.0f} });
 	tilemap->Fickler().SyncT();
 	tilemap->Insert(4, 0, 1);
 	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
@@ -215,9 +215,9 @@ void Pulsar::Run(GLFWwindow* window)
 	RectRender grandchild2(textureTux);
 
 	child.Fickler().AttachUnsafe(grandchild.Fickler());
-	set_ptr(grandchild.Fickler().Scale(), {0.25f, 0.25f});
-	set_ptr(grandchild.Fickler().Position(), {300.0f, -100.0f});
-	set_ptr(child.Fickler().Scale(), {0.25f, 0.25f});
+	set_ptr(grandchild.Fickler().Scale(), { 0.25f, 0.25f });
+	set_ptr(grandchild.Fickler().Position(), { 300.0f, -100.0f });
+	set_ptr(child.Fickler().Scale(), { 0.25f, 0.25f });
 	child.Fickler().SyncT();
 	child2.Fickler().AttachUnsafe(grandchild2.Fickler());
 	set_ptr(grandchild2.Fickler().Scale(), { 0.25f, 0.25f });
@@ -227,7 +227,7 @@ void Pulsar::Run(GLFWwindow* window)
 
 	root.Fickler().AttachUnsafe(child.Fickler());
 	root.Fickler().AttachUnsafe(child2.Fickler());
-	set_ptr(root.Fickler().Scale(), {10.0f, 10.0f});
+	set_ptr(root.Fickler().Scale(), { 10.0f, 10.0f });
 	root.Fickler().SyncT();
 	for (const auto& child : root.Fickler().Transformer()->children)
 	{
@@ -259,12 +259,12 @@ void Pulsar::Run(GLFWwindow* window)
 		{ { 0, 100 } },
 		{ { 200, 0 } },
 		{ { -200, 0 } }
-	});
+		});
 	tuxGrid.PushBackStatic({
 		{ { 50, 0 } },
 		{ { 50, 200 } },
 		{ { 50, -200 } }
-	});
+		});
 
 	tux.SetModulationPerPoint({ Colors::WHITE, Colors::BLUE, Colors::RED * Colors::HALF_TRANSPARENT_WHITE, Colors::LIGHT_GREEN });
 
@@ -308,7 +308,7 @@ void Pulsar::Run(GLFWwindow* window)
 	AnimationPlayer<void> animPlayerEvents;
 	animPlayerEvents.SetPeriod(2.0f);
 	animPlayerEvents.SetSpeed(1.3f);
-	
+
 	using AnimEventTrackT = AnimationTrack<void, void, KF_Event<void>, Interp::Constant>;
 	AnimEventTrackT animEventTrack;
 	animEventTrack.SetOrInsert(KF_Event<void>(0.0f, make_functor_ptr([](void*) { Logger::LogInfo("0 seconds!"); })));
@@ -331,23 +331,22 @@ void Pulsar::Run(GLFWwindow* window)
 
 	Renderer::RemoveCanvasLayer(11);
 	Renderer::AddCanvasLayer(11);
-	
-	TileHandle ogntile = TileRegistry::GetHandle({"res/textures/grassTL.png"});
-	NonantRender nonant(NonantTile(*TileRegistry::Get(ogntile), NonantLines_Relative{ 0.5f, 0.8f, 0.25f, 0.8f }));
 
-	RectRender og_nonant(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ogntile, 1, {MinFilter::Nearest, MagFilter::Nearest}}));
+	TileHandle ogntile = TileRegistry::GetHandle({ "res/textures/panel.png" });
+	NonantRender nonant(NonantTile(*TileRegistry::Get(ogntile), NonantLines_Absolute{ 6, 26, 6, 26 }));
+
+	RectRender og_nonant(TextureRegistry::GetHandle(TextureConstructArgs_tile{ ogntile, 1, {MinFilter::Nearest, MagFilter::Nearest} }));
 
 	// TODO function on FickleActor2D that does sync automatically when setting position, rotation, etc.
-	set_ptr(og_nonant.Fickler().Scale(), { 20.0f, 20.0f });
+	set_ptr(og_nonant.Fickler().Scale(), { 10.0f, 10.0f });
 	set_ptr(og_nonant.Fickler().Position(), { -250.0f, 250.0f });
 	og_nonant.Fickler().SyncT();
 
 	Renderer::GetCanvasLayer(11)->OnAttach(&og_nonant);
 	Renderer::GetCanvasLayer(11)->OnAttach(&nonant);
-	set_ptr(nonant.Fickler().Transform(), { { 150.0f, -300.0f }, 0.0f, { 20.0f, 20.0f } });
+	set_ptr(nonant.Fickler().Transform(), { { 150.0f, -300.0f }, 0.0f, { 10.0f, 10.0f } });
 	nonant.Fickler().SyncT();
-	
-	//nonant.Reconfigure(NonantLines_Relative{ 0.5f, 0.8f, 0.25f, 0.8f });
+	nonant.SetPivot({ 0.3f, 0.3f });
 	
 	// TODO tilemap is broken.
 	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
@@ -370,11 +369,7 @@ void Pulsar::Run(GLFWwindow* window)
 
 		_frame_start();
 
-		float relCL = 0.35f + 0.25f * glm::sin(Pulsar::totalDrawTime);
-		float relCR = 0.85f + 0.25f * glm::sin(1.0f + Pulsar::totalDrawTime);
-		float relRB = 0.25f + 0.25f * glm::cos(Pulsar::totalDrawTime);
-		float relRT = 0.75f + 0.25f * glm::cos(1.0f + Pulsar::totalDrawTime);
-		//nonant.Reconfigure(NonantLines_Relative{ relCL, relCR, relRB, relRT });
+		nonant.SetNonantSize({ nonant.NTile().GetWidth() + 10 * glm::sin(totalDrawTime), nonant.NTile().GetHeight() + 10 * glm::cos(totalDrawTime) });
 		
 		*child.Fickler().Rotation() = -Pulsar::totalDrawTime;
 		*child2.Fickler().Rotation() = -Pulsar::totalDrawTime;

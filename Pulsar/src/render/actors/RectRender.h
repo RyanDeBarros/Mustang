@@ -9,7 +9,7 @@ protected:
 	static Renderable rect_renderable;
 	static constexpr Stride end_attrib_pos = ActorPrimitive2D::end_attrib_pos + 4;
 
-	float m_UVWidth, m_UVHeight;
+	int m_UVWidth, m_UVHeight;
 	glm::vec2 m_Pivot;
 
 public:
@@ -28,15 +28,15 @@ public:
 	int GetWidth() const { return TextureRegistry::GetWidth(m_Render.textureHandle); }
 	int GetHeight() const { return TextureRegistry::GetHeight(m_Render.textureHandle); }
 	// TODO when rect is cropped, width/height when setting scale is not accurate. Also, define SetWidth and SetHeight so that scale is not necessary.
-	float GetUVWidth() const { return m_UVWidth; }
-	float GetUVHeight() const { return m_UVHeight; }
+	int GetUVWidth() const { return m_UVWidth; }
+	int GetUVHeight() const { return m_UVHeight; }
 	glm::vec2 GetPivot() const { return m_Pivot; }
 	void SetPivot(float pivotX, float pivotY);
 	void SetPivot(const glm::vec2& pivot) { SetPivot(pivot.x, pivot.y); }
 	void RefreshTexture();
 
-	void CropToRect(glm::vec4 rect, int atlas_width, int atlas_height);
-	void CropToRelativeRect(glm::vec4 rect);
+	void CropToRect(const glm::vec4& rect, int atlas_width, int atlas_height);
+	void CropToRelativeRect(const glm::vec4& rect = { 0.0f, 0.0f, 1.0f, 1.0f });
 	void ResetTransformUVs();
 
 	void SetTextureHandle(TextureHandle handle) override { ActorPrimitive2D::SetTextureHandle(handle); SetPivot(m_Pivot); }
