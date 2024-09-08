@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdexcept>
+
 #include "Handles.inl"
 #include "../Tile.h"
 
@@ -31,6 +33,7 @@ class NonantTile
 	NonantLines_Absolute lines;
 
 	void CreateSharedBuffer(const Tile& tile);
+	void SetTileProps(TileHandle th, int offset, unsigned char* renewal, const struct _SubbufferBounds& bounds) const;
 	void RenewSharedBuffer(const NonantLines_Absolute& new_lines);
 
 public:
@@ -59,6 +62,83 @@ public:
 	TileHandle GetBottomMiddle() const { return tBM; }
 	TileHandle GetBottomRight() const { return tBR; }
 
+	const TileHandle& GetTileAtIndex(int i) const
+	{
+		switch (i)
+		{
+		case 0:
+			return tBL;
+		case 1:
+			return tBM;
+		case 2:
+			return tBR;
+		case 3:
+			return tCL;
+		case 4:
+			return tCM;
+		case 5:
+			return tCR;
+		case 6:
+			return tTL;
+		case 7:
+			return tTM;
+		case 8:
+			return tTR;
+		default:
+			throw std::out_of_range("Nonant tile index must be in range 0-9.");
+		}
+	}
+
+	int ColumnPos(int i) const
+	{
+		if (i == 0)
+			return 0;
+		else if (i == 1)
+			return lines.column_l;
+		else if (i == 2)
+			return lines.column_r;
+		else
+			return width;
+	}
+
+	int RowPos(int i) const
+	{
+		if (i == 0)
+			return 0;
+		else if (i == 1)
+			return lines.row_b;
+		else if (i == 2)
+			return lines.row_t;
+		else
+			return height;
+	}
+
 private:
 	void DeleteBuffer() const;
+	TileHandle& GetTileAtIndex(int i)
+	{
+		switch (i)
+		{
+		case 0:
+			return tBL;
+		case 1:
+			return tBM;
+		case 2:
+			return tBR;
+		case 3:
+			return tCL;
+		case 4:
+			return tCM;
+		case 5:
+			return tCR;
+		case 6:
+			return tTL;
+		case 7:
+			return tTM;
+		case 8:
+			return tTR;
+		default:
+			throw std::out_of_range("Nonant tile index must be in range 0-9.");
+		}
+	}
 };
