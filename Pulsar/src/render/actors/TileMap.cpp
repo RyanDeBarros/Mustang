@@ -38,9 +38,9 @@ void TileMap::Insert(TileMapIndex tessel, float posX, float posY, const Modulate
 	if (m_Fickler.transformable)
 	{
 		if (m_Fickler.modulatable)
-			m_Map[tessel].tessel->PushBackStatic({ {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} }, modulate );
+			m_Map[tessel].tessel->PushBackStatic({ {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} }, modulate, true );
 		else
-			m_Map[tessel].tessel->PushBackStatic({ {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} });
+			m_Map[tessel].tessel->PushBackStatic({ {posX * m_Map[tessel].rectRender->GetUVWidth(), posY * m_Map[tessel].rectRender->GetUVHeight()} }, true);
 	}
 }
 

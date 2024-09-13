@@ -349,7 +349,7 @@ void Pulsar::Run(GLFWwindow* window)
 	nonant.SetPivot({ 0.3f, 0.3f });
 	
 	// TODO tilemap is broken.
-	//Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
+	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 
 	// small delay
 	while (totalDrawTime < 0.01f)
