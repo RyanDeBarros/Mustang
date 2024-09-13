@@ -9,6 +9,8 @@
 
 #include "UniformLexicon.h"
 
+// TODO lexicon version and register lexicon
+
 struct UniformLexiconConstructArgs
 {
 	const std::unordered_map<std::string, Uniform>& uniforms;

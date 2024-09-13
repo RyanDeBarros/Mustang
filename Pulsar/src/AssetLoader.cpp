@@ -476,7 +476,7 @@ LOAD_STATUS Loader::loadRenderable(const char* filepath, Renderable& renderable,
 			if (loadUniformLexicon(uniform_lexicon.value().c_str(), lexicon_handle) != LOAD_STATUS::OK)
 				return LOAD_STATUS::REFERENCE_ERROR;
 		}
-		renderable.model.uniformLexicon = lexicon_handle;
+		renderable.uniformLexicon = lexicon_handle;
 
 		auto vertex_array = render["vertices"].as_array();
 		auto num_vertices = render["num_vertices"].value<int64_t>();

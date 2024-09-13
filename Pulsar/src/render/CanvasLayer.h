@@ -68,7 +68,6 @@ class CanvasLayer
 	GLuint* indexPos;
 	GLuint m_VB, m_IB;
 	BatchModel currentModel;
-	UniformLexiconHandle currentLexiconHandle = 0;
 	DrawMode currentDrawMode = DrawMode::VOID;
 	UniformLexicon currentLexicon;
 	std::vector<TextureHandle> m_TextureSlotBatch;
@@ -98,10 +97,11 @@ public:
 private:
 	void SetBlending() const;
 	void SetBatchModel(const BatchModel&);
+	void SetUniformLexicon(UniformLexiconHandle lexicon);
 	void PoolOverAll(const Renderable&);
 	void PoolOverIndexBuffer(const Renderable&);
 	void PoolOverVertexBuffer(const Renderable&);
-	void PoolOverLexicon(const Renderable&);
+	void PoolOverLexicon(UniformLexiconHandle lexicon);
 	void FlushAndReset();
 	TextureSlot GetTextureSlot(const Renderable&);
 	

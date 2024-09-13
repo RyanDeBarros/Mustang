@@ -63,8 +63,8 @@ void UniformLexiconRegistry::OnApply(UniformLexiconHandle uniformLexicon, Shader
 		return;
 	if (dynamicLexicons.find(uniformLexicon) == dynamicLexicons.end())
 	{
-		std::unordered_map<UniformLexiconHandle, std::unordered_set<ShaderHandle>>::iterator set;
-		if ((set = shaderCache.find(uniformLexicon)) != shaderCache.end())
+		auto set = shaderCache.find(uniformLexicon);
+		if (set != shaderCache.end())
 		{
 			if (set->second.find(shader) != set->second.end())
 				return;
@@ -76,64 +76,13 @@ void UniformLexiconRegistry::OnApply(UniformLexiconHandle uniformLexicon, Shader
 	}
 
 	UniformLexicon const* lex = Get(uniformLexicon);
-	if (!lex)
-		return;
-	for (const auto& [name, uniform] : lex->m_Uniforms)
-	{
-		switch (uniform.index())
-		{
-		case 0:
-			ShaderRegistry::SetUniform1i(shader, name.c_str(), std::get<GLint>(uniform));
-			break;
-		case 1:
-			ShaderRegistry::SetUniform2iv(shader, name.c_str(), &std::get<glm::ivec2>(uniform)[0]);
-			break;
-		case 2:
-			ShaderRegistry::SetUniform3iv(shader, name.c_str(), &std::get<glm::ivec3>(uniform)[0]);
-			break;
-		case 3:
-			ShaderRegistry::SetUniform4iv(shader, name.c_str(), &std::get<glm::ivec4>(uniform)[0]);
-			break;
-		case 4:
-			ShaderRegistry::SetUniform1ui(shader, name.c_str(), std::get<GLuint>(uniform));
-			break;
-		case 5:
-			ShaderRegistry::SetUniform2uiv(shader, name.c_str(), &std::get<glm::uvec2>(uniform)[0]);
-			break;
-		case 6:
-			ShaderRegistry::SetUniform3uiv(shader, name.c_str(), &std::get<glm::uvec3>(uniform)[0]);
-			break;
-		case 7:
-			ShaderRegistry::SetUniform4uiv(shader, name.c_str(), &std::get<glm::uvec4>(uniform)[0]);
-			break;
-		case 8:
-			ShaderRegistry::SetUniform1f(shader, name.c_str(), std::get<GLfloat>(uniform));
-			break;
-		case 9:
-			ShaderRegistry::SetUniform2fv(shader, name.c_str(), &std::get<glm::vec2>(uniform)[0]);
-			break;
-		case 10:
-			ShaderRegistry::SetUniform3fv(shader, name.c_str(), &std::get<glm::vec3>(uniform)[0]);
-			break;
-		case 11:
-			ShaderRegistry::SetUniform4fv(shader, name.c_str(), &std::get<glm::vec4>(uniform)[0]);
-			break;
-		case 12:
-			ShaderRegistry::SetUniformMatrix2fv(shader, name.c_str(), &std::get<glm::mat2>(uniform)[0][0]);
-			break;
-		case 13:
-			ShaderRegistry::SetUniformMatrix3fv(shader, name.c_str(), &std::get<glm::mat3>(uniform)[0][0]);
-			break;
-		case 14:
-			ShaderRegistry::SetUniformMatrix4fv(shader, name.c_str(), &std::get<glm::mat4>(uniform)[0][0]);
-			break;
-		}
-	}
+	if (lex)
+		lex->OnApply(shader);
 }
 
 bool UniformLexiconRegistry::Shares(UniformLexiconHandle lexicon1, UniformLexiconHandle lexicon2)
 {
-	if (lexicon1 == lexicon2)
+	if (lexicon1 == lexicon2 || lexicon1 == 0 || lexicon2 == 0)
 		return true;
 	UniformLexicon* lex1 = nullptr;
 	UniformLexicon* lex2 = nullptr;

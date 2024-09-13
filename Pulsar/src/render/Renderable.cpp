@@ -3,14 +3,14 @@
 #include "Macros.h"
 #include "registry/UniformLexiconRegistry.h"
 
-BatchModel::BatchModel(VertexLayout layout, VertexLayoutMask layoutMask, ShaderHandle shader, UniformLexiconHandle uniformLexicon)
-	: layout(layout), layoutMask(layoutMask), shader(shader), uniformLexicon(uniformLexicon)
+BatchModel::BatchModel(VertexLayout layout, VertexLayoutMask layoutMask, ShaderHandle shader)
+	: layout(layout), layoutMask(layoutMask), shader(shader)
 {
 }
 
 bool BatchModel::operator==(const BatchModel& m) const
 {
-	return layout == m.layout && layoutMask == m.layoutMask && shader == m.shader && UniformLexiconRegistry::Shares(uniformLexicon, m.uniformLexicon);
+	return layout == m.layout && layoutMask == m.layoutMask && shader == m.shader;
 }
 
 
@@ -24,12 +24,12 @@ size_t std::hash<BatchModel>::operator()(const BatchModel& model) const
 
 namespace Render
 {
-	BufferCounter VertexBufferLayoutCount(const Renderable& render)
+	VertexBufferCounter VertexBufferLayoutCount(const Renderable& render)
 	{
 		return render.vertexCount * StrideCountOf(render.model.layout, render.model.layoutMask);
 	}
 
-	BufferCounter VertexBufferLayoutCount(const BufferCounter& num_vertices, const VertexLayout& layout, const VertexLayoutMask& mask)
+	VertexBufferCounter VertexBufferLayoutCount(const VertexBufferCounter& num_vertices, const VertexLayout& layout, const VertexLayoutMask& mask)
 	{
 		return num_vertices * StrideCountOf(layout, mask);
 	}
@@ -63,20 +63,22 @@ namespace Render
 	}
 }
 
-Renderable::Renderable(BatchModel model, TextureHandle texture_handle)
-	: model(model), textureHandle(texture_handle), vertexBufferData(nullptr), vertexCount(0), indexBufferData(nullptr), indexCount(0)
+Renderable::Renderable(BatchModel model, TextureHandle texture_handle, UniformLexiconHandle uniform_lexicon)
+	: model(model), textureHandle(texture_handle), uniformLexicon(uniform_lexicon), vertexBufferData(nullptr), vertexCount(0), indexBufferData(nullptr), indexCount(0)
 {
 }
 
 Renderable::Renderable(Renderable&& other) noexcept
-	: model(other.model), textureHandle(other.textureHandle), vertexBufferData(other.vertexBufferData), vertexCount(other.vertexCount), indexBufferData(other.indexBufferData), indexCount(other.indexCount)
+	: model(other.model), textureHandle(other.textureHandle), uniformLexicon(other.uniformLexicon),
+	vertexBufferData(other.vertexBufferData), vertexCount(other.vertexCount), indexBufferData(other.indexBufferData), indexCount(other.indexCount)
 {
 	other.vertexBufferData = nullptr;
 	other.indexBufferData = nullptr;
 }
 
 Renderable::Renderable(const Renderable& other)
-	: model(other.model), textureHandle(other.textureHandle), vertexBufferData(nullptr), vertexCount(other.vertexCount), indexBufferData(nullptr), indexCount(other.indexCount)
+	: model(other.model), textureHandle(other.textureHandle), uniformLexicon(other.uniformLexicon),
+	vertexBufferData(nullptr), vertexCount(other.vertexCount), indexBufferData(nullptr), indexCount(other.indexCount)
 {
 	if (other.vertexBufferData)
 	{
@@ -97,6 +99,7 @@ Renderable& Renderable::operator=(const Renderable& other)
 		return *this;
 	model = other.model;
 	textureHandle = other.textureHandle;
+	uniformLexicon = other.uniformLexicon;
 	
 	if (vertexBufferData)
 	{
@@ -131,6 +134,7 @@ Renderable& Renderable::operator=(Renderable&& other) noexcept
 		return *this;
 	model = other.model;
 	textureHandle = other.textureHandle;
+	uniformLexicon = other.uniformLexicon;
 	if (vertexBufferData)
 		delete[] vertexBufferData;
 	vertexBufferData = other.vertexBufferData;
@@ -161,6 +165,8 @@ Renderable::~Renderable()
 
 bool Renderable::AttachVertexBuffer(toml::v3::array* vertex_array, size_t size)
 {
+	if (size > USHRT_MAX)
+		return false;
 	if (vertexBufferData)
 		delete[] vertexBufferData;
 	if (size == 0)
@@ -185,6 +191,8 @@ bool Renderable::AttachVertexBuffer(toml::v3::array* vertex_array, size_t size)
 
 bool Renderable::AttachIndexBuffer(toml::v3::array* index_array, size_t size)
 {
+	if (size > USHRT_MAX)
+		return false;
 	if (indexBufferData)
 		delete[] indexBufferData;
 	if (size == 0)

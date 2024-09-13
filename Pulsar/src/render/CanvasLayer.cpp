@@ -150,10 +150,11 @@ void CanvasLayer::DrawPrimitive(ActorPrimitive2D* primitive)
 		currentDrawMode = DrawMode::PRIMITIVE;
 	}
 	const auto& render = primitive->m_Render;
-	if (render.model != currentModel)
+	if (render.model != currentModel || !currentLexicon.Shares(render.uniformLexicon))
 	{
 		SendTriangles();
 		SetBatchModel(render.model);
+		SetUniformLexicon(render.uniformLexicon);
 	}
 	else if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(render)
 			|| m_Data.maxIndexPoolSize - (indexPos - m_IndexPool) < render.indexCount)
@@ -169,8 +170,9 @@ void CanvasLayer::DrawArray(const Renderable& renderable, GLenum indexing_mode)
 	FlushAndReset();
 	currentDrawMode = DrawMode::ARRAY;
 	SetBatchModel(renderable.model);
+	SetUniformLexicon(renderable.uniformLexicon);
 	PoolOverVertexBuffer(renderable);
-	PoolOverLexicon(renderable);
+	PoolOverLexicon(renderable.uniformLexicon);
 	SendArray(renderable, indexing_mode);
 }
 
@@ -179,6 +181,7 @@ void CanvasLayer::DrawMultiArray(DebugMultiPolygon* multi_polygon)
 	FlushAndReset();
 	currentDrawMode = DrawMode::MULTI_ARRAY;
 	SetBatchModel(multi_polygon->m_Model);
+	SetUniformLexicon(0);
 	for (const auto& poly : multi_polygon->m_Polygons)
 	{
 		if (!poly->DrawPrep())
@@ -186,7 +189,7 @@ void CanvasLayer::DrawMultiArray(DebugMultiPolygon* multi_polygon)
 		if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(poly->m_Renderable))
 			SendMultiArray(multi_polygon);
 		PoolOverVertexBuffer(poly->m_Renderable);
-		PoolOverLexicon(poly->m_Renderable);
+		PoolOverLexicon(poly->m_Renderable.uniformLexicon);
 	}
 	SendMultiArray(multi_polygon);
 }
@@ -204,11 +207,12 @@ void CanvasLayer::DrawRect(RectRender* rect)
 		rectBatcher.draw_count = 1;
 	}
 	const auto& render = rect->m_Render;
-	if (render.model != currentModel)
+	if (render.model != currentModel || !currentLexicon.Shares(render.uniformLexicon))
 	{
 		SendRects();
 		rectBatcher.draw_count = 1;
 		SetBatchModel(render.model);
+		SetUniformLexicon(render.uniformLexicon);
 	}
 	else if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(render)
 		|| m_Data.maxIndexPoolSize - (indexPos - m_IndexPool) < render.indexCount)
@@ -218,7 +222,7 @@ void CanvasLayer::DrawRect(RectRender* rect)
 	}
 	rect->OnDraw(GetTextureSlot(render));
 	PoolOverVertexBuffer(render);
-	PoolOverLexicon(render);
+	PoolOverLexicon(render.uniformLexicon);
 }
 
 void CanvasLayer::SetBlending() const
@@ -237,10 +241,14 @@ void CanvasLayer::SetBlending() const
 void CanvasLayer::SetBatchModel(const BatchModel& model)
 {
 	currentModel = model;
-	currentLexiconHandle = model.uniformLexicon;
-	currentLexicon.MergeLexicon(model.uniformLexicon);
 	if (m_VAOs.find(currentModel) == m_VAOs.end())
 		RegisterModel();
+}
+
+void CanvasLayer::SetUniformLexicon(UniformLexiconHandle lexicon)
+{
+	currentLexicon.Clear();
+	currentLexicon.MergeLexicon(lexicon);
 }
 
 // NOTE If buffer data is too large to fit in corresponding pool, it will not be rendered.
@@ -250,7 +258,7 @@ void CanvasLayer::PoolOverAll(const Renderable& renderable)
 	// order of these calls is crucial
 	PoolOverIndexBuffer(renderable);
 	PoolOverVertexBuffer(renderable);
-	PoolOverLexicon(renderable);
+	PoolOverLexicon(renderable.uniformLexicon);
 }
 
 void CanvasLayer::PoolOverIndexBuffer(const Renderable& renderable)
@@ -272,10 +280,9 @@ void CanvasLayer::PoolOverVertexBuffer(const Renderable& renderable)
 	vertexPos += Render::VertexBufferLayoutCount(renderable);
 }
 
-void CanvasLayer::PoolOverLexicon(const Renderable& renderable)
+void CanvasLayer::PoolOverLexicon(UniformLexiconHandle lexicon)
 {
-	if (renderable.model.uniformLexicon != currentLexiconHandle)
-		currentLexicon.MergeLexicon(renderable.model.uniformLexicon);
+	currentLexicon.MergeLexicon(lexicon);
 }
 
 void CanvasLayer::FlushAndReset()
@@ -334,7 +341,7 @@ void CanvasLayer::OpenShading() const
 	BindVertexArray(m_VAOs.find(currentModel)->second);
 	ShaderRegistry::Bind(currentModel.shader);
 	m_LayerView.PassVPUniform(currentModel.shader);
-	UniformLexiconRegistry::OnApply(currentModel.uniformLexicon, currentModel.shader);
+	currentLexicon.OnApply(currentModel.shader);
 }
 
 void CanvasLayer::CloseShading() const

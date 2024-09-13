@@ -31,8 +31,10 @@ public:
 	UniformLexicon& operator=(UniformLexicon&&) noexcept;
 	~UniformLexicon();
 
-	void MergeLexicon(const UniformLexiconHandle& lexicon_handle);
+	void MergeLexicon(UniformLexiconHandle lexicon_handle);
 	bool Shares(const UniformLexicon& lexicon);
+	bool Shares(UniformLexiconHandle lexicon_handle);
+	void OnApply(ShaderHandle shader) const;
 
 private:
 	Uniform const* GetValue(const std::string& name) const;
