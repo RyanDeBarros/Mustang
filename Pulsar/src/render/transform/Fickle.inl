@@ -10,29 +10,28 @@
 #include "utils/CopyPtr.inl"
 #include "utils/Meta.inl"
 
-template<typename T>
-class FickleWrapper
+class Transformable2D
 {
 protected:
-	T* ptr = nullptr;
+	Transformer2D* ptr = nullptr;
 
 public:
-	FickleWrapper() {}
-	FickleWrapper(const T& fickler) : ptr(new T(fickler)) {}
-	FickleWrapper(T&& fickler) : ptr(new T(std::move(fickler))) {}
-	FickleWrapper(const FickleWrapper<T>& other)
+	Transformable2D() {}
+	Transformable2D(const Transformer2D& fickler) : ptr(new Transformer2D(fickler)) {}
+	Transformable2D(Transformer2D&& fickler) : ptr(new Transformer2D(std::move(fickler))) {}
+	Transformable2D(const Transformable2D& other)
 	{
 		if (other.ptr)
-			ptr = new T(*other.ptr);
+			ptr = new Transformer2D(*other.ptr);
 	}
-	FickleWrapper(FickleWrapper<T>&& other) noexcept
+	Transformable2D(Transformable2D&& other) noexcept
 		: ptr(other.ptr)
 	{
 		other.ptr = nullptr;
 	}
-protected:
+private:
 	friend struct Fickler2D;
-	FickleWrapper& operator=(const FickleWrapper<T>& other)
+	Transformable2D& operator=(const Transformable2D& other)
 	{
 		if (this == &other)
 			return *this;
@@ -40,12 +39,12 @@ protected:
 		{
 			if (ptr)
 			{
-				ptr->~T();
-				new (ptr) T(*other.ptr);
+				ptr->~Transformer2D();
+				new (ptr) Transformer2D(*other.ptr);
 			}
 			else
 			{
-				ptr = new T(*other.ptr);
+				ptr = new Transformer2D(*other.ptr);
 			}
 		}
 		else if (ptr)
@@ -55,7 +54,7 @@ protected:
 		}
 		return *this;
 	}
-	FickleWrapper& operator=(FickleWrapper<T>&& other) noexcept
+	Transformable2D& operator=(Transformable2D&& other) noexcept
 	{
 		if (this == &other)
 			return *this;
@@ -66,7 +65,7 @@ protected:
 		return *this;
 	}
 public:
-	~FickleWrapper()
+	~Transformable2D()
 	{
 		if (ptr)
 			delete ptr;
@@ -83,45 +82,30 @@ public:
 			ptr = nullptr;
 		}
 	}
-	void Engage(const T& fickler)
+	void Engage(const Transformer2D& fickler)
 	{
 		if (ptr)
 		{
-			ptr->~T();
-			new (ptr) T(fickler);
+			ptr->~Transformer2D();
+			new (ptr) Transformer2D(fickler);
 		}
 		else
 		{
-			ptr = new T(fickler);
+			ptr = new Transformer2D(fickler);
 		}
 	}
-	void Engage(T&& fickler)
+	void Engage(Transformer2D&& fickler)
 	{
 		if (ptr)
 		{
-			ptr->~T();
-			new (ptr) T(std::move(fickler));
+			ptr->~Transformer2D();
+			new (ptr) Transformer2D(std::move(fickler));
 		}
 		else
 		{
-			ptr = new T(std::move(fickler));
+			ptr = new Transformer2D(std::move(fickler));
 		}
 	}
-	T* Ref()
-	{
-		return ptr;
-	}
-	T& operator*() { return *ptr; }
-	const T& operator*() const { return *ptr; }
-	T* operator->() { return ptr; }
-};
-
-struct Transformable2D : public FickleWrapper<Transformer2D>
-{
-	Transformable2D() : FickleWrapper<Transformer2D>() {}
-	Transformable2D(const Transformer2D& transformer) : FickleWrapper<Transformer2D>(transformer) {}
-	Transformable2D(Transformer2D&& transformer) : FickleWrapper<Transformer2D>(std::move(transformer)) {}
-	
 	void Emplace(const Transform2D& transform = {})
 	{
 		if (ptr)
@@ -134,14 +118,111 @@ struct Transformable2D : public FickleWrapper<Transformer2D>
 			ptr = new Transformer2D(transform);
 		}
 	}
+	Transformer2D* Ref()
+	{
+		return ptr;
+	}
+	Transformer2D& operator*() { return *ptr; }
+	const Transformer2D& operator*() const { return *ptr; }
+	Transformer2D* operator->() { return ptr; }
 };
 
-struct Modulatable : public FickleWrapper<Modulator>
+class Modulatable
 {
-	Modulatable() : FickleWrapper<Modulator>() {}
-	Modulatable(const Modulator& modulator) : FickleWrapper<Modulator>(modulator) {}
-	Modulatable(Modulator&& modulator) : FickleWrapper<Modulator>(std::move(modulator)) {}
+protected:
+	Modulator* ptr = nullptr;
 
+public:
+	Modulatable() {}
+	Modulatable(const Modulator& fickler) : ptr(new Modulator(fickler)) {}
+	Modulatable(Modulator&& fickler) : ptr(new Modulator(std::move(fickler))) {}
+	Modulatable(const Modulatable& other)
+	{
+		if (other.ptr)
+			ptr = new Modulator(*other.ptr);
+	}
+	Modulatable(Modulatable&& other) noexcept
+		: ptr(other.ptr)
+	{
+		other.ptr = nullptr;
+	}
+private:
+	friend struct Fickler2D;
+	Modulatable& operator=(const Modulatable& other)
+	{
+		if (this == &other)
+			return *this;
+		if (other.ptr)
+		{
+			if (ptr)
+			{
+				ptr->~Modulator();
+				new (ptr) Modulator(*other.ptr);
+			}
+			else
+			{
+				ptr = new Modulator(*other.ptr);
+			}
+		}
+		else if (ptr)
+		{
+			delete ptr;
+			ptr = nullptr;
+		}
+		return *this;
+	}
+	Modulatable& operator=(Modulatable&& other) noexcept
+	{
+		if (this == &other)
+			return *this;
+		if (ptr)
+			delete ptr;
+		ptr = other.ptr;
+		other.ptr = nullptr;
+		return *this;
+	}
+public:
+	~Modulatable()
+	{
+		if (ptr)
+			delete ptr;
+	}
+	operator bool() const
+	{
+		return ptr;
+	}
+	void Disengage()
+	{
+		if (ptr)
+		{
+			delete ptr;
+			ptr = nullptr;
+		}
+	}
+	void Engage(const Modulator& fickler)
+	{
+		if (ptr)
+		{
+			ptr->~Modulator();
+			new (ptr) Modulator(fickler);
+		}
+		else
+		{
+			ptr = new Modulator(fickler);
+		}
+	}
+	void Engage(Modulator&& fickler)
+	{
+		if (ptr)
+		{
+			ptr->~Modulator();
+			new (ptr) Modulator(std::move(fickler));
+		}
+		else
+		{
+			ptr = new Modulator(std::move(fickler));
+		}
+	}
 	void Emplace(const Modulate& modulate = { 1.0f, 1.0f, 1.0f, 1.0f })
 	{
 		if (ptr)
@@ -154,6 +235,13 @@ struct Modulatable : public FickleWrapper<Modulator>
 			ptr = new Modulator(modulate);
 		}
 	}
+	Modulator* Ref()
+	{
+		return ptr;
+	}
+	Modulator& operator*() { return *ptr; }
+	const Modulator& operator*() const { return *ptr; }
+	Modulator* operator->() { return ptr; }
 };
 
 struct bad_fickle_type_error : std::exception
