@@ -61,7 +61,7 @@ void DebugPoint::CheckStatus()
 	{
 		m_PointStatus &= ~0b1;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
-		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+		for (VertexBufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 		{
 			m_Renderable.vertexBufferData[i * stride + 12] = static_cast<GLfloat>(m_Diameter);
 		}
@@ -70,7 +70,7 @@ void DebugPoint::CheckStatus()
 	{
 		m_PointStatus &= ~0b10;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
-		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+		for (VertexBufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 		{
 			m_Renderable.vertexBufferData[i * stride + 13] = static_cast<GLfloat>(m_InnerRadius);
 		}
@@ -79,7 +79,7 @@ void DebugPoint::CheckStatus()
 	{
 		m_PointStatus &= ~0b100;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
-		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+		for (VertexBufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 		{
 			m_Renderable.vertexBufferData[i * stride + 14] = static_cast<GLfloat>(m_InnerColor[0]);
 			m_Renderable.vertexBufferData[i * stride + 15] = static_cast<GLfloat>(m_InnerColor[1]);

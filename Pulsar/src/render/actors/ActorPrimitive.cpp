@@ -70,7 +70,7 @@ void ActorPrimitive2D::OnDraw(signed char texture_slot)
 	// update TextureSlot
 	if (m_Render.vertexBufferData[0] != texture_slot)
 	{
-		for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+		for (VertexBufferCounter i = 0; i < m_Render.vertexCount; i++)
 			m_Render.vertexBufferData[i * stride] = static_cast<GLfloat>(texture_slot);
 	}
 	// update TransformP
@@ -144,7 +144,7 @@ void ActorPrimitive2D::BindBufferFuncs()
 void ActorPrimitive2D::buffer_packed_p(Stride stride)
 {
 	const PackedP2D& position = *m_Fickler.PackedP();
-	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+	for (VertexBufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
 		m_Render.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(position.x);
 		m_Render.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(position.y);
@@ -153,7 +153,7 @@ void ActorPrimitive2D::buffer_packed_p(Stride stride)
 
 void ActorPrimitive2D::buffer_packed_p_default(Stride stride)
 {
-	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+	for (VertexBufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
 		m_Render.vertexBufferData[i * stride + 1] = 0.0f;
 		m_Render.vertexBufferData[i * stride + 2] = 0.0f;
@@ -163,7 +163,7 @@ void ActorPrimitive2D::buffer_packed_p_default(Stride stride)
 void ActorPrimitive2D::buffer_packed_rs(Stride stride)
 {
 	const PackedRS2D& condensed_rs_matrix = *m_Fickler.PackedRS();
-	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+	for (VertexBufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
 		m_Render.vertexBufferData[i * stride + 3] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);
 		m_Render.vertexBufferData[i * stride + 4] = static_cast<GLfloat>(condensed_rs_matrix[0][1]);
@@ -174,7 +174,7 @@ void ActorPrimitive2D::buffer_packed_rs(Stride stride)
 
 void ActorPrimitive2D::buffer_packed_rs_default(Stride stride)
 {
-	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+	for (VertexBufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
 		m_Render.vertexBufferData[i * stride + 3] = 1.0f;
 		m_Render.vertexBufferData[i * stride + 4] = 0.0f;
@@ -186,7 +186,7 @@ void ActorPrimitive2D::buffer_packed_rs_default(Stride stride)
 void ActorPrimitive2D::buffer_packed_m(Stride stride)
 {
 	const Modulate& modulate = *m_Fickler.PackedM();
-	for (BufferCounter i = 0; i < m_Render.vertexCount; i++)
+	for (VertexBufferCounter i = 0; i < m_Render.vertexCount; i++)
 	{
 		if (i < m_ModulationColors.size())
 		{
@@ -208,7 +208,7 @@ void ActorPrimitive2D::buffer_packed_m(Stride stride)
 
 void ActorPrimitive2D::buffer_packed_m_default(Stride stride)
 {
-	for (BufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
+	for (VertexBufferCounter i = 0; i < m_Render.vertexCount && i < m_ModulationColors.size(); i++)
 	{
 		Modulate color = m_ModulationColors[i];
 		m_Render.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(color.r);

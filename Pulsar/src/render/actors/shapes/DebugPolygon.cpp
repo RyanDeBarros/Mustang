@@ -84,7 +84,7 @@ void DebugPolygon::CheckStatus()
 	if (m_Status & 0b1)
 	{
 		m_Status = ~0b1;
-		m_Renderable.vertexCount = static_cast<BufferCounter>(m_Points.size());
+		m_Renderable.vertexCount = static_cast<VertexBufferCounter>(m_Points.size());
 		if (m_Renderable.vertexBufferData)
 			delete[] m_Renderable.vertexBufferData;
 		m_Renderable.vertexBufferData = new GLfloat[Render::VertexBufferLayoutCount(m_Renderable)];
@@ -101,7 +101,7 @@ void DebugPolygon::CheckStatus()
 	{
 		m_Status &= ~0b100;
 		Stride stride = Render::StrideCountOf(m_Renderable.model.layout, m_Renderable.model.layoutMask);
-		for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+		for (VertexBufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 		{
 			// TODO buffer overflow?
 #pragma warning(push)
@@ -157,7 +157,7 @@ void DebugPolygon::BindBufferFuncs()
 void DebugPolygon::buffer_packed_p(Stride stride)
 {
 	const PackedP2D& position = *m_Fickler.PackedP();
-	for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+	for (VertexBufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 	{
 		m_Renderable.vertexBufferData[i * stride	] = static_cast<GLfloat>(position.x);
 		m_Renderable.vertexBufferData[i * stride + 1] = static_cast<GLfloat>(position.y);
@@ -166,7 +166,7 @@ void DebugPolygon::buffer_packed_p(Stride stride)
 
 void DebugPolygon::buffer_packed_p_default(Stride stride)
 {
-	for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+	for (VertexBufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 	{
 		m_Renderable.vertexBufferData[i * stride	] = 0.0f;
 		m_Renderable.vertexBufferData[i * stride + 1] = 0.0f;
@@ -176,7 +176,7 @@ void DebugPolygon::buffer_packed_p_default(Stride stride)
 void DebugPolygon::buffer_packed_rs(Stride stride)
 {
 	const PackedRS2D& condensed_rs_matrix = *m_Fickler.PackedRS();
-	for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+	for (VertexBufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 	{
 		m_Renderable.vertexBufferData[i * stride + 2] = static_cast<GLfloat>(condensed_rs_matrix[0][0]);
 		m_Renderable.vertexBufferData[i * stride + 3] = static_cast<GLfloat>(condensed_rs_matrix[0][1]);
@@ -187,7 +187,7 @@ void DebugPolygon::buffer_packed_rs(Stride stride)
 
 void DebugPolygon::buffer_packed_rs_default(Stride stride)
 {
-	for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+	for (VertexBufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 	{
 		m_Renderable.vertexBufferData[i * stride + 2] = 1.0f;
 		m_Renderable.vertexBufferData[i * stride + 3] = 0.0f;
@@ -199,7 +199,7 @@ void DebugPolygon::buffer_packed_rs_default(Stride stride)
 void DebugPolygon::buffer_packed_m(Stride stride)
 {
 	const Modulate& color = *m_Fickler.PackedM();
-	for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+	for (VertexBufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 	{
 		m_Renderable.vertexBufferData[i * stride + 6] = static_cast<GLfloat>(color[0]);
 		m_Renderable.vertexBufferData[i * stride + 7] = static_cast<GLfloat>(color[1]);
@@ -210,7 +210,7 @@ void DebugPolygon::buffer_packed_m(Stride stride)
 
 void DebugPolygon::buffer_packed_m_default(Stride stride)
 {
-	for (BufferCounter i = 0; i < m_Renderable.vertexCount; i++)
+	for (VertexBufferCounter i = 0; i < m_Renderable.vertexCount; i++)
 	{
 		m_Renderable.vertexBufferData[i * stride + 6] = 1.0f;
 		m_Renderable.vertexBufferData[i * stride + 7] = 1.0f;

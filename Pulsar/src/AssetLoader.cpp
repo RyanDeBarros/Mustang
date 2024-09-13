@@ -482,14 +482,14 @@ LOAD_STATUS Loader::loadRenderable(const char* filepath, Renderable& renderable,
 		auto num_vertices = render["num_vertices"].value<int64_t>();
 		if (!vertex_array || !num_vertices)
 			return LOAD_STATUS::SYNTAX_ERR;
-		renderable.vertexCount = static_cast<BufferCounter>(num_vertices.value());
+		renderable.vertexCount = static_cast<VertexBufferCounter>(num_vertices.value());
 		if (!renderable.AttachVertexBuffer(vertex_array, Render::VertexBufferLayoutCount(renderable)))
 			return LOAD_STATUS::ASSET_LOAD_ERR;
 
 		auto index_array = render["indices"].as_array();
 		if (!index_array)
 			return LOAD_STATUS::SYNTAX_ERR;
-		renderable.indexCount = static_cast<BufferCounter>(index_array->size());
+		renderable.indexCount = static_cast<VertexBufferCounter>(index_array->size());
 		
 		if (!renderable.AttachIndexBuffer(index_array, renderable.indexCount))
 			return LOAD_STATUS::ASSET_LOAD_ERR;
