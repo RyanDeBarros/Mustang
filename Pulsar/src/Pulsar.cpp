@@ -6,6 +6,7 @@
 #include "RendererSettings.h"
 #include "Logger.inl"
 #include "Macros.h"
+#include "Window.h"
 #include "AssetLoader.h"
 #include "render/Renderer.h"
 #include "render/actors/TileMap.h"
@@ -30,55 +31,39 @@ real Pulsar::deltaDrawTime;
 real Pulsar::prevDrawTime;
 real Pulsar::totalDrawTime;
 
-static void window_refresh_callback(GLFWwindow* window)
+std::shared_ptr<Window> Pulsar::CreateWindow(const char* title, GLFWmonitor* monitor, GLFWwindow* share)
 {
-	Renderer::OnDraw();
-	PULSAR_TRY(glFinish()); // important, this waits until rendering result is actually visible, thus making resizing less ugly
+	return std::make_shared<Window>(static_cast<unsigned int>(_RendererSettings::initial_window_width),
+		static_cast<unsigned int>(_RendererSettings::initial_window_height), title, monitor, share);
 }
 
-static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+static void glfw_error_callback(int error, const char* description)
 {
-	// TODO
-	// If _RendererSettings::resize_mode is set to SCALE_IGNORE_ASPECT_RATIO, don't add anything.
-	// If it is set to SCALE_KEEP_ASPECT_RATIO, call new Renderer function that will scale objects as usual without stretching their aspect ratios.
-	// If it is set to NO_SCALE_KEEP_SIZE, call new Renderer function that will not scale objects - only display more of the scene.
-	// Also update frame in callback. Currently, animation is paused when resizing.
-	PULSAR_TRY(glViewport(0, 0, width, height));
-	Renderer::OnDraw();
+	Logger::LogErrorFatal(std::string("GLFW err(") + std::to_string(error) + "): " + description);
 }
 
-int Pulsar::StartUp(GLFWwindow*& window)
+int Pulsar::StartUp()
 {
 	if (!Loader::_LoadRendererSettings())
 		return -1;
 	if (!glfwInit())
 		return -1;
+	glfwSetErrorCallback(glfw_error_callback);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-	window = glfwCreateWindow((int)_RendererSettings::initial_window_width, (int)_RendererSettings::initial_window_height, "Pulsar Renderer", nullptr, nullptr);
-	if (!window)
-	{
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-	if (_RendererSettings::vsync_on)
-		glfwSwapInterval(1);
-	glfwSetWindowRefreshCallback(window, window_refresh_callback);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	if (glewInit() != GLEW_OK)
-	{
-		glfwTerminate();
-		return -1;
-	}
+	std::srand(static_cast<unsigned int>(time(0)));
+	return 0;
+}
+
+std::shared_ptr<Window> Pulsar::WelcomeWindow(const char* title)
+{
+	auto window = CreateWindow(title);
 	Logger::LogInfo("Welcome to Pulsar Renderer! GL_VERSION:");
 	PULSAR_TRY(Logger::LogInfo(reinterpret_cast<const char*>(glGetString(GL_VERSION))));
-	std::srand(static_cast<unsigned int>(time(0)));
 	Renderer::Init();
-	Renderer::FocusWindow(window);
-	return 0;
+	return window;
 }
 
 void Pulsar::Terminate()
@@ -102,7 +87,7 @@ void Pulsar::FrameStart(void(*frame_start)())
 		_frame_start = frame_start;
 }
 
-void Pulsar::Run(GLFWwindow* window)
+void Pulsar::Run(Window& window)
 {
 	prevDrawTime = drawTime = static_cast<real>(glfwGetTime());
 	deltaDrawTime = totalDrawTime = 0;
@@ -350,16 +335,13 @@ void Pulsar::Run(GLFWwindow* window)
 	
 	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 
-	// small delay
-	while (totalDrawTime < 0.01f)
-	{
-		drawTime = static_cast<real>(glfwGetTime());
-		deltaDrawTime = drawTime - prevDrawTime;
-		prevDrawTime = drawTime;
-		totalDrawTime += deltaDrawTime;
-		Renderer::_ForceRefresh();
-	}
-	for (;;)
+	// TODO put run() in Window?
+	drawTime = static_cast<real>(glfwGetTime());
+	deltaDrawTime = drawTime - prevDrawTime;
+	prevDrawTime = drawTime;
+	totalDrawTime += deltaDrawTime;
+	window.ForceRefresh();
+	for (glfwPollEvents(); window.ShouldNotClose(); glfwPollEvents())
 	{
 		drawTime = static_cast<real>(glfwGetTime());
 		deltaDrawTime = drawTime - prevDrawTime;
@@ -402,8 +384,6 @@ void Pulsar::Run(GLFWwindow* window)
 		}
 
 		Renderer::OnDraw();
-		glfwPollEvents();
-		if (glfwWindowShouldClose(window))
-			break;
+		window.ForceRefresh();
 	}
 }

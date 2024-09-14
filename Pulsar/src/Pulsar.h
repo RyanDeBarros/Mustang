@@ -7,7 +7,9 @@ typedef double real;
 typedef float real;
 #endif
 
-#include <GL/glew.h>
+#include <memory>
+
+#include "Window.h"
 
 typedef GLint TextureSlot;
 
@@ -15,7 +17,12 @@ struct GLFWwindow;
 
 namespace Pulsar
 {
-	int StartUp(GLFWwindow*&);
+	std::shared_ptr<Window> CreateWindow(const char* title, GLFWmonitor* monitor = nullptr, GLFWwindow* share = nullptr);
+	// #1
+	int StartUp();
+	// #2
+	std::shared_ptr<Window> WelcomeWindow(const char* title);
+	// #4
 	void Terminate();
 
 	extern real drawTime;
@@ -23,7 +30,8 @@ namespace Pulsar
 	extern real prevDrawTime;
 	extern real totalDrawTime;
 
+	// #3
+	void Run(class Window&);
 	void PostInit(void(*post_init)());
-	void Run(GLFWwindow*);
 	void FrameStart(void(*frame_start)());
 }

@@ -11,8 +11,6 @@ public:
 	static void Init();
 	static void Terminate();
 	static void OnDraw();
-	static void FocusWindow(struct GLFWwindow*);
-	static void _ForceRefresh();
 	static void _SetClearColor();
 	static void AddCanvasLayer(const CanvasLayerData&);
 	static void RemoveCanvasLayer(CanvasIndex);

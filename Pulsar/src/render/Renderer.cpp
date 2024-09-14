@@ -1,10 +1,10 @@
 #include "Renderer.h"
 
-#include <GLFW/glfw3.h>
 #include <map>
 
 #include "Macros.h"
 #include "Logger.inl"
+#include "Window.h"
 #include "registry/ShaderRegistry.h"
 #include "registry/TextureRegistry.h"
 #include "registry/UniformLexiconRegistry.h"
@@ -21,7 +21,6 @@
 #endif // PULSAR_CHECK_INITIALIZED
 
 std::map<CanvasIndex, CanvasLayer> Renderer::layers;
-GLFWwindow* focused_window;
 
 #if !PULSAR_ASSUME_INITIALIZED
 bool uninitialized = true;
@@ -59,18 +58,6 @@ void Renderer::OnDraw()
 	PULSAR_CHECK_INITIALIZED
 	for (auto& [z, layer] : layers)
 		layer.OnDraw();
-	_ForceRefresh();
-}
-
-void Renderer::FocusWindow(GLFWwindow* window)
-{
-	focused_window = window;
-}
-
-void Renderer::_ForceRefresh()
-{
-	glfwSwapBuffers(focused_window);
-	PULSAR_TRY(glClear(GL_COLOR_BUFFER_BIT));
 }
 
 void Renderer::_SetClearColor()
