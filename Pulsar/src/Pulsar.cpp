@@ -2,6 +2,7 @@
 #include "Pulsar.h"
 
 #include <glm/ext/scalar_constants.hpp>
+#include <functional>
 
 #include "RendererSettings.h"
 #include "Logger.inl"
@@ -24,17 +25,15 @@
 #include "render/transform/YSorter.h"
 #include "render/actors/NonantRender.h"
 
-using namespace Pulsar;
-
 real Pulsar::drawTime;
 real Pulsar::deltaDrawTime;
 real Pulsar::prevDrawTime;
 real Pulsar::totalDrawTime;
 
-std::shared_ptr<Window> Pulsar::CreateWindow(const char* title, GLFWmonitor* monitor, GLFWwindow* share)
+void Pulsar::CreateWindow(WindowHandle handle, const char* title, GLFWmonitor* monitor, GLFWwindow* share)
 {
-	return std::make_shared<Window>(static_cast<unsigned int>(_RendererSettings::initial_window_width),
-		static_cast<unsigned int>(_RendererSettings::initial_window_height), title, monitor, share);
+	WindowManager::RegisterWindow(handle, Window(static_cast<unsigned int>(_RendererSettings::initial_window_width),
+		static_cast<unsigned int>(_RendererSettings::initial_window_height), title, monitor, share));
 }
 
 static void glfw_error_callback(int error, const char* description)
@@ -42,7 +41,7 @@ static void glfw_error_callback(int error, const char* description)
 	Logger::LogErrorFatal(std::string("GLFW err(") + std::to_string(error) + "): " + description);
 }
 
-int Pulsar::StartUp()
+int Pulsar::StartUp(const char* title)
 {
 	if (!Loader::_LoadRendererSettings())
 		return -1;
@@ -54,16 +53,14 @@ int Pulsar::StartUp()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 	std::srand(static_cast<unsigned int>(time(0)));
-	return 0;
-}
 
-std::shared_ptr<Window> Pulsar::WelcomeWindow(const char* title)
-{
-	auto window = CreateWindow(title);
+	CreateWindow(0, title);
 	Logger::LogInfo("Welcome to Pulsar Renderer! GL_VERSION:");
 	PULSAR_TRY(Logger::LogInfo(reinterpret_cast<const char*>(glGetString(GL_VERSION))));
 	Renderer::Init();
-	return window;
+	Renderer::FocusWindow(0);
+
+	return 0;
 }
 
 void Pulsar::Terminate()
@@ -87,7 +84,9 @@ void Pulsar::FrameStart(void(*frame_start)())
 		_frame_start = frame_start;
 }
 
-void Pulsar::Run(Window& window)
+static std::function<void(void)> _frame_exec;
+
+void Pulsar::Run()
 {
 	prevDrawTime = drawTime = static_cast<real>(glfwGetTime());
 	deltaDrawTime = totalDrawTime = 0;
@@ -335,14 +334,7 @@ void Pulsar::Run(Window& window)
 	
 	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 
-	// TODO put run() in Window?
-	drawTime = static_cast<real>(glfwGetTime());
-	deltaDrawTime = drawTime - prevDrawTime;
-	prevDrawTime = drawTime;
-	totalDrawTime += deltaDrawTime;
-	window.ForceRefresh();
-	for (glfwPollEvents(); window.ShouldNotClose(); glfwPollEvents())
-	{
+	_frame_exec = [&]() {
 		drawTime = static_cast<real>(glfwGetTime());
 		deltaDrawTime = drawTime - prevDrawTime;
 		prevDrawTime = drawTime;
@@ -351,7 +343,7 @@ void Pulsar::Run(Window& window)
 		_frame_start();
 
 		nonant.SetNonantSize({ nonant.NTile().GetWidth() + 10 * glm::sin(totalDrawTime), nonant.NTile().GetHeight() + 10 * glm::cos(totalDrawTime) });
-		
+
 		*child.Fickler().Rotation() = -Pulsar::totalDrawTime;
 		*child2.Fickler().Rotation() = -Pulsar::totalDrawTime;
 		*grandchild.Fickler().Rotation() = Pulsar::totalDrawTime;
@@ -384,6 +376,21 @@ void Pulsar::Run(Window& window)
 		}
 
 		Renderer::OnDraw();
-		window.ForceRefresh();
-	}
+	};
+
+	// TODO put run() in Window?
+	drawTime = static_cast<real>(glfwGetTime());
+	deltaDrawTime = drawTime - prevDrawTime;
+	prevDrawTime = drawTime;
+	totalDrawTime += deltaDrawTime;
+	Window& window = *WindowManager::GetWindow(0);
+	window._ForceRefresh();
+
+	for (glfwPollEvents(); window.ShouldNotClose(); glfwPollEvents())
+		_ExecFrame();
+}
+
+void Pulsar::_ExecFrame()
+{
+	_frame_exec();
 }

@@ -1,7 +1,15 @@
 #pragma once
 
-/// Contains information about keycode, act
 class InputEvent
 {
 
 };
+
+class Window;
+
+namespace Input
+{
+
+	void AssignBasicCallbacks(Window&);
+
+}

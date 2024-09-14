@@ -21,6 +21,7 @@
 #endif // PULSAR_CHECK_INITIALIZED
 
 std::map<CanvasIndex, CanvasLayer> Renderer::layers;
+WindowHandle focused_window;
 
 #if !PULSAR_ASSUME_INITIALIZED
 bool uninitialized = true;
@@ -58,6 +59,12 @@ void Renderer::OnDraw()
 	PULSAR_CHECK_INITIALIZED
 	for (auto& [z, layer] : layers)
 		layer.OnDraw();
+	WindowManager::GetWindow(focused_window)->_ForceRefresh();
+}
+
+void Renderer::FocusWindow(WindowHandle window)
+{
+	focused_window = window;
 }
 
 void Renderer::_SetClearColor()

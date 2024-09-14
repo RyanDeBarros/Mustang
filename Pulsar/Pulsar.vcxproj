@@ -225,6 +225,7 @@
     <ClCompile Include="src\utils\Strings.cpp" />
     <ClCompile Include="src\utils\CommonMath.cpp" />
     <ClCompile Include="src\VendorInclude.cpp" />
+    <ClCompile Include="src\WindowManager.cpp" />
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
     <ClCompile Include="vendor\stb\stb_image.cpp" />
@@ -305,6 +306,7 @@
     <ClInclude Include="src\utils\Permutation.h" />
     <ClInclude Include="src\utils\Strings.h" />
     <ClInclude Include="src\utils\CommonMath.h" />
+    <ClInclude Include="src\WindowManager.h" />
     <ClInclude Include="vendor\glm\common.hpp" />
     <ClInclude Include="vendor\glm\detail\compute_common.hpp" />
     <ClInclude Include="vendor\glm\detail\compute_vector_decl.hpp" />

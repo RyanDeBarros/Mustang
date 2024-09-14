@@ -21,16 +21,13 @@ static void frame_start()
 
 int main()
 {
-	int startup = Pulsar::StartUp();
-	auto window = Pulsar::WelcomeWindow("Pulsar Renderer");
+	int startup = Pulsar::StartUp("Pulsar Renderer");
 	//window->SetPostInit(&post_init);
 	//window->SetFrameStart(&frame_start-);
 	// TODO PostInit and FrameStart should be methods on Window.
 	Pulsar::PostInit(&post_init);
 	Pulsar::FrameStart(&frame_start);
-
-	Pulsar::Run(*window);
-
+	Pulsar::Run();
 	Pulsar::Terminate();
 	return startup;
 }

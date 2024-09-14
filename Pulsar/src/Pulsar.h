@@ -7,9 +7,7 @@ typedef double real;
 typedef float real;
 #endif
 
-#include <memory>
-
-#include "Window.h"
+#include "WindowManager.h"
 
 typedef GLint TextureSlot;
 
@@ -17,12 +15,8 @@ struct GLFWwindow;
 
 namespace Pulsar
 {
-	std::shared_ptr<Window> CreateWindow(const char* title, GLFWmonitor* monitor = nullptr, GLFWwindow* share = nullptr);
-	// #1
-	int StartUp();
-	// #2
-	std::shared_ptr<Window> WelcomeWindow(const char* title);
-	// #4
+	void CreateWindow(WindowHandle handle, const char* title, GLFWmonitor* monitor = nullptr, GLFWwindow* share = nullptr);
+	int StartUp(const char* title);
 	void Terminate();
 
 	extern real drawTime;
@@ -31,7 +25,9 @@ namespace Pulsar
 	extern real totalDrawTime;
 
 	// #3
-	void Run(class Window&);
+	void Run();
 	void PostInit(void(*post_init)());
 	void FrameStart(void(*frame_start)());
+
+	void _ExecFrame();
 }

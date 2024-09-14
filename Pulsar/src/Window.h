@@ -23,6 +23,7 @@ public:
 	unsigned int GetHeight() const { return height; }
 
 	void Focus() const;
-	void ForceRefresh() const;
+	void _ForceRefresh() const;
 	bool ShouldNotClose() const { return !glfwWindowShouldClose(window); }
+	GLFWwindow* _GetInternal() { return window; }
 };
