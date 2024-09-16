@@ -10,6 +10,7 @@
 #include "registry/UniformLexiconRegistry.h"
 #include "registry/TileRegistry.h"
 #include "render/actors/RectRender.h"
+#include "Input.h"
 
 #ifndef PULSAR_CHECK_INITIALIZED
 #if PULSAR_ASSUME_INITIALIZED
@@ -36,6 +37,7 @@ void Renderer::Init()
 	TextureRegistry::Init();
 	UniformLexiconRegistry::Init();
 	TileRegistry::Init();
+	InputManager::Instance(); // TODO put somewhere else?
 	RectRender::DefineRectRenderable();
 	PULSAR_TRY(glEnable(GL_PROGRAM_POINT_SIZE));
 	_SetClearColor();
