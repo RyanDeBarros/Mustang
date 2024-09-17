@@ -345,12 +345,12 @@ void Pulsar::Run()
 				Logger::LogInfo("Click!");
 			}));
 	InputManager::Instance().DispatchMouseButton().Connect(InputSource::MouseButton(0, Input::MouseButton::Left, Input::Action::Release),
-		make_functor_ptr([](const InputEvent::MouseButton& event) {
+		[](const InputEvent::MouseButton& event) {
 			if (event.mods & GLFW_MOD_CONTROL)
 				Logger::LogInfo("Control release!");
 			else
 				Logger::LogInfo("Release!");
-			}));
+			});
 
 	_frame_exec = [&]() {
 		drawTime = static_cast<real>(glfwGetTime());

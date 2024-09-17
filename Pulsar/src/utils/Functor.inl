@@ -216,8 +216,41 @@ struct _FunctorEnclosure<Ret, void, void, _Storage, _ValueIn> : public _FunctorI
 
 struct null_functor_error : public std::exception
 {
-	null_functor_error() : std::exception("Tried to call null functor.") {}
+	null_functor_error(const char* message = "Tried to call null functor.") : std::exception(message) {}
 };
+
+template<typename Lambda>
+struct parse_function
+{
+	static constexpr unsigned char value = 0;
+};
+
+template<typename Ret, typename Arg, typename Cls>
+struct parse_function<Ret(*)(Arg, Cls)>
+{
+	static constexpr unsigned char value = 1;
+	using ret_type = Ret;
+	using arg_type = Arg;
+	using cls_type = Cls;
+};
+
+template<typename Ret, typename Par>
+struct parse_function<Ret(*)(Par)>
+{
+	static constexpr unsigned char value = 2;
+	using ret_type = Ret;
+	using par_type = Par;
+};
+
+template<typename Ret>
+struct parse_function<Ret(*)()>
+{
+	static constexpr unsigned char value = 3;
+	using ret_type = Ret;
+};
+
+template<typename Lambda>
+constexpr unsigned char parse_function_v = parse_function<Lambda>::value;
 
 template<typename Ret, typename Arg>
 class Functor
@@ -228,6 +261,7 @@ public:
 	using RetType = Ret;
 	using ArgType = Arg;
 
+	Functor() = default;
 	template<typename Cls, typename _Storage, bool _ValueIn>
 	Functor(_FunctorEnclosure<Ret, Arg, Cls, _Storage, _ValueIn>* f) : f(f) {}
 	Functor(_FunctorInterface<Ret, Arg>* f) : f(f) {}
@@ -237,7 +271,9 @@ public:
 			f = other.f->clone();
 	}
 	Functor(Functor<Ret, Arg>&& other) noexcept : f(other.f) { other.f = nullptr; }
-	Functor& operator=(const Functor<Ret, Arg>& other)
+	template<typename Func, typename = std::enable_if_t<std::is_invocable_r_v<Ret, Func, Arg> && !std::is_base_of_v<Functor<Ret, Arg>, std::decay_t<Func>>>>
+	Functor(Func&& func) : f(new _FunctorEnclosure<Ret, Arg, void, void>(std::forward<Func>(func))) {}
+	Functor<Ret, Arg>& operator=(const Functor<Ret, Arg>& other)
 	{
 		if (this == &other)
 			return *this;
@@ -249,7 +285,7 @@ public:
 			f = nullptr;
 		return *this;
 	}
-	Functor& operator=(Functor&& other) noexcept
+	Functor<Ret, Arg>& operator=(Functor<Ret, Arg>&& other) noexcept
 	{
 		if (this == &other)
 			return *this;
@@ -262,9 +298,11 @@ public:
 	~Functor() { if (f) delete f; }
 	Functor<Ret, Arg> clone() const
 	{
-		return f ? Functor<Ret, Arg>(f->clone()) : nullptr;
+		if (f)
+			return Functor<Ret, Arg>(f->clone());
+		else
+			throw null_functor_error("Tried to clone null functor.");
 	}
-
 	Ret operator()(Arg arg) const
 	{
 		if constexpr (std::is_void_v<Ret>)
@@ -303,6 +341,8 @@ public:
 			f = other.f->clone();
 	}
 	Functor(Functor<Ret, void>&& other) noexcept : f(other.f) { other.f = nullptr; }
+	template<typename Func, typename = std::enable_if_t<std::is_invocable_r_v<Ret, Func> && !std::is_base_of_v<Functor<Ret, void>, std::decay_t<Func>>>>
+	Functor(Func&& func) : f(new _FunctorEnclosure<Ret, void, void, void>(std::forward<Func>(func))) {}
 	Functor& operator=(const Functor<Ret, void>& other)
 	{
 		if (this == &other)
@@ -328,7 +368,10 @@ public:
 	~Functor() { if (f) delete f; }
 	Functor<Ret, void> clone() const
 	{
-		return f ? Functor<Ret, void>(f->clone()) : nullptr;
+		if (f)
+			return Functor<Ret, void>(f->clone());
+		else
+			throw null_functor_error("Tried to clone null functor.");
 	}
 
 	Ret operator()() const
@@ -362,39 +405,6 @@ constexpr bool is_functor_ptr_v = is_functor_ptr<T>::value;
 
 template<typename T>
 constexpr bool decays_to_functor_ptr_v = is_functor_ptr_v<std::decay_t<T>>;
-
-template<typename Lambda>
-struct parse_function
-{
-	static constexpr unsigned char value = 0;
-};
-
-template<typename Ret, typename Arg, typename Cls>
-struct parse_function<Ret(*)(Arg, Cls)>
-{
-	static constexpr unsigned char value = 1;
-	using ret_type = Ret;
-	using arg_type = Arg;
-	using cls_type = Cls;
-};
-
-template<typename Ret, typename Par>
-struct parse_function<Ret(*)(Par)>
-{
-	static constexpr unsigned char value = 2;
-	using ret_type = Ret;
-	using par_type = Par;
-};
-
-template<typename Ret>
-struct parse_function<Ret(*)()>
-{
-	static constexpr unsigned char value = 3;
-	using ret_type = Ret;
-};
-
-template<typename Lambda>
-constexpr unsigned char parse_function_v = parse_function<Lambda>::value;
 
 // TODO rename make_functor_ptr to make_functor
 
