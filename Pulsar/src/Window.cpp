@@ -1,49 +1,13 @@
 #include "Window.h"
 
 #include "Macros.h"
-#include "Input.h"
+#include "InputManager.h"
 #include "render/Renderer.h"
-
-Window::Window(unsigned int width, unsigned int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share)
-{
-	window = glfwCreateWindow(width, height, title, monitor, share);
-	if (!window)
-		throw WindowException("glfwCreateWindow() failed in Window constructor.");
-	Focus();
-	if (_RendererSettings::vsync_on)
-		glfwSwapInterval(1);
-	Input::AssignBasicCallbacks(*this);
-	if (glewInit() != GLEW_OK)
-	{
-		glfwDestroyWindow(window);
-		window = nullptr;
-		throw WindowException("glewInit() failed in Window constructor.");
-	}
-}
-
-void Window::Focus() const
-{
-	glfwMakeContextCurrent(window);
-}
-
-void Window::_ForceRefresh() const
-{
-	glfwSwapBuffers(window);
-	PULSAR_TRY(glClear(GL_COLOR_BUFFER_BIT));
-}
-
-// TODO for all these _Callback()s, call all connected input event handlers.
-
 
 static void default_window_refresh()
 {
 	Pulsar::_ExecFrame();
 	PULSAR_TRY(glFinish());
-}
-
-void Window::_CallbackWindowRefresh()
-{
-	default_window_refresh();
 }
 
 static void default_window_resize(int width, int height)
@@ -56,55 +20,38 @@ static void default_window_resize(int width, int height)
 	Pulsar::_ExecFrame();
 }
 
-void Window::_CallbackWindowResize(int width, int height)
+Window::Window(unsigned int width, unsigned int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share)
 {
-	default_window_resize(width, height);
+	window = glfwCreateWindow(width, height, title, monitor, share);
+	if (!window)
+		throw WindowException("glfwCreateWindow() failed in Window constructor.");
+	Focus();
+	if (_RendererSettings::vsync_on)
+		glfwSwapInterval(1);
+	InputManager::Instance().AssignWindowCallbacks(*this);
+	if (glewInit() != GLEW_OK)
+	{
+		glfwDestroyWindow(window);
+		window = nullptr;
+		throw WindowException("glewInit() failed in Window constructor.");
+	}
 }
 
-void Window::_CallbackWindowClose()
+void Window::_Register(WindowHandle handle)
 {
+	InputManager::Instance().DispatchWindowRefresh().Connect({ handle },
+		make_functor_ptr([](const InputEvent::WindowRefresh& wr) { default_window_refresh(); }));
+	InputManager::Instance().DispatchWindowResize().Connect({ handle },
+		make_functor_ptr([](const InputEvent::WindowResize& wr) { default_window_resize(wr.width, wr.height); }));
 }
 
-void Window::_CallbackWindowContentScale(float sx, float sy)
+void Window::Focus() const
 {
+	glfwMakeContextCurrent(window);
 }
 
-void Window::_CallbackWindowFocus(bool focused)
+void Window::_ForceRefresh() const
 {
-}
-
-void Window::_CallbackWindowIconify(bool iconified)
-{
-}
-
-void Window::_CallbackWindowMaximize(bool maximized)
-{
-}
-
-void Window::_CallbackWindowPos(int x, int y)
-{
-}
-
-void Window::_CallbackCursorEnter(bool entered)
-{
-}
-
-void Window::_CallbackCursorPos(double x, double y)
-{
-}
-
-void Window::_CallbackPathDrop(int path_count, const char** paths)
-{
-}
-
-void Window::_CallbackKey(int key, int scancode, int action, int mods)
-{
-}
-
-void Window::_CallbackMouseButton(int button, int action, int mods)
-{
-}
-
-void Window::_CallbackScroll(double xoff, double yoff)
-{
+	glfwSwapBuffers(window);
+	PULSAR_TRY(glClear(GL_COLOR_BUFFER_BIT));
 }

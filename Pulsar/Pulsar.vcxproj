@@ -164,10 +164,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="sandbox\CHRS.cpp" />
     <ClCompile Include="sandbox\Sandbox.cpp" />
     <ClCompile Include="src\AssetLoader.cpp" />
+    <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\registry\compound\Atlas.cpp" />
     <ClCompile Include="src\registry\compound\NonantTile.cpp" />
     <ClCompile Include="src\registry\Tile.cpp" />
@@ -211,7 +211,9 @@
     <ClCompile Include="src\render\transform\Modulate.cpp" />
     <ClCompile Include="src\render\transform\Transform.cpp" />
     <ClCompile Include="src\render\transform\Transforms.cpp" />
+    <ClInclude Include="src\EventDispatcher.inl" />
     <ClInclude Include="src\Input.h" />
+    <ClInclude Include="src\InputManager.h" />
     <ClInclude Include="src\registry\compound\NonantTile.h" />
     <ClInclude Include="src\render\actors\NonantRender.h" />
     <ClInclude Include="src\render\transform\YSorter.h" />

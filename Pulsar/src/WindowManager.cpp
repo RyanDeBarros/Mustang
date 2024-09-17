@@ -8,6 +8,7 @@ bool WindowManager::RegisterWindow(WindowHandle handle, Window&& window)
 	auto iter = windows.find(handle);
 	if (iter == windows.end())
 	{
+		window._Register(handle);
 		windows.insert({ handle, std::move(window) });
 		lookup.insert({ window._GetInternal(), handle });
 		return true;
@@ -25,6 +26,15 @@ Window* WindowManager::_GetWindow(GLFWwindow* window)
 {
 	auto iter = lookup.find(window);
 	return iter != lookup.end() ? &windows[iter->second] : nullptr;
+}
+
+bool WindowManager::_GetHandle(GLFWwindow* window, WindowHandle& handle)
+{
+	auto iter = lookup.find(window);
+	if (iter == lookup.end())
+		return false;
+	handle = iter->second;
+	return true;
 }
 
 void WindowManager::IterateOverWindows(const Functor<void, const Window&>& func)

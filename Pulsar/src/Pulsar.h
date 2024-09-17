@@ -7,11 +7,11 @@ typedef double real;
 typedef float real;
 #endif
 
-#include "WindowManager.h"
+#include "VendorInclude.h"
+#include "Handles.inl"
 
+// TODO recreate typedefs file?
 typedef GLint TextureSlot;
-
-struct GLFWwindow;
 
 namespace Pulsar
 {

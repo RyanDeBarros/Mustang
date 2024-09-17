@@ -49,6 +49,7 @@ public:
 	using HandlerID = EventDispatcher<DestinationEvent>::HandlerID;
 	using Handler = EventDispatcher<DestinationEvent>::Handler;
 
+	EventBucketDispatcher(const Separator& separator) : separator(separator) {}
 	EventBucketDispatcher(Separator&& separator) : separator(std::move(separator)) {}
 
 	void Emit(const SourceEvent& e)

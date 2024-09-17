@@ -24,6 +24,8 @@
 #include "render/actors/anim/KeyFrames.inl"
 #include "render/transform/YSorter.h"
 #include "render/actors/NonantRender.h"
+#include "WindowManager.h"
+#include "InputManager.h"
 
 real Pulsar::drawTime;
 real Pulsar::deltaDrawTime;
@@ -333,6 +335,22 @@ void Pulsar::Run()
 	nonant.SetPivot({ 0.3f, 0.3f });
 	
 	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
+
+	// TODO make MODS enum in Input
+	InputManager::Instance().DispatchMouseButton().Connect(InputSource::MouseButton(0, Input::MouseButton::Left, Input::Action::Press),
+		make_functor_ptr([](const InputEvent::MouseButton& event) {
+			if (event.mods & GLFW_MOD_CONTROL)
+				Logger::LogInfo("Control click!");
+			else
+				Logger::LogInfo("Click!");
+			}));
+	InputManager::Instance().DispatchMouseButton().Connect(InputSource::MouseButton(0, Input::MouseButton::Left, Input::Action::Release),
+		make_functor_ptr([](const InputEvent::MouseButton& event) {
+			if (event.mods & GLFW_MOD_CONTROL)
+				Logger::LogInfo("Control release!");
+			else
+				Logger::LogInfo("Release!");
+			}));
 
 	_frame_exec = [&]() {
 		drawTime = static_cast<real>(glfwGetTime());

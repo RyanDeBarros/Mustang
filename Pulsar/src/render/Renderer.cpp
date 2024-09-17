@@ -10,7 +10,7 @@
 #include "registry/UniformLexiconRegistry.h"
 #include "registry/TileRegistry.h"
 #include "render/actors/RectRender.h"
-#include "Input.h"
+#include "InputManager.h"
 
 #ifndef PULSAR_CHECK_INITIALIZED
 #if PULSAR_ASSUME_INITIALIZED

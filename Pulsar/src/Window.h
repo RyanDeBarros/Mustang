@@ -2,9 +2,11 @@
 
 #include <glm/glm.hpp>
 #include <stdexcept>
+#include <vector>
 
 #include "VendorInclude.h"
 #include "utils/Functor.inl"
+#include "Input.h"
 
 // TODO use std::runtime_error instead of std::exception
 struct WindowException : public std::runtime_error
@@ -27,23 +29,9 @@ public:
 	glm::ivec2 GetSize() const { int width; int height; glfwGetWindowSize(window, &width, &height); return { width, height }; }
 	void OperateWindow(const Functor<void, GLFWwindow&>& op) { op(*window); }
 
+	void _Register(WindowHandle);
 	void Focus() const;
 	void _ForceRefresh() const;
 	bool ShouldNotClose() const { return !glfwWindowShouldClose(window); }
 	GLFWwindow* _GetInternal() { return window; }
-
-	void _CallbackWindowRefresh();
-	void _CallbackWindowResize(int width, int height);
-	void _CallbackWindowClose();
-	void _CallbackWindowContentScale(float sx, float sy);
-	void _CallbackWindowFocus(bool focused);
-	void _CallbackWindowIconify(bool iconified);
-	void _CallbackWindowMaximize(bool maximized);
-	void _CallbackWindowPos(int x, int y);
-	void _CallbackCursorEnter(bool entered);
-	void _CallbackCursorPos(double x, double y);
-	void _CallbackPathDrop(int path_count, const char** paths);
-	void _CallbackKey(int key, int scancode, int action, int mods);
-	void _CallbackMouseButton(int button, int action, int mods);
-	void _CallbackScroll(double xoff, double yoff);
 };

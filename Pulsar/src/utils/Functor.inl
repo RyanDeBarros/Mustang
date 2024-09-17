@@ -358,10 +358,10 @@ template<typename Ret, typename Arg>
 struct is_functor_ptr<Functor<Ret, Arg>> : public std::true_type {};
 
 template<typename T>
-inline constexpr bool is_functor_ptr_v = is_functor_ptr<T>::value;
+constexpr bool is_functor_ptr_v = is_functor_ptr<T>::value;
 
 template<typename T>
-inline constexpr bool decays_to_functor_ptr_v = is_functor_ptr_v<std::decay_t<T>>;
+constexpr bool decays_to_functor_ptr_v = is_functor_ptr_v<std::decay_t<T>>;
 
 template<typename Lambda>
 struct parse_function
@@ -394,7 +394,9 @@ struct parse_function<Ret(*)()>
 };
 
 template<typename Lambda>
-inline constexpr unsigned char parse_function_v = parse_function<Lambda>::value;
+constexpr unsigned char parse_function_v = parse_function<Lambda>::value;
+
+// TODO rename make_functor_ptr to make_functor
 
 template<bool _ValueIn, bool _ReferExternal = true>
 inline auto make_functor_ptr(auto f, auto&& closure) requires (!_ValueIn)
