@@ -86,12 +86,13 @@ static void path_drop_callback(GLFWwindow* window, int path_count, const char** 
 
 static void joystick_callback(int jid, int event)
 {
-	InputManager::Instance().DispatchControllerConnect().Emit({ jid, static_cast<bool>(event) });
+	InputManager::Instance().DispatchControllerConnect().Emit({ static_cast<Input::ControllerID>(jid), static_cast<bool>(event) });
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	WindowHandle handle;
+	// TODO also have regular event dispatcher that emits generic InputSource so that key can then be checked in handler. Similar in other callbacks
 	if (WindowManager::_GetHandle(window, handle))
 		InputManager::Instance().DispatchKey().Emit({ handle, static_cast<Input::Key>(key), static_cast<Input::Action>(action), scancode, mods });
 }
@@ -116,22 +117,22 @@ static void scroll_callback(GLFWwindow* window, double xoff, double yoff)
 }
 
 InputManager::InputManager()
-	: h_WindowClose(InputData::WindowClose::Separator),
-	h_WindowContentScale(InputData::WindowContentScale::Separator),
-	h_WindowFocus(InputData::WindowFocus::Separator),
-	h_WindowIconify(InputData::WindowIconify::Separator),
-	h_WindowMaximize(InputData::WindowMaximize::Separator),
-	h_WindowPos(InputData::WindowPos::Separator),
-	h_WindowRefresh(InputData::WindowRefresh::Separator),
-	h_WindowResize(InputData::WindowResize::Separator),
-	h_CursorEnter(InputData::CursorEnter::Separator),
-	h_CursorPos(InputData::CursorPos::Separator),
-	h_PathDrop(InputData::PathDrop::Separator),
-	h_ControllerConnect(InputData::ControllerConnect::Separator),
-	h_Key(InputData::Key::Separator),
-	h_MonitorConnect(InputData::MonitorConnect::Separator),
-	h_MouseButton(InputData::MouseButton::Separator),
-	h_Scroll(InputData::Scroll::Separator)
+	: h_WindowClose(InputSource::WindowClose::Separator),
+	h_WindowContentScale(InputSource::WindowContentScale::Separator),
+	h_WindowFocus(InputSource::WindowFocus::Separator),
+	h_WindowIconify(InputSource::WindowIconify::Separator),
+	h_WindowMaximize(InputSource::WindowMaximize::Separator),
+	h_WindowPos(InputSource::WindowPos::Separator),
+	h_WindowRefresh(InputSource::WindowRefresh::Separator),
+	h_WindowResize(InputSource::WindowResize::Separator),
+	h_CursorEnter(InputSource::CursorEnter::Separator),
+	h_CursorPos(InputSource::CursorPos::Separator),
+	h_PathDrop(InputSource::PathDrop::Separator),
+	h_ControllerConnect(InputSource::ControllerConnect::Separator),
+	h_Key(InputSource::Key::Separator),
+	h_MonitorConnect(InputSource::MonitorConnect::Separator),
+	h_MouseButton(InputSource::MouseButton::Separator),
+	h_Scroll(InputSource::Scroll::Separator)
 {
 	glfwSetJoystickCallback(joystick_callback);
 	glfwSetMonitorCallback(monitor_callback);

@@ -338,16 +338,16 @@ void Pulsar::Run()
 	Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
 	// TODO make MODS enum in Input
-	InputManager::Instance().DispatchMouseButton().Connect(InputSource::MouseButton(0, Input::MouseButton::Left, Input::Action::Press),
+	InputManager::Instance().DispatchMouseButton().Connect(InputBucket::MouseButton(0, Input::MouseButton::LEFT, Input::Action::PRESS),
 		[](const InputEvent::MouseButton& event) {
-			if (event.mods & GLFW_MOD_CONTROL)
+			if (event.mods & Input::Mod::CONTROL)
 				Logger::LogInfo("Control click!");
 			else
 				Logger::LogInfo("Click!");
 			});
-	InputManager::Instance().DispatchMouseButton().Connect(InputSource::MouseButton(0, Input::MouseButton::Left, Input::Action::Release),
+	InputManager::Instance().DispatchMouseButton().Connect(InputBucket::MouseButton(0, Input::MouseButton::LEFT, Input::Action::RELEASE),
 		[](const InputEvent::MouseButton& event) {
-			if (event.mods & GLFW_MOD_CONTROL)
+			if (event.mods & Input::Mod::CONTROL)
 				Logger::LogInfo("Control release!");
 			else
 				Logger::LogInfo("Release!");
