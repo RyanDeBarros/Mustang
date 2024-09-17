@@ -58,8 +58,8 @@ struct AnimationTrack : public AnimationTrackBase<_Target>
 	static constexpr auto equalitor = [](const _KeyFrame& a, const _KeyFrame& b) -> bool { return a.timepoint == b.timepoint; };
 
 	std::vector<_KeyFrame> keyFrames;
-	Functor<void, void> callback = VoidFunctor;
-	Functor<_Property*, _Target*> getProperty = make_functor_ptr([](_Target*) -> _Property* { return nullptr; });
+	Functor<void, void> callback = []() {};
+	Functor<_Property*, _Target*> getProperty = [](_Target*) -> _Property* { return nullptr; };
 
 	AnimationTrack() = default;
 	

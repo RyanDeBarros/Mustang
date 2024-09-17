@@ -77,7 +77,7 @@ inline auto vec2_expand(auto&& fx, auto&& fy) requires (decays_to_functor_ptr_v<
 	using fxt = std::decay_t<decltype(fx)>;
 	using fyt = std::decay_t<decltype(fy)>;
 	using cls = std::tuple<fxt, fyt>;
-	return make_functor_ptr<false>([](Arg arg, const cls& tuple) -> Ret {
+	return make_functor<false>([](Arg arg, const cls& tuple) -> Ret {
 		return Ret{ static_cast<RetComp>(std::get<0>(tuple)(static_cast<fxt::ArgType>(arg))), static_cast<RetComp>(std::get<1>(tuple)(static_cast<fyt::ArgType>(arg))) };
 	}, cls(forward(fx), forward(fy)));
 }
@@ -89,7 +89,7 @@ inline auto vec2_compwise(auto&& fx, auto&& fy) requires (decays_to_functor_ptr_
 	using fxt = std::decay_t<decltype(fx)>;
 	using fyt = std::decay_t<decltype(fy)>;
 	using cls = std::tuple<fxt, fyt>;
-	return make_functor_ptr<false>([](const glm::vec<2, ArgComp>& arg, const cls& tuple) -> Ret {
+	return make_functor<false>([](const glm::vec<2, ArgComp>& arg, const cls& tuple) -> Ret {
 		return Ret{ static_cast<RetComp>(std::get<0>(tuple)(static_cast<fxt::ArgType>(arg[0]))), static_cast<RetComp>(std::get<1>(tuple)(static_cast<fyt::ArgType>(arg[1])))};
 	}, cls(forward(fx), forward(fy)));
 }
@@ -100,7 +100,7 @@ inline auto vec2_each(auto&& f) requires (decays_to_functor_ptr_v<decltype(f)>)
 	using Ret = glm::vec<2, RetComp>;
 	using ft = std::decay_t<decltype(f)>;
 	using cls = Functor<ft::RetType, ft::ArgType>;
-	return make_functor_ptr<false>([](const glm::vec<2, ArgComp>& arg, const cls& f) -> Ret {
+	return make_functor<false>([](const glm::vec<2, ArgComp>& arg, const cls& f) -> Ret {
 		return Ret{ static_cast<RetComp>(f(static_cast<ft::ArgType>(arg[0]))), static_cast<RetComp>(f(static_cast<ft::ArgType>(arg[1]))) };
 	}, forward(f));
 }
@@ -111,7 +111,7 @@ inline Functor<Ret, Arg> func_sum(auto&& f1, auto&& f2) requires (decays_to_func
 	using f1t = std::decay_t<decltype(f1)>;
 	using f2t = std::decay_t<decltype(f2)>;
 	using cls = std::tuple<f1t, f2t>;
-	return make_functor_ptr<false>([](Arg arg, const cls& tuple) -> Ret {
+	return make_functor<false>([](Arg arg, const cls& tuple) -> Ret {
 		return static_cast<Ret>(std::get<0>(tuple)(static_cast<f1t::ArgType>(arg)) + std::get<1>(tuple)(static_cast<f2t::ArgType>(arg)));
 	}, cls(forward(f1), forward(f2)));
 }
@@ -122,7 +122,7 @@ inline Functor<Ret, Arg> func_mul(auto&& f1, auto&& f2) requires (decays_to_func
 	using f1t = std::decay_t<decltype(f1)>;
 	using f2t = std::decay_t<decltype(f2)>;
 	using cls = std::tuple<f1t, f2t>;
-	return make_functor_ptr<false>([](Arg arg, const cls& tuple) -> Ret {
+	return make_functor<false>([](Arg arg, const cls& tuple) -> Ret {
 		return static_cast<Ret>(std::get<0>(tuple)(static_cast<f1t::ArgType>(arg)) * std::get<1>(tuple)(static_cast<f2t::ArgType>(arg)));
 	}, cls(forward(f1), forward(f2)));
 }
@@ -134,7 +134,7 @@ inline Functor<Ret, Arg> func_compose(auto&& f1, auto&& f2) requires (decays_to_
 	using f1t = std::decay_t<decltype(f1)>;
 	using f2t = std::decay_t<decltype(f2)>;
 	using cls = std::tuple<f1t, f2t>;
-	return make_functor_ptr<false>([](Arg arg, const cls& tuple) -> Ret {
+	return make_functor<false>([](Arg arg, const cls& tuple) -> Ret {
 		return static_cast<Ret>(std::get<1>(tuple)(static_cast<f2t::ArgType>(std::get<0>(tuple)(static_cast<f1t::ArgType>(arg)))));
 	}, cls(forward(f1), forward(f2)));
 }
@@ -147,7 +147,7 @@ inline Functor<Ret, Arg> func_conditional(auto&& condition, auto&& true_case, au
 	using true_t = std::decay_t<decltype(true_case)>;
 	using false_t = std::decay_t<decltype(false_case)>;
 	using cls = std::tuple<cond_t, true_t, false_t>;
-	return make_functor_ptr<false>([](Arg arg, const cls& tuple) -> Ret {
+	return make_functor<false>([](Arg arg, const cls& tuple) -> Ret {
 		if constexpr (std::is_void_v<Ret>)
 		{
 			if (std::get<0>(tuple)(static_cast<cond_t::ArgType>(arg)))

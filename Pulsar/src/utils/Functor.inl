@@ -272,7 +272,7 @@ public:
 	}
 	Functor(Functor<Ret, Arg>&& other) noexcept : f(other.f) { other.f = nullptr; }
 	template<typename Func, typename = std::enable_if_t<std::is_invocable_r_v<Ret, Func, Arg> && !std::is_base_of_v<Functor<Ret, Arg>, std::decay_t<Func>>>>
-	Functor(Func&& func) : f(new _FunctorEnclosure<Ret, Arg, void, void>(std::forward<Func>(func))) {}
+	Functor(Func func) : f(new _FunctorEnclosure<Ret, Arg, void, void>(func)) {}
 	Functor<Ret, Arg>& operator=(const Functor<Ret, Arg>& other)
 	{
 		if (this == &other)
@@ -342,7 +342,7 @@ public:
 	}
 	Functor(Functor<Ret, void>&& other) noexcept : f(other.f) { other.f = nullptr; }
 	template<typename Func, typename = std::enable_if_t<std::is_invocable_r_v<Ret, Func> && !std::is_base_of_v<Functor<Ret, void>, std::decay_t<Func>>>>
-	Functor(Func&& func) : f(new _FunctorEnclosure<Ret, void, void, void>(std::forward<Func>(func))) {}
+	Functor(Func func) : f(new _FunctorEnclosure<Ret, void, void, void>(func)) {}
 	Functor& operator=(const Functor<Ret, void>& other)
 	{
 		if (this == &other)
@@ -409,7 +409,7 @@ constexpr bool decays_to_functor_ptr_v = is_functor_ptr_v<std::decay_t<T>>;
 // TODO rename make_functor_ptr to make_functor
 
 template<bool _ValueIn, bool _ReferExternal = true>
-inline auto make_functor_ptr(auto f, auto&& closure) requires (!_ValueIn)
+inline auto make_functor(auto f, auto&& closure) requires (!_ValueIn)
 {
 	using Func = decltype(+f);
 	constexpr auto parse_v = parse_function_v<Func>;
@@ -452,7 +452,7 @@ inline auto make_functor_ptr(auto f, auto&& closure) requires (!_ValueIn)
 }
 
 template<bool _ValueIn>
-inline auto make_functor_ptr(auto f, auto closure) requires (_ValueIn)
+inline auto make_functor(auto f, auto closure) requires (_ValueIn)
 {
 	using Func = decltype(+f);
 	constexpr auto parse_v = parse_function_v<Func>;
@@ -478,7 +478,7 @@ inline auto make_functor_ptr(auto f, auto closure) requires (_ValueIn)
 	}
 }
 
-inline auto make_functor_ptr(auto f)
+inline auto make_functor(auto f)
 {
 	using Func = decltype(+f);
 	constexpr auto parse_v = parse_function_v<Func>;
@@ -496,5 +496,3 @@ inline auto make_functor_ptr(auto f)
 		return Functor<Ret, void>(new _FunctorEnclosure<Ret, void, void, void, true>(f));
 	}
 }
-
-inline Functor<void, void> VoidFunctor = make_functor_ptr([]() {});

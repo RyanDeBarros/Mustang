@@ -270,8 +270,8 @@ void Pulsar::Run()
 	Fickler2D* serotoninPRL = &serotonin.Primitive()->Fickler();
 	using AnimTrack1T = AnimationTrack<AnimActorPrimitive2D, Position2D, KF_Assign<Position2D>, Interp::Linear>;
 	AnimTrack1T animTrack1;
-	animTrack1.getProperty = make_functor_ptr([](AnimActorPrimitive2D* anim) { return anim->Primitive()->Fickler().Position(); });
-	animTrack1.callback = make_functor_ptr<true>([](Fickler2D* trf) { trf->SyncP(); }, serotoninPRL);
+	animTrack1.getProperty = [](AnimActorPrimitive2D* anim) { return anim->Primitive()->Fickler().Position(); };
+	animTrack1.callback = make_functor<true>([](Fickler2D* trf) { trf->SyncP(); }, serotoninPRL);
 	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.0f, { 0.0f, 100.0f }));
 	animTrack1.SetOrInsert(KF_Assign<Position2D>(0.5f, { 300.0f, 0.0f }));
 	animTrack1.SetOrInsert(KF_Assign<Position2D>(1.0f, { 0.0f, -100.0f }));
@@ -281,8 +281,8 @@ void Pulsar::Run()
 
 	using AnimTrack2T = AnimationTrack<AnimActorPrimitive2D, Modulate, KF_Assign<Modulate>, Interp::Linear>;
 	AnimTrack2T animTrack2;
-	animTrack2.getProperty = make_functor_ptr([](AnimActorPrimitive2D* anim) { return anim->Primitive()->Fickler().Modulate(); });
-	animTrack2.callback = make_functor_ptr<true>([](Fickler2D* trf) { trf->SyncM(); }, serotoninPRL);
+	animTrack2.getProperty = [](AnimActorPrimitive2D* anim) { return anim->Primitive()->Fickler().Modulate(); };
+	animTrack2.callback = make_functor<true>([](Fickler2D* trf) { trf->SyncM(); }, serotoninPRL);
 	animTrack2.SetOrInsert(KF_Assign<Modulate>(0.0f, Colors::WHITE));
 	animTrack2.SetOrInsert(KF_Assign<Modulate>(0.5f, Colors::BLUE));
 	animTrack2.SetOrInsert(KF_Assign<Modulate>(1.0f, Colors::GREEN));
@@ -297,11 +297,11 @@ void Pulsar::Run()
 
 	using AnimEventTrackT = AnimationTrack<void, void, KF_Event<void>, Interp::Constant>;
 	AnimEventTrackT animEventTrack;
-	animEventTrack.SetOrInsert(KF_Event<void>(0.0f, make_functor_ptr([](void*) { Logger::LogInfo("0 seconds!"); })));
-	animEventTrack.SetOrInsert(KF_Event<void>(0.5f, make_functor_ptr([](void*) { Logger::LogInfo("0.5 seconds!"); })));
-	animEventTrack.SetOrInsert(KF_Event<void>(1.0f, make_functor_ptr([](void*) { Logger::LogInfo("1 seconds!"); })));
-	animEventTrack.SetOrInsert(KF_Event<void>(1.5f, make_functor_ptr([](void*) { Logger::LogInfo("1.5 seconds!"); })));
-	animEventTrack.SetOrInsert(KF_Event<void>(2.0f, make_functor_ptr([](void*) { Logger::LogInfo("2 seconds!"); })));
+	animEventTrack.SetOrInsert(KF_Event<void>(0.0f, [](void*) { Logger::LogInfo("0 seconds!"); }));
+	animEventTrack.SetOrInsert(KF_Event<void>(0.5f, [](void*) { Logger::LogInfo("0.5 seconds!"); }));
+	animEventTrack.SetOrInsert(KF_Event<void>(1.0f, [](void*) { Logger::LogInfo("1 seconds!"); }));
+	animEventTrack.SetOrInsert(KF_Event<void>(1.5f, [](void*) { Logger::LogInfo("1.5 seconds!"); }));
+	animEventTrack.SetOrInsert(KF_Event<void>(2.0f, [](void*) { Logger::LogInfo("2 seconds!"); }));
 	animPlayerEvents.tracks.push_back(CopyPtr(animEventTrack));
 
 	Renderer::GetCanvasLayer(11)->OnDetach(&root);
@@ -335,15 +335,16 @@ void Pulsar::Run()
 	nonant.SetPivot({ 0.3f, 0.3f });
 	
 	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
+	Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
 	// TODO make MODS enum in Input
 	InputManager::Instance().DispatchMouseButton().Connect(InputSource::MouseButton(0, Input::MouseButton::Left, Input::Action::Press),
-		make_functor_ptr([](const InputEvent::MouseButton& event) {
+		[](const InputEvent::MouseButton& event) {
 			if (event.mods & GLFW_MOD_CONTROL)
 				Logger::LogInfo("Control click!");
 			else
 				Logger::LogInfo("Click!");
-			}));
+			});
 	InputManager::Instance().DispatchMouseButton().Connect(InputSource::MouseButton(0, Input::MouseButton::Left, Input::Action::Release),
 		[](const InputEvent::MouseButton& event) {
 			if (event.mods & GLFW_MOD_CONTROL)

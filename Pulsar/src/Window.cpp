@@ -40,9 +40,9 @@ Window::Window(unsigned int width, unsigned int height, const char* title, GLFWm
 void Window::_Register(WindowHandle handle)
 {
 	InputManager::Instance().DispatchWindowRefresh().Connect({ handle },
-		make_functor_ptr([](const InputEvent::WindowRefresh& wr) { default_window_refresh(); }));
+		[](const InputEvent::WindowRefresh& wr) { default_window_refresh(); });
 	InputManager::Instance().DispatchWindowResize().Connect({ handle },
-		make_functor_ptr([](const InputEvent::WindowResize& wr) { default_window_resize(wr.width, wr.height); }));
+		[](const InputEvent::WindowResize& wr) { default_window_resize(wr.width, wr.height); });
 }
 
 void Window::Focus() const

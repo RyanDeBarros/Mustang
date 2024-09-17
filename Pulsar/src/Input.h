@@ -200,8 +200,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::Window, InputEvent::WindowClose, InputData::WindowClose>;
 		static const sep_t Separator;
 	};
-	inline const InputData::WindowClose::sep_t InputData::WindowClose::Separator = make_functor_ptr([](const InputData::WindowClose& d)
-		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowClose{}); });
+	inline const InputData::WindowClose::sep_t InputData::WindowClose::Separator = [](const InputData::WindowClose& d)
+		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowClose{}); };
 	struct WindowContentScale
 	{
 		WindowHandle window;
@@ -210,8 +210,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::Window, InputEvent::WindowContentScale, InputData::WindowContentScale>;
 		static const sep_t Separator;
 	};
-	inline const InputData::WindowContentScale::sep_t InputData::WindowContentScale::Separator = make_functor_ptr([](const InputData::WindowContentScale& d)
-		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowContentScale{ d.sx, d.sy }); });
+	inline const InputData::WindowContentScale::sep_t InputData::WindowContentScale::Separator = [](const InputData::WindowContentScale& d)
+		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowContentScale{ d.sx, d.sy }); };
 	struct WindowFocus
 	{
 		WindowHandle window;
@@ -219,8 +219,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::Window, InputEvent::WindowFocus, InputData::WindowFocus>;
 		static const sep_t Separator;
 	};
-	inline const InputData::WindowFocus::sep_t InputData::WindowFocus::Separator = make_functor_ptr([](const InputData::WindowFocus& d)
-		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowFocus{ d.focused }); });
+	inline const InputData::WindowFocus::sep_t InputData::WindowFocus::Separator = [](const InputData::WindowFocus& d)
+		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowFocus{ d.focused }); };
 	struct WindowIconify
 	{
 		WindowHandle window;
@@ -228,8 +228,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::Window, InputEvent::WindowIconify, InputData::WindowIconify>;
 		static const sep_t Separator;
 	};
-	inline const InputData::WindowIconify::sep_t InputData::WindowIconify::Separator = make_functor_ptr([](const InputData::WindowIconify& d)
-		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowIconify{ d.iconified }); });
+	inline const InputData::WindowIconify::sep_t InputData::WindowIconify::Separator = [](const InputData::WindowIconify& d)
+		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowIconify{ d.iconified }); };
 	struct WindowMaximize
 	{
 		WindowHandle window;
@@ -237,8 +237,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::Window, InputEvent::WindowMaximize, InputData::WindowMaximize>;
 		static const sep_t Separator;
 	};
-	inline const InputData::WindowMaximize::sep_t InputData::WindowMaximize::Separator = make_functor_ptr([](const InputData::WindowMaximize& d)
-		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowMaximize{ d.maximized }); });
+	inline const InputData::WindowMaximize::sep_t InputData::WindowMaximize::Separator = [](const InputData::WindowMaximize& d)
+		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowMaximize{ d.maximized }); };
 	struct WindowPos
 	{
 		WindowHandle window;
@@ -247,16 +247,16 @@ namespace InputData
 		using sep_t = input_separator<InputSource::Window, InputEvent::WindowPos, InputData::WindowPos>;
 		static const sep_t Separator;
 	};
-	inline const InputData::WindowPos::sep_t InputData::WindowPos::Separator = make_functor_ptr([](const InputData::WindowPos& d)
-		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowPos{ d.x, d.y }); });
+	inline const InputData::WindowPos::sep_t InputData::WindowPos::Separator = [](const InputData::WindowPos& d)
+		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowPos{ d.x, d.y }); };
 	struct WindowRefresh
 	{
 		WindowHandle window;
 		using sep_t = input_separator<InputSource::Window, InputEvent::WindowRefresh, InputData::WindowRefresh>;
 		static const sep_t Separator;
 	};
-	inline const InputData::WindowRefresh::sep_t InputData::WindowRefresh::Separator = make_functor_ptr([](const InputData::WindowRefresh& d)
-		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowRefresh{}); });
+	inline const InputData::WindowRefresh::sep_t InputData::WindowRefresh::Separator = [](const InputData::WindowRefresh& d)
+		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowRefresh{}); };
 	struct WindowResize
 	{
 		WindowHandle window;
@@ -265,8 +265,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::Window, InputEvent::WindowResize, InputData::WindowResize>;
 		static const sep_t Separator;
 	};
-	inline const InputData::WindowResize::sep_t InputData::WindowResize::Separator = make_functor_ptr([](const InputData::WindowResize& d)
-		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowResize{ d.width, d.height }); });
+	inline const InputData::WindowResize::sep_t InputData::WindowResize::Separator = [](const InputData::WindowResize& d)
+		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::WindowResize{ d.width, d.height }); };
 	struct CursorEnter
 	{
 		WindowHandle window;
@@ -274,8 +274,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::Window, InputEvent::CursorEnter, InputData::CursorEnter>;
 		static const sep_t Separator;
 	};
-	inline const InputData::CursorEnter::sep_t InputData::CursorEnter::Separator = make_functor_ptr([](const InputData::CursorEnter& d)
-		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::CursorEnter{ d.entered }); });
+	inline const InputData::CursorEnter::sep_t InputData::CursorEnter::Separator = [](const InputData::CursorEnter& d)
+		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::CursorEnter{ d.entered }); };
 	struct CursorPos
 	{
 		WindowHandle window;
@@ -284,8 +284,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::Window, InputEvent::CursorPos, InputData::CursorPos>;
 		static const sep_t Separator;
 	};
-	inline const InputData::CursorPos::sep_t InputData::CursorPos::Separator = make_functor_ptr([](const InputData::CursorPos& d)
-		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::CursorPos{ d.x, d.y }); });
+	inline const InputData::CursorPos::sep_t InputData::CursorPos::Separator = [](const InputData::CursorPos& d)
+		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::CursorPos{ d.x, d.y }); };
 	struct PathDrop
 	{
 		WindowHandle window;
@@ -293,8 +293,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::Window, InputEvent::PathDrop, InputData::PathDrop>;
 		static const sep_t Separator;
 	};
-	inline const InputData::PathDrop::sep_t InputData::PathDrop::Separator = make_functor_ptr([](const InputData::PathDrop& d)
-		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::PathDrop{ d.paths }); });
+	inline const InputData::PathDrop::sep_t InputData::PathDrop::Separator = [](const InputData::PathDrop& d)
+		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::PathDrop{ d.paths }); };
 	struct ControllerConnect
 	{
 		ControllerID jid;
@@ -302,8 +302,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::ControllerConnect, InputEvent::ControllerConnect, InputData::ControllerConnect>;
 		static const sep_t Separator;
 	};
-	inline const InputData::ControllerConnect::sep_t InputData::ControllerConnect::Separator = make_functor_ptr([](const InputData::ControllerConnect& d)
-		{ return std::make_pair(InputSource::ControllerConnect{ d.jid, d.connected }, InputEvent::ControllerConnect{}); });
+	inline const InputData::ControllerConnect::sep_t InputData::ControllerConnect::Separator = [](const InputData::ControllerConnect& d)
+		{ return std::make_pair(InputSource::ControllerConnect{ d.jid, d.connected }, InputEvent::ControllerConnect{}); };
 	struct Key
 	{
 		WindowHandle window;
@@ -314,8 +314,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::Key, InputEvent::Key, InputData::Key>;
 		static const sep_t Separator;
 	};
-	inline const InputData::Key::sep_t InputData::Key::Separator = make_functor_ptr([](const InputData::Key& d)
-		{ return std::make_pair(InputSource::Key{ d.window, d.key, d.action }, InputEvent::Key{ d.scancode, d.mods }); });
+	inline const InputData::Key::sep_t InputData::Key::Separator = [](const InputData::Key& d)
+		{ return std::make_pair(InputSource::Key{ d.window, d.key, d.action }, InputEvent::Key{ d.scancode, d.mods }); };
 	struct MonitorConnect
 	{
 		GLFWmonitor* monitor = nullptr;
@@ -323,8 +323,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::MonitorConnect, InputEvent::MonitorConnect, InputData::MonitorConnect>;
 		static const sep_t Separator;
 	};
-	inline const InputData::MonitorConnect::sep_t InputData::MonitorConnect::Separator = make_functor_ptr([](const InputData::MonitorConnect& d)
-		{ return std::make_pair(InputSource::MonitorConnect{ d.monitor, d.connected }, InputEvent::MonitorConnect{}); });
+	inline const InputData::MonitorConnect::sep_t InputData::MonitorConnect::Separator = [](const InputData::MonitorConnect& d)
+		{ return std::make_pair(InputSource::MonitorConnect{ d.monitor, d.connected }, InputEvent::MonitorConnect{}); };
 	struct MouseButton
 	{
 		WindowHandle window;
@@ -334,8 +334,8 @@ namespace InputData
 		using sep_t = input_separator<InputSource::MouseButton, InputEvent::MouseButton, InputData::MouseButton>;
 		static const sep_t Separator;
 	};
-	inline const InputData::MouseButton::sep_t InputData::MouseButton::Separator = make_functor_ptr([](const InputData::MouseButton& d)
-		{ return std::make_pair(InputSource::MouseButton{ d.window, d.button, d.action }, InputEvent::MouseButton{ d.mods }); });
+	inline const InputData::MouseButton::sep_t InputData::MouseButton::Separator = [](const InputData::MouseButton& d)
+		{ return std::make_pair(InputSource::MouseButton{ d.window, d.button, d.action }, InputEvent::MouseButton{ d.mods }); };
 	struct Scroll
 	{
 		WindowHandle window;
@@ -344,6 +344,6 @@ namespace InputData
 		using sep_t = input_separator<InputSource::Window, InputEvent::Scroll, InputData::Scroll>;
 		static const sep_t Separator;
 	};
-	inline const InputData::Scroll::sep_t InputData::Scroll::Separator = make_functor_ptr([](const InputData::Scroll& d)
-		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::Scroll{ d.xoff, d.yoff }); });
+	inline const InputData::Scroll::sep_t InputData::Scroll::Separator = [](const InputData::Scroll& d)
+		{ return std::make_pair(InputSource::Window{ d.window }, InputEvent::Scroll{ d.xoff, d.yoff }); };
 }
