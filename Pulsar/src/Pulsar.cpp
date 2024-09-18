@@ -337,7 +337,6 @@ void Pulsar::Run()
 	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 	Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
-	// TODO make MODS enum in Input
 	InputManager::Instance().DispatchMouseButton().Connect(InputBucket::MouseButton(0, Input::MouseButton::LEFT, Input::Action::PRESS),
 		[](const InputEvent::MouseButton& event) {
 			if (event.mods & Input::Mod::CONTROL)

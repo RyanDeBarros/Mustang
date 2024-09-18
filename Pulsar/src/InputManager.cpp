@@ -140,6 +140,10 @@ InputManager::InputManager()
 
 void InputManager::AssignWindowCallbacks(Window& window)
 {
+	// TODO do these: These callbacks should be used for text input.
+	glfwSetCharCallback;
+	glfwSetCharModsCallback;
+
 	glfwSetWindowCloseCallback(window._GetInternal(), window_close_callback);
 	glfwSetWindowContentScaleCallback(window._GetInternal(), window_content_scale_callback);
 	glfwSetWindowFocusCallback(window._GetInternal(), window_focus_callback);
@@ -157,4 +161,112 @@ void InputManager::AssignWindowCallbacks(Window& window)
 	glfwSetKeyCallback(window._GetInternal(), key_callback);
 	glfwSetMouseButtonCallback(window._GetInternal(), mouse_button_callback);
 	glfwSetScrollCallback(window._GetInternal(), scroll_callback);
+}
+
+Input::Action InputManager::GetKey(Input::Key key, WindowHandle window)
+{
+	return static_cast<Input::Action>(glfwGetKey(WindowManager::GetWindow(window)->_GetInternal(), static_cast<int>(key)));
+}
+
+Input::Action InputManager::GetMouseButton(Input::MouseButton mb, WindowHandle window)
+{
+	return static_cast<Input::Action>(glfwGetMouseButton(WindowManager::GetWindow(window)->_GetInternal(), static_cast<int>(mb)));
+}
+
+Input::Action InputManager::GetKeySafe(Input::Key key, WindowHandle window)
+{
+	if (auto win = WindowManager::GetWindow(window))
+		return static_cast<Input::Action>(glfwGetKey(win->_GetInternal(), static_cast<int>(key)));
+	else
+		throw WindowException("Window handle (" + std::to_string(window) + ") does not exist.");
+}
+
+Input::Action InputManager::GetMouseButtonSafe(Input::MouseButton mb, WindowHandle window)
+{
+	if (auto win = WindowManager::GetWindow(window))
+		return static_cast<Input::Action>(glfwGetMouseButton(win->_GetInternal(), static_cast<int>(mb)));
+	else
+		throw WindowException("Window handle (" + std::to_string(window) + ") does not exist.");
+}
+
+Input::Action InputManager::GetControllerButton(Input::Gamepad::Button button, Input::ControllerID jid)
+{
+	int count;
+	return static_cast<Input::Action>(glfwGetJoystickButtons(static_cast<int>(jid), &count)[static_cast<int>(button)]);
+}
+
+float InputManager::GetControllerAxis(Input::Gamepad::Axis axis, Input::ControllerID jid)
+{
+	int count;
+	return glfwGetJoystickAxes(static_cast<int>(jid), &count)[static_cast<int>(axis)];
+}
+
+Input::Action InputManager::GetControllerButtonSafe(Input::Gamepad::Button button, Input::ControllerID jid)
+{
+	int count;
+	unsigned char const* buttons = glfwGetJoystickButtons(static_cast<int>(jid), &count);
+	if (count > static_cast<int>(button))
+		return static_cast<Input::Action>(buttons[static_cast<int>(button)]);
+	else
+		throw InputException("Controller (" + std::to_string(static_cast<int>(jid)) + ") is not connected, the button ("
+			+ std::to_string(static_cast<int>(button)) + ") is not supported, or a GLFW error occurred.");
+}
+
+float InputManager::GetControllerAxisSafe(Input::Gamepad::Axis axis, Input::ControllerID jid)
+{
+	int count;
+	float const* axes = glfwGetJoystickAxes(static_cast<int>(jid), &count);
+	if (count > static_cast<int>(axis))
+		return axes[static_cast<int>(axis)];
+	else
+		throw InputException("Controller (" + std::to_string(static_cast<int>(jid)) + ") is not connected, the axis ("
+			+ std::to_string(static_cast<int>(axis)) + ") is not supported, or a GLFW error occurred.");
+}
+
+bool InputManager::IsControllerConnected(Input::ControllerID jid)
+{
+	return static_cast<bool>(glfwJoystickPresent(static_cast<int>(jid))) == GLFW_TRUE;
+}
+
+bool InputManager::IsControllerGamepad(Input::ControllerID jid)
+{
+	return static_cast<bool>(glfwJoystickIsGamepad(static_cast<int>(jid))) == GLFW_TRUE;
+}
+
+Input::Gamepad::HatDirection InputManager::GetDPad(Input::ControllerID jid, int dpad)
+{
+	int count;
+	return static_cast<Input::Gamepad::HatDirection>(glfwGetJoystickHats(static_cast<int>(jid), &count)[dpad]);
+}
+
+Input::Gamepad::HatDirection InputManager::GetDPadSafe(Input::ControllerID jid, int dpad)
+{
+	int count;
+	unsigned char const* hats = glfwGetJoystickHats(static_cast<int>(jid), &count);
+	if (count > dpad)
+		return static_cast<Input::Gamepad::HatDirection>(hats[dpad]);
+	else
+		throw InputException("Controller (" + std::to_string(static_cast<int>(jid)) + ") is not connected, the dpad ("
+			+ std::to_string(static_cast<int>(dpad)) + ") is not supported, or a GLFW error occurred.");
+}
+
+Input::Gamepad::State InputManager::GetFullGamepadState(Input::ControllerID jid)
+{
+	GLFWgamepadstate state;
+	glfwGetGamepadState(static_cast<int>(jid), &state);
+	return Input::Gamepad::State(state);
+}
+
+Input::Gamepad::State InputManager::GetFullGamepadStateSafe(Input::ControllerID jid)
+{
+	GLFWgamepadstate state;
+	if (glfwGetGamepadState(static_cast<int>(jid), &state))
+		return Input::Gamepad::State(state);
+	else
+		throw InputException("Controller (" + std::to_string(static_cast<int>(jid)) + ") is not connected, or a GLFW error occurred.");
+}
+
+bool InputManager::LoadGamepadMapping(const char* mapping)
+{
+	return static_cast<bool>(glfwUpdateGamepadMappings(mapping));
 }

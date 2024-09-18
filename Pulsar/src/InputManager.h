@@ -18,6 +18,21 @@ public:
 	}
 
 	void AssignWindowCallbacks(Window&);
+	Input::Action GetKey(Input::Key key, WindowHandle window = 0);
+	Input::Action GetMouseButton(Input::MouseButton mb, WindowHandle window = 0);
+	Input::Action GetKeySafe(Input::Key key, WindowHandle window = 0);
+	Input::Action GetMouseButtonSafe(Input::MouseButton mb, WindowHandle window = 0);
+	Input::Action GetControllerButton(Input::Gamepad::Button button, Input::ControllerID jid = Input::ControllerID::J1);
+	float GetControllerAxis(Input::Gamepad::Axis axis, Input::ControllerID jid = Input::ControllerID::J1);
+	Input::Action GetControllerButtonSafe(Input::Gamepad::Button button, Input::ControllerID jid = Input::ControllerID::J1);
+	float GetControllerAxisSafe(Input::Gamepad::Axis axis, Input::ControllerID jid = Input::ControllerID::J1);
+	bool IsControllerConnected(Input::ControllerID jid = Input::ControllerID::J1);
+	bool IsControllerGamepad(Input::ControllerID jid = Input::ControllerID::J1);
+	Input::Gamepad::HatDirection GetDPad(Input::ControllerID jid = Input::ControllerID::J1, int dpad = 0);
+	Input::Gamepad::HatDirection GetDPadSafe(Input::ControllerID jid = Input::ControllerID::J1, int dpad = 0);
+	Input::Gamepad::State GetFullGamepadState(Input::ControllerID jid = Input::ControllerID::J1);
+	Input::Gamepad::State GetFullGamepadStateSafe(Input::ControllerID jid = Input::ControllerID::J1);
+	bool LoadGamepadMapping(const char* mapping);
 
 private:
 	EventBucketDispatcher<InputSource::WindowClose, InputEvent::WindowClose, InputBucket::Window> h_WindowClose;

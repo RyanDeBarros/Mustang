@@ -8,6 +8,11 @@
 #include "Handles.inl"
 #include "utils/Functor.inl"
 
+struct InputException : public std::runtime_error
+{
+	InputException(const std::string& err_msg = "Input error occured.") : std::runtime_error(err_msg) {}
+};
+
 namespace Input
 {
 	enum class Key
@@ -135,6 +140,16 @@ namespace Input
 		WORLD_2 = GLFW_KEY_WORLD_2,
 	};
 
+	inline const char* get_key_name(Input::Key key, int scancode = 0)
+	{
+		return glfwGetKeyName(static_cast<int>(key), scancode);
+	}
+
+	inline int get_scancode(Input::Key key)
+	{
+		return glfwGetKeyScancode(static_cast<int>(key));
+	}
+
 	enum class MouseButton
 	{
 		LEFT = GLFW_MOUSE_BUTTON_LEFT,
@@ -151,7 +166,7 @@ namespace Input
 	{
 		PRESS = GLFW_PRESS,
 		RELEASE = GLFW_RELEASE,
-		REPEAT = GLFW_REPEAT
+		DOWN = GLFW_REPEAT
 	};
 
 	enum class ControllerID
@@ -203,6 +218,45 @@ namespace Input
 			LEFT_TRIGGER = GLFW_GAMEPAD_AXIS_LEFT_TRIGGER,
 			RIGHT_TRIGGER = GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER
 		};
+		enum class HatDirection
+		{
+			U = GLFW_HAT_UP,
+			R = GLFW_HAT_RIGHT,
+			D = GLFW_HAT_DOWN,
+			L = GLFW_HAT_LEFT,
+			RU = GLFW_HAT_RIGHT_UP,
+			LU = GLFW_HAT_LEFT_UP,
+			RD = GLFW_HAT_RIGHT_DOWN,
+			LD = GLFW_HAT_LEFT_DOWN,
+			C = GLFW_HAT_CENTERED,
+		};
+		class State
+		{
+			GLFWgamepadstate state;
+
+		public:
+			State(const GLFWgamepadstate& state) : state(state) {}
+
+			Input::Action GetButton(Input::Gamepad::Button button) const
+			{
+				return static_cast<Input::Action>(state.buttons[static_cast<int>(button)]);
+			}
+
+			float GetAxis(Input::Gamepad::Axis axis) const
+			{
+				return state.axes[static_cast<int>(axis)];
+			}
+		};
+	}
+
+	inline const char* get_joystick_name(Input::ControllerID jid)
+	{
+		return glfwGetJoystickName(static_cast<int>(jid));
+	}
+
+	inline const char* get_gamepad_name(Input::ControllerID jid)
+	{
+		return glfwGetGamepadName(static_cast<int>(jid));
 	}
 
 	enum class Mod
