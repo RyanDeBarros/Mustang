@@ -13,7 +13,7 @@ static void default_window_refresh()
 static void default_window_resize(int width, int height)
 {
 	// TODO
-	// If _RendererSettings::resize_mode is set to SCALE_IGNORE_ASPECT_RATIO, don't add anything.
+	// If _PulsarSettings::resize_mode is set to SCALE_IGNORE_ASPECT_RATIO, don't add anything.
 	// If it is set to SCALE_KEEP_ASPECT_RATIO, call new Renderer function that will scale objects as usual without stretching their aspect ratios.
 	// If it is set to NO_SCALE_KEEP_SIZE, call new Renderer function that will not scale objects - only display more of the scene.
 	PULSAR_TRY(glViewport(0, 0, width, height));
@@ -26,7 +26,7 @@ Window::Window(unsigned int width, unsigned int height, const char* title, GLFWm
 	if (!window)
 		throw WindowException("glfwCreateWindow() failed in Window constructor.");
 	Focus();
-	if (_RendererSettings::vsync_on)
+	if (_PulsarSettings::vsync_on)
 		glfwSwapInterval(1);
 	InputManager::Instance().AssignWindowCallbacks(*this);
 	if (glewInit() != GLEW_OK)

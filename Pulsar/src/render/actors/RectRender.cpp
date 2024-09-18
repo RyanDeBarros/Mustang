@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "RendererSettings.h"
+#include "PulsarSettings.h"
 #include "AssetLoader.h"
 #include "Logger.inl"
 #include "utils/Data.inl"
@@ -54,7 +54,7 @@ RectRender& RectRender::operator=(RectRender&& other) noexcept
 
 void RectRender::DefineRectRenderable()
 {
-	LOAD_STATUS load_status = Loader::loadRenderable(_RendererSettings::rect_renderable_filepath.c_str(), rect_renderable);
+	LOAD_STATUS load_status = Loader::loadRenderable(_PulsarSettings::rect_renderable_filepath.c_str(), rect_renderable);
 	if (load_status != LOAD_STATUS::OK)
 		Logger::LogErrorFatal("Could not load rect renderable. Load Status = " + std::to_string(static_cast<int>(load_status)));
 }

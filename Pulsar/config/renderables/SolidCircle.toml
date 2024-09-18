@@ -3,7 +3,7 @@ header = "renderable"
 [renderable.model]
 layout = 0b11111101
 mask = 0b1111
-shader = "config/SolidCircleShader.toml"
+shader = "config/shaders/SolidCircleShader.toml"
 
 [renderable]
 # condensed P-transform (2) | condensed RS-transform (4) | RGBA color (4) | vertex position + local bounds position (4)

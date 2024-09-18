@@ -5,17 +5,18 @@ width = 1440
 height = 1080
 gl_clear_color = [0.08, 0.08, 0.08, 0.0]
 vsync_on = true
+sdl_gamecontrollerdb = "config/sdl-gamecontrollerdb/gamecontrollerdb.txt"
 
 [rendering]
 max_texture_slots = 32
 standard_vertex_pool_size = 2048
 standard_index_pool_size = 1024
 # config/StandardShader<max_texture_slots>.toml
-standard_shader = "config/StandardShader32.toml"
-solid_polygon_shader = "config/SolidPolygonShader.toml"
-rect_renderable = "config/RectRenderable.toml"
-solid_polygon = "config/SolidPolygon.toml"
-solid_point = "config/SolidPoint.toml"
-solid_circle = "config/SolidCircle.toml"
+standard_shader = "config/shaders/StandardShader32.toml"
+solid_polygon_shader = "config/shaders/SolidPolygonShader.toml"
+rect_renderable = "config/renderables/RectRenderable.toml"
+solid_polygon = "config/renderables/SolidPolygon.toml"
+solid_point = "config/renderables/SolidPoint.toml"
+solid_circle = "config/renderables/SolidCircle.toml"
 
 particle_frame_length = 0.0167

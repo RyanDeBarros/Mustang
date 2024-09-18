@@ -8,7 +8,7 @@
 
 #include <glm/glm.hpp>
 
-#include "RendererSettings.h"
+#include "PulsarSettings.h"
 #include "ActorRenderBase.h"
 #include "LayerView.h"
 #include "Renderable.h"
@@ -24,9 +24,9 @@ struct CanvasLayerData
 	GLenum sourceBlend, destBlend;
 	int pLeft, pRight, pBottom, pTop;
 	VertexSize maxVertexPoolSize, maxIndexPoolSize;
-	CanvasLayerData(CanvasIndex ci, VertexSize max_vertex_pool_size = _RendererSettings::standard_vertex_pool_size, VertexSize max_index_pool_size = _RendererSettings::standard_index_pool_size)
+	CanvasLayerData(CanvasIndex ci, VertexSize max_vertex_pool_size = _PulsarSettings::standard_vertex_pool_size, VertexSize max_index_pool_size = _PulsarSettings::standard_index_pool_size)
 		: ci(ci), enableGLBlend(true), sourceBlend(GL_SRC_ALPHA), destBlend(GL_ONE_MINUS_SRC_ALPHA),
-		pLeft(0), pRight(_RendererSettings::initial_window_width), pBottom(0), pTop(_RendererSettings::initial_window_height),
+		pLeft(0), pRight(_PulsarSettings::initial_window_width), pBottom(0), pTop(_PulsarSettings::initial_window_height),
 		maxVertexPoolSize(max_vertex_pool_size), maxIndexPoolSize(max_index_pool_size)
 	{}
 };

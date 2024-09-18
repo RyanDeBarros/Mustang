@@ -2,4 +2,4 @@ header = "shader"
 
 [shader]
 vertex = "config/shaders/Standard.vert"
-fragment = "res/shaders/custom32.frag"
+fragment = "config/shaders/Standard32.frag"

@@ -4,13 +4,12 @@
 
 #include "Macros.h"
 #include "Logger.inl"
-#include "Window.h"
 #include "registry/ShaderRegistry.h"
 #include "registry/TextureRegistry.h"
 #include "registry/UniformLexiconRegistry.h"
 #include "registry/TileRegistry.h"
 #include "render/actors/RectRender.h"
-#include "InputManager.h"
+#include "platform/InputManager.h"
 
 #ifndef PULSAR_CHECK_INITIALIZED
 #if PULSAR_ASSUME_INITIALIZED
@@ -71,7 +70,7 @@ void Renderer::FocusWindow(WindowHandle window)
 
 void Renderer::_SetClearColor()
 {
-	PULSAR_TRY(glClearColor(_RendererSettings::gl_clear_color[0], _RendererSettings::gl_clear_color[1], _RendererSettings::gl_clear_color[2], _RendererSettings::gl_clear_color[3]));
+	PULSAR_TRY(glClearColor(_PulsarSettings::gl_clear_color[0], _PulsarSettings::gl_clear_color[1], _PulsarSettings::gl_clear_color[2], _PulsarSettings::gl_clear_color[3]));
 }
 
 void Renderer::AddCanvasLayer(const CanvasLayerData& data)

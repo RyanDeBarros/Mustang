@@ -1,6 +1,6 @@
-#include "RendererSettings.h"
+#include "PulsarSettings.h"
 
-namespace _RendererSettings
+namespace _PulsarSettings
 {
 	const char* settings_filepath = "config/Renderer.toml";
 
@@ -20,4 +20,6 @@ namespace _RendererSettings
 	std::string solid_circle_filepath = "config/SolidCircle.toml";
 
 	real particle_frame_length = 0.0167f;
+
+	std::string sdl_gamecontrollerdb = "config/sdl-gamecontrollerdb/gamecontrollerdb.txt";
 }

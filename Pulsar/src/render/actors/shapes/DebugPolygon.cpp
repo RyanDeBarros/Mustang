@@ -9,7 +9,7 @@ DebugPolygon::DebugPolygon(const std::vector<glm::vec2>& points, GLenum indexing
 {
 	m_Fickler.SetNotification(m_Notification);
 	BindBufferFuncs();
-	Loader::loadRenderable(_RendererSettings::solid_polygon_filepath.c_str(), m_Renderable);
+	Loader::loadRenderable(_PulsarSettings::solid_polygon_filepath.c_str(), m_Renderable);
 	SetIndexingMode(indexing_mode);
 	PointsRef() = points;
 }

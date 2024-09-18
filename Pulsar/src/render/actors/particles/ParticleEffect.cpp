@@ -1,7 +1,7 @@
 #include "ParticleEffect.h"
 
 #include "Pulsar.h"
-#include "RendererSettings.h"
+#include "PulsarSettings.h"
 
 // TODO eventually, create factory for particle effects?
 
@@ -38,10 +38,10 @@ void ParticleEffect::OnUpdate()
 	if (!paused)
 	{
 		m_LeftoverDT += Pulsar::deltaDrawTime;
-		if (m_LeftoverDT >= _RendererSettings::particle_frame_length)
+		if (m_LeftoverDT >= _PulsarSettings::particle_frame_length)
 		{
-			m_DeltaTime = _RendererSettings::particle_frame_length;
-			m_LeftoverDT -= _RendererSettings::particle_frame_length;
+			m_DeltaTime = _PulsarSettings::particle_frame_length;
+			m_LeftoverDT -= _PulsarSettings::particle_frame_length;
 		}
 		else
 		{

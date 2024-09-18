@@ -8,7 +8,7 @@
 #include <fstream>
 
 #include "Logger.inl"
-#include "RendererSettings.h"
+#include "PulsarSettings.h"
 #include "registry/ShaderRegistry.h"
 #include "registry/TextureRegistry.h"
 #include "registry/UniformLexiconRegistry.h"
@@ -39,61 +39,64 @@ static LOAD_STATUS verify_header(const toml::v3::ex::parse_result& file, const c
 	else return LOAD_STATUS::SYNTAX_ERR;
 }
 
+// TODO load pulsar settings in PulsarSettings? Make PulsarSettings a class singleton, with its constructor doing this loading. That way the values can be read-only.
 bool Loader::_LoadRendererSettings()
 {
 	try
 	{
-		auto file = toml::parse_file(_RendererSettings::settings_filepath);
+		auto file = toml::parse_file(_PulsarSettings::settings_filepath);
 		if (verify_header(file, "renderer") != LOAD_STATUS::OK)
 		{
-			Logger::LogErrorFatal("Cannot parse renderer settings file. \"" + std::string(_RendererSettings::settings_filepath) + "\" does not have the proper header.");
+			Logger::LogErrorFatal("Cannot parse pulsar settings file. \"" + std::string(_PulsarSettings::settings_filepath) + "\" does not have the proper header.");
 			return false;
 		}
 
 		if (auto window = file["window"])
 		{
 			if (auto width = window["width"].value<int64_t>())
-				_RendererSettings::initial_window_width = static_cast<int>(width.value());
+				_PulsarSettings::initial_window_width = static_cast<int>(width.value());
 			if (auto height = window["height"].value<int64_t>())
-				_RendererSettings::initial_window_height = static_cast<int>(height.value());
+				_PulsarSettings::initial_window_height = static_cast<int>(height.value());
 			if (auto gl_clear_color = window["gl_clear_color"].as_array())
 			{
-				_RendererSettings::gl_clear_color = {
+				_PulsarSettings::gl_clear_color = {
 					gl_clear_color->get_as<double>(0)->get(), gl_clear_color->get_as<double>(1)->get(),
 					gl_clear_color->get_as<double>(2)->get(), gl_clear_color->get_as<double>(3)->get()
 				};
 			}
 			if (auto vsync_on = window["vsync_on"].value<bool>())
-				_RendererSettings::vsync_on = vsync_on.value();
+				_PulsarSettings::vsync_on = vsync_on.value();
+			if (auto sdlgcdb = window["sdl_gamecontrollerdb"].value<std::string>())
+				_PulsarSettings::sdl_gamecontrollerdb = sdlgcdb.value();
 		}
 		if (auto rendering = file["rendering"])
 		{
 			if (auto max_texture_slots = rendering["max_texture_slots"].value<int64_t>())
-				_RendererSettings::max_texture_slots = static_cast<TextureSlot>(max_texture_slots.value());
+				_PulsarSettings::max_texture_slots = static_cast<TextureSlot>(max_texture_slots.value());
 			if (auto standard_vertex_pool_size = rendering["standard_vertex_pool_size"].value<int64_t>())
-				_RendererSettings::standard_vertex_pool_size = static_cast<VertexSize>(standard_vertex_pool_size.value());
+				_PulsarSettings::standard_vertex_pool_size = static_cast<VertexSize>(standard_vertex_pool_size.value());
 			if (auto standard_index_pool_size = rendering["standard_index_pool_size"].value<int64_t>())
-				_RendererSettings::standard_index_pool_size = static_cast<VertexSize>(standard_index_pool_size.value());
+				_PulsarSettings::standard_index_pool_size = static_cast<VertexSize>(standard_index_pool_size.value());
 			if (auto standard_shader_filepath = rendering["standard_shader"].value<std::string>())
-				_RendererSettings::standard_shader_assetfile = standard_shader_filepath.value();
+				_PulsarSettings::standard_shader_assetfile = standard_shader_filepath.value();
 			if (auto solid_polygon_shader = rendering["solid_polygon_shader"].value<std::string>())
-				_RendererSettings::solid_polygon_shader = solid_polygon_shader.value();
+				_PulsarSettings::solid_polygon_shader = solid_polygon_shader.value();
 			if (auto rect_renderable_filepath = rendering["rect_renderable"].value<std::string>())
-				_RendererSettings::rect_renderable_filepath = rect_renderable_filepath.value();
+				_PulsarSettings::rect_renderable_filepath = rect_renderable_filepath.value();
 			if (auto solid_polygon = rendering["solid_polygon"].value<std::string>())
-				_RendererSettings::solid_polygon_filepath = solid_polygon.value();
+				_PulsarSettings::solid_polygon_filepath = solid_polygon.value();
 			if (auto solid_point = rendering["solid_point"].value<std::string>())
-				_RendererSettings::solid_point_filepath = solid_point.value();
+				_PulsarSettings::solid_point_filepath = solid_point.value();
 			if (auto solid_circle = rendering["solid_circle"].value<std::string>())
-				_RendererSettings::solid_circle_filepath = solid_circle.value();
+				_PulsarSettings::solid_circle_filepath = solid_circle.value();
 			if (auto particle_frame_length = rendering["particle_frame_length"].value<double>())
-				_RendererSettings::particle_frame_length = static_cast<real>(particle_frame_length.value());
+				_PulsarSettings::particle_frame_length = static_cast<real>(particle_frame_length.value());
 		}
 		return true;
 	}
 	catch (const toml::parse_error& err)
 	{
-		Logger::LogErrorFatal("Cannot parse renderer settings file \"" + std::string(_RendererSettings::settings_filepath) + "\":" + std::string(err.description()));
+		Logger::LogErrorFatal("Cannot parse renderer settings file \"" + std::string(_PulsarSettings::settings_filepath) + "\":" + std::string(err.description()));
 		return false;
 	}
 }

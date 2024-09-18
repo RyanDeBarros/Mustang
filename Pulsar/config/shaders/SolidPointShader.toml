@@ -1,0 +1,5 @@
+header = "shader"
+
+[shader]
+vertex = "config/shaders/SolidPoint.vert"
+fragment = "config/shaders/SolidPoint.frag"

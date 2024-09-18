@@ -7,28 +7,7 @@
 
 #include "Macros.h"
 #include "Logger.inl"
-
-static char* read_file(const char* filepath)
-{
-	FILE* file;
-	fopen_s(&file, filepath, "rb");
-	if (file)
-	{
-		fseek(file, 0, SEEK_END);
-		const size_t filesize = ftell(file);
-		fseek(file, 0, SEEK_SET);
-
-		char* buffer = new char[filesize + 1];
-		fread(buffer, sizeof(char), filesize + 1, file);
-		buffer[filesize] = '\0';
-		return buffer;
-	}
-	else
-	{
-		Logger::LogError(std::string("Could not read file \"") + filepath + "\"");
-		return nullptr;
-	}
-}
+#include "IO.h"
 
 static GLuint compile_shader(GLenum type, const char* shader, const char*filepath)
 {
@@ -51,16 +30,43 @@ static GLuint compile_shader(GLenum type, const char* shader, const char*filepat
 	}
 	return id;
 }
+/*
+static char* read_file(const char* filepath)
+{
+	FILE* file;
+	fopen_s(&file, filepath, "rb");
+	if (file)
+	{
+		fseek(file, 0, SEEK_END);
+		const size_t filesize = ftell(file);
+		fseek(file, 0, SEEK_SET);
 
+		char* buffer = new char[filesize + 1];
+		fread(buffer, sizeof(char), filesize + 1, file);
+		buffer[filesize] = '\0';
+		return buffer;
+	}
+	else
+	{
+		Logger::LogError(std::string("Could not read file \"") + filepath + "\"");
+		return nullptr;
+	}
+}
+*/
 Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
 	: m_RID(0)
 {
-	const char* vertex_shader = read_file(vertex_filepath);
-	const char* fragment_shader = read_file(fragment_filepath);
-	if (vertex_shader && fragment_shader)
+	std::string vertex_shader;
+	if (!IO::read_file(vertex_filepath, vertex_shader))
+		Logger::LogError(std::string("Could not read vertex shader: \"") + vertex_filepath + "\"");
+	std::string fragment_shader;
+	if (!IO::read_file(fragment_filepath, fragment_shader))
+		Logger::LogError(std::string("Could not read fragment shader: \"") + fragment_filepath + "\"");
+	
+	if (!vertex_shader.empty() && !fragment_shader.empty())
 	{
 		PULSAR_TRY(m_RID = glCreateProgram());
-		GLuint vs = compile_shader(GL_VERTEX_SHADER, vertex_shader, vertex_filepath);
+		GLuint vs = compile_shader(GL_VERTEX_SHADER, vertex_shader.c_str(), vertex_filepath);
 		if (vs == 0)
 		{
 			PULSAR_TRY(glDeleteProgram(m_RID));
@@ -68,7 +74,7 @@ Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
 		}
 		else
 		{
-			GLuint fs = compile_shader(GL_FRAGMENT_SHADER, fragment_shader, fragment_filepath);
+			GLuint fs = compile_shader(GL_FRAGMENT_SHADER, fragment_shader.c_str(), fragment_filepath);
 			if (fs == 0)
 			{
 				PULSAR_TRY(glDeleteProgram(m_RID));
@@ -87,8 +93,6 @@ Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
 			}
 		}
 	}
-	delete[] vertex_shader;
-	delete[] fragment_shader;
 }
 
 Shader::Shader(Shader&& shader) noexcept

@@ -1,6 +1,9 @@
 #include "InputManager.h"
 
 #include "Window.h"
+#include "PulsarSettings.h"
+#include "Logger.inl"
+#include "IO.h"
 
 static void window_close_callback(GLFWwindow* window)
 {
@@ -136,6 +139,11 @@ InputManager::InputManager()
 {
 	glfwSetJoystickCallback(joystick_callback);
 	glfwSetMonitorCallback(monitor_callback);
+	std::string mapping;
+	if (IO::read_file(_PulsarSettings::sdl_gamecontrollerdb.c_str(), mapping))
+		LoadGamepadMapping(mapping.c_str());
+	else
+		Logger::LogErrorFatal("Cannot load SDL_GameControllerDB.");
 }
 
 void InputManager::AssignWindowCallbacks(Window& window)

@@ -1,5 +1,0 @@
-header = "shader"
-
-[shader]
-vertex = "config/Standard.vert"
-fragment = "config/Standard8.frag"

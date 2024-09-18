@@ -1,0 +1,5 @@
+header = "shader"
+
+[shader]
+vertex = "config/shaders/SolidPolygon.vert"
+fragment = "config/shaders/SolidPolygon.frag"

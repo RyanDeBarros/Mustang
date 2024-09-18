@@ -3,7 +3,7 @@ header = "renderable"
 [renderable.model]
 layout = 0b110101111101
 mask = 0b111111
-shader = "config/SolidPointShader.toml"
+shader = "config/shaders/SolidPointShader.toml"
 
 [renderable]
 # condensed P-transform (2) | condensed RS-transform (4) | RGBA outer color (4) | vertex position (2) | point size, inner radius (2) | RGBA inner color (4)

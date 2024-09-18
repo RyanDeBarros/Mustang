@@ -1,0 +1,5 @@
+header = "shader"
+
+[shader]
+vertex = "config/shaders/SolidCircle.vert"
+fragment = "config/shaders/SolidCircle.frag"

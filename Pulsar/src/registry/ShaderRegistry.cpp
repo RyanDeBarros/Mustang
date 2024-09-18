@@ -3,7 +3,7 @@
 #include "Macros.h"
 #include "Logger.inl"
 #include "AssetLoader.h"
-#include "RendererSettings.h"
+#include "PulsarSettings.h"
 
 #ifndef PULSAR_ELSE_CHECK_BAD_UNIFORM
 #if PULSAR_IGNORE_WARNINGS_NULL_SHADER
@@ -46,9 +46,9 @@ bool ShaderRegistry::DestroyShader(ShaderHandle handle)
 void ShaderRegistry::Init()
 {
 	handle_cap = 1;
-	auto status = Loader::loadShader(_RendererSettings::standard_shader_assetfile.c_str(), standard_shader);
+	auto status = Loader::loadShader(_PulsarSettings::standard_shader_assetfile.c_str(), standard_shader);
 	if (status != LOAD_STATUS::OK)
-		Logger::LogErrorFatal("Standard shader could not be loaded (error code " + std::to_string(static_cast<int>(status)) + "): " + _RendererSettings::standard_shader_assetfile);
+		Logger::LogErrorFatal("Standard shader could not be loaded (error code " + std::to_string(static_cast<int>(status)) + "): " + _PulsarSettings::standard_shader_assetfile);
 }
 
 void ShaderRegistry::Terminate()

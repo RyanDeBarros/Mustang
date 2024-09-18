@@ -167,7 +167,8 @@
     <ClCompile Include="sandbox\CHRS.cpp" />
     <ClCompile Include="sandbox\Sandbox.cpp" />
     <ClCompile Include="src\AssetLoader.cpp" />
-    <ClCompile Include="src\InputManager.cpp" />
+    <ClCompile Include="src\IO.cpp" />
+    <ClCompile Include="src\platform\InputManager.cpp" />
     <ClCompile Include="src\registry\compound\Atlas.cpp" />
     <ClCompile Include="src\registry\compound\NonantTile.cpp" />
     <ClCompile Include="src\registry\Tile.cpp" />
@@ -187,7 +188,7 @@
     <ClCompile Include="src\render\actors\shapes\DebugPoint.cpp" />
     <ClCompile Include="src\render\actors\shapes\DebugPolygon.cpp" />
     <ClCompile Include="src\render\actors\RectRender.cpp" />
-    <ClCompile Include="src\RendererSettings.cpp" />
+    <ClCompile Include="src\PulsarSettings.cpp" />
     <ClCompile Include="src\Pulsar.cpp" />
     <ClCompile Include="src\render\actors\ActorComposite.cpp" />
     <ClCompile Include="src\render\actors\ActorPrimitive.cpp" />
@@ -212,22 +213,23 @@
     <ClCompile Include="src\render\transform\Transform.cpp" />
     <ClCompile Include="src\render\transform\Transforms.cpp" />
     <ClInclude Include="src\EventDispatcher.inl" />
-    <ClInclude Include="src\Input.h" />
-    <ClInclude Include="src\InputManager.h" />
+    <ClInclude Include="src\IO.h" />
+    <ClInclude Include="src\platform\Input.h" />
+    <ClInclude Include="src\platform\InputManager.h" />
     <ClInclude Include="src\registry\compound\NonantTile.h" />
     <ClInclude Include="src\render\actors\NonantRender.h" />
     <ClInclude Include="src\render\transform\YSorter.h" />
-    <ClInclude Include="src\Window.h" />
+    <ClInclude Include="src\platform\Window.h" />
     <ClInclude Include="src\utils\CopyPtr.inl">
       <FileType>CppHeader</FileType>
     </ClInclude>
     <ClCompile Include="src\render\transform\YSorter.cpp" />
-    <ClCompile Include="src\Window.cpp" />
+    <ClCompile Include="src\platform\Window.cpp" />
     <ClCompile Include="src\utils\Permutation.cpp" />
     <ClCompile Include="src\utils\Strings.cpp" />
     <ClCompile Include="src\utils\CommonMath.cpp" />
     <ClCompile Include="src\VendorInclude.cpp" />
-    <ClCompile Include="src\WindowManager.cpp" />
+    <ClCompile Include="src\platform\WindowManager.cpp" />
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
     <ClCompile Include="vendor\stb\stb_image.cpp" />
@@ -278,7 +280,7 @@
     <ClInclude Include="src\render\LayerView.h" />
     <ClInclude Include="src\render\Renderable.h" />
     <ClInclude Include="src\render\Renderer.h" />
-    <ClInclude Include="src\RendererSettings.h" />
+    <ClInclude Include="src\PulsarSettings.h" />
     <ClInclude Include="src\registry\Shader.h" />
     <ClInclude Include="src\registry\ShaderRegistry.h" />
     <ClInclude Include="src\registry\Texture.h" />
@@ -308,7 +310,7 @@
     <ClInclude Include="src\utils\Permutation.h" />
     <ClInclude Include="src\utils\Strings.h" />
     <ClInclude Include="src\utils\CommonMath.h" />
-    <ClInclude Include="src\WindowManager.h" />
+    <ClInclude Include="src\platform\WindowManager.h" />
     <ClInclude Include="vendor\glm\common.hpp" />
     <ClInclude Include="vendor\glm\detail\compute_common.hpp" />
     <ClInclude Include="vendor\glm\detail\compute_vector_decl.hpp" />

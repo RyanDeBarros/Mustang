@@ -4,10 +4,9 @@
 #include <glm/ext/scalar_constants.hpp>
 #include <functional>
 
-#include "RendererSettings.h"
+#include "PulsarSettings.h"
 #include "Logger.inl"
 #include "Macros.h"
-#include "Window.h"
 #include "AssetLoader.h"
 #include "render/Renderer.h"
 #include "render/actors/TileMap.h"
@@ -24,8 +23,8 @@
 #include "render/actors/anim/KeyFrames.inl"
 #include "render/transform/YSorter.h"
 #include "render/actors/NonantRender.h"
-#include "WindowManager.h"
-#include "InputManager.h"
+#include "platform/WindowManager.h"
+#include "platform/InputManager.h"
 
 real Pulsar::drawTime;
 real Pulsar::deltaDrawTime;
@@ -34,8 +33,8 @@ real Pulsar::totalDrawTime;
 
 void Pulsar::CreateWindow(WindowHandle handle, const char* title, GLFWmonitor* monitor, GLFWwindow* share)
 {
-	WindowManager::RegisterWindow(handle, Window(static_cast<unsigned int>(_RendererSettings::initial_window_width),
-		static_cast<unsigned int>(_RendererSettings::initial_window_height), title, monitor, share));
+	WindowManager::RegisterWindow(handle, Window(static_cast<unsigned int>(_PulsarSettings::initial_window_width),
+		static_cast<unsigned int>(_PulsarSettings::initial_window_height), title, monitor, share));
 }
 
 static void glfw_error_callback(int error, const char* description)
@@ -143,7 +142,7 @@ void Pulsar::Run()
 	Renderer::GetCanvasLayer(0)->OnSetZIndex(&actor3, -1);
 
 	actor3.SetPivot(0.0f, 0.0f);
-	set_ptr(actor3.Fickler().Position(), _RendererSettings::initial_window_rel_pos(-0.5f, 0.5f));
+	set_ptr(actor3.Fickler().Position(), _PulsarSettings::initial_window_rel_pos(-0.5f, 0.5f));
 	set_ptr(actor3.Fickler().Scale(), { 0.3f, 0.3f });
 	actor3.Fickler().SyncT();
 	actor2.SetModulation(glm::vec4(0.7f, 0.7f, 1.0f, 1.0f));
@@ -174,7 +173,7 @@ void Pulsar::Run()
 		PULSAR_ASSERT(false);
 	std::unique_ptr<ParticleEffect> psys(psys_raw);
 
-	set_ptr(psys->Fickler().Scale(), glm::vec2{ _RendererSettings::initial_window_width / p2width, _RendererSettings::initial_window_height / p2height } *0.75f);
+	set_ptr(psys->Fickler().Scale(), glm::vec2{ _PulsarSettings::initial_window_width / p2width, _PulsarSettings::initial_window_height / p2height } *0.75f);
 	psys->Fickler().SyncRS();
 
 	Renderer::AddCanvasLayer(11);
@@ -228,7 +227,7 @@ void Pulsar::Run()
 	Renderer::GetCanvasLayer(11)->OnAttach(&child);
 	Renderer::GetCanvasLayer(11)->OnAttach(&grandchild);
 
-	DebugRect rect(_RendererSettings::initial_window_width * 0.5f, _RendererSettings::initial_window_height * 1.0f, true, { 1.0f, 0.5f }, 1);
+	DebugRect rect(_PulsarSettings::initial_window_width * 0.5f, _PulsarSettings::initial_window_height * 1.0f, true, { 1.0f, 0.5f }, 1);
 	set_ptr(rect.Fickler().Modulate(), { 0.5f, 0.5f, 1.0f, 0.3f });
 	rect.Fickler().SyncM();
 	Renderer::GetCanvasLayer(11)->OnAttach(&rect);
