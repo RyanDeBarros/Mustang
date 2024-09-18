@@ -1,25 +1,56 @@
 #include "PulsarSettings.h"
 
-namespace _PulsarSettings
+#include "AssetLoader.h"
+
+PulsarSettings::PulsarSettings()
 {
-	const char* settings_filepath = "config/Renderer.toml";
+	toml::v3::parse_result file;
+	if (!Loader::_LoadRendererSettingsContent(file, _settings_filepath))
+	{
+		__loaded = false;
+		return;
+	}
 
-	int initial_window_width = 1440, initial_window_height = 1080;
-	glm::vec4 gl_clear_color = glm::vec4(0.08, 0.08, 0.08, 0.0);
-	bool vsync_on = true;
-	
-	TextureSlot max_texture_slots = 32;
-	VertexSize standard_vertex_pool_size = 2048;
-	VertexSize standard_index_pool_size = 1024;
+	if (auto window = file["window"])
+	{
+		if (auto width = window["width"].value<int64_t>())
+			_initial_window_width = static_cast<int>(width.value());
+		if (auto height = window["height"].value<int64_t>())
+			_initial_window_height = static_cast<int>(height.value());
+		if (auto glcc = window["gl_clear_color"].as_array())
+		{
+		_gl_clear_color = {
+				glcc->get_as<double>(0)->get(), glcc->get_as<double>(1)->get(),
+				glcc->get_as<double>(2)->get(), glcc->get_as<double>(3)->get()
+			};
+		}
+		if (auto vo = window["vsync_on"].value<bool>())
+			_vsync_on = vo.value();
+		if (auto sdlgcdb = window["sdl_gamecontrollerdb"].value<std::string>())
+			_sdl_gamecontrollerdb = sdlgcdb.value();
+	}
 
-	std::string standard_shader_assetfile = "config/StandardShader32.toml";
-	std::string solid_polygon_shader = "config/SolidPolygonShader.toml";
-	std::string rect_renderable_filepath = "config/RectRenderable.toml";
-	std::string solid_polygon_filepath = "config/SolidPolygon.toml";
-	std::string solid_point_filepath = "config/SolidPoint.toml";
-	std::string solid_circle_filepath = "config/SolidCircle.toml";
-
-	real particle_frame_length = 0.0167f;
-
-	std::string sdl_gamecontrollerdb = "config/sdl-gamecontrollerdb/gamecontrollerdb.txt";
+	if (auto rendering = file["rendering"])
+	{
+		if (auto mts = rendering["max_texture_slots"].value<int64_t>())
+			_max_texture_slots = static_cast<TextureSlot>(mts.value());
+		if (auto svps = rendering["standard_vertex_pool_size"].value<int64_t>())
+			_standard_vertex_pool_size = static_cast<VertexSize>(svps.value());
+		if (auto sips = rendering["standard_index_pool_size"].value<int64_t>())
+			_standard_index_pool_size = static_cast<VertexSize>(sips.value());
+		if (auto ssf = rendering["standard_shader"].value<std::string>())
+			_standard_shader_assetfile = ssf.value();
+		if (auto sps = rendering["solid_polygon_shader"].value<std::string>())
+			_solid_polygon_shader = sps.value();
+		if (auto rrf = rendering["rect_renderable"].value<std::string>())
+			_rect_renderable_filepath = rrf.value();
+		if (auto sp = rendering["solid_polygon"].value<std::string>())
+			_solid_polygon_filepath = sp.value();
+		if (auto sp = rendering["solid_point"].value<std::string>())
+			_solid_point_filepath = sp.value();
+		if (auto sc = rendering["solid_circle"].value<std::string>())
+			_solid_circle_filepath = sc.value();
+		if (auto pfl = rendering["particle_frame_length"].value<double>())
+			_particle_frame_length = static_cast<real>(pfl.value());
+	}
 }

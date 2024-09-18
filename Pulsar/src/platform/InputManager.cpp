@@ -140,7 +140,7 @@ InputManager::InputManager()
 	glfwSetJoystickCallback(joystick_callback);
 	glfwSetMonitorCallback(monitor_callback);
 	std::string mapping;
-	if (IO::read_file(_PulsarSettings::sdl_gamecontrollerdb.c_str(), mapping))
+	if (IO::read_file(PulsarSettings::sdl_gamecontrollerdb(), mapping))
 		LoadGamepadMapping(mapping.c_str());
 	else
 		Logger::LogErrorFatal("Cannot load SDL_GameControllerDB.");

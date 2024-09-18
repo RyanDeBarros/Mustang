@@ -70,7 +70,8 @@ void Renderer::FocusWindow(WindowHandle window)
 
 void Renderer::_SetClearColor()
 {
-	PULSAR_TRY(glClearColor(_PulsarSettings::gl_clear_color[0], _PulsarSettings::gl_clear_color[1], _PulsarSettings::gl_clear_color[2], _PulsarSettings::gl_clear_color[3]));
+	PULSAR_TRY(glClearColor(PulsarSettings::gl_clear_color()[0], PulsarSettings::gl_clear_color()[1],
+		PulsarSettings::gl_clear_color()[2], PulsarSettings::gl_clear_color()[3]));
 }
 
 void Renderer::AddCanvasLayer(const CanvasLayerData& data)
@@ -79,7 +80,8 @@ void Renderer::AddCanvasLayer(const CanvasLayerData& data)
 	if (layers.find(data.ci) == layers.end())
 		layers.emplace(data.ci, data);
 	else
-		Logger::LogErrorFatal(std::string("Tried to add new canvas layer to renderer canvas index (") + std::to_string(data.ci) + "), but a canvas layer under that canvas index already exists!");
+		Logger::LogErrorFatal(std::string("Tried to add new canvas layer to renderer canvas index (") + std::to_string(data.ci)
+			+ "), but a canvas layer under that canvas index already exists!");
 }
 
 void Renderer::RemoveCanvasLayer(CanvasIndex ci)
@@ -89,7 +91,8 @@ void Renderer::RemoveCanvasLayer(CanvasIndex ci)
 	if (layer_it != layers.end())
 		layers.erase(layer_it);
 	else
-		Logger::LogErrorFatal(std::string("Tried to remove a canvas layer at renderer canvas index (") + std::to_string(ci) + "), but no canvas layer under that canvas index exists!");
+		Logger::LogErrorFatal(std::string("Tried to remove a canvas layer at renderer canvas index (") + std::to_string(ci)
+			+ "), but no canvas layer under that canvas index exists!");
 }
 
 CanvasLayer* Renderer::GetCanvasLayer(CanvasIndex ci)
@@ -100,7 +103,8 @@ CanvasLayer* Renderer::GetCanvasLayer(CanvasIndex ci)
 		return &layer->second;
 	else
 	{
-		Logger::LogErrorFatal(std::string("Tried to get a canvas layer at renderer canvas index (") + std::to_string(ci) + "), but no canvas layer under that canvas index exists!");
+		Logger::LogErrorFatal(std::string("Tried to get a canvas layer at renderer canvas index (") + std::to_string(ci)
+			+ "), but no canvas layer under that canvas index exists!");
 		return nullptr;
 	}
 }
@@ -110,11 +114,13 @@ void Renderer::ChangeCanvasLayerIndex(CanvasIndex old_index, CanvasIndex new_ind
 	auto layer_it = layers.find(old_index);
 	if (layer_it == layers.end())
 	{
-		Logger::LogErrorFatal(std::string("Tried to change canvas layer index from " + std::to_string(old_index) + " to " + std::to_string(new_index) + ", but the old index does not exist."));
+		Logger::LogErrorFatal(std::string("Tried to change canvas layer index from " + std::to_string(old_index)
+			+ " to " + std::to_string(new_index) + ", but the old index does not exist."));
 	}
 	else if (layers.find(new_index) != layers.end())
 	{
-		Logger::LogErrorFatal(std::string("Tried to change canvas layer index from " + std::to_string(old_index) + " to " + std::to_string(new_index) + ", but the new index already exists."));
+		Logger::LogErrorFatal(std::string("Tried to change canvas layer index from " + std::to_string(old_index)
+			+ " to " + std::to_string(new_index) + ", but the new index already exists."));
 	}
 	else
 	{

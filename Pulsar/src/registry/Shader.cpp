@@ -30,29 +30,7 @@ static GLuint compile_shader(GLenum type, const char* shader, const char*filepat
 	}
 	return id;
 }
-/*
-static char* read_file(const char* filepath)
-{
-	FILE* file;
-	fopen_s(&file, filepath, "rb");
-	if (file)
-	{
-		fseek(file, 0, SEEK_END);
-		const size_t filesize = ftell(file);
-		fseek(file, 0, SEEK_SET);
 
-		char* buffer = new char[filesize + 1];
-		fread(buffer, sizeof(char), filesize + 1, file);
-		buffer[filesize] = '\0';
-		return buffer;
-	}
-	else
-	{
-		Logger::LogError(std::string("Could not read file \"") + filepath + "\"");
-		return nullptr;
-	}
-}
-*/
 Shader::Shader(const char* vertex_filepath, const char* fragment_filepath)
 	: m_RID(0)
 {

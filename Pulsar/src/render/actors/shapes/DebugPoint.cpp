@@ -7,7 +7,7 @@
 DebugPoint::DebugPoint(float diameter, float inner_radius, const glm::vec4& inner_color, ZIndex z, FickleType fickle_type)
 	: DebugPolygon({{ 0.0f, 0.0f }}, GL_POINTS, z, fickle_type), m_Diameter(diameter), m_InnerRadius(inner_radius), m_InnerColor(inner_color)
 {
-	Loader::loadRenderable(_PulsarSettings::solid_point_filepath.c_str(), m_Renderable);
+	Loader::loadRenderable(PulsarSettings::solid_point_filepath(), m_Renderable);
 }
 
 DebugPoint::DebugPoint(const DebugPoint& other)

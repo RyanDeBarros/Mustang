@@ -24,10 +24,11 @@ struct CanvasLayerData
 	GLenum sourceBlend, destBlend;
 	int pLeft, pRight, pBottom, pTop;
 	VertexSize maxVertexPoolSize, maxIndexPoolSize;
-	CanvasLayerData(CanvasIndex ci, VertexSize max_vertex_pool_size = _PulsarSettings::standard_vertex_pool_size, VertexSize max_index_pool_size = _PulsarSettings::standard_index_pool_size)
+	CanvasLayerData(CanvasIndex ci, VertexSize max_vertex_pool_size = 0, VertexSize max_index_pool_size = 0)
 		: ci(ci), enableGLBlend(true), sourceBlend(GL_SRC_ALPHA), destBlend(GL_ONE_MINUS_SRC_ALPHA),
-		pLeft(0), pRight(_PulsarSettings::initial_window_width), pBottom(0), pTop(_PulsarSettings::initial_window_height),
-		maxVertexPoolSize(max_vertex_pool_size), maxIndexPoolSize(max_index_pool_size)
+		pLeft(0), pRight(PulsarSettings::initial_window_width()), pBottom(0), pTop(PulsarSettings::initial_window_height()),
+		maxVertexPoolSize(max_vertex_pool_size > 0 ? max_vertex_pool_size : PulsarSettings::standard_vertex_pool_size()),
+		maxIndexPoolSize(max_index_pool_size > 0 ? max_index_pool_size : PulsarSettings::standard_index_pool_size())
 	{}
 };
 

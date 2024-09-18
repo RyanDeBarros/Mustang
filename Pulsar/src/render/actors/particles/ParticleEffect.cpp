@@ -38,10 +38,10 @@ void ParticleEffect::OnUpdate()
 	if (!paused)
 	{
 		m_LeftoverDT += Pulsar::deltaDrawTime;
-		if (m_LeftoverDT >= _PulsarSettings::particle_frame_length)
+		if (m_LeftoverDT >= PulsarSettings::particle_frame_length())
 		{
-			m_DeltaTime = _PulsarSettings::particle_frame_length;
-			m_LeftoverDT -= _PulsarSettings::particle_frame_length;
+			m_DeltaTime = PulsarSettings::particle_frame_length();
+			m_LeftoverDT -= PulsarSettings::particle_frame_length();
 		}
 		else
 		{

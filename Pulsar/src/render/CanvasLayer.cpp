@@ -302,7 +302,7 @@ TextureSlot CanvasLayer::GetTextureSlot(const Renderable& render)
 		if (*it == render.textureHandle)
 			return static_cast<TextureSlot>(it - m_TextureSlotBatch.begin());
 	}
-	if (m_TextureSlotBatch.size() >= _PulsarSettings::max_texture_slots)
+	if (m_TextureSlotBatch.size() >= PulsarSettings::max_texture_slots())
 		FlushAndReset();
 	TextureSlot slot = static_cast<TextureSlot>(m_TextureSlotBatch.size());
 	m_TextureSlotBatch.push_back(render.textureHandle);

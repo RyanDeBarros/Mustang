@@ -7,7 +7,7 @@
 DebugCircle::DebugCircle(float radius, ZIndex z, FickleType fickle_type)
 	: DebugPolygon({}, GL_TRIANGLE_FAN, z, fickle_type), m_Diameter(2 * radius)
 {
-	Loader::loadRenderable(_PulsarSettings::solid_circle_filepath.c_str(), m_Renderable);
+	Loader::loadRenderable(PulsarSettings::solid_circle_filepath(), m_Renderable);
 	PointsRef() = { {m_Diameter, m_Diameter}, {-m_Diameter, m_Diameter}, {-m_Diameter, -m_Diameter}, {m_Diameter, -m_Diameter} };
 	m_Status &= ~0b1;
 }
