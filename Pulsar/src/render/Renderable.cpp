@@ -51,12 +51,13 @@ namespace Render
 	{
 		unsigned short offset = 0;
 		unsigned char num_attribs = 0;
+		Stride stride = Render::StrideCountOf(layout, mask) * sizeof(GLfloat);
 		while (mask >> num_attribs != 0)
 		{
 			PULSAR_TRY(glEnableVertexAttribArray(num_attribs));
 			auto shift = 2 * num_attribs;
 			unsigned char attrib = ((layout & (3 << shift)) >> shift) + 1;
-			PULSAR_TRY(glVertexAttribPointer(num_attribs, attrib, GL_FLOAT, GL_FALSE, Render::StrideCountOf(layout, mask) * sizeof(GLfloat), (const GLvoid*)offset));
+			PULSAR_TRY(glVertexAttribPointer(num_attribs, attrib, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)offset));
 			offset += attrib * sizeof(GLfloat);
 			num_attribs++;
 		}

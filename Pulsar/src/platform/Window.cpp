@@ -55,3 +55,21 @@ void Window::_ForceRefresh() const
 	glfwSwapBuffers(window);
 	PULSAR_TRY(glClear(GL_COLOR_BUFFER_BIT));
 }
+
+void Window::SetCursor(Cursor&& new_cursor)
+{
+	cursor = std::move(new_cursor);
+	glfwSetCursor(window, cursor._GetInternal());
+}
+
+glm::vec2 Window::GetCursorPos() const
+{
+	double x, y;
+	glfwGetCursorPos(window, &x, &y);;
+	return { static_cast<float>(x), static_cast<float>(y) };
+}
+
+void Window::SetCursorPos(const glm::vec2& pos)
+{
+	glfwSetCursorPos(window, static_cast<double>(pos.x), static_cast<double>(pos.y));
+}

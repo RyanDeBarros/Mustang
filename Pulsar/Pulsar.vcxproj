@@ -168,6 +168,7 @@
     <ClCompile Include="sandbox\Sandbox.cpp" />
     <ClCompile Include="src\AssetLoader.cpp" />
     <ClCompile Include="src\IO.cpp" />
+    <ClCompile Include="src\platform\Cursor.cpp" />
     <ClCompile Include="src\platform\InputManager.cpp" />
     <ClCompile Include="src\registry\compound\Atlas.cpp" />
     <ClCompile Include="src\registry\compound\NonantTile.cpp" />
@@ -214,6 +215,7 @@
     <ClCompile Include="src\render\transform\Transforms.cpp" />
     <ClInclude Include="src\EventDispatcher.inl" />
     <ClInclude Include="src\IO.h" />
+    <ClInclude Include="src\platform\Cursor.h" />
     <ClInclude Include="src\platform\Input.h" />
     <ClInclude Include="src\platform\InputManager.h" />
     <ClInclude Include="src\registry\compound\NonantTile.h" />

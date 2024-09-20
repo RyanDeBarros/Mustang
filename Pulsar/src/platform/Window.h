@@ -7,6 +7,7 @@
 #include "VendorInclude.h"
 #include "utils/Functor.inl"
 #include "Input.h"
+#include "Cursor.h"
 
 // TODO use std::runtime_error instead of std::exception
 struct WindowException : public std::runtime_error
@@ -18,6 +19,7 @@ class Window
 {
 	// TODO have Renderer as a data member? so it isn't a singleton?
 	GLFWwindow* window = nullptr;
+	Cursor cursor;
 
 public:
 	Window() = default;
@@ -34,4 +36,8 @@ public:
 	void _ForceRefresh() const;
 	bool ShouldNotClose() const { return !glfwWindowShouldClose(window); }
 	GLFWwindow* _GetInternal() { return window; }
+
+	void SetCursor(Cursor&& cursor);
+	glm::vec2 GetCursorPos() const;
+	void SetCursorPos(const glm::vec2& pos);
 };

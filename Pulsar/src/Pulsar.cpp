@@ -31,6 +31,13 @@ real Pulsar::deltaDrawTime;
 real Pulsar::prevDrawTime;
 real Pulsar::totalDrawTime;
 
+static bool glfw_initialized = false;;
+
+bool Pulsar::GLFWInitialized()
+{
+	return glfw_initialized;
+}
+
 void Pulsar::CreateWindow(WindowHandle handle, const char* title, GLFWmonitor* monitor, GLFWwindow* share)
 {
 	WindowManager::RegisterWindow(handle, Window(static_cast<unsigned int>(PulsarSettings::initial_window_width()),
@@ -48,6 +55,7 @@ int Pulsar::StartUp(const char* title)
 		return -1;
 	if (!glfwInit())
 		return -1;
+	glfw_initialized = true;
 	glfwSetErrorCallback(glfw_error_callback);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
@@ -68,6 +76,7 @@ void Pulsar::Terminate()
 {
 	Renderer::Terminate();
 	glfwTerminate();
+	glfw_initialized = false;
 }
 
 static void(*_post_init)() = []() {};
@@ -334,7 +343,9 @@ void Pulsar::Run()
 	nonant.SetPivot({ 0.3f, 0.3f });
 	
 	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
-	Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
+	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
+
+	WindowManager::GetWindow(0)->SetCursor(Cursor(StandardCursor::CROSSHAIR));
 
 	InputManager::Instance().DispatchMouseButton().Connect(InputBucket::MouseButton(0, Input::MouseButton::LEFT, Input::Action::PRESS),
 		[](const InputEvent::MouseButton& event) {

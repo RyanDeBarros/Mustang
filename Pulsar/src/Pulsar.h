@@ -15,6 +15,8 @@ typedef GLint TextureSlot;
 
 namespace Pulsar
 {
+	bool GLFWInitialized();
+
 	void CreateWindow(WindowHandle handle, const char* title, GLFWmonitor* monitor = nullptr, GLFWwindow* share = nullptr);
 	int StartUp(const char* title);
 	void Terminate();
@@ -24,7 +26,6 @@ namespace Pulsar
 	extern real prevDrawTime;
 	extern real totalDrawTime;
 
-	// #3
 	void Run();
 	void PostInit(void(*post_init)());
 	void FrameStart(void(*frame_start)());
