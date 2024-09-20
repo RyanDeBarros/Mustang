@@ -19,7 +19,7 @@ static void flip_vertically(unsigned char* buffer, int height, int stride)
 	delete[] temp_row;
 }
 
-Tile::Tile(const char* filepath, float svg_scale)
+Tile::Tile(const char* filepath, float svg_scale, bool flip)
 	: m_ImageBuffer(nullptr), m_Width(0), m_Height(0), m_BPP(0)
 {
 	const auto& fext = file_extension_of(filepath);
@@ -40,7 +40,8 @@ Tile::Tile(const char* filepath, float svg_scale)
 			nsvgDeleteRasterizer(rasterizer);
 			nsvgDelete(image);
 
-			flip_vertically(m_ImageBuffer, m_Height, m_Width * 4);
+			if (flip)
+				flip_vertically(m_ImageBuffer, m_Height, m_Width * 4);
 		}
 		else
 		{
@@ -56,6 +57,7 @@ Tile::Tile(const char* filepath, float svg_scale)
 	else
 	{
 		deletion_policy = TileDeletionPolicy::FROM_STBI;
+		stbi_set_flip_vertically_on_load(static_cast<int>(flip));
 		m_ImageBuffer = stbi_load(filepath, &m_Width, &m_Height, &m_BPP, 0);
 		if (!m_ImageBuffer)
 		{
@@ -65,9 +67,11 @@ Tile::Tile(const char* filepath, float svg_scale)
 	}
 }
 
-Tile::Tile(unsigned char* heap_image_buffer, int width, int height, int bpp, TileDeletionPolicy deletion_policy)
+Tile::Tile(unsigned char* heap_image_buffer, int width, int height, int bpp, TileDeletionPolicy deletion_policy, bool flip)
 	: m_ImageBuffer(heap_image_buffer), m_Width(width), m_Height(height), m_BPP(bpp), deletion_policy(deletion_policy)
 {
+	if (flip)
+		flip_vertically(m_ImageBuffer, m_Height, m_Width * m_BPP);
 }
 
 Tile::Tile(Tile&& tile) noexcept

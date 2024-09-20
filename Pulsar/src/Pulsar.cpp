@@ -25,6 +25,7 @@
 #include "render/actors/NonantRender.h"
 #include "platform/WindowManager.h"
 #include "platform/InputManager.h"
+#include "utils/Strings.h"
 
 real Pulsar::drawTime;
 real Pulsar::deltaDrawTime;
@@ -345,7 +346,9 @@ void Pulsar::Run()
 	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
-	WindowManager::GetWindow(0)->SetCursor(Cursor(StandardCursor::CROSSHAIR));
+	//WindowManager::GetWindow(0)->SetCursor(Cursor(StandardCursor::CROSSHAIR));
+	Tile t("res/textures/flag.png", 1.0f, false);
+	WindowManager::GetWindow(0)->SetCursor(Cursor(t.GetImageBuffer(), t.GetWidth(), t.GetHeight()));
 
 	InputManager::Instance().DispatchMouseButton().Connect(InputBucket::MouseButton(0, Input::MouseButton::LEFT, Input::Action::PRESS),
 		[](const InputEvent::MouseButton& event) {
@@ -402,6 +405,8 @@ void Pulsar::Run()
 				animPlayer1.isInReverse = !animPlayer1.isInReverse;
 			}
 		}
+
+		Logger::LogInfo(STR(WindowManager::GetWindow(0)->GetCursorPos()));
 
 		Renderer::OnDraw();
 	};

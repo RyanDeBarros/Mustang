@@ -7,6 +7,12 @@ Cursor::Cursor(StandardCursor standard_cursor)
 	cursor = glfwCreateStandardCursor(static_cast<int>(standard_cursor));
 }
 
+Cursor::Cursor(unsigned char const* rgba_pixels, int width, int height, int xhot, int yhot)
+{
+	GLFWimage image{ width, height, const_cast<unsigned char*>(rgba_pixels) };
+	cursor = glfwCreateCursor(&image, xhot, yhot);
+}
+
 Cursor::Cursor(Cursor&& other) noexcept
 	: cursor(other.cursor)
 {

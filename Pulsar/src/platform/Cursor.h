@@ -23,6 +23,7 @@ class Cursor
 public:
 	Cursor() = default;
 	Cursor(StandardCursor standard_cursor);
+	Cursor(unsigned char const* rgba_pixels, int width, int height, int xhot = 0, int yhot = 0);
 	Cursor(const Cursor&) = delete;
 	Cursor(Cursor&&) noexcept;
 	Cursor& operator=(Cursor&&) noexcept;

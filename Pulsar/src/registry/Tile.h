@@ -29,8 +29,8 @@ class Tile
 	void DeleteBuffer() const;
 
 public:
-	Tile(const char* filepath, float svg_scale = 1.0f);
-	Tile(unsigned char* heap_image_buffer, int width, int height, int bpp, TileDeletionPolicy deletion_policy);
+	Tile(const char* filepath, float svg_scale = 1.0f, bool flip_vertically = true);
+	Tile(unsigned char* heap_image_buffer, int width, int height, int bpp, TileDeletionPolicy deletion_policy, bool flip_vertically = false);
 	Tile(const Tile&) = delete;
 	Tile(Tile&& tile) noexcept;
 	Tile& operator=(Tile&& tile) noexcept;

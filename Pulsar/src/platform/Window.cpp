@@ -66,7 +66,7 @@ glm::vec2 Window::GetCursorPos() const
 {
 	double x, y;
 	glfwGetCursorPos(window, &x, &y);;
-	return { static_cast<float>(x), static_cast<float>(y) };
+	return { static_cast<float>(x), GetHeight() - static_cast<float>(y) };
 }
 
 void Window::SetCursorPos(const glm::vec2& pos)
