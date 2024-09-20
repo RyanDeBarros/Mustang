@@ -234,7 +234,6 @@
     <ClCompile Include="src\platform\WindowManager.cpp" />
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
-    <ClCompile Include="vendor\stb\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sandbox\CHRS.h" />
