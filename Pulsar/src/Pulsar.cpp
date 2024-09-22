@@ -1,8 +1,10 @@
 #include "VendorInclude.h"
 #include "Pulsar.h"
 
-#include <glm/ext/scalar_constants.hpp>
 #include <functional>
+#include <glm/ext/scalar_constants.hpp>
+#include <stb/stb_truetype.h>
+#include <stb/stb_image_write.h>
 
 #include "PulsarSettings.h"
 #include "Logger.inl"
@@ -26,6 +28,7 @@
 #include "platform/WindowManager.h"
 #include "platform/InputManager.h"
 #include "utils/Strings.h"
+#include "IO.h"
 
 real Pulsar::drawTime;
 real Pulsar::deltaDrawTime;
@@ -364,6 +367,91 @@ void Pulsar::Run()
 			else
 				Logger::LogInfo("Release!");
 			});
+
+	unsigned char* font_file;
+	size_t font_filesize;
+	//if (!IO::read_file_uc("res/fonts/Roboto-Regular.ttf", font_file, font_filesize))
+	if (!IO::read_file_uc("res/fonts/Roboto-BoldItalic.ttf", font_file, font_filesize))
+		Logger::LogErrorFatal("Cannot load font file.");
+
+	stbtt_fontinfo font_info;
+	if (!stbtt_InitFont(&font_info, font_file, 0))
+		Logger::LogErrorFatal("Cannot init font.");
+
+	float font_size = 96.0f;
+	int fb_width = 512;
+	int fb_height = 256;
+
+	float scale = stbtt_ScaleForPixelHeight(&font_info, font_size);
+	unsigned char* font_bitmap = new unsigned char[fb_width * fb_height];
+	std::memset(font_bitmap, 255, fb_width * fb_height);
+	//std::memset(font_bitmap, 0, fb_width * fb_height);
+
+	int ascent, descent, linegap;
+	stbtt_GetFontVMetrics(&font_info, &ascent, &descent, &linegap);
+	int baseline = static_cast<int>(roundf(ascent * scale));
+	int line_height = static_cast<int>(roundf((ascent - descent + linegap) * scale));
+
+	const char* text = "Hello,\nWorld!";
+	int startX = 10;
+	int x = startX;
+	int y = baseline;
+	for (int i = 0; i < strlen(text); ++i)
+	{
+		if (text[i] == '\r' && i < strlen(text) - 1 && text[i + 1] == '\n')
+			continue;
+		if (text[i] == '\n' || text[i] == '\r')
+		{
+			x = startX;
+			y += line_height;
+			continue;
+		}
+
+		int glyph_index = stbtt_FindGlyphIndex(&font_info, text[i]);
+		if (!glyph_index)
+			continue;
+
+		int ch_x0, ch_y0, ch_x1, ch_y1;
+		stbtt_GetGlyphBitmapBox(&font_info, glyph_index, scale, scale, &ch_x0, &ch_y0, &ch_x1, &ch_y1);
+
+		int advance_width, left_bearing;
+		stbtt_GetGlyphHMetrics(&font_info, glyph_index, &advance_width, &left_bearing);
+
+		if (i > 0)
+		{
+			int previous_glyph_index = stbtt_FindGlyphIndex(&font_info, text[i - 1]);
+			int kern = stbtt_GetGlyphKernAdvance(&font_info, previous_glyph_index, glyph_index);
+			x += static_cast<int>(roundf(kern * scale));
+		}
+
+		int glyph_width = ch_x1 - ch_x0;
+		int glyph_height = ch_y1 - ch_y0;
+		unsigned char* glyph_bitmap = new unsigned char[glyph_width * glyph_height];
+		stbtt_MakeGlyphBitmap(&font_info, glyph_bitmap, glyph_width, glyph_height, glyph_width, scale, scale, glyph_index);
+		 
+		for (int row = 0; row < glyph_height; ++row)
+		{
+			for (int col = 0; col < glyph_width; ++col)
+			{
+				int destX = x + col;
+				int destY = y + row + ch_y0;
+
+				if (destX >= 0 && destX < fb_width && destY >= 0 && destY < fb_height)
+				{
+					font_bitmap[destY * fb_width + destX] *= 1.0f - glyph_bitmap[row * glyph_width + col] / 255.0f;
+				}
+			}
+		}
+
+		delete[] glyph_bitmap;
+
+		x += static_cast<int>(roundf(advance_width * scale));
+	}
+
+	stbi_flip_vertically_on_write(0);
+	stbi_write_png("res/out.png", fb_width, fb_height, 1, font_bitmap, fb_width);
+	delete[] font_file;
+	delete[] font_bitmap;
 
 	_frame_exec = [&]() {
 		drawTime = static_cast<real>(glfwGetTime());
