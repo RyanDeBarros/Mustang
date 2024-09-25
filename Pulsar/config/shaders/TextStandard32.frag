@@ -12,7 +12,7 @@ void main() {
 	if (t_TexSlot < 0) {
 		o_Color = t_Color;
 	} else {
-	// TODO BPP in shaders only work for =4. Create different shaders for each BPP? Or define attribute? Or define uniform instead of different shaders.
-		o_Color = t_Color * texture(TEXTURE_SLOTS[int(t_TexSlot)], t_TexCoord);
+		float grayscale = texture(TEXTURE_SLOTS[int(t_TexSlot)], t_TexCoord).r;
+		o_Color = t_Color * vec4(1.0, 1.0, 1.0, grayscale);
 	}
 }

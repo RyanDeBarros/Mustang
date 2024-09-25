@@ -2,6 +2,7 @@
 
 #include "ActorPrimitive.h"
 #include "registry/TextureRegistry.h"
+#include "utils/Functor.inl"
 
 class RectRender : public ActorPrimitive2D
 {
@@ -11,6 +12,7 @@ protected:
 
 	int m_UVWidth, m_UVHeight;
 	glm::vec2 m_Pivot;
+	Functor<void, TextureSlot> on_draw_callback;
 
 public:
 	// TODO renderable should have empty index buffer, since it will not be used.

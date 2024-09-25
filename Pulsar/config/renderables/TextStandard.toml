@@ -1,0 +1,17 @@
+header = "renderable"
+
+[renderable.model]
+layout = 0b010111110100
+mask = 0b111111
+shader = "config/shaders/TextStandard32.toml"
+
+[renderable]
+# texture slot (1) | condensed P-transform (2) | condensed RS-transform (4) | RGBA modulation color (4) | vertex position (2) | texture coordinate (2) 
+vertices = [
+	-1.0,			0.0, 0.0,					1.0, 0.0, 0.0, 1.0,				1.0, 1.0, 1.0, 1.0,			-0.5, -0.5,			0.0, 0.0,
+	-1.0,			0.0, 0.0,					1.0, 0.0, 0.0, 1.0,				1.0, 1.0, 1.0, 1.0,			 0.5, -0.5,			1.0, 0.0,
+	-1.0,			0.0, 0.0,					1.0, 0.0, 0.0, 1.0,				1.0, 1.0, 1.0, 1.0,			 0.5,  0.5,			1.0, 1.0,
+	-1.0,			0.0, 0.0,					1.0, 0.0, 0.0, 1.0,				1.0, 1.0, 1.0, 1.0,			-0.5,  0.5,			0.0, 1.0
+]
+num_vertices = 4
+indices = []

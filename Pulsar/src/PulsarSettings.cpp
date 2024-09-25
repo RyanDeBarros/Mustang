@@ -44,6 +44,8 @@ PulsarSettings::PulsarSettings()
 			_solid_polygon_shader = sps.value();
 		if (auto rrf = rendering["rect_renderable"].value<std::string>())
 			_rect_renderable_filepath = rrf.value();
+		if (auto tsf = rendering["text_standard"].value<std::string>())
+			_text_standard_filepath = tsf.value();
 		if (auto sp = rendering["solid_polygon"].value<std::string>())
 			_solid_polygon_filepath = sp.value();
 		if (auto sp = rendering["solid_point"].value<std::string>())

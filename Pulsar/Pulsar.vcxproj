@@ -175,6 +175,7 @@
     <ClCompile Include="src\platform\Cursor.cpp" />
     <ClCompile Include="src\platform\InputManager.cpp" />
     <ClCompile Include="src\registry\compound\Atlas.cpp" />
+    <ClCompile Include="src\render\Font.cpp" />
     <ClCompile Include="src\registry\compound\NonantTile.cpp" />
     <ClCompile Include="src\registry\Tile.cpp" />
     <ClCompile Include="src\registry\TileRegistry.cpp" />
@@ -222,6 +223,7 @@
     <ClInclude Include="src\platform\Cursor.h" />
     <ClInclude Include="src\platform\Input.h" />
     <ClInclude Include="src\platform\InputManager.h" />
+    <ClInclude Include="src\render\Font.h" />
     <ClInclude Include="src\registry\compound\NonantTile.h" />
     <ClInclude Include="src\render\actors\NonantRender.h" />
     <ClInclude Include="src\render\transform\YSorter.h" />
@@ -238,6 +240,13 @@
     <ClCompile Include="src\platform\WindowManager.cpp" />
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
+    <ClInclude Include="vendor\utf\utf8.h" />
+    <ClInclude Include="vendor\utf\utf8\checked.h" />
+    <ClInclude Include="vendor\utf\utf8\core.h" />
+    <ClInclude Include="vendor\utf\utf8\cpp11.h" />
+    <ClInclude Include="vendor\utf\utf8\cpp17.h" />
+    <ClInclude Include="vendor\utf\utf8\cpp20.h" />
+    <ClInclude Include="vendor\utf\utf8\unchecked.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sandbox\CHRS.h" />

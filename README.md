@@ -12,5 +12,6 @@ This project uses the following libraries:
 - **STB**
 - **Nano SVG**
 - **TOML++**
+- **utfcpp**
 
 For the actual licensing information, refer to the Licenses folder.

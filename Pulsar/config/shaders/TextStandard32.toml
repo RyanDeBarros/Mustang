@@ -1,0 +1,5 @@
+header = "shader"
+
+[shader]
+vertex = "config/shaders/TextStandard.vert"
+fragment = "config/shaders/TextStandard32.frag"

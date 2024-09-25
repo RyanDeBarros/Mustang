@@ -18,7 +18,7 @@ protected:
 	friend class ActorTesselation2D;
 	Renderable m_Render;
 	std::vector<glm::vec4> m_ModulationColors;
-	// m_Status = 0b... | transformRS updated | transformP updated | visible
+	// m_Status = 0b... transformM updated | transformRS updated | transformP updated | visible
 	unsigned char m_Status = 0b111;
 
 public:
@@ -59,7 +59,6 @@ public:
 	TextureHandle GetTextureHandle() const { return m_Render.textureHandle; }
 	const Renderable& GetRenderable() const { return m_Render; }
 
-protected:
 	void OnDraw(signed char texture_slot);
 
 private:

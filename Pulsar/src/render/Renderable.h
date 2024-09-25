@@ -49,7 +49,6 @@ struct Renderable
 	Renderable& operator=(Renderable&& other) noexcept;
 	~Renderable();
 
-private:
 	VertexBufferCounter vertexCount;
 	VertexBufferCounter indexCount;
 	GLfloat* vertexBufferData;
@@ -57,13 +56,4 @@ private:
 	
 	bool AttachVertexBuffer(toml::v3::array* vertex_array, size_t size);
 	bool AttachIndexBuffer(toml::v3::array* index_array, size_t size);
-
-	friend class CanvasLayer;
-	friend class ActorPrimitive2D;
-	friend class RectRender;
-	friend class DebugPolygon;
-	friend class DebugPoint;
-	friend class DebugPoint;
-	friend struct Loader;
-	friend VertexBufferCounter Render::VertexBufferLayoutCount(const Renderable& render);
 };

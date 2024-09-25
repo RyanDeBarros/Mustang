@@ -10,8 +10,13 @@
 
 Renderable RectRender::rect_renderable;
 
+static Functor<void, TextureSlot> create_on_draw_callback(RectRender* rr)
+{
+	return make_functor<true>([](TextureSlot slot, RectRender* rr) { rr->OnDraw(slot); }, rr);
+}
+
 RectRender::RectRender(TextureHandle texture, const glm::vec2& pivot, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible)
-	: ActorPrimitive2D(rect_renderable, z, fickle_type, visible)
+	: ActorPrimitive2D(rect_renderable, z, fickle_type, visible), on_draw_callback(create_on_draw_callback(this))
 {
 	SetShaderHandle(shader);
 	SetTextureHandle(texture);
@@ -21,34 +26,40 @@ RectRender::RectRender(TextureHandle texture, const glm::vec2& pivot, ShaderHand
 }
 
 RectRender::RectRender(const RectRender& other)
-	: ActorPrimitive2D(other), m_UVWidth(other.m_UVWidth), m_UVHeight(other.m_UVHeight), m_Pivot(other.m_Pivot)
+	: ActorPrimitive2D(other), m_UVWidth(other.m_UVWidth), m_UVHeight(other.m_UVHeight),
+	m_Pivot(other.m_Pivot), on_draw_callback(create_on_draw_callback(this))
 {
 }
 
 RectRender::RectRender(RectRender&& other) noexcept
-	: ActorPrimitive2D(std::move(other)), m_UVWidth(other.m_UVWidth), m_UVHeight(other.m_UVHeight), m_Pivot(other.m_Pivot)
+	: ActorPrimitive2D(std::move(other)), m_UVWidth(other.m_UVWidth), m_UVHeight(other.m_UVHeight),
+	m_Pivot(other.m_Pivot), on_draw_callback(create_on_draw_callback(this))
 {
 }
 
 RectRender& RectRender::operator=(const RectRender& other)
 {
-	if (this == &other)
-		return *this;
-	ActorPrimitive2D::operator=(other);
-	m_UVWidth = other.m_UVWidth;
-	m_UVHeight = other.m_UVHeight;
-	SetPivot(other.m_Pivot);
+	if (this != &other)
+	{
+		ActorPrimitive2D::operator=(other);
+		m_UVWidth = other.m_UVWidth;
+		m_UVHeight = other.m_UVHeight;
+		SetPivot(other.m_Pivot);
+		on_draw_callback = create_on_draw_callback(this);
+	}
 	return *this;
 }
 
 RectRender& RectRender::operator=(RectRender&& other) noexcept
 {
-	if (this == &other)
-		return *this;
-	ActorPrimitive2D::operator=(std::move(other));
-	m_UVWidth = other.m_UVWidth;
-	m_UVHeight = other.m_UVHeight;
-	SetPivot(other.m_Pivot);
+	if (this != &other)
+	{
+		ActorPrimitive2D::operator=(std::move(other));
+		m_UVWidth = other.m_UVWidth;
+		m_UVHeight = other.m_UVHeight;
+		SetPivot(other.m_Pivot);
+		on_draw_callback = create_on_draw_callback(this);
+	}
 	return *this;
 }
 
@@ -61,7 +72,7 @@ void RectRender::DefineRectRenderable()
 
 void RectRender::RequestDraw(CanvasLayer* canvas_layer)
 {
-	canvas_layer->DrawRect(this);
+	canvas_layer->DrawRect(m_Render, on_draw_callback);
 }
 
 void RectRender::SetPivot(float pivotX, float pivotY)

@@ -13,9 +13,17 @@ struct TextureConstructArgs_filepath
 	TextureVersion version = 0;
 	float svg_scale = 1.0f;
 
+	TextureConstructArgs_filepath(const std::string& filepath, const TextureSettings& settings = {},
+		bool temporary_buffer = false, TextureVersion version = 0, float svg_scale = 1.0f)
+		: filepath(filepath), settings(settings), temporaryBuffer(temporary_buffer), version(version), svg_scale(svg_scale) {}
+	TextureConstructArgs_filepath(std::string&& filepath, const TextureSettings& settings = {},
+		bool temporary_buffer = false, TextureVersion version = 0, float svg_scale = 1.0f)
+		: filepath(std::move(filepath)), settings(settings), temporaryBuffer(temporary_buffer), version(version), svg_scale(svg_scale) {}
+
 	bool operator==(const TextureConstructArgs_filepath& args) const
 	{
-		return filepath == args.filepath && settings == args.settings && temporaryBuffer == args.temporaryBuffer && version == args.version && svg_scale == args.svg_scale;
+		return filepath == args.filepath && settings == args.settings && temporaryBuffer == args.temporaryBuffer
+			&& version == args.version && svg_scale == args.svg_scale;
 	}
 };
 
@@ -38,6 +46,9 @@ struct TextureConstructArgs_tile
 	TileHandle tile;
 	TextureVersion version = 0;
 	TextureSettings settings = {};
+
+	TextureConstructArgs_tile(TileHandle tile, TextureVersion version = 0, const TextureSettings& settings = {})
+		: tile(tile), version(version), settings(settings) {}
 
 	bool operator==(const TextureConstructArgs_tile& args) const
 	{

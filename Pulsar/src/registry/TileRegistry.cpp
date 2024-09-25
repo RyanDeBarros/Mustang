@@ -5,7 +5,8 @@
 
 TileHandle TileRegistry::handle_cap;
 std::unordered_map<TileHandle, Tile> TileRegistry::registry;
-std::unordered_map<TileConstructArgs, TileHandle> TileRegistry::lookupMap;
+std::unordered_map<TileConstructArgs_filepath, TileHandle> TileRegistry::lookupMap_filepath;
+std::unordered_map<TileConstructArgs_buffer, TileHandle> TileRegistry::lookupMap_buffer;
 
 void TileRegistry::Init()
 {
@@ -15,7 +16,8 @@ void TileRegistry::Init()
 void TileRegistry::Terminate()
 {
 	registry.clear();
-	lookupMap.clear();
+	lookupMap_filepath.clear();
+	lookupMap_buffer.clear();
 }
 
 Tile const* TileRegistry::Get(TileHandle handle)
@@ -41,17 +43,33 @@ bool TileRegistry::DestroyTile(TileHandle handle)
 	return true;
 }
 
-TileHandle TileRegistry::GetHandle(const TileConstructArgs& args)
+TileHandle TileRegistry::GetHandle(const TileConstructArgs_filepath& args)
 {
-	auto iter = lookupMap.find(args);
-	if (iter != lookupMap.end())
+	auto iter = lookupMap_filepath.find(args);
+	if (iter != lookupMap_filepath.end())
 		return iter->second;
-	Tile tile(args.filepath.c_str(), args.svg_scale);
+	Tile tile(args.filepath.c_str(), args.svg_scale, args.flip_vertically);
 	if (tile.IsValid())
 	{
 		TileHandle handle = handle_cap++;
 		registry.emplace(handle, std::move(tile));
-		lookupMap[args] = handle;
+		lookupMap_filepath[args] = handle;
+		return handle;
+	}
+	else return 0;
+}
+
+TileHandle TileRegistry::GetHandle(const TileConstructArgs_buffer& args)
+{
+	auto iter = lookupMap_buffer.find(args);
+	if (iter != lookupMap_buffer.end())
+		return iter->second;
+	Tile tile(args.image_buffer, args.width, args.height, args.bpp, args.deletion_policy, args.flip_vertically);
+	if (tile.IsValid())
+	{
+		TileHandle handle = handle_cap++;
+		registry.emplace(handle, std::move(tile));
+		lookupMap_buffer[args] = handle;
 		return handle;
 	}
 	else return 0;

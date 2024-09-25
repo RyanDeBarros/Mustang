@@ -194,7 +194,7 @@ void CanvasLayer::DrawMultiArray(DebugMultiPolygon* multi_polygon)
 	SendMultiArray(multi_polygon);
 }
 
-void CanvasLayer::DrawRect(RectRender* rect)
+void CanvasLayer::DrawRect(const Renderable& renderable, const Functor<void, TextureSlot>& on_draw_callback)
 {
 	if (currentDrawMode != DrawMode::RECT)
 	{
@@ -206,23 +206,22 @@ void CanvasLayer::DrawRect(RectRender* rect)
 		SendRects();
 		rectBatcher.draw_count = 1;
 	}
-	const auto& render = rect->m_Render;
-	if (render.model != currentModel || !currentLexicon.Shares(render.uniformLexicon))
+	if (renderable.model != currentModel || !currentLexicon.Shares(renderable.uniformLexicon))
 	{
 		SendRects();
 		rectBatcher.draw_count = 1;
-		SetBatchModel(render.model);
-		SetUniformLexicon(render.uniformLexicon);
+		SetBatchModel(renderable.model);
+		SetUniformLexicon(renderable.uniformLexicon);
 	}
-	else if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(render)
-		|| m_Data.maxIndexPoolSize - (indexPos - m_IndexPool) < render.indexCount)
+	else if (m_Data.maxVertexPoolSize - (vertexPos - m_VertexPool) < Render::VertexBufferLayoutCount(renderable)
+		|| m_Data.maxIndexPoolSize - (indexPos - m_IndexPool) < renderable.indexCount)
 	{
 		SendRects();
 		rectBatcher.draw_count = 1;
 	}
-	rect->OnDraw(GetTextureSlot(render));
-	PoolOverVertexBuffer(render);
-	PoolOverLexicon(render.uniformLexicon);
+	on_draw_callback(GetTextureSlot(renderable));
+	PoolOverVertexBuffer(renderable);
+	PoolOverLexicon(renderable.uniformLexicon);
 }
 
 void CanvasLayer::SetBlending() const

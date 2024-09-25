@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 
 #include "PulsarSettings.h"
+#include "utils/Functor.inl"
 #include "ActorRenderBase.h"
 #include "LayerView.h"
 #include "Renderable.h"
@@ -93,7 +94,7 @@ public:
 	void DrawPrimitive(class ActorPrimitive2D*);
 	void DrawArray(const Renderable& renderable, GLenum indexing_mode);
 	void DrawMultiArray(class DebugMultiPolygon*);
-	void DrawRect(class RectRender*);
+	void DrawRect(const Renderable& renderable, const Functor<void, TextureSlot>& on_draw_callback);
 
 private:
 	void SetBlending() const;

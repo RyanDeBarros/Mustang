@@ -35,6 +35,7 @@ public:
 	static VertexSize standard_index_pool_size() { return ps()._standard_index_pool_size; }
 
 	static const char* standard_shader_assetfile() { return ps()._standard_shader_assetfile.c_str(); }
+	static const char* text_standard_filepath() { return ps()._text_standard_filepath.c_str(); }
 	static const char* solid_polygon_shader() { return ps()._solid_polygon_shader.c_str(); }
 	static const char* rect_renderable_filepath() { return ps()._rect_renderable_filepath.c_str(); }
 	static const char* solid_polygon_filepath() { return ps()._solid_polygon_filepath.c_str(); }
@@ -61,12 +62,13 @@ private:
 	VertexSize _standard_vertex_pool_size = 2048;
 	VertexSize _standard_index_pool_size = 1024;
 
-	std::string _standard_shader_assetfile = "config/StandardShader32.toml";
-	std::string _solid_polygon_shader = "config/SolidPolygonShader.toml";
-	std::string _rect_renderable_filepath = "config/RectRenderable.toml";
-	std::string _solid_polygon_filepath = "config/SolidPolygon.toml";
-	std::string _solid_point_filepath = "config/SolidPoint.toml";
-	std::string _solid_circle_filepath = "config/SolidCircle.toml";
+	std::string _standard_shader_assetfile = "config/shaders/StandardShader32.toml";
+	std::string _solid_polygon_shader = "config/shaders/SolidPolygonShader.toml";
+	std::string _rect_renderable_filepath = "config/renderables/RectRenderable.toml";
+	std::string _text_standard_filepath = "config/renderables/TextStandard.toml";
+	std::string _solid_polygon_filepath = "config/renderables/SolidPolygon.toml";
+	std::string _solid_point_filepath = "config/renderables/SolidPoint.toml";
+	std::string _solid_circle_filepath = "config/renderables/SolidCircle.toml";
 
 	real _particle_frame_length = 0.0167f;
 
