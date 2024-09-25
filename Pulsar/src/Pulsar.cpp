@@ -73,8 +73,10 @@ int Pulsar::StartUp(const char* title)
 	PULSAR_TRY(Logger::LogInfo(reinterpret_cast<const char*>(glGetString(GL_VERSION))));
 	Renderer::Init();
 	Renderer::FocusWindow(0);
-	// TODO put in better place
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	
+	// TODO also use:
+	// glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureSlots);
+	// TODO Logger functions should have a flush mode that either buffers messages are flushes them.
 	return 0;
 }
 
@@ -383,9 +385,11 @@ void Pulsar::Run()
 	*text_render.Fickler().Scale() = glm::vec2{ 1.0f, 1.0f } * 2.5f;
 	//*text_render.Fickler().Position() = glm::vec2{ -600.0f, -300.0f };
 	//text_render.Fickler().SyncT();
-	Renderer::RemoveCanvasLayer(11);
-	Renderer::AddCanvasLayer(11); // TODO Clear() for CanvasLayer.
+	//Renderer::RemoveCanvasLayer(11);
+	//Renderer::AddCanvasLayer(11); // TODO Clear() for CanvasLayer.
 	Renderer::GetCanvasLayer(11)->OnAttach(&text_render);
+	//psys->z = -100;
+	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
 	_frame_exec = [&]() {
 		drawTime = static_cast<real>(glfwGetTime());
@@ -428,7 +432,7 @@ void Pulsar::Run()
 			}
 		}
 
-		Logger::LogInfo(STR(WindowManager::GetWindow(0)->GetCursorPos()));
+		//Logger::LogInfo(STR(WindowManager::GetWindow(0)->GetCursorPos()));
 
 		Renderer::OnDraw();
 	};

@@ -99,19 +99,23 @@ void Texture::TexImage(Tile const* tile, const std::string& err_msg, GLint lod_l
 	}
 	PULSAR_TRY(glGenTextures(1, &m_RID));
 	PULSAR_TRY(glBindTexture(GL_TEXTURE_2D, m_RID));
-
+	
 	switch (tile->m_BPP)
 	{
 	case 4:
+		PULSAR_TRY(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
 		PULSAR_TRY(glTexImage2D(GL_TEXTURE_2D, lod_level, GL_RGBA8, tile->m_Width, tile->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tile->m_ImageBuffer));
 		break;
 	case 3:
+		PULSAR_TRY(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 		PULSAR_TRY(glTexImage2D(GL_TEXTURE_2D, lod_level, GL_RGB8, tile->m_Width, tile->m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, tile->m_ImageBuffer));
 		break;
 	case 2:
+		PULSAR_TRY(glPixelStorei(GL_UNPACK_ALIGNMENT, 2));
 		PULSAR_TRY(glTexImage2D(GL_TEXTURE_2D, lod_level, GL_RG8, tile->m_Width, tile->m_Height, 0, GL_RG, GL_UNSIGNED_BYTE, tile->m_ImageBuffer));
 		break;
 	case 1:
+		PULSAR_TRY(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 		PULSAR_TRY(glTexImage2D(GL_TEXTURE_2D, lod_level, GL_R8, tile->m_Width, tile->m_Height, 0, GL_RED, GL_UNSIGNED_BYTE, tile->m_ImageBuffer));
 		break;
 	default:
