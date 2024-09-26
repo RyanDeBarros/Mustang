@@ -376,8 +376,7 @@ void Pulsar::Run()
 	// TODO font registry?
 	//Font font("res/fonts/Roboto-BoldItalic.ttf", 96.0f, Font::COMMON);
 	Font font("res/fonts/Roboto-BoldItalic.ttf", 96.0f, "");
-	Font font2("res/fonts/Roboto-Regular.ttf", 96.0f);
-	TextRender text_render = font2.GetTextRender();
+	TextRender text_render = font.GetTextRender();
 	text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!!";
 	//text_render.text = "H";
 	//*text_render.Fickler().Scale() = glm::vec2{ 1.0f, 1.0f } * 8.0f;
@@ -385,9 +384,22 @@ void Pulsar::Run()
 	//*text_render.Fickler().Position() = glm::vec2{ -600.0f, -300.0f };
 	//text_render.Fickler().SyncT();
 	//Renderer::GetCanvasLayer(11)->Clear();
-	Renderer::GetCanvasLayer(11)->OnAttach(&text_render);
 	//psys->z = -100;
 	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
+
+	Font font2("res/fonts/Roboto-Regular.ttf", 96.0f, "");
+	font2.CacheAll(font);
+
+	Logger::LogInfo(text_render.Width());
+	Logger::LogInfo(text_render.Height());
+	Logger::NewLine();
+
+	DebugRect text_background(text_render.Width(), text_render.Height(), true, {0.0f, 1.0f});
+	text_background.Fickler().modulatable->self.Sync({0.0f, 0.0f, 0.6f, 0.6f});
+	Renderer::GetCanvasLayer(11)->OnAttach(&text_background);
+	Renderer::GetCanvasLayer(11)->OnAttach(&text_render);
+
+	int modified = 0;
 
 	_frame_exec = [&]() {
 		drawTime = static_cast<real>(glfwGetTime());
@@ -435,10 +447,28 @@ void Pulsar::Run()
 		//*text_render.Fickler().Modulate() = { std::abs(glm::sin(Pulsar::totalDrawTime)),
 			//std::abs(glm::sin(Pulsar::totalDrawTime + 1.0f)),
 			//std::abs(glm::sin(Pulsar::totalDrawTime - 1.0f)), 1.0f};
-		//if (std::fmod(Pulsar::totalDrawTime, 2.0f) < 1.0f)
-			//text_render.ChangeFont(&font);
-		//else
-			//text_render.ChangeFont(&font2);
+		if (std::fmod(Pulsar::totalDrawTime, 2.0f) < 1.0f)
+		{
+			if (modified != 1)
+			{
+				modified = 1;
+				text_render.ChangeFont(&font);
+				text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 1";
+				text_background.SetWidth(text_render.Width(true));
+				Logger::LogInfo(text_render.Width(true));
+			}
+		}
+		else
+		{
+			if (modified != 2)
+			{
+				modified = 2;
+				text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 2";
+				text_render.ChangeFont(&font2);
+				text_background.SetWidth(text_render.Width(true));
+				Logger::LogInfo(text_render.Width(true));
+			}
+		}
 
 		Renderer::OnDraw();
 	};

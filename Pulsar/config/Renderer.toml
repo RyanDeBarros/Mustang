@@ -3,7 +3,8 @@ header = "renderer"
 [window]
 width = 1440
 height = 1080
-gl_clear_color = [0.08, 0.08, 0.08, 0.0]
+#gl_clear_color = [0.08, 0.08, 0.08, 0.0]
+gl_clear_color = [0.8, 0.8, 0.8, 0.0]
 vsync_on = true
 sdl_gamecontrollerdb = "config/sdl-gamecontrollerdb/gamecontrollerdb.txt"
 

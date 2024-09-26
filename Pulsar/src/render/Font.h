@@ -87,6 +87,8 @@ class TextRender : public FickleActor2D
 	Functor<void, TextureSlot> on_draw_callback;
 	static Functor<void, TextureSlot> create_on_draw_callback(TextRender* tr);
 
+	int width = -1, height = -1;
+
 public:
 	TextRender(Font* font, ZIndex z);
 	TextRender(const TextRender&) = delete;
@@ -118,9 +120,12 @@ public:
 	// although it may be possible to abstract that too.
 
 	void ChangeFont(Font* font_) { font = font_; }
+	int Width(bool recalculate = false) { if (width < 0.0f || recalculate) CalculateBounds(); return width; }
+	int Height(bool recalculate = false) { if (height < 0.0f || recalculate) CalculateBounds(); return height; }
 
 private:
 	void DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* canvas_layer);
+	void CalculateBounds();
 };
 
 struct TR_Notification : public FickleNotification

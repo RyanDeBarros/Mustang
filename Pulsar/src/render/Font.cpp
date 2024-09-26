@@ -182,7 +182,7 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 		return;
 	int line_height = font->LineHeight(format.line_spacing_mult);
 	int x = 0;
-	int y = font->baseline;
+	int y = -font->baseline;
 
 	int prevGIndex = 0;
 	auto iter = text.begin();
@@ -291,4 +291,61 @@ void TextRender::DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* 
 	// TODO pivot for text render.
 
 	canvas_layer->DrawRect(renderable, on_draw_callback);
+}
+
+void TextRender::CalculateBounds()
+{
+	int line_height = font->LineHeight(format.line_spacing_mult);
+	int x = 0;
+	int y = -font->baseline;
+	width = 0;
+
+	int prevGIndex = 0;
+	auto iter = text.begin();
+	while (iter)
+	{
+		Font::Codepoint codepoint = iter.advance();
+
+		if (codepoint == ' ')
+		{
+			x += font->space_width;
+			prevGIndex = 0;
+		}
+		else if (codepoint == '\t')
+		{
+			x = static_cast<int>(x + font->space_width * format.num_spaces_in_tab);
+			prevGIndex = 0;
+		}
+		else if (carriage_return_2(codepoint, iter ? iter.codepoint() : 0))
+		{
+			if (x > width)
+				width = x;
+			x = 0;
+			y -= line_height;
+			++iter;
+			prevGIndex = 0;
+		}
+		else if (carriage_return_1(codepoint))
+		{
+			if (x > width)
+				width = x;
+			x = 0;
+			y -= line_height;
+			prevGIndex = 0;
+		}
+		else if (font->Cache(codepoint))
+		{
+			const Font::Glyph& glyph = font->glyphs[codepoint];
+			if (prevGIndex > 0)
+			{
+				int kern = stbtt_GetGlyphKernAdvance(&font->font_info, prevGIndex, glyph.gIndex);
+				x += static_cast<int>(roundf(kern * font->scale));
+			}
+			x += static_cast<int>(roundf(glyph.advance_width * font->scale));
+			prevGIndex = glyph.gIndex;
+		}
+	}
+	if (x > width)
+		width = x;
+	height = -y;
 }
