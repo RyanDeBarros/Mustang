@@ -373,26 +373,21 @@ void Pulsar::Run()
 			});
 
 	// TODO font registry?
-	Font font("res/fonts/Roboto-BoldItalic.ttf", 96.0f, Font::COMMON);
-	TextRender text_render = font.GetTextRender();
-	text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!!";
-	//text_render.text = "H";
+	Font font("res/fonts/Roboto-BoldItalic.ttf", 96.0f, "");
+	Font font2("res/fonts/Roboto-Regular.ttf", 48.0f, Font::COMMON);
+	TextRender text_render = font2.GetTextRender();
+	//text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!!";
+	text_render.text = "Whereas recognition of the inherent dignity";
+	text_render.UpdateBounds();
 	//*text_render.Fickler().Scale() = glm::vec2{ 1.0f, 1.0f } * 8.0f;
 	*text_render.Fickler().Scale() = glm::vec2{ 1.0f, 1.0f } * 2.5f;
 	//*text_render.Fickler().Position() = glm::vec2{ -600.0f, -300.0f };
-	text_render.Fickler().SyncT();
+	//text_render.Fickler().SyncT();
 	//Renderer::GetCanvasLayer(11)->Clear();
 	//psys->z = -100;
 	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
-	Font font2("res/fonts/Roboto-Regular.ttf", 96.0f, Font::COMMON);
-	font2.CacheAll(font);
-
-	Logger::LogInfo(text_render.Width());
-	Logger::LogInfo(text_render.Height());
-	Logger::NewLine();
-
-	DebugRect text_background(text_render.Width(), text_render.Height(), true, {0.0f, 1.0f});
+	DebugRect text_background(text_render.GetBounds().full_width, text_render.GetBounds().full_height, true, {0.0f, 1.0f});
 	text_background.Fickler().modulatable->self.Sync({0.0f, 0.0f, 0.6f, 0.6f});
 	Renderer::GetCanvasLayer(11)->OnAttach(&text_background);
 	Renderer::GetCanvasLayer(11)->OnAttach(&text_render);

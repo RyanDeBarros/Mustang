@@ -208,9 +208,10 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 	if ((status & 0b1) == 0b0)
 		return;
 	int line_height = font->LineHeight(format.line_spacing_mult);
-	int startX = static_cast<int>(-pivot.x * Width());
+	int startX = static_cast<int>(-pivot.x * bounds.full_width);
 	int x = startX;
-	int y = static_cast<int>(roundf(-font->baseline + (1.0f - pivot.y) * Height()));
+	// TODO the bounds.top_ribbon ensures a kind of vertical justify. Explore this more in format.
+	int y = static_cast<int>(roundf(-font->baseline + (1.0f - pivot.y) * bounds.full_height)) + bounds.top_ribbon;
 
 	int prevGIndex = 0;
 	auto iter = text.begin();
@@ -324,7 +325,8 @@ void TextRender::UpdateBounds()
 	int line_height = font->LineHeight(format.line_spacing_mult);
 	int x = 0;
 	int y = -font->baseline;
-	width = 0;
+	bounds.full_width = 0;
+	int min_ch_y0 = 0;
 
 	int prevGIndex = 0;
 	auto iter = text.begin();
@@ -344,8 +346,8 @@ void TextRender::UpdateBounds()
 		}
 		else if (carriage_return_2(codepoint, iter ? iter.codepoint() : 0))
 		{
-			if (x > width)
-				width = x;
+			if (x > bounds.full_width)
+				bounds.full_width = x;
 			x = 0;
 			y -= line_height;
 			++iter;
@@ -353,8 +355,8 @@ void TextRender::UpdateBounds()
 		}
 		else if (carriage_return_1(codepoint))
 		{
-			if (x > width)
-				width = x;
+			if (x > bounds.full_width)
+				bounds.full_width = x;
 			x = 0;
 			y -= line_height;
 			prevGIndex = 0;
@@ -369,9 +371,13 @@ void TextRender::UpdateBounds()
 			}
 			x += static_cast<int>(roundf(glyph.advance_width * font->scale));
 			prevGIndex = glyph.gIndex;
+			if (glyph.ch_y0 < min_ch_y0)
+				min_ch_y0 = glyph.ch_y0;
 		}
 	}
-	if (x > width)
-		width = x;
-	height = -y;
+	if (x > bounds.full_width)
+		bounds.full_width = x;
+	bounds.lowest_baseline = -y;
+	bounds.top_ribbon = font->ascent * font->scale + min_ch_y0;
+	bounds.full_height = bounds.lowest_baseline - font->descent * font->scale - bounds.top_ribbon;
 }

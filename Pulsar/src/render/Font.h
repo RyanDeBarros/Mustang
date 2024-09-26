@@ -92,19 +92,26 @@ class TextRender : public FickleActor2D
 	Functor<void, TextureSlot> on_draw_callback;
 	static Functor<void, TextureSlot> create_on_draw_callback(TextRender* tr);
 
-	int width = -1, height = -1;
-
 public:
 	TextRender(Font* font, ZIndex z);
 	TextRender(const TextRender&) = delete;
 	TextRender(TextRender&&) = delete;
 
+	// TODO FormatRegistry
 	struct Format
 	{
 		float line_spacing_mult = 1.0f;
 		float num_spaces_in_tab = 4;
 		// TODO justification/alignment/underline/strikethrough/etc.
 		// background color/drop-shadow/reflection/etc.
+	};
+
+	struct Bounds
+	{
+		int full_width = 0;
+		int full_height = 0;
+		int lowest_baseline = 0;
+		int top_ribbon = 0;
 	};
 
 	UTF::String text = "";
@@ -122,16 +129,15 @@ public:
 	void FlagTransformRS() { status |= 0b100; }
 	void FlagModulate() { status |= 0b1000; }
 
-	// TODO width() and height() for bounds. this will make it easy to put text renders of different formats next to each other,
-	// although it may be possible to abstract that too.
-
 	void ChangeFont(Font* font_) { font = font_; }
-	int Width() { if (width < 0.0f) UpdateBounds(); return width; }
-	int Height() { if (height < 0.0f) UpdateBounds(); return height; }
+	// TODO Block/rich text that tesselates TextRenders properly using bounds.
+	Bounds GetBounds() const { return bounds; }
 	void UpdateBounds();
 
 private:
 	void DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* canvas_layer);
+
+	Bounds bounds;
 };
 
 struct TR_Notification : public FickleNotification
