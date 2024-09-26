@@ -136,6 +136,12 @@ bool Font::Cache(Font::Codepoint codepoint)
 	return false;
 }
 
+void Font::CacheAll(const Font& other)
+{
+	for (const auto& [codepoint, glyph] : other.glyphs)
+		Cache(codepoint);
+}
+
 TextRender Font::GetTextRender(ZIndex z)
 {
 	return TextRender(this, z);
@@ -183,19 +189,8 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 	while (iter)
 	{
 		Font::Codepoint codepoint = iter.advance();
-		if (font->Cache(codepoint))
-		{
-			const Font::Glyph& glyph = font->glyphs[codepoint];
-			if (prevGIndex > 0)
-			{
-				int kern = stbtt_GetGlyphKernAdvance(&font->font_info, prevGIndex, glyph.gIndex);
-				x += static_cast<int>(roundf(kern * font->scale));
-			}
-			DrawGlyph(glyph, x, y, canvas_layer);
-			x += static_cast<int>(roundf(glyph.advance_width * font->scale));
-			prevGIndex = glyph.gIndex;
-		}
-		else if (codepoint == ' ')
+
+		if (codepoint == ' ')
 		{
 			x += font->space_width;
 			prevGIndex = 0;
@@ -218,17 +213,25 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 			y -= line_height;
 			prevGIndex = 0;
 		}
+		else if (font->Cache(codepoint))
+		{
+			const Font::Glyph& glyph = font->glyphs[codepoint];
+			if (prevGIndex > 0)
+			{
+				int kern = stbtt_GetGlyphKernAdvance(&font->font_info, prevGIndex, glyph.gIndex);
+				x += static_cast<int>(roundf(kern * font->scale));
+			}
+			DrawGlyph(glyph, x, y, canvas_layer);
+			x += static_cast<int>(roundf(glyph.advance_width * font->scale));
+			prevGIndex = glyph.gIndex;
+		}
 	}
 }
 
 void TextRender::DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* canvas_layer)
 {
-	PackedTransform2D glyph_transform;
-	glyph_transform.transform.position = { x, y - glyph.ch_y0 };
-	glyph_transform.transform.scale = { format.font_size_mult, -format.font_size_mult };
+	PackedTransform2D glyph_transform({ {x, y - glyph.ch_y0}, 0.0f, {1.0f, -1.0f} });
 	glyph_transform.Sync(m_Fickler.transformable->self);
-	PackedModulate glyph_modulate;
-	glyph_modulate.Sync(m_Fickler.modulatable->self);
 
 	if (status & 0b10)
 	{
@@ -253,12 +256,13 @@ void TextRender::DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* 
 	if (status & 0b1110)
 	{
 		// transformM
+		Modulate glyph_modulate = m_Fickler.modulatable->self.modulate;
 		for (VertexBufferCounter i = 0; i < renderable.vertexCount; ++i)
 		{
-			renderable.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(glyph_modulate.packedM.r);
-			renderable.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(glyph_modulate.packedM.g);
-			renderable.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(glyph_modulate.packedM.b);
-			renderable.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(glyph_modulate.packedM.a);
+			renderable.vertexBufferData[i * stride + 7 ] = static_cast<GLfloat>(glyph_modulate.r);
+			renderable.vertexBufferData[i * stride + 8 ] = static_cast<GLfloat>(glyph_modulate.g);
+			renderable.vertexBufferData[i * stride + 9 ] = static_cast<GLfloat>(glyph_modulate.b);
+			renderable.vertexBufferData[i * stride + 10] = static_cast<GLfloat>(glyph_modulate.a);
 		}
 	}
 	// vertex positions
@@ -287,19 +291,4 @@ void TextRender::DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* 
 	// TODO pivot for text render.
 
 	canvas_layer->DrawRect(renderable, on_draw_callback);
-
-	/*for (int row = 0; row < glyph.height; ++row)
-	{
-		for (int col = 0; col < glyph.width; ++col)
-		{
-			int destX = x + col;
-			int destY = y + row + glyph.ch_y0;
-
-			//if (destX >= 0 && destX < fb_width && destY >= 0 && destY < fb_height)
-			//{
-				//font_bitmap[destY * fb_width + destX] *= 1.0f - glyph_bitmap[row * glyph_width + col] / 255.0f;
-			//}
-
-		}
-	}*/
 }

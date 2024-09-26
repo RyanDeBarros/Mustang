@@ -19,7 +19,11 @@ namespace UTF
 	public:
 		String(const std::string& str) : str(str) {}
 		String(std::string&& str) : str(std::move(str)) {}
+		String(const std::u16string& str) : str(UTF::encode(str)) {}
+		String(const std::u32string& str) : str(UTF::encode(str)) {}
 		String(const char* str) : str(str) {}
+		String(const char16_t* str) : str(UTF::encode(str)) {}
+		String(const char32_t* str) : str(UTF::encode(str)) {}
 		String() = default;
 
 		class Iterator
@@ -48,5 +52,7 @@ namespace UTF
 		void push_back(int codepoint);
 
 		// TODO Bi-Iterator? for going backwards keep reference to the previous Bi-Iterator. Also const versions
+
+		// TODO other string operations that propogate to underlying str member.
 	};
 }

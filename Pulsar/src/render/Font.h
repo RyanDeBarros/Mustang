@@ -51,20 +51,21 @@ private:
 	TextureSettings texture_settings;
 
 public:
-	static constexpr const char* COMMON = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./<>?;:\'\"\\|[]{}!@#$%^&*()-=_+`~ ";
-	static constexpr const char* ALPHA_NUMERIC = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
-	static constexpr const char* NUMERIC = "0123456789 ";
-	static constexpr const char* ALPHA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
-	static constexpr const char* ALPHA_LOWERCASE = "abcdefghijklmnopqrstuvwxyz ";
-	static constexpr const char* ALPHA_UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+	static constexpr const char* COMMON = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./<>?;:\'\"\\|[]{}!@#$%^&*()-=_+`~";
+	static constexpr const char* ALPHA_NUMERIC = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	static constexpr const char* NUMERIC = "0123456789";
+	static constexpr const char* ALPHA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static constexpr const char* ALPHA_LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
+	static constexpr const char* ALPHA_UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	
 	Font(const char* font_filepath, float font_size, const UTF::String& common_buffer = Font::COMMON,
 		const TextureSettings& settings = {}, UTF::String* failed_common_chars = nullptr);
-	Font(const Font&) = delete;
+	Font(const Font&) = delete; // TODO copy/move constructors/assignments. utilize common_buffer
 	Font(Font&&) = delete;
 	~Font();
 
 	bool Cache(Font::Codepoint codepoint);
+	void CacheAll(const Font& other);
 
 	TextRender GetTextRender(ZIndex z = 0);
 
@@ -77,10 +78,6 @@ class TextRender : public FickleActor2D
 	friend class Font;
 	Font* font;
 
-	TextRender(Font* font, ZIndex z);
-	TextRender(const TextRender&) = delete;
-	TextRender(TextRender&&) = delete;
-
 	Renderable renderable;
 	// m_Status = 0b... transformM updated | transformRS updated | transformP updated | visible
 	unsigned char status = 0b111;
@@ -91,13 +88,16 @@ class TextRender : public FickleActor2D
 	static Functor<void, TextureSlot> create_on_draw_callback(TextRender* tr);
 
 public:
+	TextRender(Font* font, ZIndex z);
+	TextRender(const TextRender&) = delete;
+	TextRender(TextRender&&) = delete;
+
 	struct Format
 	{
-		float font_size_mult = 1.0f;
 		float line_spacing_mult = 1.0f;
 		float num_spaces_in_tab = 4;
-		// TODO justification/alignment/underline/etc.
-		// TODO background color/text color/etc.
+		// TODO justification/alignment/underline/strikethrough/etc.
+		// background color/drop-shadow/reflection/etc.
 	};
 
 	UTF::String text;
@@ -116,6 +116,8 @@ public:
 
 	// TODO width() and height() for bounds. this will make it easy to put text renders of different formats next to each other,
 	// although it may be possible to abstract that too.
+
+	void ChangeFont(Font* font_) { font = font_; }
 
 private:
 	void DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* canvas_layer);
