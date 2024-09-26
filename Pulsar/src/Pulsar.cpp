@@ -399,6 +399,9 @@ void Pulsar::Run()
 	Renderer::GetCanvasLayer(11)->OnAttach(&text_background);
 	Renderer::GetCanvasLayer(11)->OnAttach(&text_render);
 
+	text_render.pivot = {0.5f, 0.5f};
+	text_background.SetPivot({0.5f, 0.5f});
+
 	int modified = 0;
 
 	_frame_exec = [&]() {
@@ -454,8 +457,8 @@ void Pulsar::Run()
 				modified = 1;
 				text_render.ChangeFont(&font);
 				text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 1";
-				text_background.SetWidth(text_render.Width(true));
-				Logger::LogInfo(text_render.Width(true));
+				text_render.UpdateBounds();
+				text_background.SetWidth(text_render.Width());
 			}
 		}
 		else
@@ -463,10 +466,10 @@ void Pulsar::Run()
 			if (modified != 2)
 			{
 				modified = 2;
-				text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 2";
 				text_render.ChangeFont(&font2);
-				text_background.SetWidth(text_render.Width(true));
-				Logger::LogInfo(text_render.Width(true));
+				text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 2";
+				text_render.UpdateBounds();
+				text_background.SetWidth(text_render.Width());
 			}
 		}
 

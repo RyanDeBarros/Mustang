@@ -102,8 +102,9 @@ public:
 		// background color/drop-shadow/reflection/etc.
 	};
 
-	UTF::String text;
-	Format format;
+	UTF::String text = "";
+	Format format = {};
+	glm::vec2 pivot = { 0.0f, 1.0f };
 
 	void RequestDraw(class CanvasLayer* canvas_layer) override;
 
@@ -120,12 +121,12 @@ public:
 	// although it may be possible to abstract that too.
 
 	void ChangeFont(Font* font_) { font = font_; }
-	int Width(bool recalculate = false) { if (width < 0.0f || recalculate) CalculateBounds(); return width; }
-	int Height(bool recalculate = false) { if (height < 0.0f || recalculate) CalculateBounds(); return height; }
+	int Width() { if (width < 0.0f) UpdateBounds(); return width; }
+	int Height() { if (height < 0.0f) UpdateBounds(); return height; }
+	void UpdateBounds();
 
 private:
 	void DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* canvas_layer);
-	void CalculateBounds();
 };
 
 struct TR_Notification : public FickleNotification

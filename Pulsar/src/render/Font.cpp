@@ -181,8 +181,9 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 	if ((status & 0b1) == 0b0)
 		return;
 	int line_height = font->LineHeight(format.line_spacing_mult);
-	int x = 0;
-	int y = -font->baseline;
+	int startX = static_cast<int>(-pivot.x * Width());
+	int x = startX;
+	int y = -font->baseline + (1.0f - pivot.y) * Height();
 
 	int prevGIndex = 0;
 	auto iter = text.begin();
@@ -202,14 +203,14 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 		}
 		else if (carriage_return_2(codepoint, iter ? iter.codepoint() : 0))
 		{
-			x = 0;
+			x = startX;
 			y -= line_height;
 			++iter;
 			prevGIndex = 0;
 		}
 		else if (carriage_return_1(codepoint))
 		{
-			x = 0;
+			x = startX;
 			y -= line_height;
 			prevGIndex = 0;
 		}
@@ -293,7 +294,7 @@ void TextRender::DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* 
 	canvas_layer->DrawRect(renderable, on_draw_callback);
 }
 
-void TextRender::CalculateBounds()
+void TextRender::UpdateBounds()
 {
 	int line_height = font->LineHeight(format.line_spacing_mult);
 	int x = 0;
