@@ -11,6 +11,7 @@
 #include "Renderable.h"
 #include "registry/Texture.h"
 #include "utils/Functor.inl"
+#include "utils/UTF.h"
 
 class TextRender;
 
@@ -50,19 +51,19 @@ private:
 	TextureSettings texture_settings;
 
 public:
-	static constexpr const char* COMMON = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./<>?;:\'\"\\|[]{}!@#$%^&*()-=_+`~";
-	static constexpr const char* ALPHA_NUMERIC = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	static constexpr const char* NUMERIC = "0123456789";
-	static constexpr const char* ALPHA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	static constexpr const char* ALPHA_LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
-	static constexpr const char* ALPHA_UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static constexpr const char* COMMON = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./<>?;:\'\"\\|[]{}!@#$%^&*()-=_+`~ ";
+	static constexpr const char* ALPHA_NUMERIC = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
+	static constexpr const char* NUMERIC = "0123456789 ";
+	static constexpr const char* ALPHA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+	static constexpr const char* ALPHA_LOWERCASE = "abcdefghijklmnopqrstuvwxyz ";
+	static constexpr const char* ALPHA_UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
 	
-	Font(const char* font_filepath, float font_size, const std::string& common_buffer = Font::COMMON, const TextureSettings& settings = {});
+	Font(const char* font_filepath, float font_size, const UTF::String& common_buffer = Font::COMMON,
+		const TextureSettings& settings = {}, UTF::String* failed_common_chars = nullptr);
 	Font(const Font&) = delete;
 	Font(Font&&) = delete;
 	~Font();
 
-	bool Cache(const std::string& str, size_t index);
 	bool Cache(Font::Codepoint codepoint);
 
 	TextRender GetTextRender(ZIndex z = 0);
@@ -99,7 +100,7 @@ public:
 		// TODO background color/text color/etc.
 	};
 
-	std::string text;
+	UTF::String text;
 	Format format;
 
 	void RequestDraw(class CanvasLayer* canvas_layer) override;
@@ -112,6 +113,9 @@ public:
 	void FlagTransformP() { status |= 0b10; }
 	void FlagTransformRS() { status |= 0b100; }
 	void FlagModulate() { status |= 0b1000; }
+
+	// TODO width() and height() for bounds. this will make it easy to put text renders of different formats next to each other,
+	// although it may be possible to abstract that too.
 
 private:
 	void DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* canvas_layer);

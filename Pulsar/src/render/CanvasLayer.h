@@ -85,6 +85,7 @@ public:
 	void OnAttach(ActorRenderBase2D* const actor);
 	bool OnSetZIndex(ActorRenderBase2D* const actor, ZIndex new_val);
 	bool OnDetach(ActorRenderBase2D* const actor);
+	void Clear();
 	void OnDraw();
 
 	LayerView2D& GetLayerView2DRef() { return m_LayerView; }

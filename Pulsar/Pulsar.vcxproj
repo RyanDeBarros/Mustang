@@ -236,10 +236,12 @@
     <ClCompile Include="src\utils\Permutation.cpp" />
     <ClCompile Include="src\utils\Strings.cpp" />
     <ClCompile Include="src\utils\CommonMath.cpp" />
+    <ClCompile Include="src\utils\UTF.cpp" />
     <ClCompile Include="src\VendorInclude.cpp" />
     <ClCompile Include="src\platform\WindowManager.cpp" />
     <ClCompile Include="vendor\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\glm\glm.cppm" />
+    <ClInclude Include="src\utils\UTF.h" />
     <ClInclude Include="vendor\utf\utf8.h" />
     <ClInclude Include="vendor\utf\utf8\checked.h" />
     <ClInclude Include="vendor\utf\utf8\core.h" />

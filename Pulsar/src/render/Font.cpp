@@ -1,14 +1,12 @@
 #include "Font.h"
 
-#include <utf/utf8.h>
-
 #include "IO.h"
 #include "Logger.inl"
 #include "CanvasLayer.h"
 #include "AssetLoader.h"
 
 Font::Glyph::Glyph(Font* font, int gIndex, float scale)
-	: gIndex(gIndex), font(font)
+	: gIndex(gIndex), font(font), texture(0), uvs({})
 {
 	stbtt_GetGlyphHMetrics(&font->font_info, gIndex, &advance_width, &left_bearing);
 	int ch_x0, ch_x1, ch_y1;
@@ -23,8 +21,8 @@ void Font::Glyph::RenderOnBitmap(unsigned char* bmp)
 	location = bmp;
 }
 
-Font::Font(const char* font_filepath, float font_size, const std::string& common_buffer, const TextureSettings& settings)
-	: font_size(font_size), texture_settings(settings)
+Font::Font(const char* font_filepath, float font_size, const UTF::String& common_buffer, const TextureSettings& settings, UTF::String* failed_common_chars)
+	: font_size(font_size), texture_settings(settings), font_info{}
 {
 	unsigned char* font_file;
 	size_t font_filesize;
@@ -42,24 +40,23 @@ Font::Font(const char* font_filepath, float font_size, const std::string& common
 	scale = stbtt_ScaleForPixelHeight(&font_info, font_size);
 	stbtt_GetFontVMetrics(&font_info, &ascent, &descent, &linegap);
 	baseline = static_cast<int>(roundf(ascent * scale));
-	int space_advance_width, space_left_bearing;
-	stbtt_GetCodepointHMetrics(&font_info, ' ', &space_advance_width, &space_left_bearing);
-	space_width = static_cast<int>(roundf(space_advance_width * scale));
 
 	size_t common_width = 0;
 	size_t common_height = 0;
-	utf8::iterator<std::string::const_iterator> begin(common_buffer.cbegin(), common_buffer.cbegin(), common_buffer.cend());
-	utf8::iterator<std::string::const_iterator> end(common_buffer.cend(), common_buffer.cbegin(), common_buffer.cend());
 	std::vector<Font::Codepoint> codepoints;
-	for (auto& iter = begin; iter != end; ++iter)
+	auto iter = common_buffer.begin();
+	while (iter)
 	{
-		int codepoint = *iter;
+		int codepoint = iter.advance();
 		if (glyphs.find(codepoint) != glyphs.end())
 			continue;
 		int gIndex = stbtt_FindGlyphIndex(&font_info, codepoint);
-		// TODO warning message? bool flag in constructor to disable warnings
 		if (!gIndex)
+		{
+			if (failed_common_chars)
+				failed_common_chars->push_back(codepoint);
 			continue;
+		}
 		Glyph glyph(this, gIndex, scale);
 		common_width += glyph.width;
 		// TODO better way of packing? that would make UVs much more complex though.
@@ -78,7 +75,8 @@ Font::Font(const char* font_filepath, float font_size, const std::string& common
 			glyph.RenderOnBitmap(common_bmp + left_x * common_height);
 			left_x += glyph.width;
 		}
-		TileHandle tile = TileRegistry::GetHandle(TileConstructArgs_buffer(common_bmp, common_width, common_height, 1, TileDeletionPolicy::FROM_EXTERNAL, false));
+		TileHandle tile = TileRegistry::GetHandle(TileConstructArgs_buffer(common_bmp,
+			static_cast<int>(common_width), static_cast<int>(common_height), 1, TileDeletionPolicy::FROM_EXTERNAL, false));
 		TextureHandle texture = TextureRegistry::GetHandle(TextureConstructArgs_tile(tile, 0, texture_settings));
 		left_x = 0;
 		for (Font::Codepoint codepoint : codepoints)
@@ -97,6 +95,15 @@ Font::Font(const char* font_filepath, float font_size, const std::string& common
 			left_x += glyph.width;
 		}
 	}
+	auto space = glyphs.find(' ');
+	if (space == glyphs.end())
+	{
+		int space_advance_width, space_left_bearing;
+		stbtt_GetCodepointHMetrics(&font_info, ' ', &space_advance_width, &space_left_bearing);
+		space_width = static_cast<int>(roundf(space_advance_width * scale));
+	}
+	else
+		space_width = space->second.width;
 }
 
 Font::~Font()
@@ -105,12 +112,6 @@ Font::~Font()
 		delete[] common_bmp;
 }
 
-bool Font::Cache(const std::string& str, size_t index)
-{
-	utf8::iterator<std::string::const_iterator> it(str.cbegin() + index, str.cbegin(), str.cend());
-	return Cache(*it);
-}
-// TODO space is sometimes actually accepted. Added to Font::COMMON?
 bool Font::Cache(Font::Codepoint codepoint)
 {
 	if (glyphs.find(codepoint) != glyphs.end())
@@ -145,16 +146,21 @@ int Font::LineHeight(float line_spacing) const
 	return static_cast<int>(roundf((ascent - descent + linegap) * scale * line_spacing));
 }
 
-static bool carriage_return(const std::string& text, size_t index)
+static bool carriage_return_1(Font::Codepoint codepoint)
 {
-	return text[index] == '\n' || (text[index] == '\r' && index < text.size() - 1 && text[index + 1] == '\n');
+	return codepoint == '\n' || codepoint == '\r';
+}
+
+static bool carriage_return_2(Font::Codepoint r, Font::Codepoint n)
+{
+	return r == '\r' && n == '\n';
 }
 
 Functor<void, TextureSlot> TextRender::create_on_draw_callback(TextRender* tr)
 {
 	return make_functor<true>([](TextureSlot slot, TextRender* tr) {
 		for (VertexBufferCounter i = 0; i < tr->renderable.vertexCount; ++i)
-			tr->renderable.vertexBufferData[0 + i * TextRender::stride] = slot;
+			tr->renderable.vertexBufferData[0 + i * TextRender::stride] = static_cast<GLfloat>(slot);
 		}, tr);
 }
 
@@ -171,36 +177,46 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 	int line_height = font->LineHeight(format.line_spacing_mult);
 	int x = 0;
 	int y = font->baseline;
-	for (size_t i = 0; i < text.size(); ++i)
+
+	int prevGIndex = 0;
+	auto iter = text.begin();
+	while (iter)
 	{
-		if (font->Cache(text, i))
+		Font::Codepoint codepoint = iter.advance();
+		if (font->Cache(codepoint))
 		{
-			// TODO get_codepoint utility function, not text[i]. replace above Cache(text, i) with that as well.
-			const Font::Glyph& glyph = font->glyphs[text[i]];
-			if (i > 0)
+			const Font::Glyph& glyph = font->glyphs[codepoint];
+			if (prevGIndex > 0)
 			{
-				auto iter = font->glyphs.find(text[i - 1]);
-				if (iter != font->glyphs.end())
-				{
-					int kern = stbtt_GetGlyphKernAdvance(&font->font_info, iter->second.gIndex, glyph.gIndex);
-					x += static_cast<int>(roundf(kern * font->scale));
-				}
+				int kern = stbtt_GetGlyphKernAdvance(&font->font_info, prevGIndex, glyph.gIndex);
+				x += static_cast<int>(roundf(kern * font->scale));
 			}
 			DrawGlyph(glyph, x, y, canvas_layer);
 			x += static_cast<int>(roundf(glyph.advance_width * font->scale));
+			prevGIndex = glyph.gIndex;
 		}
-		else if (text[i] == ' ')
+		else if (codepoint == ' ')
 		{
 			x += font->space_width;
+			prevGIndex = 0;
 		}
-		else if (text[i] == '\t')
+		else if (codepoint == '\t')
 		{
-			x += font->space_width * format.num_spaces_in_tab;
+			x = static_cast<int>(x + font->space_width * format.num_spaces_in_tab);
+			prevGIndex = 0;
 		}
-		else if (carriage_return(text, i))
+		else if (carriage_return_2(codepoint, iter ? iter.codepoint() : 0))
 		{
 			x = 0;
 			y -= line_height;
+			++iter;
+			prevGIndex = 0;
+		}
+		else if (carriage_return_1(codepoint))
+		{
+			x = 0;
+			y -= line_height;
+			prevGIndex = 0;
 		}
 	}
 }
@@ -213,10 +229,6 @@ void TextRender::DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* 
 	glyph_transform.Sync(m_Fickler.transformable->self);
 	PackedModulate glyph_modulate;
 	glyph_modulate.Sync(m_Fickler.modulatable->self);
-	// TODO format.font_size_mult
-
-	//PackedTransform2D glyph_transform = m_Fickler.transformable->self;
-	//PackedModulate glyph_modulate = m_Fickler.modulatable->self;
 
 	if (status & 0b10)
 	{

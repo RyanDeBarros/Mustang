@@ -6,12 +6,11 @@ My very first 2D renderer, using OpenGL!
 
 This project uses the following libraries:
 
-- **GLEW**
+- **nigels-com/glew**
 - **GLFW**
-- **GLM**
-- **STB**
-- **Nano SVG**
-- **TOML++**
-- **utfcpp**
+- **g-truc/glm**
+- **nothings/stb**
+- **memononen/nanosvg**
+- **marzer/tomlplusplus**
 
 For the actual licensing information, refer to the Licenses folder.

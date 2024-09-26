@@ -385,8 +385,7 @@ void Pulsar::Run()
 	*text_render.Fickler().Scale() = glm::vec2{ 1.0f, 1.0f } * 2.5f;
 	//*text_render.Fickler().Position() = glm::vec2{ -600.0f, -300.0f };
 	//text_render.Fickler().SyncT();
-	//Renderer::RemoveCanvasLayer(11);
-	//Renderer::AddCanvasLayer(11); // TODO Clear() for CanvasLayer.
+	//Renderer::GetCanvasLayer(11)->Clear();
 	Renderer::GetCanvasLayer(11)->OnAttach(&text_render);
 	//psys->z = -100;
 	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());

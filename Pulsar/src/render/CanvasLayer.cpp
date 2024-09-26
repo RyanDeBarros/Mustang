@@ -99,7 +99,6 @@ CanvasLayer::~CanvasLayer()
 	{
 		PULSAR_TRY(glDeleteVertexArrays(1, &vao));
 	}
-	m_VAOs.clear();
 }
 
 void CanvasLayer::OnAttach(ActorRenderBase2D* const actor)
@@ -129,6 +128,20 @@ bool CanvasLayer::OnDetach(ActorRenderBase2D* const actor)
 		return false;
 	entry->second.remove(actor);
 	return true;
+}
+
+void CanvasLayer::Clear()
+{
+	for (const auto& [model, vao] : m_VAOs)
+	{
+		PULSAR_TRY(glDeleteVertexArrays(1, &vao));
+	}
+	m_VAOs.clear();
+	m_TextureSlotBatch.clear();
+	m_Batcher.clear();
+	rectBatcher.set_size(0);
+	rectBatcher.draw_count = 0;
+	ResetPoolsAndLexicon();
 }
 
 void CanvasLayer::OnDraw()
