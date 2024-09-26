@@ -14,5 +14,8 @@ void main() {
 	} else {
 		float grayscale = texture(TEXTURE_SLOTS[int(t_TexSlot)], t_TexCoord).r;
 		o_Color = t_Color * vec4(1.0, 1.0, 1.0, grayscale);
+		// TODO in bool (or make tex slot an int, with a binary combo). that determines whether to use line 16/18/19, or something else.
+		//o_Color = t_Color * grayscale;
+		//o_Color = t_Color * vec4(1.0 - grayscale, 1.0 - grayscale, 1.0 - grayscale, grayscale);
 	}
 }

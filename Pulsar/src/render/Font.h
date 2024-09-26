@@ -36,6 +36,7 @@ private:
 		Glyph() = default;
 		Glyph(Font* font, int gIndex, float scale);
 
+		void RenderOnBitmap(unsigned char* bmp, int common_stride, int common_height, bool plus_one);
 		void RenderOnBitmap(unsigned char* bmp);
 		size_t Area() const { return static_cast<size_t>(width) * height; }
 	};
@@ -48,6 +49,7 @@ private:
 	int ascent = 0, descent = 0, linegap = 0, baseline = 0;
 	int space_width = 0;
 	unsigned char* common_bmp = nullptr;
+	size_t common_width = 0, common_height = 0;
 	TextureSettings texture_settings;
 
 public:
@@ -68,6 +70,9 @@ public:
 	void CacheAll(const Font& other);
 
 	TextRender GetTextRender(ZIndex z = 0);
+
+	TextureSettings GetTextureSettings() const { return texture_settings; }
+	void SetTextureSettings(const TextureSettings& ts = {});
 
 private:
 	int LineHeight(float line_spacing = 1.0f) const;

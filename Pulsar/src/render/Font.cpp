@@ -15,6 +15,21 @@ Font::Glyph::Glyph(Font* font, int gIndex, float scale)
 	height = ch_y1 - ch_y0;
 }
 
+void Font::Glyph::RenderOnBitmap(unsigned char* bmp, int common_stride, int common_height, bool plus_one)
+{
+	unsigned char* temp = new unsigned char[width * height];
+	stbtt_MakeGlyphBitmap(&font->font_info, temp, width, height, width, font->scale, font->scale, gIndex);
+	for (int row = 0; row < height; ++row)
+		memcpy(bmp + row * common_stride, temp + row * width, width);
+	delete[] temp;
+	for (int row = height; row < common_height; ++row)
+		memset(bmp + row * common_stride, 0x0, width);
+	if (plus_one)
+		for (int row = 0; row < common_height; ++row)
+			*(bmp + row * common_stride + width) = 0x0;
+	location = bmp;
+}
+
 void Font::Glyph::RenderOnBitmap(unsigned char* bmp)
 {
 	stbtt_MakeGlyphBitmap(&font->font_info, bmp, width, height, width, font->scale, font->scale, gIndex);
@@ -41,8 +56,6 @@ Font::Font(const char* font_filepath, float font_size, const UTF::String& common
 	stbtt_GetFontVMetrics(&font_info, &ascent, &descent, &linegap);
 	baseline = static_cast<int>(roundf(ascent * scale));
 
-	size_t common_width = 0;
-	size_t common_height = 0;
 	std::vector<Font::Codepoint> codepoints;
 	auto iter = common_buffer.begin();
 	while (iter)
@@ -58,8 +71,7 @@ Font::Font(const char* font_filepath, float font_size, const UTF::String& common
 			continue;
 		}
 		Glyph glyph(this, gIndex, scale);
-		common_width += glyph.width;
-		// TODO better way of packing? that would make UVs much more complex though.
+		common_width += glyph.width + size_t(1);
 		if (glyph.height > common_height)
 			common_height = glyph.height;
 		glyphs.insert({ codepoint, std::move(glyph) });
@@ -68,31 +80,32 @@ Font::Font(const char* font_filepath, float font_size, const UTF::String& common
 	if (common_width > 0)
 	{
 		common_bmp = new unsigned char[common_width * common_height];
-		size_t left_x = 0;
+		size_t buffer_width = 0;
 		for (Font::Codepoint codepoint : codepoints)
 		{
 			Font::Glyph& glyph = glyphs[codepoint];
-			glyph.RenderOnBitmap(common_bmp + left_x * common_height);
-			left_x += glyph.width;
+			glyph.RenderOnBitmap(common_bmp + buffer_width, common_width, common_height, true);
+			buffer_width += glyph.width + size_t(1);
 		}
 		TileHandle tile = TileRegistry::GetHandle(TileConstructArgs_buffer(common_bmp,
 			static_cast<int>(common_width), static_cast<int>(common_height), 1, TileDeletionPolicy::FROM_EXTERNAL, false));
 		TextureHandle texture = TextureRegistry::GetHandle(TextureConstructArgs_tile(tile, 0, texture_settings));
-		left_x = 0;
+		buffer_width = 0;
 		for (Font::Codepoint codepoint : codepoints)
 		{
 			Font::Glyph& glyph = glyphs[codepoint];
 			glyph.texture = texture;
-			float uvx1 = static_cast<float>(left_x) / common_width;
-			float uvx2 = (static_cast<float>(left_x) + glyph.width) / common_width;
-			float uvy = static_cast<float>(glyph.height) / common_height;
+			float uvx1 = static_cast<float>(buffer_width) / common_width;
+			float uvx2 = static_cast<float>(buffer_width + glyph.width) / common_width;
+			float uvy1 = 0.0f;
+			float uvy2 = static_cast<float>(glyph.height) / common_height;
 			glyph.uvs = std::array<glm::vec2, 4>{
-				glm::vec2{ uvx1, 0.0f },
-				glm::vec2{ uvx2, 0.0f },
-				glm::vec2{ uvx2, uvy },
-				glm::vec2{ uvx1, uvy }
+				glm::vec2{ uvx1, uvy1 },
+				glm::vec2{ uvx2, uvy1 },
+				glm::vec2{ uvx2, uvy2 },
+				glm::vec2{ uvx1, uvy2 }
 			};
-			left_x += glyph.width;
+			buffer_width += glyph.width + size_t(1);
 		}
 	}
 	auto space = glyphs.find(' ');
@@ -147,6 +160,20 @@ TextRender Font::GetTextRender(ZIndex z)
 	return TextRender(this, z);
 }
 
+void Font::SetTextureSettings(const TextureSettings& ts)
+{
+	texture_settings = ts;
+	TileHandle tile = TileRegistry::GetHandle(TileConstructArgs_buffer(common_bmp,
+		static_cast<int>(common_width), static_cast<int>(common_height), 1, TileDeletionPolicy::FROM_EXTERNAL, false));
+	TextureHandle common_texture = TextureRegistry::GetHandle(TextureConstructArgs_tile(tile, 0, texture_settings));
+	TextureRegistry::SetSettings(common_texture, ts);
+	for (const auto& [codepoint, glyph] : glyphs)
+	{
+		if (glyph.texture != common_texture)
+			TextureRegistry::SetSettings(glyph.texture, ts);
+	}
+}
+
 int Font::LineHeight(float line_spacing) const
 {
 	return static_cast<int>(roundf((ascent - descent + linegap) * scale * line_spacing));
@@ -183,7 +210,7 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 	int line_height = font->LineHeight(format.line_spacing_mult);
 	int startX = static_cast<int>(-pivot.x * Width());
 	int x = startX;
-	int y = -font->baseline + (1.0f - pivot.y) * Height();
+	int y = static_cast<int>(roundf(-font->baseline + (1.0f - pivot.y) * Height()));
 
 	int prevGIndex = 0;
 	auto iter = text.begin();
@@ -288,8 +315,6 @@ void TextRender::DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* 
 	renderable.vertexBufferData[2 * stride + 14] = static_cast<GLfloat>(glyph.uvs[2].y);
 	renderable.vertexBufferData[3 * stride + 13] = static_cast<GLfloat>(glyph.uvs[3].x);
 	renderable.vertexBufferData[3 * stride + 14] = static_cast<GLfloat>(glyph.uvs[3].y);
-
-	// TODO pivot for text render.
 
 	canvas_layer->DrawRect(renderable, on_draw_callback);
 }
