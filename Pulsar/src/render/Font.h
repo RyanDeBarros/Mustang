@@ -13,6 +13,15 @@
 #include "utils/Functor.inl"
 #include "utils/UTF.h"
 
+template<>
+struct std::hash<std::pair<int, int>>
+{
+	size_t operator()(const std::pair<int, int>& p) const
+	{
+		return std::hash<int>{}(p.first) ^ (std::hash<int>{}(p.second) << 1);
+	}
+};
+
 class TextRender;
 
 class Font
@@ -20,6 +29,8 @@ class Font
 	friend class TextRender;
 public:
 	typedef int Codepoint;
+	// TODO internal Kerning registry
+	typedef std::unordered_map<std::pair<Font::Codepoint, Font::Codepoint>, int> Kerning;
 
 private:
 	struct Glyph
@@ -29,12 +40,12 @@ private:
 		int ch_y0;
 		int advance_width, left_bearing;
 		TextureHandle texture;
-		std::array<glm::vec2, 4> uvs;
+		size_t buffer_pos = -1;
 		Font* font = nullptr;
 		unsigned char* location = nullptr;
 
 		Glyph() = default;
-		Glyph(Font* font, int gIndex, float scale);
+		Glyph(Font* font, int gIndex, float scale, size_t buffer_pos);
 
 		void RenderOnBitmap(unsigned char* bmp, int common_stride, int common_height, bool plus_one);
 		void RenderOnBitmap(unsigned char* bmp);
@@ -51,6 +62,7 @@ private:
 	unsigned char* common_bmp = nullptr;
 	size_t common_width = 0, common_height = 0;
 	TextureSettings texture_settings;
+	Kerning kerning; // TODO kerning handle?
 
 public:
 	static constexpr const char8_t* COMMON = u8"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./<>?;:\'\"\\|[]{}!@#$%^&*()-=_+`~";
@@ -61,9 +73,10 @@ public:
 	static constexpr const char8_t* ALPHA_UPPERCASE = u8"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	
 	Font(const char* font_filepath, float font_size, const UTF::String& common_buffer = Font::COMMON,
-		const TextureSettings& settings = {}, UTF::String* failed_common_chars = nullptr);
+		const TextureSettings& settings = {}, UTF::String* failed_common_chars = nullptr, const Kerning& kerning = Kerning());
 	Font(const Font&) = delete; // TODO copy/move constructors/assignments. utilize common_buffer
-	Font(Font&&) = delete;
+	Font(Font&&) noexcept;
+	Font& operator=(Font&&) noexcept;
 	~Font();
 
 	bool Cache(Font::Codepoint codepoint);
@@ -76,6 +89,7 @@ public:
 
 private:
 	int LineHeight(float line_spacing = 1.0f) const;
+	std::array<glm::vec2, 4> UVs(const Glyph& glyph) const;
 };
 
 class TextRender : public FickleActor2D
@@ -166,5 +180,56 @@ struct TR_Notification : public FickleNotification
 			if (text) text->FlagModulate();
 			break;
 		}
+	}
+};
+
+struct FontConstructorArgs
+{
+	float font_size;
+	UTF::String common_buffer = Font::COMMON;
+	TextureSettings settings = {};
+	UTF::String* failed_common_chars = nullptr;
+
+	FontConstructorArgs(float font_size, const UTF::String& common_buffer = Font::COMMON,
+		const TextureSettings& settings = {}, UTF::String* failed_common_chars = nullptr)
+		: font_size(font_size), common_buffer(common_buffer), settings(settings), failed_common_chars(failed_common_chars) {}
+
+	FontConstructorArgs(float font_size, UTF::String&& common_buffer = Font::COMMON,
+		const TextureSettings& settings = {}, UTF::String* failed_common_chars = nullptr)
+		: font_size(font_size), common_buffer(std::move(common_buffer)), settings(settings), failed_common_chars(failed_common_chars) {}
+};
+
+// TODO FontFamily registry instead of Font registry?
+class FontFamily
+{
+	struct FontEntry
+	{
+		std::string filepath;
+		Font::Kerning kerning;
+		// TODO is vector okay for this? There would be < 20 different font sizes probably.
+		std::vector<std::pair<float, Font>> fonts;
+
+		Font* CreateFont(const FontConstructorArgs& args)
+		{
+			for (auto it = fonts.begin(); it != fonts.end(); ++it)
+			{
+				if (it->first == args.font_size)
+					return &it->second;
+			}
+			fonts.push_back({args.font_size,
+				Font(filepath.c_str(), args.font_size, args.common_buffer, args.settings, args.failed_common_chars, kerning)});
+			return &fonts[fonts.size() - 1].second;
+		}
+	};
+
+	std::unordered_map<std::string, FontEntry> family;
+
+public:
+	FontFamily(const char* filepath);
+
+	Font* GetFont(const char* font_name, const FontConstructorArgs& args)
+	{
+		auto iter = family.find(font_name);
+		return iter != family.end() ? iter->second.CreateFont(args) : nullptr;
 	}
 };

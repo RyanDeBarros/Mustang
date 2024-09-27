@@ -1,12 +1,14 @@
 #include "Font.h"
 
+#include <toml/toml.hpp>
+
 #include "IO.h"
 #include "Logger.inl"
 #include "CanvasLayer.h"
 #include "AssetLoader.h"
 
-Font::Glyph::Glyph(Font* font, int gIndex, float scale)
-	: gIndex(gIndex), font(font), texture(0), uvs({})
+Font::Glyph::Glyph(Font* font, int gIndex, float scale, size_t buffer_pos)
+	: gIndex(gIndex), font(font), texture(0), buffer_pos(buffer_pos)
 {
 	stbtt_GetGlyphHMetrics(&font->font_info, gIndex, &advance_width, &left_bearing);
 	int ch_x0, ch_x1, ch_y1;
@@ -36,8 +38,9 @@ void Font::Glyph::RenderOnBitmap(unsigned char* bmp)
 	location = bmp;
 }
 
-Font::Font(const char* font_filepath, float font_size, const UTF::String& common_buffer, const TextureSettings& settings, UTF::String* failed_common_chars)
-	: font_size(font_size), texture_settings(settings), font_info{}
+Font::Font(const char* font_filepath, float font_size, const UTF::String& common_buffer,
+	const TextureSettings& settings, UTF::String* failed_common_chars, const Kerning& kerning)
+	: font_size(font_size), texture_settings(settings), font_info{}, kerning(kerning)
 {
 	unsigned char* font_file;
 	size_t font_filesize;
@@ -70,7 +73,7 @@ Font::Font(const char* font_filepath, float font_size, const UTF::String& common
 				failed_common_chars->push_back(codepoint);
 			continue;
 		}
-		Glyph glyph(this, gIndex, scale);
+		Glyph glyph(this, gIndex, scale, common_width);
 		common_width += glyph.width + size_t(1);
 		if (glyph.height > common_height)
 			common_height = glyph.height;
@@ -80,33 +83,17 @@ Font::Font(const char* font_filepath, float font_size, const UTF::String& common
 	if (common_width > 0)
 	{
 		common_bmp = new unsigned char[common_width * common_height];
-		size_t buffer_width = 0;
 		for (Font::Codepoint codepoint : codepoints)
 		{
 			Font::Glyph& glyph = glyphs[codepoint];
-			glyph.RenderOnBitmap(common_bmp + buffer_width, common_width, common_height, true);
-			buffer_width += glyph.width + size_t(1);
+			glyph.RenderOnBitmap(common_bmp + glyph.buffer_pos, common_width, common_height, true);
 		}
 		TileHandle tile = TileRegistry::GetHandle(TileConstructArgs_buffer(common_bmp,
 			static_cast<int>(common_width), static_cast<int>(common_height), 1, TileDeletionPolicy::FROM_EXTERNAL, false));
 		TextureHandle texture = TextureRegistry::GetHandle(TextureConstructArgs_tile(tile, 0, texture_settings));
-		buffer_width = 0;
 		for (Font::Codepoint codepoint : codepoints)
 		{
-			Font::Glyph& glyph = glyphs[codepoint];
-			glyph.texture = texture;
-			// TODO store buffer_width in glyphs, store 1/common_width and 1/common_height and compute these at draw time to save space.
-			float uvx1 = static_cast<float>(buffer_width) / common_width;
-			float uvx2 = static_cast<float>(buffer_width + glyph.width) / common_width;
-			float uvy1 = 0.0f;
-			float uvy2 = static_cast<float>(glyph.height) / common_height;
-			glyph.uvs = std::array<glm::vec2, 4>{
-				glm::vec2{ uvx1, uvy1 },
-				glm::vec2{ uvx2, uvy1 },
-				glm::vec2{ uvx2, uvy2 },
-				glm::vec2{ uvx1, uvy2 }
-			};
-			buffer_width += glyph.width + size_t(1);
+			glyphs[codepoint].texture = texture;
 		}
 	}
 	auto space = glyphs.find(' ');
@@ -118,6 +105,39 @@ Font::Font(const char* font_filepath, float font_size, const UTF::String& common
 	}
 	else
 		space_width = space->second.width;
+}
+
+// TODO put into separate struct for simplicity
+Font::Font(Font&& other) noexcept
+	: glyphs(std::move(other.glyphs)), font_info(std::move(other.font_info)), font_size(other.font_size), scale(other.scale),
+	ascent(other.ascent), descent(other.descent), linegap(other.linegap), baseline(other.baseline), space_width(other.space_width),
+	common_bmp(other.common_bmp), common_width(other.common_width), common_height(other.common_height),
+	texture_settings(other.texture_settings), kerning(std::move(other.kerning))
+{
+	other.common_bmp = nullptr;
+}
+
+Font& Font::operator=(Font&& other) noexcept
+{
+	if (this != &other)
+	{
+		glyphs = std::move(other.glyphs);
+		font_info = std::move(other.font_info);
+		font_size = other.font_size;
+		scale = other.scale;
+		ascent = other.ascent;
+		descent = other.descent;
+		linegap = other.linegap;
+		baseline = other.baseline;
+		space_width = other.space_width;
+		common_bmp = other.common_bmp;
+		common_width = other.common_width;
+		common_height = other.common_height;
+		texture_settings = other.texture_settings;
+		kerning = std::move(other.kerning);
+		other.common_bmp = nullptr;
+	}
+	return *this;
 }
 
 Font::~Font()
@@ -132,18 +152,12 @@ bool Font::Cache(Font::Codepoint codepoint)
 		return true;
 	if (int gIndex = stbtt_FindGlyphIndex(&font_info, codepoint))
 	{
-		Font::Glyph glyph(this, gIndex, scale);
+		Font::Glyph glyph(this, gIndex, scale, -1);
 		unsigned char* bmp = new unsigned char[glyph.Area()];
 		glyph.RenderOnBitmap(bmp);
 		TileHandle tile = TileRegistry::GetHandle(TileConstructArgs_buffer(bmp, glyph.width, glyph.height, 1, TileDeletionPolicy::FROM_NEW, false));
 		TextureHandle texture = TextureRegistry::GetHandle(TextureConstructArgs_tile(tile, 0, texture_settings));
 		glyph.texture = texture;
-		glyph.uvs = std::array<glm::vec2, 4>{
-			glm::vec2{ 0.0f, 0.0f },
-			glm::vec2{ 1.0f, 0.0f },
-			glm::vec2{ 1.0f, 1.0f },
-			glm::vec2{ 0.0f, 1.0f }
-		};
 		glyphs.insert({ codepoint, std::move(glyph) });
 		return true;
 	}
@@ -180,6 +194,29 @@ int Font::LineHeight(float line_spacing) const
 	return static_cast<int>(roundf((ascent - descent + linegap) * scale * line_spacing));
 }
 
+std::array<glm::vec2, 4> Font::UVs(const Glyph& glyph) const
+{
+	if (glyph.buffer_pos != size_t(-1))
+	{
+		float uvx1 = static_cast<float>(glyph.buffer_pos) / common_width;
+		float uvx2 = static_cast<float>(glyph.buffer_pos + glyph.width) / common_width;
+		float uvy1 = 0.0f;
+		float uvy2 = static_cast<float>(glyph.height) / common_height;
+		return std::array<glm::vec2, 4>{
+			glm::vec2{ uvx1, uvy1 },
+			glm::vec2{ uvx2, uvy1 },
+			glm::vec2{ uvx2, uvy2 },
+			glm::vec2{ uvx1, uvy2 }
+		};
+	}
+	else return std::array<glm::vec2, 4>{
+		glm::vec2{ 0.0f, 0.0f },
+		glm::vec2{ 1.0f, 0.0f },
+		glm::vec2{ 1.0f, 1.0f },
+		glm::vec2{ 0.0f, 1.0f }
+	};
+}
+
 static bool carriage_return_1(Font::Codepoint codepoint)
 {
 	return codepoint == '\n' || codepoint == '\r';
@@ -214,7 +251,7 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 	// TODO the bounds.top_ribbon ensures a kind of vertical justify. Explore this more in format.
 	int y = static_cast<int>(roundf(-font->baseline + (1.0f - pivot.y) * bounds.full_height)) + bounds.top_ribbon;
 
-	int prevGIndex = 0;
+	int prevCodepoint = 0;
 	auto iter = text.begin();
 	while (iter)
 	{
@@ -223,39 +260,43 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 		if (codepoint == ' ')
 		{
 			x += font->space_width;
-			prevGIndex = 0;
+			prevCodepoint = 0;
 		}
 		else if (codepoint == '\t')
 		{
 			x = static_cast<int>(x + font->space_width * format.num_spaces_in_tab);
-			prevGIndex = 0;
+			prevCodepoint = 0;
 		}
 		else if (carriage_return_2(codepoint, iter ? iter.codepoint() : 0))
 		{
 			x = startX;
 			y -= line_height;
 			++iter;
-			prevGIndex = 0;
+			prevCodepoint = 0;
 		}
 		else if (carriage_return_1(codepoint))
 		{
 			x = startX;
 			y -= line_height;
-			prevGIndex = 0;
+			prevCodepoint = 0;
 		}
 		else if (font->Cache(codepoint))
 		{
 			const Font::Glyph& glyph = font->glyphs[codepoint];
+			int prevGIndex = font->glyphs[prevCodepoint].gIndex;
 			if (prevGIndex > 0)
 			{
-				// TODO add custom kerning to fonts that don't support it natively.
-				// It would just be a basic txt with "codepoint:codepoint:kerning" lines.
-				int kern = stbtt_GetGlyphKernAdvance(&font->font_info, prevGIndex, glyph.gIndex);
+				int kern;
+				auto k = font->kerning.find({ prevCodepoint, codepoint });
+				if (k != font->kerning.end())
+					kern = k->second;
+				else
+					kern = stbtt_GetGlyphKernAdvance(&font->font_info, prevGIndex, glyph.gIndex);
 				x += static_cast<int>(roundf(kern * font->scale));
 			}
 			DrawGlyph(glyph, x, y, canvas_layer);
 			x += static_cast<int>(roundf(glyph.advance_width * font->scale));
-			prevGIndex = glyph.gIndex;
+			prevCodepoint = codepoint;
 		}
 	}
 }
@@ -311,14 +352,15 @@ void TextRender::DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* 
 	renderable.textureHandle = glyph.texture;
 
 	// UVs
-	renderable.vertexBufferData[0 * stride + 13] = static_cast<GLfloat>(glyph.uvs[0].x);
-	renderable.vertexBufferData[0 * stride + 14] = static_cast<GLfloat>(glyph.uvs[0].y);
-	renderable.vertexBufferData[1 * stride + 13] = static_cast<GLfloat>(glyph.uvs[1].x);
-	renderable.vertexBufferData[1 * stride + 14] = static_cast<GLfloat>(glyph.uvs[1].y);
-	renderable.vertexBufferData[2 * stride + 13] = static_cast<GLfloat>(glyph.uvs[2].x);
-	renderable.vertexBufferData[2 * stride + 14] = static_cast<GLfloat>(glyph.uvs[2].y);
-	renderable.vertexBufferData[3 * stride + 13] = static_cast<GLfloat>(glyph.uvs[3].x);
-	renderable.vertexBufferData[3 * stride + 14] = static_cast<GLfloat>(glyph.uvs[3].y);
+	auto uvs = font->UVs(glyph);
+	renderable.vertexBufferData[0 * stride + 13] = static_cast<GLfloat>(uvs[0].x);
+	renderable.vertexBufferData[0 * stride + 14] = static_cast<GLfloat>(uvs[0].y);
+	renderable.vertexBufferData[1 * stride + 13] = static_cast<GLfloat>(uvs[1].x);
+	renderable.vertexBufferData[1 * stride + 14] = static_cast<GLfloat>(uvs[1].y);
+	renderable.vertexBufferData[2 * stride + 13] = static_cast<GLfloat>(uvs[2].x);
+	renderable.vertexBufferData[2 * stride + 14] = static_cast<GLfloat>(uvs[2].y);
+	renderable.vertexBufferData[3 * stride + 13] = static_cast<GLfloat>(uvs[3].x);
+	renderable.vertexBufferData[3 * stride + 14] = static_cast<GLfloat>(uvs[3].y);
 
 	canvas_layer->DrawRect(renderable, on_draw_callback);
 }
@@ -331,7 +373,7 @@ void TextRender::UpdateBounds()
 	bounds.full_width = 0;
 	int min_ch_y0 = 0;
 
-	int prevGIndex = 0;
+	int prevCodepoint = 0;
 	auto iter = text.begin();
 	while (iter)
 	{
@@ -340,12 +382,12 @@ void TextRender::UpdateBounds()
 		if (codepoint == ' ')
 		{
 			x += font->space_width;
-			prevGIndex = 0;
+			prevCodepoint = 0;
 		}
 		else if (codepoint == '\t')
 		{
 			x = static_cast<int>(x + font->space_width * format.num_spaces_in_tab);
-			prevGIndex = 0;
+			prevCodepoint = 0;
 		}
 		else if (carriage_return_2(codepoint, iter ? iter.codepoint() : 0))
 		{
@@ -354,7 +396,7 @@ void TextRender::UpdateBounds()
 			x = 0;
 			y -= line_height;
 			++iter;
-			prevGIndex = 0;
+			prevCodepoint = 0;
 		}
 		else if (carriage_return_1(codepoint))
 		{
@@ -362,18 +404,24 @@ void TextRender::UpdateBounds()
 				bounds.full_width = x;
 			x = 0;
 			y -= line_height;
-			prevGIndex = 0;
+			prevCodepoint = 0;
 		}
 		else if (font->Cache(codepoint))
 		{
 			const Font::Glyph& glyph = font->glyphs[codepoint];
+			int prevGIndex = font->glyphs[prevCodepoint].gIndex;
 			if (prevGIndex > 0)
 			{
-				int kern = stbtt_GetGlyphKernAdvance(&font->font_info, prevGIndex, glyph.gIndex);
+				int kern;
+				auto k = font->kerning.find({ prevCodepoint, codepoint });
+				if (k != font->kerning.end())
+					kern = k->second;
+				else
+					kern = stbtt_GetGlyphKernAdvance(&font->font_info, prevGIndex, glyph.gIndex);
 				x += static_cast<int>(roundf(kern * font->scale));
 			}
 			x += static_cast<int>(roundf(glyph.advance_width * font->scale));
-			prevGIndex = glyph.gIndex;
+			prevCodepoint = codepoint;
 			if (glyph.ch_y0 < min_ch_y0)
 				min_ch_y0 = glyph.ch_y0;
 		}
@@ -383,4 +431,165 @@ void TextRender::UpdateBounds()
 	bounds.lowest_baseline = -y;
 	bounds.top_ribbon = font->ascent * font->scale + min_ch_y0;
 	bounds.full_height = bounds.lowest_baseline - font->descent * font->scale - bounds.top_ribbon;
+}
+
+static bool read_kern_part(const std::string& p, int& k)
+{
+	if (p[0] == '\\')
+	{
+		if (p.size() == 1)
+			return false;
+		if (p[1] == 'x')
+			k = std::stoi(p.substr(2, p.size() - 2), nullptr, 16);
+		else if (p[1] == '\\')
+			k = '\\';
+		else if (p[1] == '\'')
+			k = '\'';
+		else if (p[1] == '"')
+			k = '\"';
+		else if (p[1] == '?')
+			k = '\?';
+		else if (p[1] == 'a')
+			k = '\a';
+		else if (p[1] == 'b')
+			k = '\b';
+		else if (p[1] == 'f')
+			k = '\f';
+		else if (p[1] == 'n')
+			k = '\n';
+		else if (p[1] == 'r')
+			k = '\r';
+		else if (p[1] == 't')
+			k = '\t';
+		else if (p[1] == 'v')
+			k = '\v';
+		else if (p[1] == '0')
+			k = '\0';
+		else
+			return false;
+	}
+	else
+		k = p[0];
+	return true;
+}
+
+static bool parse_kerning_line(const std::string& p0, const std::string& p1,
+	const std::string& p2, std::pair<std::pair<Font::Codepoint, Font::Codepoint>, int>& insert)
+{
+	if (!read_kern_part(p0, insert.first.first))
+		return false;
+	if (!read_kern_part(p1, insert.first.second))
+		return false;
+	insert.second = std::stoi(p2);
+	return true;
+}
+
+static void parse_kerning(const char* filepath, Font::Kerning& kerning)
+{
+	std::string content;
+	if (IO::read_file(filepath, content))
+	{
+		char part = 0;
+		std::string p0, p1, p2;
+		for (auto iter = content.begin(); iter != content.end(); ++iter)
+		{
+			if (carriage_return_1(*iter))
+			{
+				std::pair<std::pair<Font::Codepoint, Font::Codepoint>, int> insert;
+				if (parse_kerning_line(p0, p1, p2, insert))
+					kerning.insert(insert);
+				p0.clear();
+				p1.clear();
+				p2.clear();
+				part = 0;
+			}
+			else if (carriage_return_2(*iter, iter + 1 != content.end() ? *(iter + 1) : 0))
+			{
+				std::pair<std::pair<Font::Codepoint, Font::Codepoint>, int> insert;
+				if (parse_kerning_line(p0, p1, p2, insert))
+					kerning.insert(insert);
+				p0.clear();
+				p1.clear();
+				p2.clear();
+				part = 0;
+				++iter;
+			}
+			else if (part == 0)
+			{
+				if (*iter == ' ' || *iter == '\t')
+				{
+					if (!p0.empty())
+						++part;
+				}
+				else
+					p0.push_back(*iter);
+			}
+			else if (part == 1)
+			{
+				if (*iter == ' ' || *iter == '\t')
+				{
+					if (!p1.empty())
+						++part;
+				}
+				else
+					p1.push_back(*iter);
+			}
+			else if (*iter != ' ' && *iter != '\t')
+			{
+				p2.push_back(*iter);
+			}
+		}
+		if (part == 2)
+		{
+			std::pair<std::pair<Font::Codepoint, Font::Codepoint>, int> insert;
+			if (parse_kerning_line(p0, p1, p2, insert))
+				kerning.insert(insert);
+		}
+	}
+}
+
+FontFamily::FontFamily(const char* filepath)
+{
+	try
+	{
+		auto file = toml::parse_file(filepath);
+		auto verif = Loader::verify_header(file, "font-family");
+		if (verif != LOAD_STATUS::OK)
+		{
+			Logger::LogErrorFatal("Header does not match in font-family assetfile.");
+			return;
+		}
+
+		auto ff = file["font-family"];
+		if (!ff)
+			return;
+
+		auto arr = ff["font"].as_array();
+		size_t i = 0;
+		while (auto table = arr->get_as<toml::table>(i++))
+		{
+			auto name = (*table)["name"].value<std::string>();
+			if (!name)
+			{
+				Logger::LogWarning("Name missing in font-family assetfile entry.");
+				continue;
+			}
+			auto fp = (*table)["file"].value<std::string>();
+			if (!fp)
+			{
+				Logger::LogWarning("Font filepath missing for font-family entry: " + name.value());
+				continue;
+			}
+			FontEntry font_entry;
+			font_entry.filepath = fp.value();
+			auto kerning_filepath = (*table)["kerning"].value<std::string>();
+			if (kerning_filepath)
+				parse_kerning(kerning_filepath.value().c_str(), font_entry.kerning);
+			family.insert({ name.value(), std::move(font_entry) });
+		}
+	}
+	catch (const toml::parse_error& err)
+	{
+		Logger::LogErrorFatal("Cannot parse font-family asset file \"" + std::string(filepath) + "\": " + std::string(err.description()));
+	}
 }

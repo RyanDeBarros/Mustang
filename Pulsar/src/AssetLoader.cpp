@@ -29,7 +29,7 @@
 
 // TODO instead of simply returning invalid LOAD_STATUS, also print reason for the invalidity?
 
-static LOAD_STATUS verify_header(const toml::v3::ex::parse_result& file, const char* header_name)
+LOAD_STATUS Loader::verify_header(const toml::v3::ex::parse_result& file, const char* header_name)
 {
 	if (auto header = file["header"].value<std::string>())
 	{

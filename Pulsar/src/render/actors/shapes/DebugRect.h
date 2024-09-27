@@ -20,7 +20,7 @@ public:
 	bool IsFilled() const { return m_Filled; }
 	glm::vec2 GetPivot() const { return m_Pivot; }
 	void SetWidth(float width);
-	void GetHeight(float height);
+	void SetHeight(float height);
 	void SetFilled(bool filled);
 	void SetPivot(const glm::vec2& pivot);
 

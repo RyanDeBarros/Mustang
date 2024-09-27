@@ -20,6 +20,8 @@ enum class LOAD_STATUS
 struct Loader
 {
 	static bool _LoadRendererSettingsContent(toml::v3::parse_result& parse_result, const std::string& filepath);
+	
+	static LOAD_STATUS verify_header(const toml::v3::ex::parse_result& file, const char* header_name);
 
 	static LOAD_STATUS loadShader(const char* filepath, ShaderHandle& handle);
 	static LOAD_STATUS loadTexture(const char* filepath, TextureHandle& handle, TextureVersion texture_version = 0, bool temporary_buffer = true, float svg_scale = 1.0f);

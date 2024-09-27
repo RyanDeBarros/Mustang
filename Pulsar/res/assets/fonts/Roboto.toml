@@ -1,0 +1,14 @@
+header = "font-family"
+
+[font-family]
+
+# TODO add support for relative filepaths. Create File utility that can either be in Absolute or Relative mode,
+# with a constructor that takes in the current filepath and the relative filepath. Pass current assetfile filepath as parent.
+	[[font-family.font]]
+	name = "regular"
+	file = "res/raw-fonts/Roboto-Regular.ttf"
+	kerning = "res/assets/fonts/kernings/kern-Roboto-Regular.txt"
+
+	[[font-family.font]]
+	name = "bold-italic"
+	file = "res/raw-fonts/Roboto-BoldItalic.ttf"

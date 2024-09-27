@@ -373,9 +373,12 @@ void Pulsar::Run()
 			});
 
 	// TODO font registry?
-	Font font("res/fonts/Roboto-BoldItalic.ttf", 96.0f, u8"");
-	Font font2("res/fonts/Roboto-Regular.ttf", 48.0f, Font::COMMON);
-	TextRender text_render = font2.GetTextRender();
+	//Font font("res/raw-fonts/Roboto-BoldItalic.ttf", 96.0f, u8"");
+	//Font font2("res/raw-fonts/Roboto-Regular.ttf", 48.0f, Font::COMMON);
+	FontFamily font_family("res/assets/fonts/Roboto.toml");
+	Font* font1 = font_family.GetFont("bold-italic", FontConstructorArgs(96.0f, u8""));
+	Font* font2 = font_family.GetFont("regular", FontConstructorArgs(48.0f, Font::COMMON));
+	TextRender text_render = font2->GetTextRender();
 	text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!!";
 	//text_render.text = U"Whereas recognition of the inherent dignity 😂水"; // NOTE roboto does not support emojis/kanji
 	//text_render.text = U"ΣπΦ";
@@ -455,10 +458,11 @@ void Pulsar::Run()
 			if (modified != 1)
 			{
 				modified = 1;
-				//text_render.ChangeFont(&font);
+				//text_render.ChangeFont(font1);
 				//text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 1";
 				//text_render.UpdateBounds();
-				//text_background.SetWidth(text_render.Width());
+				//text_background.SetWidth(text_render.GetBounds().full_width);
+				//text_background.SetHeight(text_render.GetBounds().full_height);
 				//TextureSettings ts_;
 				//ts_.magFilter = MagFilter::Linear;
 				//font.SetTextureSettings(ts_);
@@ -469,10 +473,11 @@ void Pulsar::Run()
 			if (modified != 2)
 			{
 				modified = 2;
-				//text_render.ChangeFont(&font2);
+				//text_render.ChangeFont(font2);
 				//text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 2";
 				//text_render.UpdateBounds();
-				//text_background.SetWidth(text_render.Width());
+				//text_background.SetWidth(text_render.GetBounds().full_width);
+				//text_background.SetHeight(text_render.GetBounds().full_height);
 				//TextureSettings ts_;
 				//ts_.magFilter = MagFilter::Nearest;
 				//font.SetTextureSettings(ts_);

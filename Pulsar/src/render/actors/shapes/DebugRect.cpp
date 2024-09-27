@@ -46,7 +46,7 @@ void DebugRect::SetWidth(float width)
 	Readjust();
 }
 
-void DebugRect::GetHeight(float height)
+void DebugRect::SetHeight(float height)
 {
 	m_Height = height;
 	Readjust();
