@@ -6,24 +6,28 @@
 
 namespace UTF
 {
-	extern std::string encode(const std::u16string& utf16, bool ignore_invalid_chars = false);
-	extern std::u16string decode_utf16(const std::string& utf8);
-	extern std::string encode(const std::u32string& utf32, bool ignore_invalid_chars = false);
-	extern std::u32string decode_utf32(const std::string& utf8);
+	extern std::u8string encode(const std::u16string& utf16, bool ignore_invalid_chars = false);
+	extern std::u16string decode_utf16(const std::u8string& utf8);
+	extern std::u8string encode(const std::u32string& utf32, bool ignore_invalid_chars = false);
+	extern std::u32string decode_utf32(const std::u8string& utf8);
+	extern std::u8string convert(const std::string& str);
+	extern std::string convert(const std::u8string& utf8);
 
 	class String
 	{
 		friend class Iterator;
-		std::string str;
+		std::u8string str = u8"";
 
 	public:
-		String(const std::string& str) : str(str) {}
-		String(std::string&& str) : str(std::move(str)) {}
+		String(const std::u8string& str) : str(str) {}
+		String(std::u8string&& str) : str(std::move(str)) {}
+		String(const std::string& str) : str(convert(str)) {}
 		String(const std::u16string& str) : str(UTF::encode(str)) {}
 		String(const std::u32string& str) : str(UTF::encode(str)) {}
-		String(const char* str) : str(str) {}
-		String(const char16_t* str) : str(UTF::encode(str)) {}
-		String(const char32_t* str) : str(UTF::encode(str)) {}
+		String(const char8_t* str) : str(str) {}
+		String(const char* str) : str(convert(str)) {}
+		String(const char16_t* str) : str(encode(std::u16string(str))) {}
+		String(const char32_t* str) : str(encode(std::u32string(str))) {}
 		String() = default;
 
 		class Iterator
@@ -48,6 +52,8 @@ namespace UTF
 		Iterator begin() const { return Iterator(*this, 0); }
 		Iterator end() const { return Iterator(*this, str.size()); }
 		size_t size() const { return str.size(); }
+		std::u8string& encoding() { return str; }
+		const std::u8string& encoding() const { return str; }
 
 		void push_back(int codepoint);
 

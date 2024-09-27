@@ -95,6 +95,7 @@ Font::Font(const char* font_filepath, float font_size, const UTF::String& common
 		{
 			Font::Glyph& glyph = glyphs[codepoint];
 			glyph.texture = texture;
+			// TODO store buffer_width in glyphs, store 1/common_width and 1/common_height and compute these at draw time to save space.
 			float uvx1 = static_cast<float>(buffer_width) / common_width;
 			float uvx2 = static_cast<float>(buffer_width + glyph.width) / common_width;
 			float uvy1 = 0.0f;
@@ -247,6 +248,8 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 			const Font::Glyph& glyph = font->glyphs[codepoint];
 			if (prevGIndex > 0)
 			{
+				// TODO add custom kerning to fonts that don't support it natively.
+				// It would just be a basic txt with "codepoint:codepoint:kerning" lines.
 				int kern = stbtt_GetGlyphKernAdvance(&font->font_info, prevGIndex, glyph.gIndex);
 				x += static_cast<int>(roundf(kern * font->scale));
 			}

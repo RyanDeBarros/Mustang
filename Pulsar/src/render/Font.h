@@ -53,12 +53,12 @@ private:
 	TextureSettings texture_settings;
 
 public:
-	static constexpr const char* COMMON = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./<>?;:\'\"\\|[]{}!@#$%^&*()-=_+`~";
-	static constexpr const char* ALPHA_NUMERIC = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	static constexpr const char* NUMERIC = "0123456789";
-	static constexpr const char* ALPHA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	static constexpr const char* ALPHA_LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
-	static constexpr const char* ALPHA_UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static constexpr const char8_t* COMMON = u8"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./<>?;:\'\"\\|[]{}!@#$%^&*()-=_+`~";
+	static constexpr const char8_t* ALPHA_NUMERIC = u8"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	static constexpr const char8_t* NUMERIC = u8"0123456789";
+	static constexpr const char8_t* ALPHA = u8"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static constexpr const char8_t* ALPHA_LOWERCASE = u8"abcdefghijklmnopqrstuvwxyz";
+	static constexpr const char8_t* ALPHA_UPPERCASE = u8"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	
 	Font(const char* font_filepath, float font_size, const UTF::String& common_buffer = Font::COMMON,
 		const TextureSettings& settings = {}, UTF::String* failed_common_chars = nullptr);
@@ -114,7 +114,7 @@ public:
 		int top_ribbon = 0;
 	};
 
-	UTF::String text = "";
+	UTF::String text;
 	Format format = {};
 	glm::vec2 pivot = { 0.0f, 1.0f };
 

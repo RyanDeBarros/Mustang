@@ -2,9 +2,9 @@
 
 #include <stdexcept>
 
-std::string UTF::encode(const std::u16string& utf16, bool ignore_invalid_chars)
+std::u8string UTF::encode(const std::u16string& utf16, bool ignore_invalid_chars)
 {
-	std::string utf8;
+	std::u8string utf8;
 
 	for (size_t i = 0; i < utf16.size(); ++i) {
 		char16_t ch = utf16[i];
@@ -51,7 +51,7 @@ std::string UTF::encode(const std::u16string& utf16, bool ignore_invalid_chars)
 	return utf8;
 }
 
-std::u16string UTF::decode_utf16(const std::string& utf8)
+std::u16string UTF::decode_utf16(const std::u8string& utf8)
 {
 	std::u16string utf16;
 
@@ -103,9 +103,9 @@ std::u16string UTF::decode_utf16(const std::string& utf8)
 	return utf16;
 }
 
-std::string UTF::encode(const std::u32string& utf32, bool ignore_invalid_chars)
+std::u8string UTF::encode(const std::u32string& utf32, bool ignore_invalid_chars)
 {
-	std::string utf8;
+	std::u8string utf8;
 
 	for (char32_t codepoint : utf32)
 	{
@@ -145,7 +145,7 @@ std::string UTF::encode(const std::u32string& utf32, bool ignore_invalid_chars)
 	return utf8;
 }
 
-std::u32string UTF::decode_utf32(const std::string& utf8)
+std::u32string UTF::decode_utf32(const std::u8string& utf8)
 {
 	std::u32string utf32;
 
@@ -190,6 +190,16 @@ std::u32string UTF::decode_utf32(const std::string& utf8)
 	}
 
 	return utf32;
+}
+
+std::u8string UTF::convert(const std::string& str)
+{
+	return std::u8string(str.begin(), str.end());
+}
+
+std::string UTF::convert(const std::u8string& utf8)
+{
+	return std::string(utf8.begin(), utf8.end());
 }
 
 int UTF::String::Iterator::codepoint() const

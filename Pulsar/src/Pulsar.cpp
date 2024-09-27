@@ -1,4 +1,4 @@
-#include "VendorInclude.h"
+﻿#include "VendorInclude.h"
 #include "Pulsar.h"
 
 #include <functional>
@@ -373,11 +373,13 @@ void Pulsar::Run()
 			});
 
 	// TODO font registry?
-	Font font("res/fonts/Roboto-BoldItalic.ttf", 96.0f, "");
+	Font font("res/fonts/Roboto-BoldItalic.ttf", 96.0f, u8"");
 	Font font2("res/fonts/Roboto-Regular.ttf", 48.0f, Font::COMMON);
 	TextRender text_render = font2.GetTextRender();
-	//text_render.text = U"Hello,\n World\t!�\r\n\rNext Line!!";
-	text_render.text = "Whereas recognition of the inherent dignity";
+	text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!!";
+	//text_render.text = U"Whereas recognition of the inherent dignity 😂水"; // NOTE roboto does not support emojis/kanji
+	//text_render.text = U"ΣπΦ";
+	//text_render.text = "hello";
 	text_render.UpdateBounds();
 	//*text_render.Fickler().Scale() = glm::vec2{ 1.0f, 1.0f } * 8.0f;
 	*text_render.Fickler().Scale() = glm::vec2{ 1.0f, 1.0f } * 2.5f;
@@ -454,7 +456,7 @@ void Pulsar::Run()
 			{
 				modified = 1;
 				//text_render.ChangeFont(&font);
-				//text_render.text = U"Hello,\n World\t!�\r\n\rNext Line!! Font 1";
+				//text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 1";
 				//text_render.UpdateBounds();
 				//text_background.SetWidth(text_render.Width());
 				//TextureSettings ts_;
@@ -468,7 +470,7 @@ void Pulsar::Run()
 			{
 				modified = 2;
 				//text_render.ChangeFont(&font2);
-				//text_render.text = U"Hello,\n World\t!�\r\n\rNext Line!! Font 2";
+				//text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 2";
 				//text_render.UpdateBounds();
 				//text_background.SetWidth(text_render.Width());
 				//TextureSettings ts_;
