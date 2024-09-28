@@ -30,6 +30,7 @@ namespace UTF
 		String(const char32_t* str) : str(encode(std::u32string(str))) {}
 		String() = default;
 
+		// TODO const iterator
 		class Iterator
 		{
 			const String& string;
@@ -41,7 +42,9 @@ namespace UTF
 		public:
 			int codepoint() const;
 			Iterator& operator++() { i += num_bytes(); return *this; }
-			Iterator& operator++(int) const { Iterator iter(string, i + num_bytes()); return iter; }
+			Iterator operator++(int) { Iterator iter(string, i); i += num_bytes(); return iter; }
+			Iterator& operator--();
+			Iterator operator--(int);
 			bool operator==(const Iterator& other) const { return string.str == other.string.str && i == other.i; }
 			bool operator!=(const Iterator& other) const { return string.str != other.string.str || i != other.i; }
 			char num_bytes() const;
@@ -57,8 +60,12 @@ namespace UTF
 
 		void push_back(int codepoint);
 
-		// TODO Bi-Iterator? for going backwards keep reference to the previous Bi-Iterator. Also const versions
+		String operator+(const String& rhs) const;
+		String& operator+=(const String& rhs);
+		String operator*(size_t n) const;
+		String& operator*=(size_t n);
 
-		// TODO other string operations that propogate to underlying str member.
+		String(const Iterator& begin_, const Iterator& end_);
+		String substr(size_t begin_, size_t end_) const;
 	};
 }

@@ -379,9 +379,9 @@ void Pulsar::Run()
 	Font* font1 = font_family.GetFont("bold-italic", FontConstructorArgs(96.0f, u8""));
 	Font* font2 = font_family.GetFont("regular", FontConstructorArgs(48.0f, Font::COMMON));
 	TextRender text_render = font2->GetTextRender();
-	text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!!";
+	//text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!!";
 	//text_render.text = U"Whereas recognition of the inherent dignity 😂水"; // NOTE roboto does not support emojis/kanji
-	//text_render.text = U"ΣπΦ";
+	text_render.text = U"ΣπΦ";
 	//text_render.text = "hello";
 	text_render.UpdateBounds();
 	//*text_render.Fickler().Scale() = glm::vec2{ 1.0f, 1.0f } * 8.0f;
@@ -405,6 +405,10 @@ void Pulsar::Run()
 	//font.SetTextureSettings(ts_);
 
 	int modified = 0;
+
+	UTF::String s1, s2;
+	s1 += s2;
+	s1 *= 3;
 
 	_frame_exec = [&]() {
 		drawTime = static_cast<real>(glfwGetTime());
