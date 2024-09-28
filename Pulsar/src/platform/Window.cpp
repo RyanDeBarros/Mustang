@@ -60,6 +60,11 @@ void Window::SetCursor(Cursor&& new_cursor)
 {
 	cursor = std::move(new_cursor);
 	glfwSetCursor(window, cursor._GetInternal());
+	glfwSetInputMode(window, GLFW_CURSOR, static_cast<int>(cursor.mouseMode));
+	if (glfwRawMouseMotionSupported())
+		glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, cursor.rawMouseMotion ? GLFW_TRUE : GLFW_FALSE);
+
+	int res = glfwGetInputMode(window, GLFW_CURSOR);
 }
 
 glm::vec2 Window::GetCursorPos() const

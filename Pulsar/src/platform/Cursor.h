@@ -16,6 +16,14 @@ enum class StandardCursor
 	CANCEL = GLFW_NOT_ALLOWED_CURSOR
 };
 
+enum class MouseMode
+{
+	VISIBLE = GLFW_CURSOR_NORMAL,
+	HIDDEN = GLFW_CURSOR_HIDDEN,
+	VIRTUAL = GLFW_CURSOR_DISABLED,
+	CAPTURED = GLFW_CURSOR_CAPTURED
+};
+
 class Cursor
 {
 	GLFWcursor* cursor = nullptr;
@@ -30,4 +38,6 @@ public:
 	~Cursor();
 
 	GLFWcursor* _GetInternal() { return cursor; }
+	MouseMode mouseMode = MouseMode::VISIBLE;
+	bool rawMouseMotion = false;
 };

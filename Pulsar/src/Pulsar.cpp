@@ -354,8 +354,11 @@ void Pulsar::Run()
 	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
 	//WindowManager::GetWindow(0)->SetCursor(Cursor(StandardCursor::CROSSHAIR));
-	Tile t("res/textures/flag.png", 1.0f, false);
-	WindowManager::GetWindow(0)->SetCursor(Cursor(t.GetImageBuffer(), t.GetWidth(), t.GetHeight()));
+	//Tile t("res/textures/flag.png", 1.0f, false);
+	//Cursor cursor = Cursor(t.GetImageBuffer(), t.GetWidth(), t.GetHeight());
+	Cursor cursor(StandardCursor::CROSSHAIR);
+	//cursor.mouseMode = MouseMode::VIRTUAL;
+	WindowManager::GetWindow(0)->SetCursor(std::move(cursor));
 
 	InputManager::Instance().DispatchMouseButton().Connect(InputBucket::MouseButton(0, Input::MouseButton::LEFT, Input::Action::PRESS),
 		[](const InputEvent::MouseButton& event) {

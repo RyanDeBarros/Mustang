@@ -14,7 +14,7 @@ Cursor::Cursor(unsigned char const* rgba_pixels, int width, int height, int xhot
 }
 
 Cursor::Cursor(Cursor&& other) noexcept
-	: cursor(other.cursor)
+	: cursor(other.cursor), mouseMode(other.mouseMode), rawMouseMotion(other.rawMouseMotion)
 {
 	other.cursor = nullptr;
 }
@@ -26,6 +26,8 @@ Cursor& Cursor::operator=(Cursor&& other) noexcept
 	if (cursor && Pulsar::GLFWInitialized())
 		glfwDestroyCursor(cursor);
 	cursor = other.cursor;
+	mouseMode = other.mouseMode;
+	rawMouseMotion = other.rawMouseMotion;
 	other.cursor = nullptr;
 	return *this;
 }
