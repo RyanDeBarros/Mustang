@@ -17,17 +17,17 @@ Font::Glyph::Glyph(Font* font, int gIndex, float scale, size_t buffer_pos)
 	height = ch_y1 - ch_y0;
 }
 
-void Font::Glyph::RenderOnBitmap(unsigned char* bmp, int common_stride, int common_height, bool plus_one)
+void Font::Glyph::RenderOnBitmap(unsigned char* bmp, size_t common_stride, size_t common_height, bool plus_one)
 {
 	unsigned char* temp = new unsigned char[width * height];
 	stbtt_MakeGlyphBitmap(&font->font_info, temp, width, height, width, font->scale, font->scale, gIndex);
-	for (int row = 0; row < height; ++row)
+	for (size_t row = 0; row < height; ++row)
 		memcpy(bmp + row * common_stride, temp + row * width, width);
 	delete[] temp;
-	for (int row = height; row < common_height; ++row)
+	for (size_t row = height; row < common_height; ++row)
 		memset(bmp + row * common_stride, 0x0, width);
 	if (plus_one)
-		for (int row = 0; row < common_height; ++row)
+		for (size_t row = 0; row < common_height; ++row)
 			*(bmp + row * common_stride + width) = 0x0;
 	location = bmp;
 }
@@ -279,7 +279,7 @@ void TextRender::FormatLine(size_t line, LineFormattingInfo& line_formatting) co
 	if (format.horizontal_align == HorizontalAlign::RIGHT)
 		line_formatting.add_x = OuterWidth() - bounds.lines[line].width;
 	else if (format.horizontal_align == HorizontalAlign::CENTER)
-		line_formatting.add_x = 0.5f * (OuterWidth() - bounds.lines[line].width);
+		line_formatting.add_x = static_cast<int>(0.5f * (OuterWidth() - bounds.lines[line].width));
 	else if (format.horizontal_align == HorizontalAlign::JUSTIFY_GLYPHS)
 	{
 		if (bounds.lines[line].width)
@@ -288,18 +288,20 @@ void TextRender::FormatLine(size_t line, LineFormattingInfo& line_formatting) co
 	}
 	else if (format.horizontal_align == HorizontalAlign::JUSTIFY)
 	{
-		int num_spaces = bounds.lines[line].num_spaces + format.num_spaces_in_tab * bounds.lines[line].num_tabs;
-		if (num_spaces)
+		float num_spaces = bounds.lines[line].num_spaces + format.num_spaces_in_tab * bounds.lines[line].num_tabs;
+		if (num_spaces > 0.0f)
 			line_formatting.space_mul_x += static_cast<float>(OuterWidth() - bounds.lines[line].width) / (num_spaces * font->space_width);
 	}
 }
 
-void TextRender::FormatPage(PageFormattingInfo& page_formatting) const
+TextRender::PageFormattingInfo TextRender::FormatPage() const
 {
+	PageFormattingInfo page_formatting;
+
 	if (format.vertical_align == VerticalAlign::BOTTOM)
 		page_formatting.add_y = OuterHeight() - bounds.inner_height;
 	else if (format.vertical_align == VerticalAlign::MIDDLE)
-		page_formatting.add_y = 0.5f * (OuterHeight() - bounds.inner_height);
+		page_formatting.add_y = static_cast<int>(0.5f * (OuterHeight() - bounds.inner_height));
 	else if (format.vertical_align == VerticalAlign::JUSTIFY)
 	{
 		int line_height = font->LineHeight(format.line_spacing_mult);
@@ -313,67 +315,65 @@ void TextRender::FormatPage(PageFormattingInfo& page_formatting) const
 		if (bounds.num_linebreaks * line_height != 0)
 			page_formatting.linebreak_mul_y += static_cast<float>(OuterHeight() - bounds.inner_height) / (bounds.num_linebreaks * line_height);
 	}
+
+	return page_formatting;
+}
+
+void TextRender::FormattingData::Setup(const TextRender& text_render)
+{
+	line_height = text_render.font->LineHeight(text_render.format.line_spacing_mult);
+	startX = static_cast<int>(-text_render.pivot.x * text_render.OuterWidth());
+	row = 0;
+	prev_codepoint = 0;
+	text_render.FormatLine(row++, line);
+	x = startX + line.add_x;
+	page = text_render.FormatPage();
+	y = static_cast<int>(roundf(-text_render.font->baseline + (1.0f - text_render.pivot.y) * text_render.OuterHeight())) + text_render.bounds.top_ribbon - page.add_y;
+}
+
+void TextRender::FormattingData::NextLine(const TextRender& text_render)
+{
+	text_render.FormatLine(row++, line);
+	if (x == startX + line.add_x)
+		y -= static_cast<int>(roundf(line_height * page.linebreak_mul_y));
+	else
+		y -= static_cast<int>(roundf(line_height * page.mul_y));
+	x = startX + line.add_x;
+	prev_codepoint = 0;
+}
+
+void TextRender::FormattingData::KerningAdvanceX(const TextRender& text_render, const Font::Glyph& glyph, Font::Codepoint codepoint)
+{
+	x += text_render.font->KerningOf(prev_codepoint, codepoint, text_render.font->glyphs[prev_codepoint].gIndex, glyph.gIndex, line.mul_x);
 }
 
 void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 {
 	if ((status & 0b1) == 0b0)
 		return;
-	int line_height = font->LineHeight(format.line_spacing_mult);
-	int startX = static_cast<int>(-pivot.x * OuterWidth());
-	int row = 0;
-	LineFormattingInfo line_formatting{};
-	FormatLine(row++, line_formatting);
-	int x = startX + line_formatting.add_x;
-	PageFormattingInfo page_formatting{};
-	FormatPage(page_formatting);
-	int y = static_cast<int>(roundf(-font->baseline + (1.0f - pivot.y) * OuterHeight())) + bounds.top_ribbon - page_formatting.add_y;
-	// TODO the bounds.top_ribbon ensures a kind of vertical justify. Explore this more in format.
-
-	int prevCodepoint = 0;
+	formatting.Setup(*this);
 	auto iter = text.begin();
 	while (iter)
 	{
 		Font::Codepoint codepoint = iter.advance();
 
 		if (codepoint == ' ')
-		{
-			x += static_cast<int>(font->space_width * line_formatting.space_mul_x);
-			prevCodepoint = 0;
-		}
+			formatting.AdvanceX(font->space_width * formatting.line.space_mul_x, 0);
 		else if (codepoint == '\t')
-		{
-			x += static_cast<int>(font->space_width * format.num_spaces_in_tab * line_formatting.space_mul_x);
-			prevCodepoint = 0;
-		}
+			formatting.AdvanceX(font->space_width * format.num_spaces_in_tab * formatting.line.space_mul_x, 0);
 		else if (carriage_return_2(codepoint, iter ? iter.codepoint() : 0))
 		{
-			FormatLine(row++, line_formatting);
-			if (x == startX + line_formatting.add_x)
-				y -= line_height * page_formatting.linebreak_mul_y;
-			else
-				y -= line_height * page_formatting.mul_y;
-			x = startX + line_formatting.add_x;
+			formatting.NextLine(*this);
 			++iter;
-			prevCodepoint = 0;
 		}
 		else if (carriage_return_1(codepoint))
-		{
-			FormatLine(row++, line_formatting);
-			if (x == startX + line_formatting.add_x)
-				y -= line_height * page_formatting.linebreak_mul_y;
-			else
-				y -= line_height * page_formatting.mul_y;
-			x = startX + line_formatting.add_x;
-			prevCodepoint = 0;
-		}
+			formatting.NextLine(*this);
 		else if (font->Cache(codepoint))
 		{
 			const Font::Glyph& glyph = font->glyphs[codepoint];
-			x += font->KerningOf(prevCodepoint, codepoint, font->glyphs[prevCodepoint].gIndex, glyph.gIndex, line_formatting.mul_x);
-			DrawGlyph(glyph, x, y, canvas_layer);
-			x += static_cast<int>(roundf(glyph.advance_width * font->scale * line_formatting.mul_x));
-			prevCodepoint = codepoint;
+			formatting.KerningAdvanceX(*this, glyph, codepoint);
+			DrawGlyph(glyph, formatting.x, formatting.y, canvas_layer);
+			formatting.AdvanceX(glyph.advance_width * font->scale * formatting.line.mul_x, codepoint);
 		}
 	}
 }
@@ -458,78 +458,40 @@ void TextRender::DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* 
 	canvas_layer->DrawRect(renderable, on_draw_callback);
 }
 
-void TextRender::UpdateBounds()
+void TextRender::BoundsFormattingData::Setup(const TextRender& text_render)
 {
-	int line_height = font->LineHeight(format.line_spacing_mult);
-	int x = 0;
-	int y = -font->baseline;
-	bounds = {};
-	int min_ch_y0 = 0;
-	int max_ch_y1 = INT_MIN;
-	LineInfo line_info{};
-	bool first_line = true;
+	line_height = text_render.font->LineHeight(text_render.format.line_spacing_mult);
+	x = 0;
+	y = -text_render.font->baseline;
+	min_ch_y0 = 0;
+	max_ch_y1 = INT_MIN;
+	line_info = {};
+	line_formatting = {};
+	first_line = true;
+	prev_codepoint = 0;
+}
 
-	int prevCodepoint = 0;
-	auto iter = text.begin();
-	while (iter)
-	{
-		Font::Codepoint codepoint = iter.advance();
+void TextRender::BoundsFormattingData::NextLine(TextRender& text_render)
+{
+	Bounds& bounds = text_render.bounds;
+	if (x > bounds.inner_width)
+		bounds.inner_width = x;
+	line_info.width = x;
+	bounds.lines.push_back(line_info);
+	line_info = {};
+	if (x == 0)
+		++bounds.num_linebreaks;
+	x = 0;
+	y -= line_height;
+	first_line = false;
+	max_ch_y1 = INT_MIN;
+	prev_codepoint = 0;
+}
 
-		if (codepoint == ' ')
-		{
-			x += font->space_width;
-			prevCodepoint = 0;
-			++line_info.num_spaces;
-		}
-		else if (codepoint == '\t')
-		{
-			x += static_cast<int>(font->space_width * format.num_spaces_in_tab);
-			prevCodepoint = 0;
-			++line_info.num_tabs;
-		}
-		else if (carriage_return_2(codepoint, iter ? iter.codepoint() : 0))
-		{
-			if (x > bounds.inner_width)
-				bounds.inner_width = x;
-			line_info.width = x;
-			bounds.lines.push_back(line_info);
-			line_info = {};
-			if (x == 0)
-				++bounds.num_linebreaks;
-			x = 0;
-			y -= line_height;
-			first_line = false;
-			max_ch_y1 = INT_MIN;
-			++iter;
-			prevCodepoint = 0;
-		}
-		else if (carriage_return_1(codepoint))
-		{
-			if (x > bounds.inner_width)
-				bounds.inner_width = x;
-			line_info.width = x;
-			bounds.lines.push_back(line_info);
-			line_info = {};
-			if (x == 0)
-				++bounds.num_linebreaks;
-			x = 0;
-			y -= line_height;
-			first_line = false;
-			max_ch_y1 = INT_MIN;
-			prevCodepoint = 0;
-		}
-		else if (font->Cache(codepoint))
-		{
-			const Font::Glyph& glyph = font->glyphs[codepoint];
-			x += font->KerningOf(prevCodepoint, codepoint, font->glyphs[prevCodepoint].gIndex, glyph.gIndex);
-			x += static_cast<int>(roundf(glyph.advance_width * font->scale));
-			prevCodepoint = codepoint;
-			if (first_line && glyph.ch_y0 < min_ch_y0)
-				min_ch_y0 = glyph.ch_y0;
-			if (glyph.ch_y0 + glyph.height > max_ch_y1)
-				max_ch_y1 = glyph.ch_y0 + glyph.height;
-		}
-	}
+void TextRender::BoundsFormattingData::LastLine(TextRender& text_render)
+{
+	Bounds& bounds = text_render.bounds;
+	Font* font = text_render.font;
 	if (x > bounds.inner_width)
 		bounds.inner_width = x;
 	line_info.width = x;
@@ -538,11 +500,67 @@ void TextRender::UpdateBounds()
 	if (x == 0)
 		++bounds.num_linebreaks;
 	bounds.lowest_baseline = -y;
-	bounds.top_ribbon = font->ascent * font->scale + min_ch_y0;
+	bounds.top_ribbon = static_cast<int>(font->ascent * font->scale + min_ch_y0);
 	if (max_ch_y1 == INT_MAX)
 		max_ch_y1 = 0;
-	bounds.bottom_ribbon = max_ch_y1 - font->descent * font->scale;
-	bounds.inner_height = bounds.lowest_baseline - font->descent * font->scale - bounds.top_ribbon;
+	bounds.bottom_ribbon = static_cast<int>(max_ch_y1 - font->descent * font->scale);
+	bounds.inner_height = static_cast<int>(bounds.lowest_baseline - font->descent * font->scale - bounds.top_ribbon);
+}
+
+void TextRender::BoundsFormattingData::KerningAdvanceX(const TextRender& text_render, const Font::Glyph& glyph, Font::Codepoint codepoint)
+{
+	x += text_render.font->KerningOf(prev_codepoint, codepoint, text_render.font->glyphs[prev_codepoint].gIndex, glyph.gIndex);
+}
+
+void TextRender::BoundsFormattingData::UpdateMinCH_Y0(const Font::Glyph& glyph)
+{
+	if (first_line && glyph.ch_y0 < min_ch_y0)
+		min_ch_y0 = glyph.ch_y0;
+}
+
+void TextRender::BoundsFormattingData::UpdateMaxCH_Y1(const Font::Glyph& glyph)
+{
+	if (glyph.ch_y0 + glyph.height > max_ch_y1)
+		max_ch_y1 = glyph.ch_y0 + glyph.height;
+}
+
+void TextRender::UpdateBounds()
+{
+	bounds = {};
+	bounds_formatting.Setup(*this);
+
+	auto iter = text.begin();
+	while (iter)
+	{
+		Font::Codepoint codepoint = iter.advance();
+
+		if (codepoint == ' ')
+		{
+			bounds_formatting.AdvanceX(font->space_width, 0);
+			++bounds_formatting.line_info.num_spaces;
+		}
+		else if (codepoint == '\t')
+		{
+			bounds_formatting.AdvanceX(font->space_width * format.num_spaces_in_tab, 0);
+			++bounds_formatting.line_info.num_tabs;
+		}
+		else if (carriage_return_2(codepoint, iter ? iter.codepoint() : 0))
+		{
+			bounds_formatting.NextLine(*this);
+			++iter;
+		}
+		else if (carriage_return_1(codepoint))
+			bounds_formatting.NextLine(*this);
+		else if (font->Cache(codepoint))
+		{
+			const Font::Glyph& glyph = font->glyphs[codepoint];
+			bounds_formatting.KerningAdvanceX(*this, glyph, codepoint);
+			bounds_formatting.AdvanceX(glyph.advance_width * font->scale, codepoint);
+			bounds_formatting.UpdateMinCH_Y0(glyph);
+			bounds_formatting.UpdateMaxCH_Y1(glyph);
+		}
+	}
+	bounds_formatting.LastLine(*this);
 }
 
 static bool read_kern_part(const std::string& p, int& k)

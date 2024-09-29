@@ -47,7 +47,7 @@ private:
 		Glyph() = default;
 		Glyph(Font* font, int gIndex, float scale, size_t buffer_pos);
 
-		void RenderOnBitmap(unsigned char* bmp, int common_stride, int common_height, bool plus_one);
+		void RenderOnBitmap(unsigned char* bmp, size_t common_stride, size_t common_height, bool plus_one);
 		void RenderOnBitmap(unsigned char* bmp);
 		size_t Area() const { return static_cast<size_t>(width) * height; }
 	};
@@ -204,7 +204,51 @@ public:
 private:
 	void DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* canvas_layer);
 	void FormatLine(size_t line, LineFormattingInfo& line_formatting) const;
-	void FormatPage(PageFormattingInfo& page_formatting) const;
+	PageFormattingInfo FormatPage() const;
+
+	struct FormattingData
+	{
+		int row = 0;
+		int x = 0, y = 0;
+		Font::Codepoint prev_codepoint = 0;
+		int startX = 0, line_height = 0;
+		LineFormattingInfo line = {};
+		PageFormattingInfo page = {};
+
+		void Setup(const TextRender& text_render);
+		void NextLine(const TextRender& text_render);
+		void AdvanceX(int amount) { x += amount; }
+		void AdvanceX(int amount, Font::Codepoint codepoint) { x += amount; prev_codepoint = codepoint; }
+		void AdvanceX(float amount) { x += static_cast<int>(roundf(amount)); }
+		void AdvanceX(float amount, Font::Codepoint codepoint) { x += static_cast<int>(roundf(amount)); prev_codepoint = codepoint; }
+		void KerningAdvanceX(const TextRender& text_render, const Font::Glyph& glyph, Font::Codepoint codepoint);
+	};
+
+	FormattingData formatting;
+
+	struct BoundsFormattingData
+	{
+		int x = 0, y = 0;
+		Font::Codepoint prev_codepoint = 0;
+		int line_height = 0;
+		int min_ch_y0 = 0, max_ch_y1 = 0;
+		bool first_line = true;
+		LineInfo line_info = {};
+		LineFormattingInfo line_formatting = {};
+
+		void Setup(const TextRender& text_render);
+		void NextLine(TextRender& text_render);
+		void LastLine(TextRender& text_render);
+		void AdvanceX(int amount) { x += amount; }
+		void AdvanceX(int amount, Font::Codepoint codepoint) { x += amount; prev_codepoint = codepoint; }
+		void AdvanceX(float amount) { x += static_cast<int>(roundf(amount)); }
+		void AdvanceX(float amount, Font::Codepoint codepoint) { x += static_cast<int>(roundf(amount)); prev_codepoint = codepoint; }
+		void KerningAdvanceX(const TextRender& text_render, const Font::Glyph& glyph, Font::Codepoint codepoint);
+		void UpdateMinCH_Y0(const Font::Glyph& glyph);
+		void UpdateMaxCH_Y1(const Font::Glyph& glyph);
+	};
+
+	BoundsFormattingData bounds_formatting;
 
 	Bounds bounds;
 };
