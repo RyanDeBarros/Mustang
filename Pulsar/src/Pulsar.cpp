@@ -382,20 +382,21 @@ void Pulsar::Run()
 	Font* font1 = font_family.GetFont("bold-italic", FontConstructorArgs(96.0f, u8""));
 	Font* font2 = font_family.GetFont("regular", FontConstructorArgs(48.0f, Font::COMMON));
 	TextRender text_render = font2->GetTextRender();
-	//text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!!";
+	text_render.format.horizontal_align = TextRender::HorizontalAlign::CENTER;
+	text_render.format.vertical_align = TextRender::VerticalAlign::MIDDLE;
+	text_render.format.min_width = 500;
+	text_render.format.min_height = 500;
+	text_render.text = U"Hello,\n World\t!é.........\r\n\rNext Line!!\nx xx  xxx\tx\n\n\n¿last line?";
 	//text_render.text = U"Whereas recognition of the inherent dignity 😂水"; // NOTE roboto does not support emojis/kanji
-	text_render.text = U"ΣπΦ";
+	text_render.WarnInvalidCharacters();
+	//text_render.text = U"ΣπΦ";
 	//text_render.text = "hello";
 	text_render.UpdateBounds();
-	//*text_render.Fickler().Scale() = glm::vec2{ 1.0f, 1.0f } * 8.0f;
-	*text_render.Fickler().Scale() = glm::vec2{ 1.0f, 1.0f } * 2.5f;
-	//*text_render.Fickler().Position() = glm::vec2{ -600.0f, -300.0f };
-	//text_render.Fickler().SyncT();
 	//Renderer::GetCanvasLayer(11)->Clear();
 	//psys->z = -100;
 	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
 
-	DebugRect text_background(text_render.GetBounds().full_width, text_render.GetBounds().full_height, true, {0.0f, 1.0f});
+	DebugRect text_background(text_render.OuterWidth(), text_render.OuterHeight(), true, {0.0f, 1.0f});
 	text_background.Fickler().modulatable->self.Sync({0.0f, 0.0f, 0.6f, 0.6f});
 	Renderer::GetCanvasLayer(11)->OnAttach(&text_background);
 	Renderer::GetCanvasLayer(11)->OnAttach(&text_render);
@@ -468,8 +469,8 @@ void Pulsar::Run()
 				//text_render.ChangeFont(font1);
 				//text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 1";
 				//text_render.UpdateBounds();
-				//text_background.SetWidth(text_render.GetBounds().full_width);
-				//text_background.SetHeight(text_render.GetBounds().full_height);
+				//text_background.SetWidth(text_render.OuterWidth());
+				//text_background.SetHeight(text_render.OuterHeight());
 				//TextureSettings ts_;
 				//ts_.magFilter = MagFilter::Linear;
 				//font.SetTextureSettings(ts_);
@@ -483,8 +484,8 @@ void Pulsar::Run()
 				//text_render.ChangeFont(font2);
 				//text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 2";
 				//text_render.UpdateBounds();
-				//text_background.SetWidth(text_render.GetBounds().full_width);
-				//text_background.SetHeight(text_render.GetBounds().full_height);
+				//text_background.SetWidth(text_render.OuterWidth());
+				//text_background.SetHeight(text_render.OuterHeight());
 				//TextureSettings ts_;
 				//ts_.magFilter = MagFilter::Nearest;
 				//font.SetTextureSettings(ts_);

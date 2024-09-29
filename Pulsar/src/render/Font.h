@@ -81,8 +81,11 @@ public:
 
 	bool Cache(Font::Codepoint codepoint);
 	void CacheAll(const Font& other);
+	bool Supports(Font::Codepoint codepoint) const;
+	int KerningOf(Font::Codepoint c1, Font::Codepoint c2, int g1, int g2, float sc = 1.0f) const;
 
-	TextRender GetTextRender(ZIndex z = 0);
+	TextRender GetTextRender(const UTF::String& text, ZIndex z = 0);
+	TextRender GetTextRender(UTF::String&& text = "", ZIndex z = 0);
 
 	TextureSettings GetTextureSettings() const { return texture_settings; }
 	void SetTextureSettings(const TextureSettings& ts = {});
@@ -107,25 +110,71 @@ class TextRender : public FickleActor2D
 	static Functor<void, TextureSlot> create_on_draw_callback(TextRender* tr);
 
 public:
-	TextRender(Font* font, ZIndex z);
+	TextRender(Font* font, ZIndex z, const UTF::String& txt);
+	TextRender(Font* font, ZIndex z, UTF::String&& txt);
 	TextRender(const TextRender&) = delete;
 	TextRender(TextRender&&) = delete;
+
+	enum class HorizontalAlign : char
+	{
+		LEFT,
+		RIGHT,
+		CENTER,
+		JUSTIFY,
+		JUSTIFY_GLYPHS
+	};
+
+	enum class VerticalAlign : char
+	{
+		TOP,
+		MIDDLE,
+		BOTTOM,
+		JUSTIFY,
+		JUSTIFY_LINEBREAKS
+	};
 
 	// TODO FormatRegistry
 	struct Format
 	{
 		float line_spacing_mult = 1.0f;
 		float num_spaces_in_tab = 4;
-		// TODO justification/alignment/underline/strikethrough/etc.
+		HorizontalAlign horizontal_align = HorizontalAlign::LEFT;
+		VerticalAlign vertical_align = VerticalAlign::TOP;
+		// TODO underline/strikethrough/etc.
 		// background color/drop-shadow/reflection/etc.
+		int min_width = 0, min_height = 0;
+	};
+
+	struct LineInfo
+	{
+		int width = 0;
+		int num_spaces = 0;
+		int num_tabs = 0;
+	};
+
+	struct LineFormattingInfo
+	{
+		int add_x = 0;
+		float mul_x = 1.0f;
+		float space_mul_x = 1.0f;
+	};
+
+	struct PageFormattingInfo
+	{
+		int add_y = 0;
+		float mul_y = 1.0f;
+		float linebreak_mul_y = 1.0f;
 	};
 
 	struct Bounds
 	{
-		int full_width = 0;
-		int full_height = 0;
+		int inner_width = 0;
+		int inner_height = 0;
 		int lowest_baseline = 0;
 		int top_ribbon = 0;
+		int bottom_ribbon = 0;
+		int num_linebreaks = 0;
+		std::vector<LineInfo> lines;
 	};
 
 	UTF::String text;
@@ -147,9 +196,15 @@ public:
 	// TODO Block/rich text that tesselates TextRenders properly using bounds.
 	Bounds GetBounds() const { return bounds; }
 	void UpdateBounds();
+	int OuterWidth() const { return bounds.inner_width > format.min_width ? bounds.inner_width : format.min_width; }
+	int OuterHeight() const { return bounds.inner_height > format.min_height ? bounds.inner_height : format.min_height; }
+
+	void WarnInvalidCharacters() const;
 
 private:
 	void DrawGlyph(const Font::Glyph& glyph, int x, int y, CanvasLayer* canvas_layer);
+	void FormatLine(size_t line, LineFormattingInfo& line_formatting) const;
+	void FormatPage(PageFormattingInfo& page_formatting) const;
 
 	Bounds bounds;
 };
@@ -199,7 +254,7 @@ struct FontConstructorArgs
 		: font_size(font_size), common_buffer(std::move(common_buffer)), settings(settings), failed_common_chars(failed_common_chars) {}
 };
 
-// TODO FontFamily registry instead of Font registry?
+// TODO FontFamily registry instead of/in addition to Font registry?
 class FontFamily
 {
 	struct FontEntry

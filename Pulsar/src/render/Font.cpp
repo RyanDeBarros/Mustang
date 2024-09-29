@@ -170,9 +170,32 @@ void Font::CacheAll(const Font& other)
 		Cache(codepoint);
 }
 
-TextRender Font::GetTextRender(ZIndex z)
+bool Font::Supports(Font::Codepoint codepoint) const
 {
-	return TextRender(this, z);
+	if (glyphs.find(codepoint) != glyphs.end())
+		return true;
+	return stbtt_FindGlyphIndex(&font_info, codepoint) != 0;
+}
+
+int Font::KerningOf(Font::Codepoint c1, Font::Codepoint c2, int g1, int g2, float sc) const
+{
+	if (g1 == 0)
+		return 0;
+	auto k = kerning.find({ c1, c2 });
+	if (k != kerning.end())
+		return static_cast<int>(roundf(k->second * scale * sc));
+	else
+		return static_cast<int>(roundf(stbtt_GetGlyphKernAdvance(&font_info, g1, g2) * scale * sc));
+}
+
+TextRender Font::GetTextRender(const UTF::String& text, ZIndex z)
+{
+	return TextRender(this, z, text);
+}
+
+TextRender Font::GetTextRender(UTF::String&& text, ZIndex z)
+{
+	return TextRender(this, z, std::move(text));
 }
 
 void Font::SetTextureSettings(const TextureSettings& ts)
@@ -235,10 +258,61 @@ Functor<void, TextureSlot> TextRender::create_on_draw_callback(TextRender* tr)
 		}, tr);
 }
 
-TextRender::TextRender(Font* font, ZIndex z)
-	: FickleActor2D(FickleType::Protean, z), font(font), on_draw_callback(create_on_draw_callback(this))
+TextRender::TextRender(Font* font, ZIndex z, const UTF::String& txt)
+	: FickleActor2D(FickleType::Protean, z), font(font), on_draw_callback(create_on_draw_callback(this)), text(txt)
 {
 	Loader::loadRenderable(PulsarSettings::text_standard_filepath(), renderable);
+	UpdateBounds();
+}
+
+TextRender::TextRender(Font* font, ZIndex z, UTF::String&& txt)
+	: FickleActor2D(FickleType::Protean, z), font(font), on_draw_callback(create_on_draw_callback(this)), text(std::move(txt))
+{
+	Loader::loadRenderable(PulsarSettings::text_standard_filepath(), renderable);
+	UpdateBounds();
+}
+
+void TextRender::FormatLine(size_t line, LineFormattingInfo& line_formatting) const
+{
+	line_formatting = {};
+	
+	if (format.horizontal_align == HorizontalAlign::RIGHT)
+		line_formatting.add_x = OuterWidth() - bounds.lines[line].width;
+	else if (format.horizontal_align == HorizontalAlign::CENTER)
+		line_formatting.add_x = 0.5f * (OuterWidth() - bounds.lines[line].width);
+	else if (format.horizontal_align == HorizontalAlign::JUSTIFY_GLYPHS)
+	{
+		if (bounds.lines[line].width)
+			line_formatting.mul_x = static_cast<float>(OuterWidth()) / bounds.lines[line].width;
+		line_formatting.space_mul_x = line_formatting.mul_x;
+	}
+	else if (format.horizontal_align == HorizontalAlign::JUSTIFY)
+	{
+		int num_spaces = bounds.lines[line].num_spaces + format.num_spaces_in_tab * bounds.lines[line].num_tabs;
+		if (num_spaces)
+			line_formatting.space_mul_x += static_cast<float>(OuterWidth() - bounds.lines[line].width) / (num_spaces * font->space_width);
+	}
+}
+
+void TextRender::FormatPage(PageFormattingInfo& page_formatting) const
+{
+	if (format.vertical_align == VerticalAlign::BOTTOM)
+		page_formatting.add_y = OuterHeight() - bounds.inner_height;
+	else if (format.vertical_align == VerticalAlign::MIDDLE)
+		page_formatting.add_y = 0.5f * (OuterHeight() - bounds.inner_height);
+	else if (format.vertical_align == VerticalAlign::JUSTIFY)
+	{
+		int line_height = font->LineHeight(format.line_spacing_mult);
+		if (bounds.inner_height != line_height)
+			page_formatting.mul_y = static_cast<float>(OuterHeight() - line_height) / (bounds.inner_height - line_height);
+		page_formatting.linebreak_mul_y = page_formatting.mul_y;
+	}
+	else if (format.vertical_align == VerticalAlign::JUSTIFY_LINEBREAKS)
+	{
+		int line_height = font->LineHeight(format.line_spacing_mult);
+		if (bounds.num_linebreaks * line_height != 0)
+			page_formatting.linebreak_mul_y += static_cast<float>(OuterHeight() - bounds.inner_height) / (bounds.num_linebreaks * line_height);
+	}
 }
 
 void TextRender::RequestDraw(CanvasLayer* canvas_layer)
@@ -246,10 +320,15 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 	if ((status & 0b1) == 0b0)
 		return;
 	int line_height = font->LineHeight(format.line_spacing_mult);
-	int startX = static_cast<int>(-pivot.x * bounds.full_width);
-	int x = startX;
+	int startX = static_cast<int>(-pivot.x * OuterWidth());
+	int row = 0;
+	LineFormattingInfo line_formatting{};
+	FormatLine(row++, line_formatting);
+	int x = startX + line_formatting.add_x;
+	PageFormattingInfo page_formatting{};
+	FormatPage(page_formatting);
+	int y = static_cast<int>(roundf(-font->baseline + (1.0f - pivot.y) * OuterHeight())) + bounds.top_ribbon - page_formatting.add_y;
 	// TODO the bounds.top_ribbon ensures a kind of vertical justify. Explore this more in format.
-	int y = static_cast<int>(roundf(-font->baseline + (1.0f - pivot.y) * bounds.full_height)) + bounds.top_ribbon;
 
 	int prevCodepoint = 0;
 	auto iter = text.begin();
@@ -259,44 +338,58 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 
 		if (codepoint == ' ')
 		{
-			x += font->space_width;
+			x += static_cast<int>(font->space_width * line_formatting.space_mul_x);
 			prevCodepoint = 0;
 		}
 		else if (codepoint == '\t')
 		{
-			x = static_cast<int>(x + font->space_width * format.num_spaces_in_tab);
+			x += static_cast<int>(font->space_width * format.num_spaces_in_tab * line_formatting.space_mul_x);
 			prevCodepoint = 0;
 		}
 		else if (carriage_return_2(codepoint, iter ? iter.codepoint() : 0))
 		{
-			x = startX;
-			y -= line_height;
+			FormatLine(row++, line_formatting);
+			if (x == startX + line_formatting.add_x)
+				y -= line_height * page_formatting.linebreak_mul_y;
+			else
+				y -= line_height * page_formatting.mul_y;
+			x = startX + line_formatting.add_x;
 			++iter;
 			prevCodepoint = 0;
 		}
 		else if (carriage_return_1(codepoint))
 		{
-			x = startX;
-			y -= line_height;
+			FormatLine(row++, line_formatting);
+			if (x == startX + line_formatting.add_x)
+				y -= line_height * page_formatting.linebreak_mul_y;
+			else
+				y -= line_height * page_formatting.mul_y;
+			x = startX + line_formatting.add_x;
 			prevCodepoint = 0;
 		}
 		else if (font->Cache(codepoint))
 		{
 			const Font::Glyph& glyph = font->glyphs[codepoint];
-			int prevGIndex = font->glyphs[prevCodepoint].gIndex;
-			if (prevGIndex > 0)
-			{
-				int kern;
-				auto k = font->kerning.find({ prevCodepoint, codepoint });
-				if (k != font->kerning.end())
-					kern = k->second;
-				else
-					kern = stbtt_GetGlyphKernAdvance(&font->font_info, prevGIndex, glyph.gIndex);
-				x += static_cast<int>(roundf(kern * font->scale));
-			}
+			x += font->KerningOf(prevCodepoint, codepoint, font->glyphs[prevCodepoint].gIndex, glyph.gIndex, line_formatting.mul_x);
 			DrawGlyph(glyph, x, y, canvas_layer);
-			x += static_cast<int>(roundf(glyph.advance_width * font->scale));
+			x += static_cast<int>(roundf(glyph.advance_width * font->scale * line_formatting.mul_x));
 			prevCodepoint = codepoint;
+		}
+	}
+}
+
+void TextRender::WarnInvalidCharacters() const
+{
+	auto iter = text.begin();
+	std::stringstream ss;
+	while (iter)
+	{
+		Font::Codepoint codepoint = iter.advance();
+		if (codepoint != ' ' && codepoint != '\t' && !carriage_return_2(codepoint, iter ? iter.codepoint() : 0) && !carriage_return_1(codepoint) && !font->Supports(codepoint))
+		{
+			ss.str("");
+			ss << "Cannot render codepoint: U+" << std::hex << std::uppercase << codepoint;
+			Logger::LogWarning(ss.str());
 		}
 	}
 }
@@ -370,8 +463,11 @@ void TextRender::UpdateBounds()
 	int line_height = font->LineHeight(format.line_spacing_mult);
 	int x = 0;
 	int y = -font->baseline;
-	bounds.full_width = 0;
+	bounds = {};
 	int min_ch_y0 = 0;
+	int max_ch_y1 = INT_MIN;
+	LineInfo line_info{};
+	bool first_line = true;
 
 	int prevCodepoint = 0;
 	auto iter = text.begin();
@@ -383,54 +479,70 @@ void TextRender::UpdateBounds()
 		{
 			x += font->space_width;
 			prevCodepoint = 0;
+			++line_info.num_spaces;
 		}
 		else if (codepoint == '\t')
 		{
-			x = static_cast<int>(x + font->space_width * format.num_spaces_in_tab);
+			x += static_cast<int>(font->space_width * format.num_spaces_in_tab);
 			prevCodepoint = 0;
+			++line_info.num_tabs;
 		}
 		else if (carriage_return_2(codepoint, iter ? iter.codepoint() : 0))
 		{
-			if (x > bounds.full_width)
-				bounds.full_width = x;
+			if (x > bounds.inner_width)
+				bounds.inner_width = x;
+			line_info.width = x;
+			bounds.lines.push_back(line_info);
+			line_info = {};
+			if (x == 0)
+				++bounds.num_linebreaks;
 			x = 0;
 			y -= line_height;
+			first_line = false;
+			max_ch_y1 = INT_MIN;
 			++iter;
 			prevCodepoint = 0;
 		}
 		else if (carriage_return_1(codepoint))
 		{
-			if (x > bounds.full_width)
-				bounds.full_width = x;
+			if (x > bounds.inner_width)
+				bounds.inner_width = x;
+			line_info.width = x;
+			bounds.lines.push_back(line_info);
+			line_info = {};
+			if (x == 0)
+				++bounds.num_linebreaks;
 			x = 0;
 			y -= line_height;
+			first_line = false;
+			max_ch_y1 = INT_MIN;
 			prevCodepoint = 0;
 		}
 		else if (font->Cache(codepoint))
 		{
 			const Font::Glyph& glyph = font->glyphs[codepoint];
-			int prevGIndex = font->glyphs[prevCodepoint].gIndex;
-			if (prevGIndex > 0)
-			{
-				int kern;
-				auto k = font->kerning.find({ prevCodepoint, codepoint });
-				if (k != font->kerning.end())
-					kern = k->second;
-				else
-					kern = stbtt_GetGlyphKernAdvance(&font->font_info, prevGIndex, glyph.gIndex);
-				x += static_cast<int>(roundf(kern * font->scale));
-			}
+			x += font->KerningOf(prevCodepoint, codepoint, font->glyphs[prevCodepoint].gIndex, glyph.gIndex);
 			x += static_cast<int>(roundf(glyph.advance_width * font->scale));
 			prevCodepoint = codepoint;
-			if (glyph.ch_y0 < min_ch_y0)
+			if (first_line && glyph.ch_y0 < min_ch_y0)
 				min_ch_y0 = glyph.ch_y0;
+			if (glyph.ch_y0 + glyph.height > max_ch_y1)
+				max_ch_y1 = glyph.ch_y0 + glyph.height;
 		}
 	}
-	if (x > bounds.full_width)
-		bounds.full_width = x;
+	if (x > bounds.inner_width)
+		bounds.inner_width = x;
+	line_info.width = x;
+	bounds.lines.push_back(line_info);
+	line_info = {};
+	if (x == 0)
+		++bounds.num_linebreaks;
 	bounds.lowest_baseline = -y;
 	bounds.top_ribbon = font->ascent * font->scale + min_ch_y0;
-	bounds.full_height = bounds.lowest_baseline - font->descent * font->scale - bounds.top_ribbon;
+	if (max_ch_y1 == INT_MAX)
+		max_ch_y1 = 0;
+	bounds.bottom_ribbon = max_ch_y1 - font->descent * font->scale;
+	bounds.inner_height = bounds.lowest_baseline - font->descent * font->scale - bounds.top_ribbon;
 }
 
 static bool read_kern_part(const std::string& p, int& k)
@@ -497,7 +609,7 @@ static void parse_kerning(const char* filepath, Font::Kerning& kerning)
 			{
 				std::pair<std::pair<Font::Codepoint, Font::Codepoint>, int> insert;
 				if (parse_kerning_line(p0, p1, p2, insert))
-					kerning.insert(insert);
+					kerning.insert_or_assign(insert.first, insert.second);
 				p0.clear();
 				p1.clear();
 				p2.clear();
@@ -507,7 +619,7 @@ static void parse_kerning(const char* filepath, Font::Kerning& kerning)
 			{
 				std::pair<std::pair<Font::Codepoint, Font::Codepoint>, int> insert;
 				if (parse_kerning_line(p0, p1, p2, insert))
-					kerning.insert(insert);
+					kerning.insert_or_assign(insert.first, insert.second);
 				p0.clear();
 				p1.clear();
 				p2.clear();
@@ -543,7 +655,7 @@ static void parse_kerning(const char* filepath, Font::Kerning& kerning)
 		{
 			std::pair<std::pair<Font::Codepoint, Font::Codepoint>, int> insert;
 			if (parse_kerning_line(p0, p1, p2, insert))
-				kerning.insert(insert);
+				kerning.insert_or_assign(insert.first, insert.second);
 		}
 	}
 }
