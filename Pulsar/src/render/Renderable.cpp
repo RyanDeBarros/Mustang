@@ -1,10 +1,10 @@
 #include "Renderable.h"
 
 #include "Macros.h"
-#include "registry/UniformLexiconRegistry.h"
+#include "Renderer.h"
 
 BatchModel::BatchModel(VertexLayout layout, VertexLayoutMask layoutMask, ShaderHandle shader)
-	: layout(layout), layoutMask(layoutMask), shader(shader)
+	: layout(layout), layoutMask(layoutMask), shader(shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader)
 {
 }
 

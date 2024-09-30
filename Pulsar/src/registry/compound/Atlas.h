@@ -3,9 +3,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "../Tile.h"
-#include "../ShaderRegistry.h"
-#include "../Texture.h"
+#include "render/Renderer.h"
 #include "render/ActorRenderBase.h"
 
 struct Placement
@@ -51,14 +49,15 @@ public:
 
 	int GetBorder() const { return m_Border; }
 	const std::vector<Placement>& GetPlacements() const { return m_Placements; }
-	unsigned char const* GetBuffer() const { return TileRegistry::GetImageBuffer(m_Tile); }
+	unsigned char const* GetBuffer() const { return Renderer::Tiles().GetImageBuffer(m_Tile); }
 	
 	class RectRender SampleSubtile(size_t index, const struct TextureSettings& texture_settings = Texture::nearest_settings,
-		TextureVersion texture_version = 0, const glm::vec2& pivot = { 0.5f, 0.5f }, ShaderHandle shader = ShaderRegistry::standard_shader,
+		TextureVersion texture_version = 0, const glm::vec2& pivot = { 0.5f, 0.5f }, ShaderHandle shader = ShaderRegistry::HANDLE_CAP,
 		ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true) const;
 	TileHandle GetTileHandle() const { return m_Tile; }
-	int GetWidth() const { return TileRegistry::GetWidth(m_Tile); }
-	int GetHeight() const { return TileRegistry::GetHeight(m_Tile); }
+	// TODO IMPORTANT for functions such as these, perhaps passing a TileRegistry which by default is null (in which case Renderer::Tiles() is used) would be best.
+	int GetWidth() const { return Renderer::Tiles().GetWidth(m_Tile); }
+	int GetHeight() const { return Renderer::Tiles().GetHeight(m_Tile); }
 
 private:
 	void RectPack(std::vector<TileHandle>& tiles, int width = -1, int height = -1);

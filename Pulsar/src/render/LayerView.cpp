@@ -2,7 +2,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "registry/ShaderRegistry.h"
+#include "registry/Shader.h"
+#include "Renderer.h"
 #include "transform/Transforms.h"
 
 LayerView2D::LayerView2D(float pLeft, float pRight, float pBottom, float pTop)
@@ -15,7 +16,7 @@ void LayerView2D::PassVPUniform(ShaderHandle handle) const
 {
 	if (shaderCache.find(handle) == shaderCache.end())
 	{
-		ShaderRegistry::SetUniformMatrix3fv(handle, "u_VP", &m_VP[0][0]);
+		Renderer::Shaders().SetUniformMatrix3fv(handle, "u_VP", &m_VP[0][0]);
 		shaderCache.insert(handle);
 	}
 }

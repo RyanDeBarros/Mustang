@@ -8,11 +8,12 @@
 
 #include "Logger.inl"
 #include "PulsarSettings.h"
-#include "registry/ShaderRegistry.h"
-#include "registry/TextureRegistry.h"
-#include "registry/UniformLexiconRegistry.h"
+#include "registry/Shader.h"
+#include "registry/Texture.h"
+#include "registry/Tile.h"
 #include "registry/UniformLexicon.h"
 #include "registry/compound/Atlas.h"
+#include "render/Renderer.h"
 #include "render/Renderable.h"
 #include "render/actors/TileMap.h"
 #include "render/actors/particles/ParticleSubsystemArray.h"
@@ -70,7 +71,7 @@ LOAD_STATUS Loader::loadShader(const char* filepath, ShaderHandle& handle)
 		auto fragment_shader = shader["fragment"].value<std::string>();
 		if (!fragment_shader)
 			return LOAD_STATUS::SYNTAX_ERR;
-		handle = ShaderRegistry::GetHandle({ vertex_shader.value(), fragment_shader.value() });
+		handle = Renderer::Shaders().GetHandle(ShaderConstructArgs(std::move(vertex_shader.value()), std::move(fragment_shader.value())));
 		return handle > 0 ? LOAD_STATUS::OK : LOAD_STATUS::ASSET_LOAD_ERR;
 	}
 	catch (const toml::parse_error& err)
@@ -134,7 +135,7 @@ LOAD_STATUS Loader::loadTexture(const char* filepath, TextureHandle& handle, Tex
 		if (auto svg_scale_ = texture["svg_scale"].value<double>())
 			svg_scale = static_cast<float>(svg_scale_.value());
 
-		handle = TextureRegistry::GetHandle(TextureConstructArgs_filepath{ path.value(), texture_settings, temporary_buffer, texture_version, svg_scale });
+		handle = Renderer::Textures().GetHandle(TextureConstructArgs_filepath(std::move(path.value()), texture_settings, temporary_buffer, texture_version, svg_scale));
 		return handle > 0 ? LOAD_STATUS::OK : LOAD_STATUS::ASSET_LOAD_ERR;
 	}
 	catch (const toml::parse_error& err)
@@ -379,7 +380,7 @@ LOAD_STATUS Loader::loadUniformLexicon(const char* filepath, UniformLexiconHandl
 		});
 		if (status != LOAD_STATUS::OK)
 			return status;
-		handle = UniformLexiconRegistry::GetHandle({ uniform_map });
+		handle = Renderer::UniformLexicons().GetHandle({ uniform_map });
 		return LOAD_STATUS::OK;
 	}
 	catch (const toml::parse_error& err)
@@ -459,7 +460,7 @@ LOAD_STATUS Loader::loadRenderable(const char* filepath, Renderable& renderable,
 	}
 }
 
-bool Loader::saveAtlas(const Atlas& atlas, const char* texture_filepath, const char* asset_filepath, const char* image_format, unsigned char jpg_quality)
+bool Loader::saveAtlas(const Atlas& atlas, const char* texture_filepath, const char* asset_filepath, bool flip_vertically, const char* image_format, unsigned char jpg_quality)
 {
 	try
 	{
@@ -499,6 +500,7 @@ bool Loader::saveAtlas(const Atlas& atlas, const char* texture_filepath, const c
 		Logger::LogErrorFatal("Cannot parse atlas asset file \"" + std::string(asset_filepath) + "\": " + std::string(err.description()));
 		return false;
 	}
+	stbi_flip_vertically_on_write(flip_vertically);
 	if (strcmp(image_format, "png"))
 		stbi_write_png(texture_filepath, atlas.GetWidth(), atlas.GetHeight(), Atlas::BPP, atlas.GetBuffer(), atlas.GetWidth() * Atlas::STRIDE_BYTES);
 	else if (strcmp(image_format, "bmp"))
@@ -628,7 +630,7 @@ LOAD_STATUS Loader::loadTileMap(const char* asset_filepath, TileMap*& tilemap_in
 			PULSAR_VERIFY(readTextureSettings(settings, texture_settings));
 		}
 
-		ShaderHandle shader = ShaderRegistry::Standard();
+		ShaderHandle shader = Renderer::Shaders().Standard();
 		if (auto sh = tm["shader"].value<std::string>())
 		{
 			if (loadShader(sh.value().c_str(), shader) != LOAD_STATUS::OK)

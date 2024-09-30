@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "../Renderer.h"
+
 TileMap::TileMap(const std::shared_ptr<const Atlas>& atlas, const TextureSettings& texture_settings, TextureVersion texture_version,
 	const glm::vec2& pivot, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible)
 	: FickleActor2D(fickle_type, z), m_Atlas(atlas)
@@ -11,7 +13,7 @@ TileMap::TileMap(const std::shared_ptr<const Atlas>& atlas, const TextureSetting
 	for (TileMapIndex i = 0; i < m_Atlas->GetPlacements().size(); i++)
 	{
 		std::unique_ptr<RectRender> rect_render(std::make_unique<RectRender>(
-			m_Atlas->SampleSubtile(i, texture_settings, texture_version, pivot, shader, 0, fickle_type, visible)));
+			m_Atlas->SampleSubtile(i, texture_settings, texture_version, pivot, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, 0, fickle_type, visible)));
 		std::shared_ptr<ActorTesselation2D> tessel(std::make_shared<ActorTesselation2D>(rect_render.get(), fickle_type));
 		m_Fickler.Attach(tessel->Fickler());
 		m_Map.push_back({ std::move(rect_render), std::move(tessel) });

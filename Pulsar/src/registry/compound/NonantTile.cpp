@@ -1,6 +1,6 @@
 #include "NonantTile.h"
 
-#include "../TileRegistry.h"
+#include "render/Renderer.h"
 #include "utils/CommonMath.h"
 #include "utils/Meta.inl"
 
@@ -82,7 +82,7 @@ static void copy_subtile(TileHandle& th, unsigned char* shared_buffer, unsigned 
 	// TODO use regular memcpy over memcpy_s more often
 	for (size_t r = 0; r < h; ++r)
 		memcpy(shared_buffer + offset + r * stride, original_buffer + bounds.LW * bpp + (r + bounds.LH) * og_stride, stride);
-	th = TileRegistry::RegisterTile(Tile(shared_buffer + offset, w, h, bpp, TileDeletionPolicy::FROM_EXTERNAL));
+	th = Renderer::Tiles().Register(Tile(TileConstructArgs_buffer(shared_buffer + offset, w, h, bpp, TileDeletionPolicy::FROM_EXTERNAL)));
 }
 
 void NonantTile::CreateSharedBuffer(const Tile& tile)
@@ -240,7 +240,7 @@ static void renew_subbuffer(const NonantTile& ntile, unsigned char* renewal, int
 
 void NonantTile::SetTileProps(TileHandle th, int offset, const _SubbufferBounds& bounds) const
 {
-	Tile* tile = const_cast<Tile*>(TileRegistry::Get(th));
+	Tile* tile = const_cast<Tile*>(Renderer::Tiles().Get(th));
 	tile->m_Width = bounds.UW - bounds.LW;
 	tile->m_Height = bounds.UH - bounds.LH;
 	tile->m_ImageBuffer = sharedBuffer + offset;
@@ -338,13 +338,13 @@ void NonantTile::Reconfigure(const NonantLines_Relative& pos)
 void NonantTile::DeleteBuffer() const
 {
 	delete[] sharedBuffer;
-	TileRegistry::DestroyTile(tTL);
-	TileRegistry::DestroyTile(tTM);
-	TileRegistry::DestroyTile(tTR);
-	TileRegistry::DestroyTile(tCL);
-	TileRegistry::DestroyTile(tCM);
-	TileRegistry::DestroyTile(tCR);
-	TileRegistry::DestroyTile(tBL);
-	TileRegistry::DestroyTile(tBM);
-	TileRegistry::DestroyTile(tBR);
+	Renderer::Tiles().Destroy(tTL);
+	Renderer::Tiles().Destroy(tTM);
+	Renderer::Tiles().Destroy(tTR);
+	Renderer::Tiles().Destroy(tCL);
+	Renderer::Tiles().Destroy(tCM);
+	Renderer::Tiles().Destroy(tCR);
+	Renderer::Tiles().Destroy(tBL);
+	Renderer::Tiles().Destroy(tBM);
+	Renderer::Tiles().Destroy(tBR);
 }

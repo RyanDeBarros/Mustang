@@ -6,6 +6,7 @@
 #include "Logger.inl"
 #include "CanvasLayer.h"
 #include "AssetLoader.h"
+#include "Renderer.h"
 
 Font::Glyph::Glyph(Font* font, int gIndex, float scale, size_t buffer_pos)
 	: gIndex(gIndex), font(font), texture(0), buffer_pos(buffer_pos)
@@ -88,9 +89,9 @@ Font::Font(const char* font_filepath, float font_size, const UTF::String& common
 			Font::Glyph& glyph = glyphs[codepoint];
 			glyph.RenderOnBitmap(common_bmp + glyph.buffer_pos, common_width, common_height, true);
 		}
-		TileHandle tile = TileRegistry::GetHandle(TileConstructArgs_buffer(common_bmp,
+		TileHandle tile = Renderer::Tiles().GetHandle(TileConstructArgs_buffer(common_bmp,
 			static_cast<int>(common_width), static_cast<int>(common_height), 1, TileDeletionPolicy::FROM_EXTERNAL, false));
-		TextureHandle texture = TextureRegistry::GetHandle(TextureConstructArgs_tile(tile, 0, texture_settings));
+		TextureHandle texture = Renderer::Textures().GetHandle(TextureConstructArgs_tile(tile, 0, texture_settings));
 		for (Font::Codepoint codepoint : codepoints)
 		{
 			glyphs[codepoint].texture = texture;
@@ -155,8 +156,8 @@ bool Font::Cache(Font::Codepoint codepoint)
 		Font::Glyph glyph(this, gIndex, scale, -1);
 		unsigned char* bmp = new unsigned char[glyph.Area()];
 		glyph.RenderOnBitmap(bmp);
-		TileHandle tile = TileRegistry::GetHandle(TileConstructArgs_buffer(bmp, glyph.width, glyph.height, 1, TileDeletionPolicy::FROM_NEW, false));
-		TextureHandle texture = TextureRegistry::GetHandle(TextureConstructArgs_tile(tile, 0, texture_settings));
+		TileHandle tile = Renderer::Tiles().GetHandle(TileConstructArgs_buffer(bmp, glyph.width, glyph.height, 1, TileDeletionPolicy::FROM_NEW, false));
+		TextureHandle texture = Renderer::Textures().GetHandle(TextureConstructArgs_tile(tile, 0, texture_settings));
 		glyph.texture = texture;
 		glyphs.insert({ codepoint, std::move(glyph) });
 		return true;
@@ -201,14 +202,13 @@ TextRender Font::GetTextRender(UTF::String&& text, ZIndex z)
 void Font::SetTextureSettings(const TextureSettings& ts)
 {
 	texture_settings = ts;
-	TileHandle tile = TileRegistry::GetHandle(TileConstructArgs_buffer(common_bmp,
-		static_cast<int>(common_width), static_cast<int>(common_height), 1, TileDeletionPolicy::FROM_EXTERNAL, false));
-	TextureHandle common_texture = TextureRegistry::GetHandle(TextureConstructArgs_tile(tile, 0, texture_settings));
-	TextureRegistry::SetSettings(common_texture, ts);
+	TileHandle tile = Renderer::Tiles().GetHandle(TileConstructArgs_buffer(common_bmp, static_cast<int>(common_width), static_cast<int>(common_height), 1, TileDeletionPolicy::FROM_EXTERNAL, false));
+	TextureHandle common_texture = Renderer::Textures().GetHandle(TextureConstructArgs_tile(tile, 0, texture_settings));
+	Renderer::Textures().SetSettings(common_texture, ts);
 	for (const auto& [codepoint, glyph] : glyphs)
 	{
 		if (glyph.texture != common_texture)
-			TextureRegistry::SetSettings(glyph.texture, ts);
+			Renderer::Textures().SetSettings(glyph.texture, ts);
 	}
 }
 

@@ -28,7 +28,7 @@ struct Loader
 	static LOAD_STATUS loadUniformLexicon(const char* filepath, UniformLexiconHandle& handle);
 	static LOAD_STATUS loadRenderable(const char* filepath, struct Renderable& renderable, TextureVersion texture_version = 0, bool temporary_buffer = true);
 	
-	static bool saveAtlas(const class Atlas& atlas, const char* texture_filepath, const char* asset_filepath, const char* image_format = "png", unsigned char jpg_quality = 100);
+	static bool saveAtlas(const class Atlas& atlas, const char* texture_filepath, const char* asset_filepath, bool flip_vertically = true, const char* image_format = "png", unsigned char jpg_quality = 100);
 	/// pass nullptr to atlas parameter, and it will point to memory on the heap.
 	static LOAD_STATUS loadAtlas(const char* asset_filepath, class Atlas*& atlas_initializer);
 	/// pass nullptr to tilemap parameter, and it will point to memory on the heap.

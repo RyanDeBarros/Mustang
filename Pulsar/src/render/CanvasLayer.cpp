@@ -2,7 +2,7 @@
 
 #include "Macros.h"
 #include "Renderer.h"
-#include "registry/ShaderRegistry.h"
+#include "registry/Shader.h"
 #include "actors/ActorPrimitive.h"
 #include "actors/shapes/DebugMultiPolygon.h"
 #include "actors/RectRender.h"
@@ -351,14 +351,14 @@ void CanvasLayer::OpenShading() const
 {
 	// order of these calls is crucial
 	BindVertexArray(m_VAOs.find(currentModel)->second);
-	ShaderRegistry::Bind(currentModel.shader);
+	Renderer::Shaders().Bind(currentModel.shader);
 	m_LayerView.PassVPUniform(currentModel.shader);
 	currentLexicon.OnApply(currentModel.shader);
 }
 
 void CanvasLayer::CloseShading() const
 {
-	ShaderRegistry::Unbind();
+	Renderer::Shaders().Unbind();
 	UnbindVertexArray();
 }
 
@@ -373,7 +373,7 @@ void CanvasLayer::BindTextureSlots() const
 {
 	for (auto it = m_TextureSlotBatch.begin(); it != m_TextureSlotBatch.end(); it++)
 		// NOTE due to the abstraction of glDrawElements and glBufferSubData behind CanvasLayer, there is currently no need to actually call TextureRegistry::Unbind on anything.
-		TextureRegistry::Bind(*it, (TextureSlot)(it - m_TextureSlotBatch.begin()));
+		Renderer::Textures().Bind(*it, (TextureSlot)(it - m_TextureSlotBatch.begin()));
 }
 
 void CanvasLayer::SendVertexPool() const

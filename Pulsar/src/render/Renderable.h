@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <toml/toml.hpp>
 
-#include "registry/ShaderRegistry.h"
+#include "registry/Shader.h"
 
 typedef unsigned short VertexLayoutMask;
 typedef unsigned int VertexLayout;
@@ -16,7 +16,7 @@ struct BatchModel
 	VertexLayoutMask layoutMask;
 	ShaderHandle shader;
 
-	BatchModel(VertexLayout layout = 0, VertexLayoutMask layoutMask = 0, ShaderHandle shader = ShaderRegistry::standard_shader);
+	BatchModel(VertexLayout layout = 0, VertexLayoutMask layoutMask = 0, ShaderHandle shader = ShaderRegistry::HANDLE_CAP);
 	bool operator==(const BatchModel&) const;
 };
 

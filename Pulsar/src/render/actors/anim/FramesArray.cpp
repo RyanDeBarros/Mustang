@@ -4,7 +4,8 @@
 #include <fstream>
 
 #include "Logger.inl"
-#include "registry/TextureRegistry.h"
+#include "registry/Texture.h"
+#include "../../Renderer.h"
 
 FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settings, unsigned short starting_index, bool temporary_buffer)
 {
@@ -47,7 +48,7 @@ FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settin
 		{
 			unsigned char* image = new unsigned char[image_size];
 			memcpy_s(image, image_size, stbi_buffer + image_size * i, image_size);
-			m_Frames[i] = TextureRegistry::RegisterTexture(Texture(Tile(image, width, height, bpp, TileDeletionPolicy::FROM_NEW), settings));
+			m_Frames[i] = Renderer::Textures().Register(Texture(Tile(TileConstructArgs_buffer(image, width, height, bpp, TileDeletionPolicy::FROM_NEW)), settings));
 		}
 	}
 	else
@@ -56,8 +57,8 @@ FramesArray::FramesArray(const char* gif_filepath, const TextureSettings& settin
 		{
 			unsigned char* image = new unsigned char[image_size];
 			memcpy_s(image, image_size, stbi_buffer + image_size * i, image_size);
-			TileHandle tile = TileRegistry::RegisterTile(Tile(image, width, height, bpp, TileDeletionPolicy::FROM_NEW));
-			m_Frames[i] = TextureRegistry::GetHandle(TextureConstructArgs_tile{ tile, 0, settings });
+			TileHandle tile = Renderer::Tiles().Register(Tile(TileConstructArgs_buffer(image, width, height, bpp, TileDeletionPolicy::FROM_NEW)));
+			m_Frames[i] = Renderer::Textures().GetHandle(TextureConstructArgs_tile{ tile, 0, settings });
 		}
 	}
 

@@ -7,48 +7,52 @@
 
 #include "Logger.inl"
 #include "Macros.h"
+#include "render/Renderer.h"
 
-Texture::Texture(const char* filepath, TextureSettings settings, bool temporary_buffer, float svg_scale)
+// TODO IMPORTANT TextureConstructArgs_filepath should be TextureConstructArgs_temporary_tile, which has a Tile reference.
+// ReTexImage is the only thing that actually uses m_Tile, so remove m_Tile and in ReTexImage use a tile reference as well.
+// Renderer should NOT be included in a file like this.
+Texture::Texture(const TextureConstructArgs_filepath& args)
 	: m_RID(0), m_Width(0), m_Height(0), m_Tile(0)
 {
 	Tile const* tile_ref = nullptr;
-	if (temporary_buffer)
+	if (args.temporary_buffer)
 	{
-		tile_ref = new Tile(filepath, svg_scale);
+		tile_ref = new Tile(TileConstructArgs_filepath(args.filepath, args.svg_scale));
 	}
 	else
 	{
-		m_Tile = TileRegistry::GetHandle({ filepath, svg_scale });
-		tile_ref = TileRegistry::Get(m_Tile);
+		m_Tile = Renderer::Tiles().GetHandle(TileConstructArgs_filepath(args.filepath, args.svg_scale));
+		tile_ref = Renderer::Tiles().Get(m_Tile);
 	}
 	if (!tile_ref)
 	{
-		Logger::LogError(std::string("Cannot create texture \"") + filepath + "\": Tile ref is null.");
+		Logger::LogError(std::string("Cannot create texture \"") + args.filepath + "\": Tile ref is null.");
 		return;
 	}
 
 	m_Width = tile_ref->GetWidth();
 	m_Height = tile_ref->GetHeight();
-	TexImage(tile_ref, std::string("Cannot create texture \"") + filepath + "\": BPP is not 4, 3, 2, or 1.", settings.lodLevel);
-	SetSettings(settings);
-	if (temporary_buffer)
+	TexImage(tile_ref, std::string("Cannot create texture \"") + args.filepath + "\": BPP is not 4, 3, 2, or 1.", args.settings.lodLevel);
+	SetSettings(args.settings);
+	if (args.temporary_buffer)
 		delete tile_ref;
 }
 
-Texture::Texture(TileHandle tile, TextureSettings settings)
-	: m_RID(0), m_Width(0), m_Height(0), m_Tile(tile)
+Texture::Texture(const TextureConstructArgs_tile& args)
+	: m_RID(0), m_Width(0), m_Height(0), m_Tile(args.tile)
 {
-	Tile const* tile_ref = TileRegistry::Get(m_Tile);
+	Tile const* tile_ref = Renderer::Tiles().Get(m_Tile);
 	if (!tile_ref)
 	{
-		Logger::LogError(std::string("Cannot create texture from tile \"") + std::to_string(tile) + "\": Tile ref is null.");
+		Logger::LogError(std::string("Cannot create texture from tile \"") + std::to_string(args.tile) + "\": Tile ref is null.");
 		return;
 	}
 	
 	m_Width = tile_ref->GetWidth();
 	m_Height = tile_ref->GetHeight();
-	TexImage(tile_ref, std::string("Cannot create texture from tile  \"") + std::to_string(tile) + "\": BPP is not 4, 3, 2, or 1.", settings.lodLevel);
-	SetSettings(settings);
+	TexImage(tile_ref, std::string("Cannot create texture from tile  \"") + std::to_string(args.tile) + "\": BPP is not 4, 3, 2, or 1.", args.settings.lodLevel);
+	SetSettings(args.settings);
 }
 
 Texture::Texture(Tile&& tile, TextureSettings settings)
@@ -175,10 +179,38 @@ void Texture::ReTexImage(GLint lod_level)
 {
 	if (m_Tile)
 	{
-		Tile const* tile = TileRegistry::Get(m_Tile);
+		Tile const* tile = Renderer::Tiles().Get(m_Tile);
 		ReTexImage(tile, lod_level);
 	}
 }
 
 const TextureSettings Texture::linear_settings = { MinFilter::Linear, MagFilter::Linear, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge };
 const TextureSettings Texture::nearest_settings = { MinFilter::Nearest, MagFilter::Nearest, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge };
+
+void TextureRegistry::Bind(TextureHandle handle, TextureSlot slot)
+{
+	Texture const* texture = Get(handle);
+	if (texture)
+		texture->Bind(slot);
+#if !PULSAR_IGNORE_WARNINGS_NULL_TEXTURE
+	else
+		Logger::LogWarning("Failed to bind texture at handle (" + std::to_string(handle) + ") to slot (" + std::to_string(slot) + ").");
+#endif
+}
+
+void TextureRegistry::Unbind(TextureSlot slot)
+{
+	PULSAR_TRY(glActiveTexture(GL_TEXTURE0 + slot));
+	PULSAR_TRY(glBindTexture(GL_TEXTURE_2D, 0));
+}
+
+void TextureRegistry::SetSettings(TextureHandle handle, const TextureSettings& settings)
+{
+	Texture const* texture = Get(handle);
+	if (texture)
+		texture->SetSettings(settings);
+#if !PULSAR_IGNORE_WARNINGS_NULL_TEXTURE
+	else
+		Logger::LogWarning("Failed to set settings at texture handle (" + std::to_string(handle) + ").");
+#endif
+}

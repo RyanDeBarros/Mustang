@@ -3,6 +3,9 @@
 #include "registry/compound/NonantTile.h"
 #include "RectRender.h"
 
+// TODO IMPORTANT: NonantRender creates a nine-patch image buffer. Instead, a much better option would be to just have the single image buffer,
+// as well as a single RectRender that tesselates, in which each patch uses different UVs. In fact, completely remove NonantTile.
+// This will also make it viable to animate the lines.
 class NonantRender : public FickleActor2D
 {
 	NonantTile ntile; // Create NonantTileRegistry and NonantTileHandle, since NonantTile's own buffers.
@@ -15,7 +18,7 @@ class NonantRender : public FickleActor2D
 
 public:
 	NonantRender(NonantTile&& ntile, TextureVersion texture_version = 0, const TextureSettings& texture_settings = { MinFilter::Nearest, MagFilter::Nearest },
-		ShaderHandle shader = ShaderRegistry::standard_shader, ZIndex z = 0, bool modulatable = true, bool visible = true);
+		ShaderHandle shader = ShaderRegistry::HANDLE_CAP, ZIndex z = 0, bool modulatable = true, bool visible = true);
 	NonantRender(const NonantRender&) = delete; // TODO
 	NonantRender(NonantRender&&) = delete; // TODO
 

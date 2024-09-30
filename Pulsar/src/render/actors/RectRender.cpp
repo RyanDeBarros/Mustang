@@ -6,9 +6,10 @@
 #include "AssetLoader.h"
 #include "Logger.inl"
 #include "utils/Data.inl"
-#include "render/CanvasLayer.h"
+#include "../CanvasLayer.h"
+#include "../Renderer.h"
 
-Renderable RectRender::rect_renderable;
+Renderable* RectRender::rect_renderable = nullptr;
 
 static Functor<void, TextureSlot> create_on_draw_callback(RectRender* rr)
 {
@@ -16,9 +17,9 @@ static Functor<void, TextureSlot> create_on_draw_callback(RectRender* rr)
 }
 
 RectRender::RectRender(TextureHandle texture, const glm::vec2& pivot, ShaderHandle shader, ZIndex z, FickleType fickle_type, bool visible)
-	: ActorPrimitive2D(rect_renderable, z, fickle_type, visible), on_draw_callback(create_on_draw_callback(this))
+	: ActorPrimitive2D(*rect_renderable, z, fickle_type, visible), on_draw_callback(create_on_draw_callback(this))
 {
-	SetShaderHandle(shader);
+	SetShaderHandle(shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader);
 	SetTextureHandle(texture);
 	SetPivot(pivot);
 	m_UVWidth = GetWidth();
@@ -65,9 +66,21 @@ RectRender& RectRender::operator=(RectRender&& other) noexcept
 
 void RectRender::DefineRectRenderable()
 {
-	LOAD_STATUS load_status = Loader::loadRenderable(PulsarSettings::rect_renderable_filepath(), rect_renderable);
+	if (rect_renderable)
+		return;
+	rect_renderable = new Renderable;
+	LOAD_STATUS load_status = Loader::loadRenderable(PulsarSettings::rect_renderable_filepath(), *rect_renderable);
 	if (load_status != LOAD_STATUS::OK)
 		Logger::LogErrorFatal("Could not load rect renderable. Load Status = " + std::to_string(static_cast<int>(load_status)));
+}
+
+void RectRender::DestroyRectRenderable()
+{
+	if (rect_renderable)
+	{
+		delete rect_renderable;
+		rect_renderable = nullptr;
+	}
 }
 
 void RectRender::RequestDraw(CanvasLayer* canvas_layer)

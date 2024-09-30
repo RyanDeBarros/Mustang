@@ -178,9 +178,7 @@
     <ClCompile Include="src\render\Font.cpp" />
     <ClCompile Include="src\registry\compound\NonantTile.cpp" />
     <ClCompile Include="src\registry\Tile.cpp" />
-    <ClCompile Include="src\registry\TileRegistry.cpp" />
     <ClCompile Include="src\registry\UniformLexicon.cpp" />
-    <ClCompile Include="src\registry\UniformLexiconRegistry.cpp" />
     <ClCompile Include="src\Macros.cpp" />
     <ClCompile Include="src\render\actors\ActorDirectory.cpp" />
     <ClCompile Include="src\render\actors\anim\AnimActorPrimitive.cpp" />
@@ -211,9 +209,7 @@
     <ClCompile Include="src\render\Renderable.cpp" />
     <ClCompile Include="src\render\Renderer.cpp" />
     <ClCompile Include="src\registry\Shader.cpp" />
-    <ClCompile Include="src\registry\ShaderRegistry.cpp" />
     <ClCompile Include="src\registry\Texture.cpp" />
-    <ClCompile Include="src\registry\TextureRegistry.cpp" />
     <ClCompile Include="src\render\actors\TileMap.cpp" />
     <ClCompile Include="src\render\transform\Modulate.cpp" />
     <ClCompile Include="src\render\transform\Transform.cpp" />
@@ -223,6 +219,9 @@
     <ClInclude Include="src\platform\Cursor.h" />
     <ClInclude Include="src\platform\Input.h" />
     <ClInclude Include="src\platform\InputManager.h" />
+    <ClInclude Include="src\registry\Registry.inl">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
     <ClInclude Include="src\render\Font.h" />
     <ClInclude Include="src\registry\compound\NonantTile.h" />
     <ClInclude Include="src\render\actors\NonantRender.h" />
@@ -264,9 +263,7 @@
     <ClInclude Include="src\AssetLoader.h" />
     <ClInclude Include="src\registry\compound\Atlas.h" />
     <ClInclude Include="src\registry\Tile.h" />
-    <ClInclude Include="src\registry\TileRegistry.h" />
     <ClInclude Include="src\registry\UniformLexicon.h" />
-    <ClInclude Include="src\registry\UniformLexiconRegistry.h" />
     <ClInclude Include="src\render\ActorRenderBase.h">
       <FileType>CppHeader</FileType>
     </ClInclude>
@@ -298,9 +295,7 @@
     <ClInclude Include="src\render\Renderer.h" />
     <ClInclude Include="src\PulsarSettings.h" />
     <ClInclude Include="src\registry\Shader.h" />
-    <ClInclude Include="src\registry\ShaderRegistry.h" />
     <ClInclude Include="src\registry\Texture.h" />
-    <ClInclude Include="src\registry\TextureRegistry.h" />
     <ClInclude Include="src\render\actors\TileMap.h" />
     <ClInclude Include="src\render\transform\Modulate.h" />
     <ClInclude Include="src\render\transform\Transform.h" />

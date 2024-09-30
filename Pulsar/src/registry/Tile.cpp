@@ -19,20 +19,19 @@ static void flip_vertically(unsigned char* buffer, int height, int stride)
 	delete[] temp_row;
 }
 
-Tile::Tile(const char* filepath, float svg_scale, bool flip)
+Tile::Tile(const TileConstructArgs_filepath& args)
 	: m_ImageBuffer(nullptr), m_Width(0), m_Height(0), m_BPP(0)
 {
-	const auto& fext = file_extension_of(filepath);
+	const auto& fext = file_extension_of(args.filepath);
 	if (fext == "svg")
 	{
 		deletion_policy = TileDeletionPolicy::FROM_NEW;
-		NSVGimage* image = nsvgParseFromFile(filepath, "px", 96);
+		NSVGimage* image = nsvgParseFromFile(args.filepath.c_str(), "px", 96);
 		if (image)
 		{
 			NSVGrasterizer* rasterizer = nsvgCreateRasterizer();
 			m_BPP = 4;
-			if (svg_scale < 0.0f)
-				svg_scale *= -1.0f;
+			float svg_scale = std::abs(args.svg_scale);
 			m_Width = static_cast<int>(svg_scale * image->width);
 			m_Height = static_cast<int>(svg_scale * image->height);
 			m_ImageBuffer = new unsigned char[m_Width * m_Height * 4];
@@ -40,7 +39,7 @@ Tile::Tile(const char* filepath, float svg_scale, bool flip)
 			nsvgDeleteRasterizer(rasterizer);
 			nsvgDelete(image);
 
-			if (flip)
+			if (args.flip_vertically)
 				flip_vertically(m_ImageBuffer, m_Height, m_Width * 4);
 		}
 		else
@@ -50,27 +49,27 @@ Tile::Tile(const char* filepath, float svg_scale, bool flip)
 				delete[] m_ImageBuffer;
 				m_ImageBuffer = nullptr;
 			}
-			Logger::LogError("SVG texture '" + std::string(filepath) + "' could not be loaded!");
+			Logger::LogError("SVG texture '" + std::string(args.filepath) + "' could not be loaded!");
 			return;
 		}
 	}
 	else
 	{
 		deletion_policy = TileDeletionPolicy::FROM_STBI;
-		stbi_set_flip_vertically_on_load(static_cast<int>(flip));
-		m_ImageBuffer = stbi_load(filepath, &m_Width, &m_Height, &m_BPP, 0);
+		stbi_set_flip_vertically_on_load(static_cast<int>(args.flip_vertically));
+		m_ImageBuffer = stbi_load(args.filepath.c_str(), &m_Width, &m_Height, &m_BPP, 0);
 		if (!m_ImageBuffer)
 		{
-			Logger::LogError("Texture '" + std::string(filepath) + "' could not be loaded!\n" + stbi_failure_reason());
+			Logger::LogError("Texture '" + args.filepath + "' could not be loaded!\n" + stbi_failure_reason());
 			return;
 		}
 	}
 }
 
-Tile::Tile(unsigned char* heap_image_buffer, int width, int height, int bpp, TileDeletionPolicy deletion_policy, bool flip)
-	: m_ImageBuffer(heap_image_buffer), m_Width(width), m_Height(height), m_BPP(bpp), deletion_policy(deletion_policy)
+Tile::Tile(const TileConstructArgs_buffer& args)
+	: m_ImageBuffer(args.image_buffer), m_Width(args.width), m_Height(args.height), m_BPP(args.bpp), deletion_policy(args.deletion_policy)
 {
-	if (flip)
+	if (args.flip_vertically)
 		flip_vertically(m_ImageBuffer, m_Height, m_Width * m_BPP);
 }
 

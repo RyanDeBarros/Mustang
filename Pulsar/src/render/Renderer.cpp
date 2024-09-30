@@ -4,10 +4,6 @@
 
 #include "Macros.h"
 #include "Logger.inl"
-#include "registry/ShaderRegistry.h"
-#include "registry/TextureRegistry.h"
-#include "registry/UniformLexiconRegistry.h"
-#include "registry/TileRegistry.h"
 #include "render/actors/RectRender.h"
 #include "platform/InputManager.h"
 
@@ -23,6 +19,11 @@
 std::map<CanvasIndex, CanvasLayer> Renderer::layers;
 WindowHandle focused_window;
 
+ShaderRegistry* Renderer::shaders = nullptr;
+TextureRegistry* Renderer::textures = nullptr;
+TileRegistry* Renderer::tiles = nullptr;
+UniformLexiconRegistry* Renderer::uniform_lexicons = nullptr;
+
 #if !PULSAR_ASSUME_INITIALIZED
 bool uninitialized = true;
 #endif
@@ -32,10 +33,15 @@ void Renderer::Init()
 #if !PULSAR_ASSUME_INITIALIZED
 	uninitialized = false;
 #endif
-	ShaderRegistry::Init();
-	TextureRegistry::Init();
-	UniformLexiconRegistry::Init();
-	TileRegistry::Init();
+	if (!shaders)
+		shaders = new ShaderRegistry();
+	shaders->DefineStandardShader();
+	if (!textures)
+		textures = new TextureRegistry();
+	if (!tiles)
+		tiles = new TileRegistry();
+	if (!uniform_lexicons)
+		uniform_lexicons = new UniformLexiconRegistry();
 	InputManager::Instance(); // TODO put somewhere else?
 	RectRender::DefineRectRenderable();
 	PULSAR_TRY(glEnable(GL_PROGRAM_POINT_SIZE));
@@ -49,10 +55,27 @@ void Renderer::Terminate()
 	uninitialized = true;
 #endif
 	layers.clear();
-	TileRegistry::Terminate();
-	UniformLexiconRegistry::Terminate();
-	TextureRegistry::Terminate();
-	ShaderRegistry::Terminate();
+	RectRender::DestroyRectRenderable();
+	if (shaders)
+	{
+		delete shaders;
+		shaders = nullptr;
+	}
+	if (textures)
+	{
+		delete textures;
+		textures = nullptr;
+	}
+	if (tiles)
+	{
+		delete tiles;
+		tiles = nullptr;
+	}
+	if (uniform_lexicons)
+	{
+		delete uniform_lexicons;
+		uniform_lexicons = nullptr;
+	}
 }
 
 void Renderer::OnDraw()

@@ -1,29 +1,30 @@
 #include "NonantRender.h"
 
+#include "../Renderer.h"
 #include "../CanvasLayer.h"
 #include "utils/Data.inl"
 
 NonantRender::NonantRender(NonantTile&& ntile, TextureVersion texture_version, const TextureSettings& texture_settings,
 	ShaderHandle shader, ZIndex z, bool modulatable, bool visible)
 	: ntile(std::move(ntile)), rects{
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(0),
-			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(1),
-			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(2),
-			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(3),
-			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(4),
-			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(5),
-			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(6),
-			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(7),
-			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible),
-		RectRender(TextureRegistry::GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(8),
-			texture_version, texture_settings }), {}, shader, z, FickleType(true, modulatable), visible)
+		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(0),
+			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
+		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(1),
+			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
+		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(2),
+			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
+		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(3),
+			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
+		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(4),
+			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
+		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(5),
+			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
+		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(6),
+			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
+		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(7),
+			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
+		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(8),
+			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible)
 	}, FickleActor2D(FickleType(true, modulatable), z)
 {
 	m_Fickler.Attach(rects[0].Fickler());
@@ -66,15 +67,15 @@ void NonantRender::Reconfigure(const NonantLines_Relative& lines)
 
 void NonantRender::Recallibrate()
 {
-	const_cast<Texture*>(TextureRegistry::Get(rects[0].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(TextureRegistry::Get(rects[1].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(TextureRegistry::Get(rects[2].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(TextureRegistry::Get(rects[3].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(TextureRegistry::Get(rects[4].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(TextureRegistry::Get(rects[5].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(TextureRegistry::Get(rects[6].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(TextureRegistry::Get(rects[7].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(TextureRegistry::Get(rects[8].GetTextureHandle()))->ReTexImage();
+	const_cast<Texture*>(Renderer::Textures().Get(rects[0].GetTextureHandle()))->ReTexImage();
+	const_cast<Texture*>(Renderer::Textures().Get(rects[1].GetTextureHandle()))->ReTexImage();
+	const_cast<Texture*>(Renderer::Textures().Get(rects[2].GetTextureHandle()))->ReTexImage();
+	const_cast<Texture*>(Renderer::Textures().Get(rects[3].GetTextureHandle()))->ReTexImage();
+	const_cast<Texture*>(Renderer::Textures().Get(rects[4].GetTextureHandle()))->ReTexImage();
+	const_cast<Texture*>(Renderer::Textures().Get(rects[5].GetTextureHandle()))->ReTexImage();
+	const_cast<Texture*>(Renderer::Textures().Get(rects[6].GetTextureHandle()))->ReTexImage();
+	const_cast<Texture*>(Renderer::Textures().Get(rects[7].GetTextureHandle()))->ReTexImage();
+	const_cast<Texture*>(Renderer::Textures().Get(rects[8].GetTextureHandle()))->ReTexImage();
 	
 	rects[0].RefreshTexture();
 	rects[1].RefreshTexture();
