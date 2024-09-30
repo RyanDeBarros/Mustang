@@ -22,24 +22,136 @@ struct std::hash<std::pair<int, int>>
 	}
 };
 
+namespace Fonts
+{
+	typedef int Codepoint;
+
+	static constexpr const char8_t* COMMON = u8"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./<>?;:\'\"\\|[]{}!@#$%^&*()-=_+`~";
+	static constexpr const char8_t* ALPHA_NUMERIC = u8"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	static constexpr const char8_t* NUMERIC = u8"0123456789";
+	static constexpr const char8_t* ALPHA = u8"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static constexpr const char8_t* ALPHA_LOWERCASE = u8"abcdefghijklmnopqrstuvwxyz";
+	static constexpr const char8_t* ALPHA_UPPERCASE = u8"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+}
+
+typedef std::unordered_map<std::pair<Fonts::Codepoint, Fonts::Codepoint>, int> KerningMap;
+
+struct KerningConstructArgs_map
+{
+	KerningMap map;
+
+	KerningConstructArgs_map(const KerningMap& map) : map(map) {}
+	KerningConstructArgs_map(KerningMap&& map) : map(std::move(map)) {}
+
+	bool operator==(const KerningConstructArgs_map&) const = default;
+};
+
+struct KerningConstructArgs_filepath
+{
+	std::string filepath;
+
+	KerningConstructArgs_filepath(const std::string& filepath) : filepath(filepath) {}
+	KerningConstructArgs_filepath(std::string&& filepath) : filepath(std::move(filepath)) {}
+
+	bool operator==(const KerningConstructArgs_filepath&) const = default;
+};
+
+namespace std
+{
+	template<>
+	struct hash<KerningMap>
+	{
+		size_t operator()(const KerningMap& map) const
+		{
+			// TODO cap the iteration in other container hashes.
+			static constexpr size_t max_elements = 20;
+			size_t num_elements = 1;
+			size_t hash_ = 0;
+
+			for (const auto& [k, v] : map)
+			{
+				size_t h1 = hash<pair<Fonts::Codepoint, Fonts::Codepoint>>{}(k);
+				size_t h2 = hash<int>{}(v);
+				hash_ ^= (h1 ^ (h2 << 1));
+				if (++num_elements > max_elements)
+					break;
+			}
+
+			return hash_;
+		}
+	};
+
+	template<>
+	struct hash<KerningConstructArgs_map>
+	{
+		size_t operator()(const KerningConstructArgs_map& args) const { return hash<KerningMap>{}(args.map); }
+	};
+
+	template<>
+	struct hash<KerningConstructArgs_filepath>
+	{
+		size_t operator()(const KerningConstructArgs_filepath& args) const { return hash<std::string>{}(args.filepath); }
+	};
+}
+
+struct Kerning
+{
+	std::unordered_map<std::pair<Fonts::Codepoint, Fonts::Codepoint>, int> kern_map;
+
+	Kerning(const KerningConstructArgs_map& args) : kern_map(args.map) {}
+	Kerning(const KerningConstructArgs_filepath& args);
+
+	// TODO maybe have a bool template parameter for Registry that requires bool overload on Element? Since there's at least 3 Elements now that just return constexpr true
+	constexpr operator bool() const { return true; }
+};
+
+typedef Registry<Kerning, KerningHandle, KerningConstructArgs_filepath, KerningConstructArgs_map> KerningRegistry;
+
+struct FontConstructArgs
+{
+	std::string font_filepath;
+	float font_size;
+	UTF::String common_buffer = Fonts::COMMON;
+	TextureSettings settings = {};
+	KerningHandle kerning = 0;
+
+	FontConstructArgs(const std::string& font_filepath, float font_size, const UTF::String& common_buffer = Fonts::COMMON,
+		const TextureSettings& settings = {}, KerningHandle kerning = 0)
+		: font_filepath(font_filepath), font_size(font_size), common_buffer(common_buffer), settings(settings), kerning(kerning) {}
+	FontConstructArgs(std::string&& font_filepath, float font_size, UTF::String&& common_buffer = Fonts::COMMON,
+		const TextureSettings& settings = {}, KerningHandle kerning = 0)
+		: font_filepath(std::move(font_filepath)), font_size(font_size), common_buffer(std::move(common_buffer)),
+		settings(settings), kerning(std::move(kerning)) {}
+
+	// TODO use default operator==s more.
+	bool operator==(const FontConstructArgs& other) const = default;
+};
+
+template<>
+struct std::hash<FontConstructArgs>
+{
+	size_t operator()(const FontConstructArgs& args) const
+	{
+		auto h1 = std::hash<std::string>{}(args.font_filepath);
+		auto h2 = std::hash<float>{}(args.font_size);
+		auto h3 = std::hash<TextureSettings>{}(args.settings);
+		return h1 ^ (h2 << 1) ^ (h3 << 2);
+	}
+};
+
 class TextRender;
 
 class Font
 {
 	friend class TextRender;
-public:
-	typedef int Codepoint;
-	// TODO internal Kerning registry
-	typedef std::unordered_map<std::pair<Font::Codepoint, Font::Codepoint>, int> Kerning;
-
-private:
+	
 	struct Glyph
 	{
-		int gIndex;
-		int width, height;
-		int ch_y0;
-		int advance_width, left_bearing;
-		TextureHandle texture;
+		int gIndex = 0;
+		int width = 0, height = 0;
+		int ch_y0 = 0;
+		int advance_width = 0, left_bearing = 0;
+		TextureHandle texture = {};
 		size_t buffer_pos = -1;
 		Font* font = nullptr;
 		unsigned char* location = nullptr;
@@ -53,7 +165,7 @@ private:
 	};
 	friend struct Glyph;
 
-	std::unordered_map<Font::Codepoint, Font::Glyph> glyphs;
+	std::unordered_map<Fonts::Codepoint, Font::Glyph> glyphs;
 	stbtt_fontinfo font_info;
 	float font_size;
 	float scale = 0.0f;
@@ -62,27 +174,21 @@ private:
 	unsigned char* common_bmp = nullptr;
 	size_t common_width = 0, common_height = 0;
 	TextureSettings texture_settings;
-	Kerning kerning; // TODO kerning handle?
+	KerningHandle kerning = 0;
 
 public:
-	static constexpr const char8_t* COMMON = u8"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./<>?;:\'\"\\|[]{}!@#$%^&*()-=_+`~";
-	static constexpr const char8_t* ALPHA_NUMERIC = u8"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	static constexpr const char8_t* NUMERIC = u8"0123456789";
-	static constexpr const char8_t* ALPHA = u8"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	static constexpr const char8_t* ALPHA_LOWERCASE = u8"abcdefghijklmnopqrstuvwxyz";
-	static constexpr const char8_t* ALPHA_UPPERCASE = u8"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	
-	Font(const char* font_filepath, float font_size, const UTF::String& common_buffer = Font::COMMON,
-		const TextureSettings& settings = {}, UTF::String* failed_common_chars = nullptr, const Kerning& kerning = Kerning());
+	Font(const FontConstructArgs& args);
 	Font(const Font&) = delete; // TODO copy/move constructors/assignments. utilize common_buffer
 	Font(Font&&) noexcept;
 	Font& operator=(Font&&) noexcept;
 	~Font();
 
-	bool Cache(Font::Codepoint codepoint);
+	constexpr operator bool() const { return true; }
+
+	bool Cache(Fonts::Codepoint codepoint);
 	void CacheAll(const Font& other);
-	bool Supports(Font::Codepoint codepoint) const;
-	int KerningOf(Font::Codepoint c1, Font::Codepoint c2, int g1, int g2, float sc = 1.0f) const;
+	bool Supports(Fonts::Codepoint codepoint) const;
+	int KerningOf(Fonts::Codepoint c1, Fonts::Codepoint c2, int g1, int g2, float sc = 1.0f) const;
 
 	TextRender GetTextRender(const UTF::String& text, ZIndex z = 0);
 	TextRender GetTextRender(UTF::String&& text = "", ZIndex z = 0);
@@ -94,6 +200,8 @@ private:
 	int LineHeight(float line_spacing = 1.0f) const;
 	std::array<glm::vec2, 4> UVs(const Glyph& glyph) const;
 };
+
+typedef Registry<Font, FontHandle, FontConstructArgs> FontRegistry;
 
 class TextRender : public FickleActor2D
 {
@@ -210,7 +318,7 @@ private:
 	{
 		int row = 0;
 		int x = 0, y = 0;
-		Font::Codepoint prev_codepoint = 0;
+		Fonts::Codepoint prev_codepoint = 0;
 		int startX = 0, line_height = 0;
 		LineFormattingInfo line = {};
 		PageFormattingInfo page = {};
@@ -218,10 +326,10 @@ private:
 		void Setup(const TextRender& text_render);
 		void NextLine(const TextRender& text_render);
 		void AdvanceX(int amount) { x += amount; }
-		void AdvanceX(int amount, Font::Codepoint codepoint) { x += amount; prev_codepoint = codepoint; }
+		void AdvanceX(int amount, Fonts::Codepoint codepoint) { x += amount; prev_codepoint = codepoint; }
 		void AdvanceX(float amount) { x += static_cast<int>(roundf(amount)); }
-		void AdvanceX(float amount, Font::Codepoint codepoint) { x += static_cast<int>(roundf(amount)); prev_codepoint = codepoint; }
-		void KerningAdvanceX(const TextRender& text_render, const Font::Glyph& glyph, Font::Codepoint codepoint);
+		void AdvanceX(float amount, Fonts::Codepoint codepoint) { x += static_cast<int>(roundf(amount)); prev_codepoint = codepoint; }
+		void KerningAdvanceX(const TextRender& text_render, const Font::Glyph& glyph, Fonts::Codepoint codepoint);
 	};
 
 	FormattingData formatting;
@@ -229,7 +337,7 @@ private:
 	struct BoundsFormattingData
 	{
 		int x = 0, y = 0;
-		Font::Codepoint prev_codepoint = 0;
+		Fonts::Codepoint prev_codepoint = 0;
 		int line_height = 0;
 		int min_ch_y0 = 0, max_ch_y1 = 0;
 		bool first_line = true;
@@ -240,10 +348,10 @@ private:
 		void NextLine(TextRender& text_render);
 		void LastLine(TextRender& text_render);
 		void AdvanceX(int amount) { x += amount; }
-		void AdvanceX(int amount, Font::Codepoint codepoint) { x += amount; prev_codepoint = codepoint; }
+		void AdvanceX(int amount, Fonts::Codepoint codepoint) { x += amount; prev_codepoint = codepoint; }
 		void AdvanceX(float amount) { x += static_cast<int>(roundf(amount)); }
-		void AdvanceX(float amount, Font::Codepoint codepoint) { x += static_cast<int>(roundf(amount)); prev_codepoint = codepoint; }
-		void KerningAdvanceX(const TextRender& text_render, const Font::Glyph& glyph, Font::Codepoint codepoint);
+		void AdvanceX(float amount, Fonts::Codepoint codepoint) { x += static_cast<int>(roundf(amount)); prev_codepoint = codepoint; }
+		void KerningAdvanceX(const TextRender& text_render, const Font::Glyph& glyph, Fonts::Codepoint codepoint);
 		void UpdateMinCH_Y0(const Font::Glyph& glyph);
 		void UpdateMaxCH_Y1(const Font::Glyph& glyph);
 	};
@@ -282,43 +390,34 @@ struct TR_Notification : public FickleNotification
 	}
 };
 
-struct FontConstructorArgs
+struct FontCharacteristics
 {
 	float font_size;
-	UTF::String common_buffer = Font::COMMON;
-	TextureSettings settings = {};
-	UTF::String* failed_common_chars = nullptr;
+	unsigned short version = 0;
 
-	FontConstructorArgs(float font_size, const UTF::String& common_buffer = Font::COMMON,
-		const TextureSettings& settings = {}, UTF::String* failed_common_chars = nullptr)
-		: font_size(font_size), common_buffer(common_buffer), settings(settings), failed_common_chars(failed_common_chars) {}
+	FontCharacteristics(float font_size, unsigned short version = 0) : font_size(font_size), version(version) {}
 
-	FontConstructorArgs(float font_size, UTF::String&& common_buffer = Font::COMMON,
-		const TextureSettings& settings = {}, UTF::String* failed_common_chars = nullptr)
-		: font_size(font_size), common_buffer(std::move(common_buffer)), settings(settings), failed_common_chars(failed_common_chars) {}
+	bool operator==(const FontCharacteristics&) const = default;
 };
 
-// TODO FontFamily registry instead of/in addition to Font registry?
+template<>
+struct std::hash<FontCharacteristics>
+{
+	size_t operator()(const FontCharacteristics& f) const
+	{
+		return std::hash<float>{}(f.font_size) ^ (std::hash<unsigned short>{}(f.version) << 1);
+	}
+};
+
 class FontFamily
 {
 	struct FontEntry
 	{
-		std::string filepath;
-		Font::Kerning kerning;
-		// TODO is vector okay for this? There would be < 20 different font sizes probably.
-		std::vector<std::pair<float, Font>> fonts;
-
-		Font* CreateFont(const FontConstructorArgs& args)
-		{
-			for (auto it = fonts.begin(); it != fonts.end(); ++it)
-			{
-				if (it->first == args.font_size)
-					return &it->second;
-			}
-			fonts.push_back({args.font_size,
-				Font(filepath.c_str(), args.font_size, args.common_buffer, args.settings, args.failed_common_chars, kerning)});
-			return &fonts[fonts.size() - 1].second;
-		}
+		std::unordered_map<FontCharacteristics, FontHandle> fonts;
+		std::string font_filepath;
+		UTF::String common_buffer = Fonts::COMMON;
+		TextureSettings settings = {};
+		KerningHandle kerning;
 	};
 
 	std::unordered_map<std::string, FontEntry> family;
@@ -326,9 +425,5 @@ class FontFamily
 public:
 	FontFamily(const char* filepath);
 
-	Font* GetFont(const char* font_name, const FontConstructorArgs& args)
-	{
-		auto iter = family.find(font_name);
-		return iter != family.end() ? iter->second.CreateFont(args) : nullptr;
-	}
+	Font* GetFont(const char* font_name, const FontCharacteristics& font_chars);
 };

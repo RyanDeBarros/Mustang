@@ -23,6 +23,8 @@ ShaderRegistry* Renderer::shaders = nullptr;
 TextureRegistry* Renderer::textures = nullptr;
 TileRegistry* Renderer::tiles = nullptr;
 UniformLexiconRegistry* Renderer::uniform_lexicons = nullptr;
+FontRegistry* Renderer::fonts = nullptr;
+KerningRegistry* Renderer::kernings = nullptr;
 
 #if !PULSAR_ASSUME_INITIALIZED
 bool uninitialized = true;
@@ -42,6 +44,10 @@ void Renderer::Init()
 		tiles = new TileRegistry();
 	if (!uniform_lexicons)
 		uniform_lexicons = new UniformLexiconRegistry();
+	if (!fonts)
+		fonts = new FontRegistry();
+	if (!kernings)
+		kernings = new KerningRegistry();
 	InputManager::Instance(); // TODO put somewhere else?
 	RectRender::DefineRectRenderable();
 	PULSAR_TRY(glEnable(GL_PROGRAM_POINT_SIZE));
@@ -75,6 +81,16 @@ void Renderer::Terminate()
 	{
 		delete uniform_lexicons;
 		uniform_lexicons = nullptr;
+	}
+	if (fonts)
+	{
+		delete fonts;
+		fonts = nullptr;
+	}
+	if (kernings)
+	{
+		delete kernings;
+		kernings = nullptr;
 	}
 }
 

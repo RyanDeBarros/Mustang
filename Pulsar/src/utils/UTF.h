@@ -64,8 +64,12 @@ namespace UTF
 		String& operator+=(const String& rhs);
 		String operator*(size_t n) const;
 		String& operator*=(size_t n);
+		bool operator==(const String& other) const { return str == other.str; }
+		size_t hash() const { return std::hash<std::u8string>{}(str); }
 
 		String(const Iterator& begin_, const Iterator& end_);
 		String substr(size_t begin_, size_t end_) const;
 	};
 }
+
+template<> struct std::hash<UTF::String> { size_t operator()(const UTF::String& string) const { return string.hash(); } };

@@ -376,11 +376,13 @@ void Pulsar::Run()
 			});
 
 	// TODO font registry?
-	//Font font("res/raw-fonts/Roboto-BoldItalic.ttf", 96.0f, u8"");
-	//Font font2("res/raw-fonts/Roboto-Regular.ttf", 48.0f, Font::COMMON);
+	//Font* font = Renderer::Fonts().Emplace(FontConstructArgs("res/raw-fonts/Roboto-BoldItalic.ttf", 96.0f, u8""));
+	//Font* font2 = Renderer::Fonts().Emplace(FontConstructArgs("res/raw-fonts/Roboto-Regular.ttf", 48.0f, Fonts::COMMON));
 	FontFamily font_family("res/assets/fonts/Roboto.toml");
-	Font* font1 = font_family.GetFont("bold-italic", FontConstructorArgs(96.0f, u8""));
-	Font* font2 = font_family.GetFont("regular", FontConstructorArgs(48.0f, Font::COMMON));
+	//Font* font1 = font_family.GetFont("bold-italic", FontConstructorArgs(96.0f, u8""));
+	Font* font1 = font_family.GetFont("bold-italic", 96.0f);
+	//Font* font2 = font_family.GetFont("regular", FontConstructorArgs(48.0f, Font::COMMON));
+	Font* font2 = font_family.GetFont("regular", 48.0f);
 	TextRender text_render = font2->GetTextRender();
 	text_render.format.horizontal_align = TextRender::HorizontalAlign::CENTER;
 	text_render.format.vertical_align = TextRender::VerticalAlign::MIDDLE;

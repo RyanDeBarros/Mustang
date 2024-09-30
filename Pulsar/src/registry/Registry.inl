@@ -27,11 +27,18 @@ public:
 	Registry(Registry&&) = delete;
 	virtual ~Registry() = default;
 
-	Element const* Get(Handle handle);
+	Element const* Get(Handle handle) const;
+	Element* Get(Handle handle);
 	bool Destroy(Handle handle);
 	Handle GetHandle(const ConstructArgs_1& args);
 	Handle GetHandle(const ConstructArgs_2& args);
 	Handle GetHandle(const ConstructArgs_3& args);
+	Element const* Emplace(const ConstructArgs_1& args) const;
+	Element const* Emplace(const ConstructArgs_2& args) const;
+	Element const* Emplace(const ConstructArgs_3& args) const;
+	Element* Emplace(const ConstructArgs_1& args);
+	Element* Emplace(const ConstructArgs_2& args);
+	Element* Emplace(const ConstructArgs_3& args);
 	Handle Register(Element&& element);
 };
 
@@ -52,10 +59,15 @@ public:
 	Registry(Registry&&) = delete;
 	virtual ~Registry() = default;
 
-	Element const* Get(Handle handle);
+	Element const* Get(Handle handle) const;
+	Element* Get(Handle handle);
 	bool Destroy(Handle handle);
 	Handle GetHandle(const ConstructArgs_1& args);
 	Handle GetHandle(const ConstructArgs_2& args);
+	Element const* Emplace(const ConstructArgs_1& args) const;
+	Element const* Emplace(const ConstructArgs_2& args) const;
+	Element* Emplace(const ConstructArgs_1& args);
+	Element* Emplace(const ConstructArgs_2& args);
 	Handle Register(Element&& element);
 };
 
@@ -75,14 +87,24 @@ public:
 	Registry(Registry&&) = delete;
 	virtual ~Registry() = default;
 
-	Element const* Get(Handle handle);
+	Element const* Get(Handle handle) const;
+	Element* Get(Handle handle);
 	bool Destroy(Handle handle);
 	Handle GetHandle(const ConstructArgs_1& args);
+	Element const* Emplace(const ConstructArgs_1& args) const;
+	Element* Emplace(const ConstructArgs_1& args);
 	Handle Register(Element&& element);
 };
 
 template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2, typename ConstructArgs_3>
-Element const* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2, ConstructArgs_3>::Get(Handle handle)
+Element const* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2, ConstructArgs_3>::Get(Handle handle) const
+{
+	auto iter = registry.find(handle);
+	return iter != registry.end() ? &iter->second : nullptr;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2, typename ConstructArgs_3>
+Element* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2, ConstructArgs_3>::Get(Handle handle)
 {
 	auto iter = registry.find(handle);
 	return iter != registry.end() ? &iter->second : nullptr;
@@ -156,6 +178,120 @@ Handle Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2, ConstructArgs
 }
 
 template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2, typename ConstructArgs_3>
+Element const* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2, ConstructArgs_3>::Emplace(const ConstructArgs_1& args) const
+{
+	auto iter = lookup_1.find(args);
+	if (iter != lookup_1.end())
+		return Get(iter->second);
+	Element element(args);
+	if (element)
+	{
+		if (current_handle == HANDLE_CAP)
+			throw RegistryFullException();
+		Handle handle = current_handle++;
+		auto res = registry.emplace(handle, std::move(element));
+		lookup_1[args] = handle;
+		return &res.first->second;
+	}
+	return 0;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2, typename ConstructArgs_3>
+Element* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2, ConstructArgs_3>::Emplace(const ConstructArgs_1& args)
+{
+	auto iter = lookup_1.find(args);
+	if (iter != lookup_1.end())
+		return Get(iter->second);
+	Element element(args);
+	if (element)
+	{
+		if (current_handle == HANDLE_CAP)
+			throw RegistryFullException();
+		Handle handle = current_handle++;
+		auto res = registry.emplace(handle, std::move(element));
+		lookup_1[args] = handle;
+		return &res.first->second;
+	}
+	return 0;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2, typename ConstructArgs_3>
+Element const* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2, ConstructArgs_3>::Emplace(const ConstructArgs_2& args) const
+{
+	auto iter = lookup_2.find(args);
+	if (iter != lookup_2.end())
+		return Get(iter->second);
+	Element element(args);
+	if (element)
+	{
+		if (current_handle == HANDLE_CAP)
+			throw RegistryFullException();
+		Handle handle = current_handle++;
+		auto res = registry.emplace(handle, std::move(element));
+		lookup_2[args] = handle;
+		return &res.first->second;
+	}
+	return 0;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2, typename ConstructArgs_3>
+Element* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2, ConstructArgs_3>::Emplace(const ConstructArgs_2& args)
+{
+	auto iter = lookup_2.find(args);
+	if (iter != lookup_2.end())
+		return Get(iter->second);
+	Element element(args);
+	if (element)
+	{
+		if (current_handle == HANDLE_CAP)
+			throw RegistryFullException();
+		Handle handle = current_handle++;
+		auto res = registry.emplace(handle, std::move(element));
+		lookup_2[args] = handle;
+		return &res.first->second;
+	}
+	return 0;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2, typename ConstructArgs_3>
+Element const* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2, ConstructArgs_3>::Emplace(const ConstructArgs_3& args) const
+{
+	auto iter = lookup_3.find(args);
+	if (iter != lookup_3.end())
+		return Get(iter->second);
+	Element element(args);
+	if (element)
+	{
+		if (current_handle == HANDLE_CAP)
+			throw RegistryFullException();
+		Handle handle = current_handle++;
+		auto res = registry.emplace(handle, std::move(element));
+		lookup_3[args] = handle;
+		return &res.first->second;
+	}
+	return 0;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2, typename ConstructArgs_3>
+Element* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2, ConstructArgs_3>::Emplace(const ConstructArgs_3& args)
+{
+	auto iter = lookup_3.find(args);
+	if (iter != lookup_3.end())
+		return Get(iter->second);
+	Element element(args);
+	if (element)
+	{
+		if (current_handle == HANDLE_CAP)
+			throw RegistryFullException();
+		Handle handle = current_handle++;
+		auto res = registry.emplace(handle, std::move(element));
+		lookup_3[args] = handle;
+		return &res.first->second;
+	}
+	return 0;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2, typename ConstructArgs_3>
 Handle Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2, ConstructArgs_3>::Register(Element&& element)
 {
 	if (element)
@@ -170,7 +306,14 @@ Handle Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2, ConstructArgs
 }
 
 template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2>
-Element const* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2>::Get(Handle handle)
+Element const* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2>::Get(Handle handle) const
+{
+	auto iter = registry.find(handle);
+	return iter != registry.end() ? &iter->second : nullptr;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2>
+Element* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2>::Get(Handle handle)
 {
 	auto iter = registry.find(handle);
 	return iter != registry.end() ? &iter->second : nullptr;
@@ -225,6 +368,83 @@ Handle Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2>::GetHandle(co
 }
 
 template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2>
+Element const* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2>::Emplace(const ConstructArgs_1& args) const
+{
+	auto iter = lookup_1.find(args);
+	if (iter != lookup_1.end())
+		return Get(iter->second);
+	Element element(args);
+	if (element)
+	{
+		if (current_handle == HANDLE_CAP)
+			throw RegistryFullException();
+		Handle handle = current_handle++;
+		auto res = registry.emplace(handle, std::move(element));
+		lookup_1[args] = handle;
+		return &res.first->second;
+	}
+	return 0;
+}
+
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2>
+Element* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2>::Emplace(const ConstructArgs_1& args)
+{
+	auto iter = lookup_1.find(args);
+	if (iter != lookup_1.end())
+		return Get(iter->second);
+	Element element(args);
+	if (element)
+	{
+		if (current_handle == HANDLE_CAP)
+			throw RegistryFullException();
+		Handle handle = current_handle++;
+		auto res = registry.emplace(handle, std::move(element));
+		lookup_1[args] = handle;
+		return &res.first->second;
+	}
+	return 0;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2>
+Element const* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2>::Emplace(const ConstructArgs_2& args) const
+{
+	auto iter = lookup_2.find(args);
+	if (iter != lookup_2.end())
+		return Get(iter->second);
+	Element element(args);
+	if (element)
+	{
+		if (current_handle == HANDLE_CAP)
+			throw RegistryFullException();
+		Handle handle = current_handle++;
+		auto res = registry.emplace(handle, std::move(element));
+		lookup_2[args] = handle;
+		return &res.first->second;
+	}
+	return 0;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2>
+Element* Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2>::Emplace(const ConstructArgs_2& args)
+{
+	auto iter = lookup_2.find(args);
+	if (iter != lookup_2.end())
+		return Get(iter->second);
+	Element element(args);
+	if (element)
+	{
+		if (current_handle == HANDLE_CAP)
+			throw RegistryFullException();
+		Handle handle = current_handle++;
+		auto res = registry.emplace(handle, std::move(element));
+		lookup_2[args] = handle;
+		return &res.first->second;
+	}
+	return 0;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1, typename ConstructArgs_2>
 Handle Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2>::Register(Element&& element)
 {
 	if (element)
@@ -239,7 +459,14 @@ Handle Registry<Element, Handle, ConstructArgs_1, ConstructArgs_2>::Register(Ele
 }
 
 template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1>
-Element const* Registry<Element, Handle, ConstructArgs_1>::Get(Handle handle)
+Element const* Registry<Element, Handle, ConstructArgs_1>::Get(Handle handle) const
+{
+	auto iter = registry.find(handle);
+	return iter != registry.end() ? &iter->second : nullptr;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1>
+Element* Registry<Element, Handle, ConstructArgs_1>::Get(Handle handle)
 {
 	auto iter = registry.find(handle);
 	return iter != registry.end() ? &iter->second : nullptr;
@@ -270,6 +497,44 @@ Handle Registry<Element, Handle, ConstructArgs_1>::GetHandle(const ConstructArgs
 		registry.emplace(handle, std::move(element));
 		lookup_1[args] = handle;
 		return handle;
+	}
+	return 0;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1>
+Element const* Registry<Element, Handle, ConstructArgs_1>::Emplace(const ConstructArgs_1& args) const
+{
+	auto iter = lookup_1.find(args);
+	if (iter != lookup_1.end())
+		return Get(iter->second);
+	Element element(args);
+	if (element)
+	{
+		if (current_handle == HANDLE_CAP)
+			throw RegistryFullException();
+		Handle handle = current_handle++;
+		auto res = registry.emplace(handle, std::move(element));
+		lookup_1[args] = handle;
+		return &res.first->second;
+	}
+	return 0;
+}
+
+template<typename Element, std::unsigned_integral Handle, typename ConstructArgs_1>
+Element* Registry<Element, Handle, ConstructArgs_1>::Emplace(const ConstructArgs_1& args)
+{
+	auto iter = lookup_1.find(args);
+	if (iter != lookup_1.end())
+		return Get(iter->second);
+	Element element(args);
+	if (element)
+	{
+		if (current_handle == HANDLE_CAP)
+			throw RegistryFullException();
+		Handle handle = current_handle++;
+		auto res = registry.emplace(handle, std::move(element));
+		lookup_1[args] = handle;
+		return &res.first->second;
 	}
 	return 0;
 }

@@ -70,7 +70,7 @@ public:
 	UniformLexicon& operator=(const UniformLexicon&);
 	UniformLexicon& operator=(UniformLexicon&&) noexcept;
 	
-	operator bool() const { return true; }
+	constexpr operator bool() const { return true; }
 
 	void MergeLexicon(UniformLexiconHandle lexicon_handle);
 	bool Shares(const UniformLexicon& lexicon);

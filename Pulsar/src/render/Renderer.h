@@ -7,12 +7,7 @@
 #include "registry/Texture.h"
 #include "registry/Tile.h"
 #include "registry/UniformLexicon.h"
-
-class Window;
-class ShaderRegistry;
-class TextureRegistry;
-class TileRegistry;
-class UniformLexiconRegistry;
+#include "render/Font.h"
 
 class Renderer
 {
@@ -22,6 +17,8 @@ class Renderer
 	static TextureRegistry* textures;
 	static TileRegistry* tiles;
 	static UniformLexiconRegistry* uniform_lexicons;
+	static FontRegistry* fonts;
+	static KerningRegistry* kernings;
 
 public:
 	static void Init();
@@ -38,4 +35,6 @@ public:
 	static TextureRegistry& Textures() { return *textures; }
 	static TileRegistry& Tiles() { return *tiles; }
 	static UniformLexiconRegistry& UniformLexicons() { return *uniform_lexicons; }
+	static FontRegistry& Fonts() { return *fonts; }
+	static KerningRegistry& Kernings() { return *kernings; }
 };

@@ -8,6 +8,136 @@
 #include "AssetLoader.h"
 #include "Renderer.h"
 
+static bool carriage_return_1(Fonts::Codepoint codepoint)
+{
+	return codepoint == '\n' || codepoint == '\r';
+}
+
+static bool carriage_return_2(Fonts::Codepoint r, Fonts::Codepoint n)
+{
+	return r == '\r' && n == '\n';
+}
+
+static bool read_kern_part(const std::string& p, int& k)
+{
+	if (p[0] == '\\')
+	{
+		if (p.size() == 1)
+			return false;
+		if (p[1] == 'x')
+			k = std::stoi(p.substr(2, p.size() - 2), nullptr, 16);
+		else if (p[1] == '\\')
+			k = '\\';
+		else if (p[1] == '\'')
+			k = '\'';
+		else if (p[1] == '"')
+			k = '\"';
+		else if (p[1] == '?')
+			k = '\?';
+		else if (p[1] == 'a')
+			k = '\a';
+		else if (p[1] == 'b')
+			k = '\b';
+		else if (p[1] == 'f')
+			k = '\f';
+		else if (p[1] == 'n')
+			k = '\n';
+		else if (p[1] == 'r')
+			k = '\r';
+		else if (p[1] == 't')
+			k = '\t';
+		else if (p[1] == 'v')
+			k = '\v';
+		else if (p[1] == '0')
+			k = '\0';
+		else
+			return false;
+	}
+	else
+		k = p[0];
+	return true;
+}
+
+static bool parse_kerning_line(const std::string& p0, const std::string& p1,
+	const std::string& p2, std::pair<std::pair<Fonts::Codepoint, Fonts::Codepoint>, int>& insert)
+{
+	if (!read_kern_part(p0, insert.first.first))
+		return false;
+	if (!read_kern_part(p1, insert.first.second))
+		return false;
+	insert.second = std::stoi(p2);
+	return true;
+}
+
+static void parse_kerning(const char* filepath, KerningMap& kerning)
+{
+	std::string content;
+	if (IO::read_file(filepath, content))
+	{
+		char part = 0;
+		std::string p0, p1, p2;
+		for (auto iter = content.begin(); iter != content.end(); ++iter)
+		{
+			if (carriage_return_1(*iter))
+			{
+				std::pair<std::pair<Fonts::Codepoint, Fonts::Codepoint>, int> insert;
+				if (parse_kerning_line(p0, p1, p2, insert))
+					kerning.insert_or_assign(insert.first, insert.second);
+				p0.clear();
+				p1.clear();
+				p2.clear();
+				part = 0;
+			}
+			else if (carriage_return_2(*iter, iter + 1 != content.end() ? *(iter + 1) : 0))
+			{
+				std::pair<std::pair<Fonts::Codepoint, Fonts::Codepoint>, int> insert;
+				if (parse_kerning_line(p0, p1, p2, insert))
+					kerning.insert_or_assign(insert.first, insert.second);
+				p0.clear();
+				p1.clear();
+				p2.clear();
+				part = 0;
+				++iter;
+			}
+			else if (part == 0)
+			{
+				if (*iter == ' ' || *iter == '\t')
+				{
+					if (!p0.empty())
+						++part;
+				}
+				else
+					p0.push_back(*iter);
+			}
+			else if (part == 1)
+			{
+				if (*iter == ' ' || *iter == '\t')
+				{
+					if (!p1.empty())
+						++part;
+				}
+				else
+					p1.push_back(*iter);
+			}
+			else if (*iter != ' ' && *iter != '\t')
+			{
+				p2.push_back(*iter);
+			}
+		}
+		if (part == 2)
+		{
+			std::pair<std::pair<Fonts::Codepoint, Fonts::Codepoint>, int> insert;
+			if (parse_kerning_line(p0, p1, p2, insert))
+				kerning.insert_or_assign(insert.first, insert.second);
+		}
+	}
+}
+
+Kerning::Kerning(const KerningConstructArgs_filepath& args)
+{
+	parse_kerning(args.filepath.c_str(), kern_map);
+}
+
 Font::Glyph::Glyph(Font* font, int gIndex, float scale, size_t buffer_pos)
 	: gIndex(gIndex), font(font), texture(0), buffer_pos(buffer_pos)
 {
@@ -39,13 +169,12 @@ void Font::Glyph::RenderOnBitmap(unsigned char* bmp)
 	location = bmp;
 }
 
-Font::Font(const char* font_filepath, float font_size, const UTF::String& common_buffer,
-	const TextureSettings& settings, UTF::String* failed_common_chars, const Kerning& kerning)
-	: font_size(font_size), texture_settings(settings), font_info{}, kerning(kerning)
+Font::Font(const FontConstructArgs& args)
+	: font_size(args.font_size), texture_settings(args.settings), font_info{}, kerning(args.kerning)
 {
 	unsigned char* font_file;
 	size_t font_filesize;
-	if (!IO::read_file_uc(font_filepath, font_file, font_filesize))
+	if (!IO::read_file_uc(args.font_filepath.c_str(), font_file, font_filesize))
 	{
 		Logger::LogErrorFatal("Cannot load font file.");
 		return;
@@ -60,8 +189,8 @@ Font::Font(const char* font_filepath, float font_size, const UTF::String& common
 	stbtt_GetFontVMetrics(&font_info, &ascent, &descent, &linegap);
 	baseline = static_cast<int>(roundf(ascent * scale));
 
-	std::vector<Font::Codepoint> codepoints;
-	auto iter = common_buffer.begin();
+	std::vector<Fonts::Codepoint> codepoints;
+	auto iter = args.common_buffer.begin();
 	while (iter)
 	{
 		int codepoint = iter.advance();
@@ -69,11 +198,7 @@ Font::Font(const char* font_filepath, float font_size, const UTF::String& common
 			continue;
 		int gIndex = stbtt_FindGlyphIndex(&font_info, codepoint);
 		if (!gIndex)
-		{
-			if (failed_common_chars)
-				failed_common_chars->push_back(codepoint);
 			continue;
-		}
 		Glyph glyph(this, gIndex, scale, common_width);
 		common_width += glyph.width + size_t(1);
 		if (glyph.height > common_height)
@@ -84,7 +209,7 @@ Font::Font(const char* font_filepath, float font_size, const UTF::String& common
 	if (common_width > 0)
 	{
 		common_bmp = new unsigned char[common_width * common_height];
-		for (Font::Codepoint codepoint : codepoints)
+		for (Fonts::Codepoint codepoint : codepoints)
 		{
 			Font::Glyph& glyph = glyphs[codepoint];
 			glyph.RenderOnBitmap(common_bmp + glyph.buffer_pos, common_width, common_height, true);
@@ -92,7 +217,7 @@ Font::Font(const char* font_filepath, float font_size, const UTF::String& common
 		TileHandle tile = Renderer::Tiles().GetHandle(TileConstructArgs_buffer(common_bmp,
 			static_cast<int>(common_width), static_cast<int>(common_height), 1, TileDeletionPolicy::FROM_EXTERNAL, false));
 		TextureHandle texture = Renderer::Textures().GetHandle(TextureConstructArgs_tile(tile, 0, texture_settings));
-		for (Font::Codepoint codepoint : codepoints)
+		for (Fonts::Codepoint codepoint : codepoints)
 		{
 			glyphs[codepoint].texture = texture;
 		}
@@ -147,7 +272,7 @@ Font::~Font()
 		delete[] common_bmp;
 }
 
-bool Font::Cache(Font::Codepoint codepoint)
+bool Font::Cache(Fonts::Codepoint codepoint)
 {
 	if (glyphs.find(codepoint) != glyphs.end())
 		return true;
@@ -171,19 +296,21 @@ void Font::CacheAll(const Font& other)
 		Cache(codepoint);
 }
 
-bool Font::Supports(Font::Codepoint codepoint) const
+bool Font::Supports(Fonts::Codepoint codepoint) const
 {
 	if (glyphs.find(codepoint) != glyphs.end())
 		return true;
 	return stbtt_FindGlyphIndex(&font_info, codepoint) != 0;
 }
 
-int Font::KerningOf(Font::Codepoint c1, Font::Codepoint c2, int g1, int g2, float sc) const
+int Font::KerningOf(Fonts::Codepoint c1, Fonts::Codepoint c2, int g1, int g2, float sc) const
 {
 	if (g1 == 0)
 		return 0;
-	auto k = kerning.find({ c1, c2 });
-	if (k != kerning.end())
+	// TODO like with other cases, Renderer should only be used by default, and not always.
+	Kerning* kern = Renderer::Kernings().Get(kerning);
+	auto k = kern->kern_map.find({ c1, c2 });
+	if (k != kern->kern_map.end())
 		return static_cast<int>(roundf(k->second * scale * sc));
 	else
 		return static_cast<int>(roundf(stbtt_GetGlyphKernAdvance(&font_info, g1, g2) * scale * sc));
@@ -238,16 +365,6 @@ std::array<glm::vec2, 4> Font::UVs(const Glyph& glyph) const
 		glm::vec2{ 1.0f, 1.0f },
 		glm::vec2{ 0.0f, 1.0f }
 	};
-}
-
-static bool carriage_return_1(Font::Codepoint codepoint)
-{
-	return codepoint == '\n' || codepoint == '\r';
-}
-
-static bool carriage_return_2(Font::Codepoint r, Font::Codepoint n)
-{
-	return r == '\r' && n == '\n';
 }
 
 Functor<void, TextureSlot> TextRender::create_on_draw_callback(TextRender* tr)
@@ -342,7 +459,7 @@ void TextRender::FormattingData::NextLine(const TextRender& text_render)
 	prev_codepoint = 0;
 }
 
-void TextRender::FormattingData::KerningAdvanceX(const TextRender& text_render, const Font::Glyph& glyph, Font::Codepoint codepoint)
+void TextRender::FormattingData::KerningAdvanceX(const TextRender& text_render, const Font::Glyph& glyph, Fonts::Codepoint codepoint)
 {
 	x += text_render.font->KerningOf(prev_codepoint, codepoint, text_render.font->glyphs[prev_codepoint].gIndex, glyph.gIndex, line.mul_x);
 }
@@ -355,7 +472,7 @@ void TextRender::RequestDraw(CanvasLayer* canvas_layer)
 	auto iter = text.begin();
 	while (iter)
 	{
-		Font::Codepoint codepoint = iter.advance();
+		Fonts::Codepoint codepoint = iter.advance();
 
 		if (codepoint == ' ')
 			formatting.AdvanceX(font->space_width * formatting.line.space_mul_x, 0);
@@ -384,7 +501,7 @@ void TextRender::WarnInvalidCharacters() const
 	std::stringstream ss;
 	while (iter)
 	{
-		Font::Codepoint codepoint = iter.advance();
+		Fonts::Codepoint codepoint = iter.advance();
 		if (codepoint != ' ' && codepoint != '\t' && !carriage_return_2(codepoint, iter ? iter.codepoint() : 0) && !carriage_return_1(codepoint) && !font->Supports(codepoint))
 		{
 			ss.str("");
@@ -507,7 +624,7 @@ void TextRender::BoundsFormattingData::LastLine(TextRender& text_render)
 	bounds.inner_height = static_cast<int>(bounds.lowest_baseline - font->descent * font->scale - bounds.top_ribbon);
 }
 
-void TextRender::BoundsFormattingData::KerningAdvanceX(const TextRender& text_render, const Font::Glyph& glyph, Font::Codepoint codepoint)
+void TextRender::BoundsFormattingData::KerningAdvanceX(const TextRender& text_render, const Font::Glyph& glyph, Fonts::Codepoint codepoint)
 {
 	x += text_render.font->KerningOf(prev_codepoint, codepoint, text_render.font->glyphs[prev_codepoint].gIndex, glyph.gIndex);
 }
@@ -532,7 +649,7 @@ void TextRender::UpdateBounds()
 	auto iter = text.begin();
 	while (iter)
 	{
-		Font::Codepoint codepoint = iter.advance();
+		Fonts::Codepoint codepoint = iter.advance();
 
 		if (codepoint == ' ')
 		{
@@ -561,121 +678,6 @@ void TextRender::UpdateBounds()
 		}
 	}
 	bounds_formatting.LastLine(*this);
-}
-
-static bool read_kern_part(const std::string& p, int& k)
-{
-	if (p[0] == '\\')
-	{
-		if (p.size() == 1)
-			return false;
-		if (p[1] == 'x')
-			k = std::stoi(p.substr(2, p.size() - 2), nullptr, 16);
-		else if (p[1] == '\\')
-			k = '\\';
-		else if (p[1] == '\'')
-			k = '\'';
-		else if (p[1] == '"')
-			k = '\"';
-		else if (p[1] == '?')
-			k = '\?';
-		else if (p[1] == 'a')
-			k = '\a';
-		else if (p[1] == 'b')
-			k = '\b';
-		else if (p[1] == 'f')
-			k = '\f';
-		else if (p[1] == 'n')
-			k = '\n';
-		else if (p[1] == 'r')
-			k = '\r';
-		else if (p[1] == 't')
-			k = '\t';
-		else if (p[1] == 'v')
-			k = '\v';
-		else if (p[1] == '0')
-			k = '\0';
-		else
-			return false;
-	}
-	else
-		k = p[0];
-	return true;
-}
-
-static bool parse_kerning_line(const std::string& p0, const std::string& p1,
-	const std::string& p2, std::pair<std::pair<Font::Codepoint, Font::Codepoint>, int>& insert)
-{
-	if (!read_kern_part(p0, insert.first.first))
-		return false;
-	if (!read_kern_part(p1, insert.first.second))
-		return false;
-	insert.second = std::stoi(p2);
-	return true;
-}
-
-static void parse_kerning(const char* filepath, Font::Kerning& kerning)
-{
-	std::string content;
-	if (IO::read_file(filepath, content))
-	{
-		char part = 0;
-		std::string p0, p1, p2;
-		for (auto iter = content.begin(); iter != content.end(); ++iter)
-		{
-			if (carriage_return_1(*iter))
-			{
-				std::pair<std::pair<Font::Codepoint, Font::Codepoint>, int> insert;
-				if (parse_kerning_line(p0, p1, p2, insert))
-					kerning.insert_or_assign(insert.first, insert.second);
-				p0.clear();
-				p1.clear();
-				p2.clear();
-				part = 0;
-			}
-			else if (carriage_return_2(*iter, iter + 1 != content.end() ? *(iter + 1) : 0))
-			{
-				std::pair<std::pair<Font::Codepoint, Font::Codepoint>, int> insert;
-				if (parse_kerning_line(p0, p1, p2, insert))
-					kerning.insert_or_assign(insert.first, insert.second);
-				p0.clear();
-				p1.clear();
-				p2.clear();
-				part = 0;
-				++iter;
-			}
-			else if (part == 0)
-			{
-				if (*iter == ' ' || *iter == '\t')
-				{
-					if (!p0.empty())
-						++part;
-				}
-				else
-					p0.push_back(*iter);
-			}
-			else if (part == 1)
-			{
-				if (*iter == ' ' || *iter == '\t')
-				{
-					if (!p1.empty())
-						++part;
-				}
-				else
-					p1.push_back(*iter);
-			}
-			else if (*iter != ' ' && *iter != '\t')
-			{
-				p2.push_back(*iter);
-			}
-		}
-		if (part == 2)
-		{
-			std::pair<std::pair<Font::Codepoint, Font::Codepoint>, int> insert;
-			if (parse_kerning_line(p0, p1, p2, insert))
-				kerning.insert_or_assign(insert.first, insert.second);
-		}
-	}
 }
 
 FontFamily::FontFamily(const char* filepath)
@@ -711,10 +713,11 @@ FontFamily::FontFamily(const char* filepath)
 				continue;
 			}
 			FontEntry font_entry;
-			font_entry.filepath = fp.value();
-			auto kerning_filepath = (*table)["kerning"].value<std::string>();
-			if (kerning_filepath)
-				parse_kerning(kerning_filepath.value().c_str(), font_entry.kerning);
+			font_entry.font_filepath = std::move(fp.value());
+			// TODO renderer
+			if (auto kerning_filepath = (*table)["kerning"].value<std::string>())
+				font_entry.kerning = Renderer::Kernings().GetHandle(KerningConstructArgs_filepath(std::move(kerning_filepath.value())));
+			// TODO font_entry.common_buffer and font_entry.settings
 			family.insert({ name.value(), std::move(font_entry) });
 		}
 	}
@@ -722,4 +725,20 @@ FontFamily::FontFamily(const char* filepath)
 	{
 		Logger::LogErrorFatal("Cannot parse font-family asset file \"" + std::string(filepath) + "\": " + std::string(err.description()));
 	}
+}
+
+Font* FontFamily::GetFont(const char* font_name, const FontCharacteristics& font_chars)
+{
+	auto p_iter = family.find(font_name);
+	if (p_iter == family.end())
+		return nullptr;
+	auto f_iter = p_iter->second.fonts.find(font_chars);
+	// TODO once again with the Renderer
+	if (f_iter != p_iter->second.fonts.end())
+		return Renderer::Fonts().Get(f_iter->second);
+	p_iter->second.font_filepath;
+	FontHandle handle = Renderer::Fonts().GetHandle(FontConstructArgs(p_iter->second.font_filepath,
+		font_chars.font_size, p_iter->second.common_buffer, p_iter->second.settings, p_iter->second.kerning));
+	p_iter->second.fonts.insert({ font_chars, handle });
+	return Renderer::Fonts().Get(handle);
 }
