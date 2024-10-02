@@ -8,12 +8,6 @@ BatchModel::BatchModel(VertexLayout layout, VertexLayoutMask layoutMask, ShaderH
 {
 }
 
-bool BatchModel::operator==(const BatchModel& m) const
-{
-	return layout == m.layout && layoutMask == m.layoutMask && shader == m.shader;
-}
-
-
 size_t std::hash<BatchModel>::operator()(const BatchModel& model) const
 {
 	size_t h1 = std::hash<ShaderHandle>{}(model.shader);

@@ -176,7 +176,6 @@
     <ClCompile Include="src\platform\InputManager.cpp" />
     <ClCompile Include="src\registry\compound\Atlas.cpp" />
     <ClCompile Include="src\render\Font.cpp" />
-    <ClCompile Include="src\registry\compound\NonantTile.cpp" />
     <ClCompile Include="src\registry\Tile.cpp" />
     <ClCompile Include="src\registry\UniformLexicon.cpp" />
     <ClCompile Include="src\Macros.cpp" />
@@ -223,7 +222,6 @@
       <FileType>CppHeader</FileType>
     </ClInclude>
     <ClInclude Include="src\render\Font.h" />
-    <ClInclude Include="src\registry\compound\NonantTile.h" />
     <ClInclude Include="src\render\actors\NonantRender.h" />
     <ClInclude Include="src\render\transform\YSorter.h" />
     <ClInclude Include="src\platform\Window.h" />

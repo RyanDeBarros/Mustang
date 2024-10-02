@@ -67,12 +67,8 @@ struct TextureSettings
 	MagFilter magFilter = MagFilter::Linear;
 	TextureWrap wrapS = TextureWrap::ClampToEdge;
 	TextureWrap wrapT = TextureWrap::ClampToEdge;
-	GLint lodLevel = 0;
 
-	bool operator==(const TextureSettings& other) const
-	{
-		return minFilter == other.minFilter && magFilter == other.magFilter && wrapS == other.wrapS && wrapT == other.wrapT && lodLevel == other.lodLevel;
-	}
+	bool operator==(const TextureSettings&) const = default;
 };
 
 template<>
@@ -84,8 +80,7 @@ struct std::hash<TextureSettings>
 		auto hash2 = hash<MagFilter>{}(settings.magFilter);
 		auto hash3 = hash<TextureWrap>{}(settings.wrapS);
 		auto hash4 = hash<TextureWrap>{}(settings.wrapT);
-		auto hash5 = hash<GLint>{}(settings.lodLevel);
-		return hash1 ^ (hash2 << 1) ^ (hash3 << 2) ^ (hash4 << 3) ^ (hash5 << 4);
+		return hash1 ^ (hash2 << 1) ^ (hash3 << 2) ^ (hash4 << 3);
 	}
 };
 
@@ -104,11 +99,7 @@ struct TextureConstructArgs_filepath
 		bool temporary_buffer = false, TextureVersion version = 0, float svg_scale = 1.0f)
 		: filepath(std::move(filepath)), settings(settings), temporary_buffer(temporary_buffer), version(version), svg_scale(svg_scale) {}
 
-	bool operator==(const TextureConstructArgs_filepath& args) const
-	{
-		return filepath == args.filepath && settings == args.settings && temporary_buffer == args.temporary_buffer
-			&& version == args.version && svg_scale == args.svg_scale;
-	}
+	bool operator==(const TextureConstructArgs_filepath&) const = default;
 };
 
 template<>
@@ -131,10 +122,7 @@ struct TextureConstructArgs_tile
 	TextureConstructArgs_tile(TileHandle tile, TextureVersion version = 0, const TextureSettings& settings = {})
 		: tile(tile), version(version), settings(settings) {}
 
-	bool operator==(const TextureConstructArgs_tile& args) const
-	{
-		return tile == args.tile && settings == args.settings && version == args.version;
-	}
+	bool operator==(const TextureConstructArgs_tile&) const = default;
 };
 
 template<>
@@ -187,7 +175,7 @@ public:
 	static const TextureSettings nearest_settings;
 
 private:
-	void TexImage(Tile const* tile, const std::string& err_msg, GLint lod_level);
+	void TexImage(Tile const* tile, const std::string& err_msg, GLint lod_level = 0);
 };
 
 class TextureRegistry : public Registry<Texture, TextureHandle, TextureConstructArgs_filepath, TextureConstructArgs_tile>

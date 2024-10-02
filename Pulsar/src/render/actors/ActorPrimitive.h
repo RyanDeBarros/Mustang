@@ -9,10 +9,10 @@ struct AP2D_Notification;
 
 class ActorPrimitive2D : public FickleActor2D
 {
-	AP2D_Notification* m_Notification;
-
 protected:
 	static constexpr Stride end_attrib_pos = 11;
+
+	AP2D_Notification* m_Notification;
 	
 	friend class CanvasLayer;
 	friend class ActorTesselation2D;

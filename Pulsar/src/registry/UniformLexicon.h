@@ -22,8 +22,6 @@ typedef std::variant<
 	glm::mat2, glm::mat3, glm::mat4
 > Uniform;
 
-// TODO lexicon version and register lexicon
-
 struct UniformLexiconConstructArgs
 {
 	std::unordered_map<std::string, Uniform> uniforms;
@@ -31,10 +29,7 @@ struct UniformLexiconConstructArgs
 	UniformLexiconConstructArgs(const std::unordered_map<std::string, Uniform>& uniforms) : uniforms(uniforms) {}
 	UniformLexiconConstructArgs(std::unordered_map<std::string, Uniform>&& uniforms) : uniforms(std::move(uniforms)) {}
 
-	bool operator==(const UniformLexiconConstructArgs& args) const
-	{
-		return uniforms == args.uniforms;
-	}
+	bool operator==(const UniformLexiconConstructArgs&) const = default;
 };
 
 template<>
@@ -55,7 +50,6 @@ struct std::hash<UniformLexiconConstructArgs>
 	}
 };
 
-// TODO POSSIBLY don't use class for this. Just use unordered_map, and define utility functions like Shares, MergeLexicon, GetValue, etc.
 class UniformLexicon
 {
 	friend class UniformLexiconRegistry;

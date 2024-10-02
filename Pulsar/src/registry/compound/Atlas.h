@@ -12,10 +12,7 @@ struct Placement
 	int x, y, w, h;
 	bool r;
 
-	bool operator==(const Placement& other) const
-	{
-		return tile == other.tile && x == other.x && y == other.y && w == other.w && h == other.h && r == other.r;
-	}
+	bool operator==(const Placement&) const = default;
 };
 
 class null_pointer_error : public std::exception
@@ -42,10 +39,10 @@ public:
 	Atlas(const std::string& texture_filepath, const std::vector<Placement>& placements, int border);
 	Atlas(const std::string& texture_filepath, std::vector<Placement>&& placements, int border);
 	Atlas(const Atlas&) = delete;
-	Atlas(Atlas&& atlas) noexcept;
-	Atlas& operator=(Atlas&& atlas) noexcept;
+	Atlas(Atlas&&) noexcept = default;
+	Atlas& operator=(Atlas&&) noexcept = default;
 
-	bool operator==(const Atlas& other) const;
+	bool operator==(const Atlas&) const = default;
 
 	int GetBorder() const { return m_Border; }
 	const std::vector<Placement>& GetPlacements() const { return m_Placements; }
@@ -55,7 +52,6 @@ public:
 		TextureVersion texture_version = 0, const glm::vec2& pivot = { 0.5f, 0.5f }, ShaderHandle shader = ShaderRegistry::HANDLE_CAP,
 		ZIndex z = 0, FickleType fickle_type = FickleType::Protean, bool visible = true) const;
 	TileHandle GetTileHandle() const { return m_Tile; }
-	// TODO IMPORTANT for functions such as these, perhaps passing a TileRegistry which by default is null (in which case Renderer::Tiles() is used) would be best.
 	int GetWidth() const { return Renderer::Tiles().GetWidth(m_Tile); }
 	int GetHeight() const { return Renderer::Tiles().GetHeight(m_Tile); }
 

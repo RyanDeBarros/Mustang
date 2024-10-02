@@ -123,8 +123,7 @@ struct FontConstructArgs
 		: font_filepath(std::move(font_filepath)), font_size(font_size), common_buffer(std::move(common_buffer)),
 		settings(settings), kerning(std::move(kerning)) {}
 
-	// TODO use default operator==s more.
-	bool operator==(const FontConstructArgs& other) const = default;
+	bool operator==(const FontConstructArgs&) const = default;
 };
 
 template<>

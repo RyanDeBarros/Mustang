@@ -9,9 +9,6 @@
 #include "Macros.h"
 #include "render/Renderer.h"
 
-// TODO IMPORTANT TextureConstructArgs_filepath should be TextureConstructArgs_temporary_tile, which has a Tile reference.
-// ReTexImage is the only thing that actually uses m_Tile, so remove m_Tile and in ReTexImage use a tile reference as well.
-// Renderer should NOT be included in a file like this.
 Texture::Texture(const TextureConstructArgs_filepath& args)
 	: m_RID(0), m_Width(0), m_Height(0), m_Tile(0)
 {
@@ -33,7 +30,7 @@ Texture::Texture(const TextureConstructArgs_filepath& args)
 
 	m_Width = tile_ref->GetWidth();
 	m_Height = tile_ref->GetHeight();
-	TexImage(tile_ref, std::string("Cannot create texture \"") + args.filepath + "\": BPP is not 4, 3, 2, or 1.", args.settings.lodLevel);
+	TexImage(tile_ref, std::string("Cannot create texture \"") + args.filepath + "\": BPP is not 4, 3, 2, or 1.");
 	SetSettings(args.settings);
 	if (args.temporary_buffer)
 		delete tile_ref;
@@ -51,7 +48,7 @@ Texture::Texture(const TextureConstructArgs_tile& args)
 	
 	m_Width = tile_ref->GetWidth();
 	m_Height = tile_ref->GetHeight();
-	TexImage(tile_ref, std::string("Cannot create texture from tile  \"") + std::to_string(args.tile) + "\": BPP is not 4, 3, 2, or 1.", args.settings.lodLevel);
+	TexImage(tile_ref, std::string("Cannot create texture from tile  \"") + std::to_string(args.tile) + "\": BPP is not 4, 3, 2, or 1.");
 	SetSettings(args.settings);
 }
 
@@ -60,7 +57,7 @@ Texture::Texture(Tile&& tile, TextureSettings settings)
 {
 	m_Width = tile.GetWidth();
 	m_Height = tile.GetHeight();
-	TexImage(&tile, "Cannot create texture from tile r-value ref: BPP is not 4, 3, 2, or 1.", settings.lodLevel);
+	TexImage(&tile, "Cannot create texture from tile r-value ref: BPP is not 4, 3, 2, or 1.");
 	SetSettings(settings);
 }
 
@@ -162,8 +159,7 @@ TextureSettings Texture::GetSettings() const
 	PULSAR_TRY(glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &wrap_t));
 
 	PULSAR_TRY(glBindTexture(GL_TEXTURE_2D, 0));
-	// TODO remove lod_level from project. Mipmaps can be integrated in the future.
-	return { static_cast<MinFilter>(min_filter), static_cast<MagFilter>(mag_filter), static_cast<TextureWrap>(wrap_s), static_cast<TextureWrap>(wrap_t), 0 };
+	return TextureSettings(static_cast<MinFilter>(min_filter), static_cast<MagFilter>(mag_filter), static_cast<TextureWrap>(wrap_s), static_cast<TextureWrap>(wrap_t));
 }
 
 void Texture::ReTexImage(Tile const* tile, GLint lod_level)

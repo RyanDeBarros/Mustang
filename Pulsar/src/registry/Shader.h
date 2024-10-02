@@ -20,10 +20,7 @@ struct ShaderConstructArgs
 	ShaderConstructArgs(std::string&& vertex_filepath, std::string&& fragment_filepath)
 		: vertexFilepath(std::move(vertex_filepath)), fragmentFilepath(std::move(fragment_filepath)) {}
 
-	bool operator==(const ShaderConstructArgs& args) const
-	{
-		return vertexFilepath == args.vertexFilepath && fragmentFilepath == args.fragmentFilepath;
-	}
+	bool operator==(const ShaderConstructArgs&) const = default;
 };
 
 template<>

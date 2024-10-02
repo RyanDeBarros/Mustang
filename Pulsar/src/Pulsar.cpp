@@ -334,10 +334,13 @@ void Pulsar::Run()
 	Renderer::RemoveCanvasLayer(11);
 	Renderer::AddCanvasLayer(11);
 
-	TileHandle ogntile = Renderer::Tiles().GetHandle({ "res/textures/panel.png" });
-	NonantRender nonant(NonantTile(*Renderer::Tiles().Get(ogntile), NonantLines_Absolute{ 6, 26, 6, 26 }));
+	TextureHandle ogntexture = Renderer::Textures().GetHandle(TextureConstructArgs_filepath("res/textures/panel.png", Texture::nearest_settings));
+	//NonantRender nonant(NonantTile(*Renderer::Tiles().Get(ogntile), NonantLines_Absolute{ 6, 26, 6, 26 }));
+	//NonantRender nonant(ogntile, NonantLines(6, 6, 6, 6));
+	// TODO 0, 0, 0, 0 for Lines seems to not actually mean 0, 0, 0, 0, but instead seems to do 1, 1, 1, 1, i.e. 1-pixel border all around.
+	NonantRender nonant(ogntexture, NonantLines(14.5f, 14.5f, 14.5f, 14.5f));
 
-	RectRender og_nonant(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ ogntile, 1, {MinFilter::Nearest, MagFilter::Nearest} }));
+	RectRender og_nonant(ogntexture);
 
 	// TODO function on FickleActor2D that does sync automatically when setting position, rotation, etc.
 	set_ptr(og_nonant.Fickler().Scale(), { 10.0f, 10.0f });
@@ -348,7 +351,7 @@ void Pulsar::Run()
 	Renderer::GetCanvasLayer(11)->OnAttach(&nonant);
 	set_ptr(nonant.Fickler().Transform(), { { 150.0f, -300.0f }, 0.0f, { 10.0f, 10.0f } });
 	nonant.Fickler().SyncT();
-	nonant.SetPivot({ 0.3f, 0.3f });
+	//nonant.SetPivot({ 0.3f, 0.3f });
 	
 	Renderer::GetCanvasLayer(11)->OnAttach(tilemap.get());
 	//Renderer::GetCanvasLayer(11)->OnAttach(psys.get());
@@ -362,17 +365,7 @@ void Pulsar::Run()
 
 	InputManager::Instance().DispatchMouseButton().Connect(InputBucket::MouseButton(0, Input::MouseButton::LEFT, Input::Action::PRESS),
 		[](const InputEvent::MouseButton& event) {
-			if (event.mods & Input::Mod::CONTROL)
-				Logger::LogInfo("Control click!");
-			else
-				Logger::LogInfo("Click!");
-			});
-	InputManager::Instance().DispatchMouseButton().Connect(InputBucket::MouseButton(0, Input::MouseButton::LEFT, Input::Action::RELEASE),
-		[](const InputEvent::MouseButton& event) {
-			if (event.mods & Input::Mod::CONTROL)
-				Logger::LogInfo("Control release!");
-			else
-				Logger::LogInfo("Release!");
+			Logger::LogInfo(STR(WindowManager::GetWindow(0)->GetCursorPos()));
 			});
 
 	// TODO font registry?
@@ -406,16 +399,6 @@ void Pulsar::Run()
 	text_render.pivot = {0.5f, 0.5f};
 	text_background.SetPivot({0.5f, 0.5f});
 	
-	//TextureSettings ts_;
-	//ts_.magFilter = MagFilter::Nearest;
-	//font.SetTextureSettings(ts_);
-
-	int modified = 0;
-
-	UTF::String s1, s2;
-	s1 += s2;
-	s1 *= 3;
-
 	_frame_exec = [&]() {
 		drawTime = static_cast<real>(glfwGetTime());
 		deltaDrawTime = drawTime - prevDrawTime;
@@ -424,7 +407,8 @@ void Pulsar::Run()
 
 		_frame_start();
 
-		nonant.SetNonantSize({ nonant.NTile().GetWidth() + 10 * glm::sin(totalDrawTime), nonant.NTile().GetHeight() + 10 * glm::cos(totalDrawTime) });
+		nonant.SetNonantWidth(nonant.GetUVWidth() + 10 * glm::sin(totalDrawTime));
+		nonant.SetNonantHeight(nonant.GetUVHeight() + 10 * glm::cos(totalDrawTime));
 
 		*child.Fickler().Rotation() = -Pulsar::totalDrawTime;
 		*child2.Fickler().Rotation() = -Pulsar::totalDrawTime;
@@ -454,43 +438,6 @@ void Pulsar::Run()
 			{
 				ap1frames = unsigned_fmod(ap1frames, 2.0f);
 				animPlayer1.isInReverse = !animPlayer1.isInReverse;
-			}
-		}
-
-		//Logger::LogInfo(STR(WindowManager::GetWindow(0)->GetCursorPos()));
-
-		//*text_render.Fickler().Modulate() = { std::abs(glm::sin(Pulsar::totalDrawTime)),
-			//std::abs(glm::sin(Pulsar::totalDrawTime + 1.0f)),
-			//std::abs(glm::sin(Pulsar::totalDrawTime - 1.0f)), 1.0f};
-		
-		if (std::fmod(Pulsar::totalDrawTime, 2.0f) < 1.0f)
-		{
-			if (modified != 1)
-			{
-				modified = 1;
-				//text_render.ChangeFont(font1);
-				//text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 1";
-				//text_render.UpdateBounds();
-				//text_background.SetWidth(text_render.OuterWidth());
-				//text_background.SetHeight(text_render.OuterHeight());
-				//TextureSettings ts_;
-				//ts_.magFilter = MagFilter::Linear;
-				//font.SetTextureSettings(ts_);
-			}
-		}
-		else
-		{
-			if (modified != 2)
-			{
-				modified = 2;
-				//text_render.ChangeFont(font2);
-				//text_render.text = U"Hello,\n World\t!é\r\n\rNext Line!! Font 2";
-				//text_render.UpdateBounds();
-				//text_background.SetWidth(text_render.OuterWidth());
-				//text_background.SetHeight(text_render.OuterHeight());
-				//TextureSettings ts_;
-				//ts_.magFilter = MagFilter::Nearest;
-				//font.SetTextureSettings(ts_);
 			}
 		}
 

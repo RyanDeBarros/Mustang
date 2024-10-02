@@ -31,26 +31,6 @@ Atlas::Atlas(const std::string& texture_filepath, std::vector<Placement>&& place
 	m_Tile = Renderer::Tiles().GetHandle({ texture_filepath });
 }
 
-Atlas::Atlas(Atlas&& atlas) noexcept
-	: m_Tile(atlas.m_Tile), m_Border(atlas.m_Border), m_Placements(std::move(atlas.m_Placements))
-{
-}
-
-Atlas& Atlas::operator=(Atlas&& atlas) noexcept
-{
-	if (this == &atlas)
-		return *this;
-	m_Tile = atlas.m_Tile;
-	m_Border = atlas.m_Border;
-	m_Placements = std::move(atlas.m_Placements);
-	return *this;
-}
-
-bool Atlas::operator==(const Atlas& other) const
-{
-	return m_Tile == other.m_Tile;
-}
-
 static int min_bound(const std::vector<TileHandle>& tiles, const int& border)
 {
 	int bound = border;

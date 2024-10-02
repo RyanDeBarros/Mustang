@@ -291,14 +291,14 @@ namespace InputBucket
 	{
 		WindowHandle window;
 		Window(WindowHandle window = 0) : window(window) {}
-		bool operator==(const InputBucket::Window& other) const { return window == other.window; }
+		bool operator==(const InputBucket::Window&) const = default;
 	};
 	struct ControllerConnect
 	{
 		Input::ControllerID jid;
 		bool connected;
 		ControllerConnect(Input::ControllerID jid, bool connected) : jid(jid), connected(connected) {}
-		bool operator==(const InputBucket::ControllerConnect& other) const { return jid == other.jid && connected == other.connected; }
+		bool operator==(const InputBucket::ControllerConnect&) const = default;
 	};
 	struct Key
 	{
@@ -306,14 +306,14 @@ namespace InputBucket
 		Input::Key key;
 		Input::Action action;
 		Key(WindowHandle window, Input::Key key, Input::Action action) : window(window), key(key), action(action) {}
-		bool operator==(const InputBucket::Key& other) const { return window == other.window && key == other.key && action == other.action; }
+		bool operator==(const InputBucket::Key&) const = default;
 	};
 	struct MonitorConnect
 	{
 		GLFWmonitor* monitor = nullptr;
 		bool connected;
 		MonitorConnect(GLFWmonitor* monitor, bool connected) : monitor(monitor), connected(connected) {}
-		bool operator==(const InputBucket::MonitorConnect& other) const { return monitor == other.monitor && connected == other.connected; }
+		bool operator==(const InputBucket::MonitorConnect&) const = default;
 	};
 	struct MouseButton
 	{
@@ -321,7 +321,7 @@ namespace InputBucket
 		Input::MouseButton button;
 		Input::Action action;
 		MouseButton(WindowHandle window, Input::MouseButton button, Input::Action action) : window(window), button(button), action(action) {}
-		bool operator==(const InputBucket::MouseButton& other) const { return window == other.window && button == other.button && action == other.action; }
+		bool operator==(const InputBucket::MouseButton&) const = default;
 	};
 }
 

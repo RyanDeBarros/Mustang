@@ -26,7 +26,7 @@ public:
 	static void DefineRectRenderable();
 	static void DestroyRectRenderable();
 
-	void RequestDraw(class CanvasLayer*) override;
+	virtual void RequestDraw(class CanvasLayer*) override;
 
 	int GetWidth() const { return Renderer::Textures().GetWidth(m_Render.textureHandle); }
 	int GetHeight() const { return Renderer::Textures().GetHeight(m_Render.textureHandle); }
@@ -34,8 +34,8 @@ public:
 	int GetUVWidth() const { return m_UVWidth; }
 	int GetUVHeight() const { return m_UVHeight; }
 	glm::vec2 GetPivot() const { return m_Pivot; }
-	void SetPivot(float pivotX, float pivotY);
-	void SetPivot(const glm::vec2& pivot) { SetPivot(pivot.x, pivot.y); }
+	virtual void SetPivot(float pivotX, float pivotY);
+	virtual void SetPivot(const glm::vec2& pivot) { SetPivot(pivot.x, pivot.y); }
 	void RefreshTexture();
 
 	void CropToRect(const glm::vec4& rect, int atlas_width, int atlas_height);

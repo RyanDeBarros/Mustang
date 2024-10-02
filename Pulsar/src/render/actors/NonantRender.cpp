@@ -4,172 +4,132 @@
 #include "../CanvasLayer.h"
 #include "utils/Data.inl"
 
-NonantRender::NonantRender(NonantTile&& ntile, TextureVersion texture_version, const TextureSettings& texture_settings,
-	ShaderHandle shader, ZIndex z, bool modulatable, bool visible)
-	: ntile(std::move(ntile)), rects{
-		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(0),
-			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
-		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(1),
-			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
-		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(2),
-			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
-		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(3),
-			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
-		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(4),
-			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
-		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(5),
-			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
-		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(6),
-			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
-		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(7),
-			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible),
-		RectRender(Renderer::Textures().GetHandle(TextureConstructArgs_tile{ this->ntile.GetTile(8),
-			texture_version, texture_settings }), {}, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible)
-	}, FickleActor2D(FickleType(true, modulatable), z)
+template<char i>
+UVBounds NonantLines::UVs(float width, float height) const requires (i >= 0 && i <= 8)
 {
-	m_Fickler.Attach(rects[0].Fickler());
-	m_Fickler.Attach(rects[1].Fickler());
-	m_Fickler.Attach(rects[2].Fickler());
-	m_Fickler.Attach(rects[3].Fickler());
-	m_Fickler.Attach(rects[4].Fickler());
-	m_Fickler.Attach(rects[5].Fickler());
-	m_Fickler.Attach(rects[6].Fickler());
-	m_Fickler.Attach(rects[7].Fickler());
-	m_Fickler.Attach(rects[8].Fickler());
+	float cl = width != 0 ? col_l_width / width : 0.0f;
+	float cr = width != 0 ? std::max(1.0f - col_r_width / width, cl) : 1.0f;
+	float rb = height != 0 ? row_b_height / height : 0.0f;
+	float rt = height != 0 ? std::max(1.0f - row_t_height / height, rb) : 1.0f;
+	if constexpr (i == 0) return UVBounds(0.0f, cl, 0.0f, rb);
+	else if constexpr (i == 1) return UVBounds(cl, cr, 0.0f, rb);
+	else if constexpr (i == 2) return UVBounds(cr, 1.0f, 0.0f, rb);
+	else if constexpr (i == 3) return UVBounds(0.0f, cl, rb, rt);
+	else if constexpr (i == 4) return UVBounds(cl, cr, rb, rt);
+	else if constexpr (i == 5) return UVBounds(cr, 1.0f, rb, rt);
+	else if constexpr (i == 6) return UVBounds(0.0f, cl, rt, 1.0f);
+	else if constexpr (i == 7) return UVBounds(cl, cr, rt, 1.0f);
+	else if constexpr (i == 8) return UVBounds(cr, 1.0f, rt, 1.0f);
+	else static_assert(false);
+}
 
-	RecallibratePosition();
+template UVBounds NonantLines::UVs<0>(float width, float height) const;
+template UVBounds NonantLines::UVs<1>(float width, float height) const;
+template UVBounds NonantLines::UVs<2>(float width, float height) const;
+template UVBounds NonantLines::UVs<3>(float width, float height) const;
+template UVBounds NonantLines::UVs<4>(float width, float height) const;
+template UVBounds NonantLines::UVs<5>(float width, float height) const;
+template UVBounds NonantLines::UVs<6>(float width, float height) const;
+template UVBounds NonantLines::UVs<7>(float width, float height) const;
+template UVBounds NonantLines::UVs<8>(float width, float height) const;
+
+NonantRender::NonantRender(TextureHandle texture, const NonantLines& lines, const glm::vec2& pivot, ShaderHandle shader, ZIndex z, bool modulatable, bool visible)
+	: RectRender(texture, { 0.0f, 0.0f }, shader == ShaderRegistry::HANDLE_CAP ? Renderer::Shaders().Standard() : shader, z, FickleType(true, modulatable), visible), lines(lines)
+{
+	nonantWidth = static_cast<float>(m_UVWidth);
+	nonantHeight = static_cast<float>(m_UVHeight);
+	SetPivot(pivot);
 }
 
 void NonantRender::RequestDraw(CanvasLayer* canvas_layer)
 {
-	rects[0].RequestDraw(canvas_layer);
-	rects[1].RequestDraw(canvas_layer);
-	rects[2].RequestDraw(canvas_layer);
-	rects[3].RequestDraw(canvas_layer);
-	rects[4].RequestDraw(canvas_layer);
-	rects[5].RequestDraw(canvas_layer);
-	rects[6].RequestDraw(canvas_layer);
-	rects[7].RequestDraw(canvas_layer);
-	rects[8].RequestDraw(canvas_layer);
+	auto stride = Render::StrideCountOf(m_Render.model.layout, m_Render.model.layoutMask);
+	PackedTransform2D prior = m_Fickler.transformable->self;
+	Draw<0>(canvas_layer, stride, prior);
+	Draw<1>(canvas_layer, stride, prior);
+	Draw<2>(canvas_layer, stride, prior);
+	Draw<3>(canvas_layer, stride, prior);
+	Draw<4>(canvas_layer, stride, prior);
+	Draw<5>(canvas_layer, stride, prior);
+	Draw<6>(canvas_layer, stride, prior);
+	Draw<7>(canvas_layer, stride, prior);
+	Draw<8>(canvas_layer, stride, prior);
+	m_Fickler.transformable->self = prior;
 }
 
-void NonantRender::Reconfigure(const NonantLines_Absolute& lines)
+template<char i>
+void NonantRender::Draw(CanvasLayer* canvas_layer, Stride stride, const PackedTransform2D& prior) requires (i >= 0 && i <= 8)
 {
-	ntile.Reconfigure(lines);
-	Recallibrate();
-}
-
-void NonantRender::Reconfigure(const NonantLines_Relative& lines)
-{
-	ntile.Reconfigure(lines);
-	Recallibrate();
-}
-
-void NonantRender::Recallibrate()
-{
-	const_cast<Texture*>(Renderer::Textures().Get(rects[0].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(Renderer::Textures().Get(rects[1].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(Renderer::Textures().Get(rects[2].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(Renderer::Textures().Get(rects[3].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(Renderer::Textures().Get(rects[4].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(Renderer::Textures().Get(rects[5].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(Renderer::Textures().Get(rects[6].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(Renderer::Textures().Get(rects[7].GetTextureHandle()))->ReTexImage();
-	const_cast<Texture*>(Renderer::Textures().Get(rects[8].GetTextureHandle()))->ReTexImage();
-	
-	rects[0].RefreshTexture();
-	rects[1].RefreshTexture();
-	rects[2].RefreshTexture();
-	rects[3].RefreshTexture();
-	rects[4].RefreshTexture();
-	rects[5].RefreshTexture();
-	rects[6].RefreshTexture();
-	rects[7].RefreshTexture();
-	rects[8].RefreshTexture();
-
-	RecallibratePosition();
-}
-
-void NonantRender::SetPivot(const glm::vec2& pvt)
-{
-	pivot = pvt;
-	RecallibratePosition();
+	m_Fickler.transformable->self.transform = CallibrateTransform<i>(SetUVs<i>(stride));
+	m_Fickler.transformable->self.packedP = { 0.0f, 0.0f };
+	m_Fickler.transformable->self.packedRS = { 1.0f, 0.0f, 0.0f, 1.0f };
+	m_Fickler.transformable->self.Sync(prior);
+	m_Fickler.transformable->SyncChildren();
+	RectRender::RequestDraw(canvas_layer);
 }
 
 void NonantRender::SetNonantWidth(float width)
 {
-	nonantWidth = width;
-	float inner_scale_x = rects[1].GetUVWidth() > 0
-		? std::max(nonantWidth - rects[0].GetUVWidth() - rects[2].GetUVWidth(), 0.0f) / rects[1].GetUVWidth()
-		: 0.0f;
-
-	rects[1].Fickler().Scale()->x = inner_scale_x;
-	rects[1].Fickler().transformable->SyncRS();
-	rects[4].Fickler().Scale()->x = inner_scale_x;
-	rects[4].Fickler().transformable->SyncRS();
-	rects[7].Fickler().Scale()->x = inner_scale_x;
-	rects[7].Fickler().transformable->SyncRS();
-
-	RecallibratePosition();
+	nonantWidth = std::max(width, lines.col_l_width + lines.col_r_width);
+	nonantXF = nonantWidth / m_UVWidth;
 }
 
 void NonantRender::SetNonantHeight(float height)
 {
-	nonantHeight = height;
-	float inner_scale_y = rects[3].GetUVHeight() > 0
-		? std::max(nonantHeight - rects[0].GetUVHeight() - rects[6].GetUVHeight(), 0.0f) / rects[3].GetUVHeight()
-		: 0.0f;
-
-	rects[3].Fickler().Scale()->y = inner_scale_y;
-	rects[3].Fickler().transformable->SyncRS();
-	rects[4].Fickler().Scale()->y = inner_scale_y;
-	rects[4].Fickler().transformable->SyncRS();
-	rects[5].Fickler().Scale()->y = inner_scale_y;
-	rects[5].Fickler().transformable->SyncRS();
-
-	RecallibratePosition();
+	nonantHeight = std::max(height, lines.row_b_height + lines.row_t_height);
+	nonantYF = nonantHeight / m_UVHeight;
 }
 
-void NonantRender::SetNonantSize(const glm::vec2& size)
+template<char i>
+UVBounds NonantRender::SetUVs(Stride stride) requires (i >= 0 && i <= 8)
 {
-	nonantWidth = size.x;
-	nonantHeight = size.y;
-	float inner_scale_x = rects[1].GetUVWidth() > 0
-		? std::max(nonantWidth - rects[0].GetUVWidth() - rects[2].GetUVWidth(), 0.0f) / rects[1].GetUVWidth()
-		: 0.0f;
-	float inner_scale_y = rects[3].GetUVHeight() > 0
-		? std::max(nonantHeight - rects[0].GetUVHeight() - rects[6].GetUVHeight(), 0.0f) / rects[3].GetUVHeight()
-		: 0.0f;
-
-	rects[1].Fickler().Scale()->x = inner_scale_x;
-	rects[1].Fickler().transformable->SyncRS();
-	rects[3].Fickler().Scale()->y = inner_scale_y;
-	rects[3].Fickler().transformable->SyncRS();
-	rects[4].Fickler().Scale()->x = inner_scale_x;
-	rects[4].Fickler().Scale()->y = inner_scale_y;
-	rects[4].Fickler().transformable->SyncRS();
-	rects[5].Fickler().Scale()->y = inner_scale_y;
-	rects[5].Fickler().transformable->SyncRS();
-	rects[7].Fickler().Scale()->x = inner_scale_x;
-	rects[7].Fickler().transformable->SyncRS();
-
-	RecallibratePosition();
+	auto uvs = lines.UVs<i>(static_cast<float>(m_UVWidth), static_cast<float>(m_UVHeight));
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2] = uvs.getX<0>();
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3] = uvs.getY<0>();
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 + stride] = uvs.getX<1>();
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 + stride] = uvs.getY<1>();
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 + 2 * stride] = uvs.getX<2>();
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 + 2 * stride] = uvs.getY<2>();
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 2 + 3 * stride] = uvs.getX<3>();
+	m_Render.vertexBufferData[ActorPrimitive2D::end_attrib_pos + 3 + 3 * stride] = uvs.getY<3>();
+	return uvs;
 }
 
-void NonantRender::RecallibratePosition()
+template<char i>
+Transform2D NonantRender::CallibrateTransform(const UVBounds& uvs) requires (i >= 0 && i <= 8)
 {
-	// TODO add pivot
-	float column_r_pos = ntile.ColumnPos(1) + rects[4].Fickler().Scale()->x * rects[4].GetUVWidth();
-	float row_t_pos = ntile.RowPos(1) + rects[4].Fickler().Scale()->y * rects[4].GetUVHeight();
-	float pvtX = pivot.x * nonantWidth, pvtY = pivot.y * nonantHeight;
-	rects[0].Fickler().transformable->Position() = { ntile.ColumnPos(0) - pvtX, ntile.RowPos(0) - pvtY };
-	rects[1].Fickler().transformable->Position() = { ntile.ColumnPos(1) - pvtX, rects[0].Fickler().transformable->Position().y };
-	rects[2].Fickler().transformable->Position() = { column_r_pos - pvtX, rects[0].Fickler().transformable->Position().y };
-	rects[3].Fickler().transformable->Position() = { rects[0].Fickler().transformable->Position().x, ntile.RowPos(1) - pvtY };
-	rects[4].Fickler().transformable->Position() = { rects[1].Fickler().transformable->Position().x, rects[3].Fickler().transformable->Position().y };
-	rects[5].Fickler().transformable->Position() = { rects[2].Fickler().transformable->Position().x, rects[3].Fickler().transformable->Position().y };
-	rects[6].Fickler().transformable->Position() = { rects[0].Fickler().transformable->Position().x, row_t_pos - pvtY };
-	rects[7].Fickler().transformable->Position() = { rects[1].Fickler().transformable->Position().x, rects[6].Fickler().transformable->Position().y };
-	rects[8].Fickler().transformable->Position() = { rects[2].Fickler().transformable->Position().x, rects[6].Fickler().transformable->Position().y };
-	m_Fickler.transformable->SyncP();
+	Transform2D transform{};
+	if constexpr (i % 3 == 0)
+	{
+		transform.position.x = -m_Pivot.x * nonantWidth;
+		transform.scale.x = uvs.x2;
+	}
+	else if constexpr (i % 3 == 1)
+	{
+		transform.position.x = lines.col_l_width - m_Pivot.x * nonantWidth;
+		transform.scale.x = std::max(0.0f, nonantXF + uvs.x2 - uvs.x1 - 1.0f);
+	}
+	else if constexpr (i % 3 == 2)
+	{
+		transform.position.x = nonantWidth - lines.col_r_width - m_Pivot.x * nonantWidth;
+		transform.scale.x = 1.0f - uvs.x1;
+	}
+	else static_assert(false);
+	if constexpr (i / 3 == 0)
+	{
+		transform.position.y = -m_Pivot.y * nonantHeight;
+		transform.scale.y = uvs.y2;
+	}
+	else if constexpr (i / 3 == 1)
+	{
+		transform.position.y = lines.row_b_height - m_Pivot.y * nonantHeight;
+		transform.scale.y = std::max(0.0f, nonantYF + uvs.y2 - uvs.y1 - 1.0f);
+	}
+	else if constexpr (i / 3 == 2)
+	{
+		transform.position.y = nonantHeight - lines.row_t_height - m_Pivot.y * nonantHeight;
+		transform.scale.y = 1.0f - uvs.y1;
+	}
+	else static_assert(false);
+	return transform;
 }

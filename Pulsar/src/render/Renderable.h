@@ -17,7 +17,7 @@ struct BatchModel
 	ShaderHandle shader;
 
 	BatchModel(VertexLayout layout = 0, VertexLayoutMask layoutMask = 0, ShaderHandle shader = ShaderRegistry::HANDLE_CAP);
-	bool operator==(const BatchModel&) const;
+	bool operator==(const BatchModel&) const = default;
 };
 
 template<>

@@ -107,8 +107,6 @@ static LOAD_STATUS readTextureSettings(const toml::v3::node_view<toml::v3::node>
 			return LOAD_STATUS::SYNTAX_ERR;
 		texture_settings.wrapT = TextureWrapLookup[wrap_t.value()];
 	}
-	if (auto lod_level = settings["lod_level"].value<int64_t>())
-		texture_settings.lodLevel = static_cast<GLint>(lod_level.value());
 	return LOAD_STATUS::OK;
 }
 

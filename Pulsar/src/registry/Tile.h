@@ -28,10 +28,7 @@ struct TileConstructArgs_filepath
 	TileConstructArgs_filepath(std::string&& filepath, float svg_scale = 1.0f, bool flip_vertically = true)
 		: filepath(std::move(filepath)), svg_scale(svg_scale), flip_vertically(flip_vertically) {}
 
-	bool operator==(const TileConstructArgs_filepath& args) const
-	{
-		return filepath == args.filepath && svg_scale == args.svg_scale && flip_vertically == args.flip_vertically;
-	}
+	bool operator==(const TileConstructArgs_filepath&) const = default;
 };
 
 template<>
@@ -55,11 +52,7 @@ struct TileConstructArgs_buffer
 	TileConstructArgs_buffer(unsigned char* image_buffer, int width, int height, int bpp, TileDeletionPolicy deletion_policy, bool flip_vertically = false)
 		: image_buffer(image_buffer), width(width), height(height), bpp(bpp), deletion_policy(deletion_policy), flip_vertically(flip_vertically) {}
 
-	bool operator==(const TileConstructArgs_buffer& args) const
-	{
-		return image_buffer == args.image_buffer && width == args.width && height == args.height
-			&& bpp == args.bpp && deletion_policy == args.deletion_policy && flip_vertically == args.flip_vertically;
-	}
+	bool operator==(const TileConstructArgs_buffer&) const = default;
 };
 
 template<>
